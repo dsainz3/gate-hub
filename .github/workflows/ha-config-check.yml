@@ -1,0 +1,24 @@
+﻿name: HA Config Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ha-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Home Assistant Core Configuration Check
+        uses: frenck/action-home-assistant@v1
+        with:
+          path: "."            # your HA config is at repo root
+          # secrets: "fakesecrets.yaml"  # uncomment if your config uses secrets
+          # version: stable               # optional; defaults to .HA_VERSION or stable
