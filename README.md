@@ -1,15 +1,21 @@
 # GateHub
 
-This repository houses a hypermodern Home Assistant OS (HAOS) configuration. It provides
-version-controlled infrastructure-as-code for reproducible deployments.
+This repository houses a hypermodern Home Assistant OS (HAOS)
+configuration. It provides version-controlled infrastructure-as-code for
+reproducible deployments.
 
 ## Documentation
 
-An overview of the development environment and cloning instructions can be found in
-[`docs/infrastructure.md`](docs/infrastructure.md).
+- [`docs/infrastructure.md`](docs/infrastructure.md): development environment
+  and cloning instructions
+- [`docs/pre-commit.md`](docs/pre-commit.md): details on repository
+  pre-commit hooks
+- [`docs/hypermodern_learning.md`](docs/hypermodern_learning.md): notes on
+  hypermodern practices used in this project
 
 ## Repository Structure
-- `configuration.yaml` – root configuration that loads automations, scripts, and scenes.
+- `configuration.yaml` – root configuration that loads automations, scripts,
+  and scenes.
 - `automations.yaml` – placeholder list for custom automations.
 - `scripts.yaml` – placeholder file for custom scripts.
 - `scenes.yaml` – placeholder file for scenes.
@@ -22,8 +28,8 @@ An overview of the development environment and cloning instructions can be found
    ```bash
    git clone https://github.com/dsainz3/gate-hub.git /config
    ```
-   If the repository is private, store a GitHub personal access token in `~/.netrc` to
-   avoid credential prompts.
+   If the repository is private, store a GitHub personal access token in
+   `~/.netrc` to avoid credential prompts.
 3. Update `secrets.yaml` with real credentials.
 4. Restart Home Assistant to apply the configuration.
 
@@ -33,8 +39,9 @@ An overview of the development environment and cloning instructions can be found
 - Use branches and pull requests for substantial changes.
 
 ## Poetry Workflow
-This repository uses [Poetry](https://python-poetry.org/) to manage developer dependencies such as
-`yamllint` and `pre-commit`. To set up the environment run:
+This repository uses [Poetry](https://python-poetry.org/) to manage developer
+dependencies such as `yamllint`, `flake8`, `black`, and `pre-commit`.
+To set up the environment run:
 
 ```bash
 poetry install
