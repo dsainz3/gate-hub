@@ -22,6 +22,22 @@ version-controlled infrastructure-as-code for reproducible deployments.
 - Keep sensitive values outside version control where possible.
 - Use branches and pull requests for substantial changes.
 
+## Poetry Workflow
+This repository uses [Poetry](https://python-poetry.org/) to manage developer dependencies such as
+`yamllint` and `pre-commit`. To set up the environment run:
+
+```bash
+poetry install
+```
+
+This will create a virtual environment and install the required tooling.  
+You can then run linters via:
+
+```bash
+poetry run yamllint .
+poetry run pre-commit run --all-files  # once a .pre-commit-config is added
+```
+
 ## Contributing
 Issues and pull requests are welcome.  Please describe your environment and the
 purpose of proposed changes.

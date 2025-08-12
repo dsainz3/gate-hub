@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "gate-hub"
+version = "0.1.0"
+description = "Home Assistant configuration managed with Poetry."
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.dev-dependencies]
+yamllint = "*"
+pre-commit = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
