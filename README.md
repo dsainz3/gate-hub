@@ -1,7 +1,12 @@
 # GateHub
 
-This repository houses a hypermodern Home Assistant OS (HAOS) configuration.  It provides
+This repository houses a hypermodern Home Assistant OS (HAOS) configuration. It provides
 version-controlled infrastructure-as-code for reproducible deployments.
+
+## Documentation
+
+An overview of the development environment and cloning instructions can be found in
+[`docs/infrastructure.md`](docs/infrastructure.md).
 
 ## Repository Structure
 - `configuration.yaml` – root configuration that loads automations, scripts, and scenes.
@@ -13,7 +18,12 @@ version-controlled infrastructure-as-code for reproducible deployments.
 
 ## Getting Started
 1. Install Home Assistant OS or Home Assistant container.
-2. Clone this repository into your Home Assistant configuration directory.
+2. Clone this repository into your Home Assistant configuration directory:
+   ```bash
+   git clone https://github.com/dsainz3/gate-hub.git /config
+   ```
+   If the repository is private, store a GitHub personal access token in `~/.netrc` to
+   avoid credential prompts.
 3. Update `secrets.yaml` with real credentials.
 4. Restart Home Assistant to apply the configuration.
 
@@ -35,7 +45,7 @@ You can then run linters via:
 
 ```bash
 poetry run yamllint .
-poetry run pre-commit run --all-files  # once a .pre-commit-config is added
+poetry run pre-commit run --all-files
 ```
 
 ## Contributing
