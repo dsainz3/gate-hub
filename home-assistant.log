@@ -1,0 +1,4 @@
+2025-08-12 06:44:09.195 WARNING (ImportExecutor_0) [py.warnings] /usr/local/lib/python3.13/site-packages/google/__init__.py:2: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  __import__('pkg_resources').declare_namespace(__name__)
+
+2025-08-12 06:44:49.007 WARNING (zeroconf-ServiceBrowser-_googlecast._tcp-118) [pychromecast.dial] Failed to determine cast type for host <unknown> (<urlopen error _ssl.c:1011: The handshake operation timed out>) (services:{MDNSServiceInfo(name='MagniFi-Max-91a8cdd7b0fc171d9133db4b0d27a010._googlecast._tcp.local.')})
