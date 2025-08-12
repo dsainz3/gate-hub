@@ -37,9 +37,9 @@ reproducible deployments.
 - Use branches and pull requests for substantial changes.
 
 ## Poetry Workflow
-This repository uses [Poetry](https://python-poetry.org/) to manage developer
-dependencies such as `yamllint`, `flake8`, and `pre-commit`. To set up the
-environment run:
+This repository uses [Poetry](https://python-poetry.org/) with Python 3.11 to
+manage developer dependencies such as `yamllint`, `flake8`, and `pre-commit`.
+To set up the environment run:
 
 ```bash
 poetry install

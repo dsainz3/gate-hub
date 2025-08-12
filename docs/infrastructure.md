@@ -43,6 +43,20 @@ machine github.com
 
 Secure the file with `chmod 600 ~/.netrc`.
 
+## Developer Environment
+
+Install development dependencies with [Poetry](https://python-poetry.org/):
+
+```bash
+poetry install
+```
+
+Run repository checks via the virtual environment:
+
+```bash
+poetry run pre-commit run --all-files
+```
+
 ## Repository Structure
 
 ```
