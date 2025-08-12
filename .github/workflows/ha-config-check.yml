@@ -1,8 +1,9 @@
-﻿name: HA Config Check
+---
+name: HA Config Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

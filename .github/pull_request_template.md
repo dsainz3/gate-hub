@@ -1,10 +1,13 @@
-<!-- .github/pull_request_template.md -->
 ## Summary
-- What & why
+Explain the change and the problem it solves.
 
 ## Changes
-- [ ] Submodules updated (if applicable)
+- [ ] Config and docs updated
+- [ ] Submodule bumped (if applicable)
 - [ ] CI passes
 
 ## Testing
-- Steps / screenshots
+Steps to verify (commands, screenshots).
+
+## Notes
+Link issues/ADRs/related PRs.

@@ -70,5 +70,3 @@ poetry run pre-commit run --all-files
 ```
 
 This structure forms the baseline for rebuilding the HAOS infrastructure in a hypermodern methodology.
-
-

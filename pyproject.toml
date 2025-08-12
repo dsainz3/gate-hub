@@ -8,8 +8,8 @@ package-mode = false
 python = "^3.11"
 
 [tool.poetry.group.dev.dependencies]
-yamllint = "*"
-pre-commit = "*"
+yamllint = "1.35.1"
+pre-commit = "3.7.1"
 flake8 = "*"
 
 [build-system]

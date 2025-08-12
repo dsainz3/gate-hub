@@ -1,0 +1,25 @@
+---
+name: "Automation spec"
+description: Specify an automation in detail
+labels: ["automation"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+  - type: textarea
+    id: triggers
+    attributes:
+      label: Triggers
+  - type: textarea
+    id: conditions
+    attributes:
+      label: Conditions
+  - type: textarea
+    id: actions
+    attributes:
+      label: Actions
+  - type: textarea
+    id: edge
+    attributes:
+      label: Edge cases / safety

@@ -1,0 +1,24 @@
+---
+extends: default
+
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.github/**/*.yml'
+  - '.github/**/*.yaml'
+  - '.pre-commit-config.yaml'
+
+ignore: |
+  external/haos/
+  .git/
+
+rules:
+  # keep long lines from breaking builds (blueprints & GH workflows get wordy)
+  line-length:
+    max: 140
+    level: warning
+    allow-non-breakable-words: true
+  truthy: disable
+  comments-indentation: disable
+  new-lines: disable
+  brackets: disable

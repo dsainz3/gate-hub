@@ -1,4 +1,5 @@
-﻿name: Bump haos-features submodule
+---
+name: Bump haos-features submodule
 
 on:
   schedule:
