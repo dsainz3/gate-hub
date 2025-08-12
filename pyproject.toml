@@ -2,11 +2,12 @@
 name = "gate-hub"
 version = "0.1.0"
 description = "Home Assistant configuration managed with Poetry."
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 yamllint = "*"
 pre-commit = "*"
 flake8 = "*"
