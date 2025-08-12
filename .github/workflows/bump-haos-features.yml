@@ -1,0 +1,39 @@
+---
+name: Bump haos-features submodule
+
+on:
+  schedule:
+    - cron: "15 6 * * 1,4"   # Mon/Thu 06:15 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Update submodule to latest on main
+        run: |
+          git submodule update --init --remote external/haos
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore(submodule): bump haos-features"
+          commit-message: "chore(submodule): bump haos-features"
+          body: "Automated submodule bump to latest commit on haos-features@main."
+          branch: chore/bump-haos-features
+          base: main
+          add-paths: |
+            external/haos
+          labels: |
+            chore
+            automated
