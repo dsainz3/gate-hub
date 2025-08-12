@@ -2,6 +2,6 @@ extends: default
 
 rules:
   line-length:
-    max: 120
+    max: 79
     allow-non-breakable-words: true
   document-start: disable
