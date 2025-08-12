@@ -9,7 +9,11 @@ python = "^3.11"
 [tool.poetry.dev-dependencies]
 yamllint = "*"
 pre-commit = "*"
+flake8 = "*"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.flake8]
+max-line-length = 79
