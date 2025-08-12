@@ -19,6 +19,6 @@ jobs:
       - name: Home Assistant Core Configuration Check
         uses: frenck/action-home-assistant@v1
         with:
-          path: "."            # your HA config is at repo root
-          # secrets: "fakesecrets.yaml"  # uncomment if your config uses secrets
-          # version: stable               # optional; defaults to .HA_VERSION or stable
+          path: "."
+          secrets: "fakesecrets.yaml"
+          # version: stable
