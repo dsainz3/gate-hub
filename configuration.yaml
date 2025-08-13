@@ -9,4 +9,5 @@ frontend:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-groups: !include groups.yaml
+group: !include group.yaml
+
