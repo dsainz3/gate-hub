@@ -36,26 +36,42 @@
   name: All Exterior Lights
   unique_id: lg_all_exterior_lights
   entities:
-    - light.argus_pt_ultra_floodlight
-    - light.argus_pt_ultra_status_led
-    - light.backyard_camera_floodlight
-    - light.backyard_camera_status_led
-    - light.garage_cam_status_led
-    - light.light_front_left
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
     - light.light_front_right
-    - light.reolink_home_hub_status_led
+    - light.light_front_left
 - platform: group
   name: All Lights
   unique_id: lg_all_lights
   entities:
-    - light.argus_pt_ultra_floodlight
-    - light.argus_pt_ultra_status_led
-    - light.backyard_camera_floodlight
-    - light.backyard_camera_status_led
-    - light.garage_cam_status_led
+    - light.light_ari
+    - light.light_guest_room
+    - light.light_parents
+    - light.light_attic
     - light.light_front_left
     - light.light_front_right
     - light.light_office
     - light.light_theater_left
     - light.light_theater_right_2
-    - light.reolink_home_hub_status_led
+    - light.livingroom_light
+    - light.sunroom_light
+    - light.diningroom_light
+    - light.permanent_outdoor_lights
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
+- platform: group
+  name: Garage Lights
+  unique_id: lg_garage_lights
+  entities:
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
+- platform: group
+  name: Mainfloor Lights
+  unique_id: lg_mainfloor_lights
+  entities:
+    - light.sunroom_light
+    - light.diningroom_light
+    - light.livingroom_light
