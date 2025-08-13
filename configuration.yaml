@@ -9,5 +9,4 @@ frontend:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-
-# Test commit: verifying sync
+groups: !include groups.yaml
