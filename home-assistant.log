@@ -4372,3 +4372,11 @@ orjson.JSONDecodeError: Input is a zero-length, empty document: line 1 column 1 
 2025-08-13 05:58:22.468 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
 2025-08-13 05:58:52.497 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
 2025-08-13 05:59:22.537 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 05:59:52.572 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:00:22.605 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:00:52.622 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:01:22.640 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:01:52.658 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:02:22.668 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:02:52.677 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office
+2025-08-13 06:03:22.696 WARNING (MainThread) [homeassistant.components.mqtt.light.schema_json] Invalid color mode 'hs' received for entity light.light_office

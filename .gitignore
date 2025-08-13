@@ -6,3 +6,6 @@
 
 # Local workspace
 /exterior/
+
+# HACS cache
+custom_components/hacs/
