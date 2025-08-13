@@ -1,2 +1,40 @@
----
-[]
+# automations.yaml
+- id: humidor_plug_temp_control
+  alias: Humidor Plug – Temperature Control
+  description: Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F.
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.hygrometer_humidor_temperature
+      above: 74
+    - platform: numeric_state
+      entity_id: sensor.hygrometed_humidor_temperature
+      below: 68
+  condition: []
+  action:
+    - choose:
+        # Too warm → turn plug ON
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometed_humidor_temperature
+              above: 74
+          sequence:
+            - condition: state
+              entity_id: switch.humidor_plug
+              state: "off"
+            - service: switch.turn_on
+              target:
+                entity_id: switch.plug_humidor
+
+        # Cool enough → turn plug OFF
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometed_humidor_temperature
+              below: 68
+          sequence:
+            - condition: state
+              entity_id: switch.plug_humidor
+              state: "on"
+            - service: switch.turn_off
+              target:
+                entity_id: switch.plug_humidor
