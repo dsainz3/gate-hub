@@ -15,7 +15,6 @@ Welcome! This is the landing page for all project documentation.
 ---
 
 ## Architecture Decisions (ADR)
-- [0001 – Use submodule for feature specs](./adr/0001-submodule-for-features.md)
 
 > Start new ADRs from the template: [ADR Template](./adr/_template.md)
 
