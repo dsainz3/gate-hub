@@ -24,4 +24,4 @@ __pycache__/
 custom_components/hacs/
 
 # Zigbee config
-zigbee2mqtt/
+zigbee2mqtt/*
