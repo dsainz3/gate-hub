@@ -1,0 +1,61 @@
+# Auto-generated light groups from your current entities
+# Place this file at /config/lights.yaml and include it with `light: !include lights.yaml`
+
+- platform: group
+  name: Office Lights
+  unique_id: lg_office_lights
+  entities:
+    - light.light_office
+- platform: group
+  name: Theater Lights
+  unique_id: lg_theater_lights
+  entities:
+    - light.light_theater_left
+    - light.light_theater_right_2
+- platform: group
+  name: Front Porch Lights
+  unique_id: lg_front_porch_lights
+  entities:
+    - light.light_front_left
+    - light.light_front_right
+- platform: group
+  name: Exterior Floodlights
+  unique_id: lg_exterior_floodlights
+  entities:
+    - light.argus_pt_ultra_floodlight
+    - light.backyard_camera_floodlight
+- platform: group
+  name: Camera Status LEDs
+  unique_id: lg_camera_status_leds
+  entities:
+    - light.argus_pt_ultra_status_led
+    - light.backyard_camera_status_led
+    - light.garage_cam_status_led
+    - light.reolink_home_hub_status_led
+- platform: group
+  name: All Exterior Lights
+  unique_id: lg_all_exterior_lights
+  entities:
+    - light.argus_pt_ultra_floodlight
+    - light.argus_pt_ultra_status_led
+    - light.backyard_camera_floodlight
+    - light.backyard_camera_status_led
+    - light.garage_cam_status_led
+    - light.light_front_left
+    - light.light_front_right
+    - light.reolink_home_hub_status_led
+- platform: group
+  name: All Lights
+  unique_id: lg_all_lights
+  entities:
+    - light.argus_pt_ultra_floodlight
+    - light.argus_pt_ultra_status_led
+    - light.backyard_camera_floodlight
+    - light.backyard_camera_status_led
+    - light.garage_cam_status_led
+    - light.light_front_left
+    - light.light_front_right
+    - light.light_office
+    - light.light_theater_left
+    - light.light_theater_right_2
+    - light.reolink_home_hub_status_led
