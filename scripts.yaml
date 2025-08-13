@@ -1,30 +1,21 @@
-theater_left_candy_cane_start:
-  alias: "Start Candy Cane: Theater Left"
+theater_dual_candy_cane_start:
+  alias: "Start Candy Cane: Left & Right Theater Lights"
   mode: restart
   sequence:
-    - service: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.theater_left_candy_cane
     - repeat:
         while:
-          - condition: state
-            entity_id: input_boolean.theater_left_candy_cane
-            state: "on"
+          - condition: template
+            value_template: "{{ true }}" # runs until manually stopped
         sequence:
           - service: scene.turn_on
             target:
-              entity_id: scene.theater_left_red
-          - delay:
-              seconds: "{{ states('input_number.theater_left_candy_cane_delay') | float(2) }}"
+              entity_id: scene.theater_left_red_right_green
+          - delay: "00:00:10"
           - service: scene.turn_on
             target:
-              entity_id: scene.theater_left_green
-          - delay:
-              seconds: "{{ states('input_number.theater_left_candy_cane_delay') | float(2) }}"
+              entity_id: scene.theater_left_green_right_red
+          - delay: "00:00:10"
 
-theater_left_candy_cane_stop:
-  alias: "Stop Candy Cane: Theater Left"
-  sequence:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.theater_left_candy_cane
+theater_dual_candy_cane_stop:
+  alias: "Stop Candy Cane: Left & Right Theater Lights"
+  sequence: []

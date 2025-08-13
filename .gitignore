@@ -21,7 +21,7 @@ __pycache__/
 /external/
 
 # HACS components
-custom_components/hacs/
+custom_components/
 
 # Zigbee config
 zigbee2mqtt/*
