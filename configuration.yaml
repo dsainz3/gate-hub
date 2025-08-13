@@ -6,9 +6,9 @@ default_config:
 frontend:
   themes: !include_dir_merge_named themes
 
-automation: !include external/haos/automations.yaml
-script: !include external/haos/scripts.yaml
-scene: !include external/haos/scenes.yaml
-group: !include external/haos/groups.yaml
+automation: !include_if_exists external/haos/automations.yaml
+script: !include_if_exists external/haos/scripts.yaml
+scene: !include_if_exists external/haos/scenes.yaml
+group: !include_if_exists external/haos/groups.yaml
 
 # Test commit: verifying sync
