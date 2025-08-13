@@ -1,0 +1,5 @@
+[ADDITION] Migrated settings to version 2
+
+[REMOVAL] The entire experimental section was removed.
+
+For more details, see https://github.com/Koenkk/zigbee2mqtt/discussions/24198

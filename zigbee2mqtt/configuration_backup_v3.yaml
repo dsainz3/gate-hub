@@ -1,0 +1,61 @@
+# Zigbee2MQTT Configuration
+# Documentation: https://www.zigbee2mqtt.io/guide/configuration/
+
+serial:
+  port: >-
+    /dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_f821ff3317c3ef1190cbe5b08048b910-if00-port0
+  adapter: zstack
+  baudrate: 115200
+  rtscts: true
+
+advanced:
+  channel: 20 # Recommended Zigbee channel (avoid Wi-Fi interference)
+  network_key: GENERATE # Auto-generate Zigbee network key
+  pan_id: 0x1A63 # Change if conflicts with another Zigbee network
+  ext_pan_id: [0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD]
+  log_level: info # Set to debug for troubleshooting
+  log_directory: data/log
+  log_file: zigbee2mqtt.log
+  log_rotation: true
+  log_size: 10m
+  log_backup_count: 3
+
+homeassistant: true # Enable Home Assistant MQTT discovery
+
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://core-mosquitto
+  user: mqtt # MQTT username
+  password: Saturday1$ # MQTT password
+  keepalive: 60
+  version: 5 # MQTT protocol version
+
+permit_join: false # Keep false for security, set true temporarily when adding devices
+
+frontend:
+  port: 8099 # Zigbee2MQTT web UI port
+  host: 0.0.0.0
+  auth_token: zigbee_ui_token # Optional auth token for UI access
+
+devices:
+  # Example device configuration
+  # "0x00124b0012345678":
+  #   friendly_name: living_room_light
+  #   retain: false
+
+groups:
+  # Example group configuration
+  # "1":
+  #   friendly_name: living_room_lights
+  #   devices:
+  #     - "0x00124b0012345678"
+  #     - "0x00158d0001abcd12"
+
+experimental:
+  new_api: true
+
+availability:
+  active:
+    timeout: 60
+  passive:
+    timeout: 600

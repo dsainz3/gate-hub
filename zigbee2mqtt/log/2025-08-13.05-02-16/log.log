@@ -1,0 +1,17 @@
+[2025-08-13 05:02:16] info: 	z2m: Logging to console, file (filename: log.log)
+[2025-08-13 05:02:16] info: 	z2m: Starting Zigbee2MQTT version 2.6.0 (commit #unknown)
+[2025-08-13 05:02:16] info: 	z2m: Starting zigbee-herdsman (5.0.4)
+[2025-08-13 05:02:16] info: 	zh:zstack:znp: Opening SerialPort with {"path":"/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_f821ff3317c3ef1190cbe5b08048b910-if00-port0","baudRate":115200,"rtscts":false,"autoOpen":false}
+[2025-08-13 05:02:16] info: 	zh:zstack:znp: Serialport opened
+[2025-08-13 05:02:16] info: 	zh:zstack:znp: Writing CC2530/CC2531 skip bootloader payload
+[2025-08-13 05:02:18] info: 	zh:zstack:znp: Skip bootloader for CC2652/CC1352
+[2025-08-13 05:02:36] error: 	z2m: Error while starting zigbee-herdsman
+[2025-08-13 05:02:36] error: 	z2m: Failed to start zigbee-herdsman
+[2025-08-13 05:02:36] error: 	z2m: Check https://www.zigbee2mqtt.io/guide/installation/20_zigbee2mqtt-fails-to-start_crashes-runtime.html for possible solutions
+[2025-08-13 05:02:36] error: 	z2m: Exiting...
+[2025-08-13 05:02:36] error: 	z2m: Error: Failed to connect to the adapter (Error: SRSP - SYS - ping after 6000ms)
+    at ZStackAdapter.start (/app/node_modules/.pnpm/zigbee-herdsman@5.0.4/node_modules/zigbee-herdsman/src/adapter/z-stack/adapter/zStackAdapter.ts:114:27)
+    at Controller.start (/app/node_modules/.pnpm/zigbee-herdsman@5.0.4/node_modules/zigbee-herdsman/src/controller/controller.ts:134:29)
+    at Zigbee.start (/app/lib/zigbee.ts:67:27)
+    at Controller.start (/app/lib/controller.ts:101:13)
+    at start (/app/index.js:149:5)

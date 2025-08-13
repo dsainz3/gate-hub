@@ -4,16 +4,62 @@ mqtt:
   server: mqtt://core-mosquitto:1883
   user: addons
   password: ejos8aiwe6Kookievaa1quahm2BeiBaibai2gah0rei6phub9uBohKee1taezai6
-serial: {}
+serial:
+  port: /dev/ttyUSB0
+  adapter: ember
+  baudrate: 115200
+  rtscts: false
 advanced:
   log_level: info
   channel: 11
-  network_key: GENERATE
-  pan_id: GENERATE
-  ext_pan_id: GENERATE
+  network_key:
+    - 117
+    - 87
+    - 75
+    - 169
+    - 216
+    - 120
+    - 30
+    - 103
+    - 158
+    - 35
+    - 14
+    - 202
+    - 169
+    - 198
+    - 228
+    - 179
+  pan_id: 21904
+  ext_pan_id:
+    - 80
+    - 42
+    - 212
+    - 26
+    - 127
+    - 179
+    - 55
+    - 15
 frontend:
   enabled: true
   port: 8099
 homeassistant:
   enabled: true
-onboarding: true
+devices:
+  '0xffffb40e0600a354':
+    friendly_name: burner-basement
+  '0xb4e8429127eb0000':
+    friendly_name: light-office
+  '0xc890a81f210a0000':
+    friendly_name: light-theater-right
+  '0xc890a81f2eca0000':
+    friendly_name: light-theater-left
+  '0x282c02bfffeff4c6':
+    friendly_name: burner-living-room
+  '0x282c02bfffeff7c5':
+    friendly_name: burner-bedroom
+  '0x282c02bfffefe13a':
+    friendly_name: plug-garage-camera
+  '0x1c784ba0b2150000':
+    friendly_name: light-front-right
+  '0x1c784ba0eeff0000':
+    friendly_name: light-front-left
