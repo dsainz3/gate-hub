@@ -25,7 +25,7 @@
         "color_mode": "hs",
         "color_temp": 392,
         "brightness": 254,
-        "linkquality": 192,
+        "linkquality": 188,
         "update": {
             "state": "idle",
             "installed_version": 66,
@@ -45,7 +45,7 @@
             "y": 0.299
         },
         "brightness": 254,
-        "linkquality": 144,
+        "linkquality": 192,
         "update": {
             "state": "idle",
             "installed_version": 66,
@@ -53,7 +53,7 @@
         }
     },
     "0xc890a81f2eca0000": {
-        "state": "ON",
+        "state": "OFF",
         "color": {
             "hue": 120,
             "h": 120,
@@ -65,7 +65,7 @@
         "color_mode": "xy",
         "color_temp": 142,
         "brightness": 254,
-        "linkquality": 188,
+        "linkquality": 192,
         "update": {
             "state": "idle",
             "installed_version": 66,
