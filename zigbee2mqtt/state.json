@@ -70,7 +70,7 @@
     },
     "0x282c02bfffeff4c6": {
         "state": "OFF",
-        "voltage": 123,
+        "voltage": 122.5,
         "ac_frequency": 60,
         "energy": 0,
         "update": {
@@ -85,7 +85,7 @@
     },
     "0x282c02bfffeff7c5": {
         "state": "OFF",
-        "voltage": 123,
+        "voltage": 122.6,
         "ac_frequency": 60,
         "energy": 0,
         "linkquality": 180,
@@ -100,7 +100,7 @@
     },
     "0x282c02bfffefe13a": {
         "state": "ON",
-        "voltage": 123.1,
+        "voltage": 122.7,
         "ac_frequency": 60,
         "energy": 0.01,
         "linkquality": 212,
@@ -111,7 +111,7 @@
         },
         "power": 2.8,
         "current": 0.04,
-        "power_factor": 0.49
+        "power_factor": 0.51
     },
     "0x1c784ba0b2150000": {
         "color": {
