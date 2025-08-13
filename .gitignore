@@ -1,8 +1,22 @@
 # Home Assistant artifacts
+.HA_VERSION
+home-assistant.log*
+home-assistant_v2.db*
+zigbee.db*
 /.storage/
 /.cloud/
-/home-assistant_v2.db
 /secrets.yaml
 
+# General logs and databases
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.log.*
+
+# Python caches
+__pycache__/
+*.py[cod]
+
 # Local workspace
-/exterior/
+/external/
