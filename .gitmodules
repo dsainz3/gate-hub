@@ -1,4 +1,0 @@
-[submodule "external/haos"]
-	path = external/haos
-	url = https://github.com/dsainz3/haos-features
-	branch = main
