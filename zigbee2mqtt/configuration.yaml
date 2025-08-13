@@ -4,16 +4,50 @@ mqtt:
   server: mqtt://core-mosquitto:1883
   user: addons
   password: ejos8aiwe6Kookievaa1quahm2BeiBaibai2gah0rei6phub9uBohKee1taezai6
-serial: {}
+serial:
+  port: /dev/ttyUSB0
+  adapter: ember
+  baudrate: 115200
+  rtscts: false
 advanced:
   log_level: info
   channel: 11
-  network_key: GENERATE
-  pan_id: GENERATE
-  ext_pan_id: GENERATE
+  network_key:
+    - 127
+    - 5
+    - 250
+    - 174
+    - 4
+    - 8
+    - 243
+    - 165
+    - 166
+    - 68
+    - 31
+    - 236
+    - 82
+    - 164
+    - 204
+    - 156
+  pan_id: 33793
+  ext_pan_id:
+    - 36
+    - 84
+    - 59
+    - 145
+    - 37
+    - 95
+    - 148
+    - 88
 frontend:
   enabled: true
   port: 8099
 homeassistant:
   enabled: true
-onboarding: true
+devices:
+  '0xb4e8429127eb0000':
+    friendly_name: Light-office
+  '0xc890a81f210a0000':
+    friendly_name: Light-Theater-Right
+  '0xc890a81f2eca0000':
+    friendly_name: Light-Theater-Left

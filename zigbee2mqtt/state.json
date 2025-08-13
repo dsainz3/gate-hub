@@ -1,9 +1,9 @@
 {
     "0xffffb40e0600a354": {
         "state": "ON",
-        "voltage": 122.9,
+        "voltage": 123.1,
         "ac_frequency": 60,
-        "energy": 0.04,
+        "energy": 0.05,
         "linkquality": 255,
         "update": {
             "state": "idle",
@@ -12,20 +12,20 @@
         },
         "power_factor": 0.99,
         "current": 0.19,
-        "power": 22.9
+        "power": 23
     },
     "0xb4e8429127eb0000": {
         "state": "OFF",
         "color": {
-            "hue": 16,
-            "h": 16,
-            "saturation": 100,
-            "s": 100
+            "hue": 30,
+            "h": 30,
+            "saturation": 84,
+            "s": 84
         },
         "color_mode": "hs",
-        "color_temp": 454,
+        "color_temp": 392,
         "brightness": 254,
-        "linkquality": 192,
+        "linkquality": 188,
         "update": {
             "state": "idle",
             "installed_version": 66,
@@ -35,7 +35,7 @@
     "0xc890a81f210a0000": {
         "color_temp": 159,
         "color_mode": "xy",
-        "state": "ON",
+        "state": "OFF",
         "color": {
             "hue": 0,
             "h": 0,
@@ -45,7 +45,7 @@
             "y": 0.299
         },
         "brightness": 254,
-        "linkquality": 196,
+        "linkquality": 192,
         "update": {
             "state": "idle",
             "installed_version": 66,
@@ -53,7 +53,7 @@
         }
     },
     "0xc890a81f2eca0000": {
-        "state": "ON",
+        "state": "OFF",
         "color": {
             "hue": 120,
             "h": 120,
@@ -74,7 +74,7 @@
     },
     "0x282c02bfffeff4c6": {
         "state": "OFF",
-        "voltage": 122.1,
+        "voltage": 121.9,
         "ac_frequency": 60,
         "energy": 0,
         "update": {
@@ -82,17 +82,17 @@
             "installed_version": 268513372,
             "latest_version": 268513372
         },
-        "linkquality": 184,
+        "linkquality": 180,
         "power_factor": 0,
         "current": 0,
         "power": 0
     },
     "0x282c02bfffeff7c5": {
         "state": "OFF",
-        "voltage": 122.6,
+        "voltage": 122,
         "ac_frequency": 60,
         "energy": 0,
-        "linkquality": 184,
+        "linkquality": 180,
         "update": {
             "state": "idle",
             "installed_version": 268513372,
@@ -104,7 +104,7 @@
     },
     "0x282c02bfffefe13a": {
         "state": "ON",
-        "voltage": 122.6,
+        "voltage": 122.1,
         "ac_frequency": 60,
         "energy": 0.02,
         "linkquality": 212,
@@ -114,8 +114,8 @@
             "latest_version": 268513372
         },
         "power": 2.8,
-        "current": 0.04,
-        "power_factor": 0.51
+        "current": 0.05,
+        "power_factor": 0.5
     },
     "0x1c784ba0b2150000": {
         "color": {
@@ -144,20 +144,20 @@
         "linkquality": 144
     },
     "0xa4c13809f17a19a6": {
-        "temperature": 18.91,
-        "humidity": 64.54,
+        "temperature": 19.92,
+        "humidity": 66.53,
         "battery": 100,
         "linkquality": 184
     },
     "0x282c02bfffefd159": {
         "state": "OFF",
-        "voltage": 122.8,
+        "voltage": 122.7,
         "ac_frequency": 60,
         "energy": 0,
         "power": 0,
         "current": 0,
         "power_factor": 0,
-        "linkquality": 176,
+        "linkquality": 172,
         "update": {
             "state": "idle"
         }
