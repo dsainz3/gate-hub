@@ -51,3 +51,17 @@ devices:
     friendly_name: Light-Theater-Right
   '0xc890a81f2eca0000':
     friendly_name: Light-Theater-Left
+  '0xffffb40e0600a354':
+    friendly_name: Plug-basement-burner
+  '0x1c784ba0eeff0000':
+    friendly_name: Light-Front-left
+  '0x1c784ba0b2150000':
+    friendly_name: Light-Front-right
+  '0x282c02bfffefd159':
+    friendly_name: Plug-humidor
+  '0xa4c13809f17a19a6':
+    friendly_name: Hygrometer-Humidor
+  '0x282c02bfffeff4c6':
+    friendly_name: Plug-Mainfloor-burner
+  '0x187a3efffec58181':
+    friendly_name: Sensor-office
