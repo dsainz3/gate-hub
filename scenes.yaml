@@ -1,13 +1,23 @@
-- name: Theater Left Red
+# Left red / Right green
+- name: Theater Left Red - Right Green
   entities:
-    light.theater_left:
+    light.light_theater_left:
       state: on
       brightness: 255
-      color_name: red
+      rgb_color: [255, 0, 0]
+    light.light_theater_right:
+      state: on
+      brightness: 255
+      rgb_color: [0, 255, 0]
 
-- name: Theater Left Green
+# Left green / Right red
+- name: Theater Left Green - Right Red
   entities:
-    light.theater_left:
+    light.light_theater_left:
       state: on
       brightness: 255
-      color_name: green
+      rgb_color: [0, 255, 0]
+    light.light_theater_right:
+      state: on
+      brightness: 255
+      rgb_color: [255, 0, 0]
