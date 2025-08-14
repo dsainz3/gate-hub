@@ -28,3 +28,7 @@ zigbee2mqtt/*# Zigbee2MQTT runtime state/cache files
 zigbee2mqtt/state.json
 zigbee2mqtt/log/*.log
 zigbee2mqtt/coordinator_backup.json
+# Zigbee2MQTT runtime state/cache files
+zigbee2mqtt/state.json
+zigbee2mqtt/log/*.log
+zigbee2mqtt/coordinator_backup.json
