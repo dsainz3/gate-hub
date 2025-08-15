@@ -19,20 +19,6 @@
     - light.light_front_left
     - light.light_front_right
 - platform: group
-  name: Exterior Floodlights
-  unique_id: lg_exterior_floodlights
-  entities:
-    - light.argus_pt_ultra_floodlight
-    - light.backyard_camera_floodlight
-- platform: group
-  name: Camera Status LEDs
-  unique_id: lg_camera_status_leds
-  entities:
-    - light.argus_pt_ultra_status_led
-    - light.backyard_camera_status_led
-    - light.garage_cam_status_led
-    - light.reolink_home_hub_status_led
-- platform: group
   name: All Exterior Lights
   unique_id: lg_all_exterior_lights
   entities:
@@ -66,9 +52,10 @@
   name: Garage Lights
   unique_id: lg_garage_lights
   entities:
-    - light.garage_center
-    - light.garage_left
-    - light.garage_right
+    - light.garage_center_2
+    - light.garage_left_2
+    - light.garage_right_2
+    - light.permanent_outdoor_lights
 - platform: group
   name: Mainfloor Lights
   unique_id: lg_mainfloor_lights
