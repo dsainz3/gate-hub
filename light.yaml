@@ -41,6 +41,7 @@
     - light.garage_right
     - light.light_front_right
     - light.light_front_left
+    - light.permanent_outdoor_lights
 - platform: group
   name: All Lights
   unique_id: lg_all_lights
