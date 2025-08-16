@@ -65,3 +65,5 @@ devices:
     friendly_name: Plug-Mainfloor-burner
   '0x187a3efffec58181':
     friendly_name: Sensor-office
+  '0x282c02bfffeff7c5':
+    friendly_name: Plug-bedroom-burner
