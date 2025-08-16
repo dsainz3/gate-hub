@@ -93,3 +93,25 @@
   state_characteristic: change
   max_age:
     hours: 24
+
+# ---- Storm watch if pressure drop > ~3 hPa in 24h ----
+- platform: template
+  sensors:
+    kneplatt72_storm_watch:
+      friendly_name: "KNEPLATT72 Storm Watch"
+      value_template: >-
+        {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
+        {% set d = states('sensor.kneplatt72_pressure_24h_change')|float(0) %}
+        {% set delta_hpa = d if u in ['hPa','mbar'] else (d * 33.8638866667) %}
+        {{ delta_hpa < -3.0 }}
+      icon_template: >-
+        {% if is_state('sensor.kneplatt72_storm_watch','True') %}mdi:weather-cloudy-alert
+        {% else %}mdi:weather-sunny
+        {% endif %}
+      attribute_templates:
+        delta_hpa: >-
+          {{ (
+              states('sensor.kneplatt72_pressure_24h_change')|float(0) *
+              (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
+            ) | round(2) }}
+        threshold_hpa: "3.0"
