@@ -1,37 +1,26 @@
 # yaml-language-server: $schema=http://schemas.home-assistant.io/integration-homeassistant-packages
 ###############################################################################
-# Huskers - Step 2 testing helpers
+# Huskers - Step 2 testing helpers (scripts that fire events)
 ###############################################################################
 
-input_button:
-  huskers_test_score:
-    name: "Huskers Test Our Score"
-    icon: mdi:trophy
-  huskers_test_opponent_score:
-    name: "Huskers Test Opponent Score"
-    icon: mdi:alert
-
-automation:
-  - id: huskers_test_fire_our_score
-    alias: "Huskers Test Fire Our Score"
+script:
+  huskers_test_our_score:
+    alias: "Huskers Test Our Score"
     mode: single
-    trigger:
-      - platform: state
-        entity_id: input_button.huskers_test_score
-    variables:
-      team_sensor: sensor.team_tracker_nebraska
-      is_home: "{{ state_attr(team_sensor, 'is_home') | bool(false) }}"
-      home_team: "{{ state_attr(team_sensor,'home_team') or 'Nebraska' }}"
-      away_team: "{{ state_attr(team_sensor,'away_team') or 'Opponent' }}"
-      our_team: "{{ home_team if is_home else away_team }}"
-      opp_team: "{{ away_team if is_home else home_team }}"
-      quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
-      clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
-      our_delta: 7
-      score_type: "td_xp"
-      our_score: 21
-      opp_score: 10
-    action:
+    sequence:
+      - variables:
+          team_sensor: sensor.team_tracker_nebraska
+          is_home: "{{ state_attr(team_sensor, 'is_home') | bool(false) }}"
+          home_team: "{{ state_attr(team_sensor,'home_team') or 'Nebraska' }}"
+          away_team: "{{ state_attr(team_sensor,'away_team') or 'Opponent' }}"
+          our_team: "{{ home_team if is_home else away_team }}"
+          opp_team: "{{ away_team if is_home else home_team }}"
+          quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
+          clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
+          our_delta: 7
+          score_type: "td_xp"
+          our_score: 21
+          opp_score: 10
       - event: huskers_score
         event_data:
           team: "{{ our_team }}"
@@ -49,26 +38,23 @@ automation:
             {{ our_team }} +{{ our_delta }} ({{ our_score }}-{{ opp_score }})
             at {{ quarter }} {{ clock }}
 
-  - id: huskers_test_fire_opponent_score
-    alias: "Huskers Test Fire Opponent Score"
+  huskers_test_opponent_score:
+    alias: "Huskers Test Opponent Score"
     mode: single
-    trigger:
-      - platform: state
-        entity_id: input_button.huskers_test_opponent_score
-    variables:
-      team_sensor: sensor.team_tracker_nebraska
-      is_home: "{{ state_attr(team_sensor, 'is_home') | bool(false) }}"
-      home_team: "{{ state_attr(team_sensor,'home_team') or 'Nebraska' }}"
-      away_team: "{{ state_attr(team_sensor,'away_team') or 'Opponent' }}"
-      our_team: "{{ home_team if is_home else away_team }}"
-      opp_team: "{{ away_team if is_home else home_team }}"
-      quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
-      clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
-      opp_delta: 3
-      score_type: "fg"
-      our_score: 21
-      opp_score: 13
-    action:
+    sequence:
+      - variables:
+          team_sensor: sensor.team_tracker_nebraska
+          is_home: "{{ state_attr(team_sensor, 'is_home') | bool(false) }}"
+          home_team: "{{ state_attr(team_sensor,'home_team') or 'Nebraska' }}"
+          away_team: "{{ state_attr(team_sensor,'away_team') or 'Opponent' }}"
+          our_team: "{{ home_team if is_home else away_team }}"
+          opp_team: "{{ away_team if is_home else home_team }}"
+          quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
+          clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
+          opp_delta: 3
+          score_type: "fg"
+          our_score: 21
+          opp_score: 13
       - event: huskers_opponent_score
         event_data:
           team: "{{ opp_team }}"
