@@ -1,8 +1,6 @@
+# yaml-language-server: $schema=http://schemas.home-assistant.io/integration-homeassistant-packages
 ###############################################################################
 # Huskers - Step 2 testing helpers
-# Adds two input buttons to manually fire our two custom events:
-# - input_button.huskers_test_score          -> fires `huskers_score`
-# - input_button.huskers_test_opponent_score -> fires `huskers_opponent_score`
 ###############################################################################
 
 input_button:
@@ -29,7 +27,6 @@ automation:
       opp_team: "{{ away_team if is_home else home_team }}"
       quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
       clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
-      # Fixed test payload: touchdown + extra point (+7)
       our_delta: 7
       score_type: "td_xp"
       our_score: 21
@@ -48,8 +45,8 @@ automation:
       - service: persistent_notification.create
         data:
           title: "Test Event Fired huskers_score"
-          message: >-
-            {{ our_team }} +{{ our_delta }} ({{ our_score }}–{{ opp_score }})
+          message: >
+            {{ our_team }} +{{ our_delta }} ({{ our_score }}-{{ opp_score }})
             at {{ quarter }} {{ clock }}
 
   - id: huskers_test_fire_opponent_score
@@ -67,7 +64,6 @@ automation:
       opp_team: "{{ away_team if is_home else home_team }}"
       quarter: "{{ state_attr(team_sensor,'quarter') or state_attr(team_sensor,'period') or 'Q1' }}"
       clock: "{{ state_attr(team_sensor,'clock') or '15:00' }}"
-      # Fixed test payload: opponent field goal (+3)
       opp_delta: 3
       score_type: "fg"
       our_score: 21
@@ -86,6 +82,6 @@ automation:
       - service: persistent_notification.create
         data:
           title: "Test Event Fired huskers_opponent_score"
-          message: >-
-            {{ opp_team }} +{{ opp_delta }} ({{ our_score }}–{{ opp_score }})
+          message: >
+            {{ opp_team }} +{{ opp_delta }} ({{ our_score }}-{{ opp_score }})
             at {{ quarter }} {{ clock }}

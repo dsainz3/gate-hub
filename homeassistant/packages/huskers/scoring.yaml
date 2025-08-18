@@ -1,25 +1,23 @@
+# yaml-language-server: $schema=http://schemas.home-assistant.io/integration-homeassistant-packages
 ###############################################################################
-# Huskers – Step 2: Detect scoring items by team
+# Huskers - Step 2: Detect scoring items by team
 # Requires Team Tracker (HACS). Replace entity IDs below to match your setup.
 ###############################################################################
 
-# Optional toggle to surface debug notifications on each detected event
 input_boolean:
   huskers_debug:
     name: "Huskers Debug Notifications"
     icon: mdi:bug
 
-# Main automation: watches Team Tracker score attributes and fires custom events
 automation:
   - id: huskers_detect_score_events
-    alias: "Huskers – Detect Score Events"
-    description: >-
-      Detects score changes for Nebraska and opponent using Team Tracker
-      attributes and emits custom events `huskers_score` and
-      `huskers_opponent_score`. Optionally posts notifications when
-      input_boolean.huskers_debug is on.
+    alias: "Huskers - Detect Score Events"
+    description: >
+      Detect score changes for Nebraska and the opponent using Team Tracker
+      attributes. Emits custom events huskers_score and huskers_opponent_score.
+      Optionally posts a notification when huskers_debug is on.
     mode: parallel
-    # IMPORTANT: replace this entity with your actual Team Tracker sensor entity
+    # IMPORTANT: replace with your Team Tracker sensor entity
     trigger:
       - platform: state
         entity_id: sensor.team_tracker_nebraska
@@ -28,33 +26,29 @@ automation:
         entity_id: sensor.team_tracker_nebraska
         attribute: away_score
 
-    # IMPORTANT: replace this with your Team Tracker game-in-progress binary sensor
+    # IMPORTANT: replace with your Team Tracker game-in-progress binary sensor
     condition:
       - condition: state
         entity_id: binary_sensor.team_tracker_nebraska_game
         state: "on"
 
     variables:
-      # Pull current + previous scoring attributes
       is_home: "{{ state_attr('sensor.team_tracker_nebraska', 'is_home') | bool(false) }}"
       old_home: "{{ (trigger.from_state.attributes.home_score | int(0)) if trigger.from_state else 0 }}"
       new_home: "{{ state_attr('sensor.team_tracker_nebraska', 'home_score') | int(0) }}"
       old_away: "{{ (trigger.from_state.attributes.away_score | int(0)) if trigger.from_state else 0 }}"
       new_away: "{{ state_attr('sensor.team_tracker_nebraska', 'away_score') | int(0) }}"
-
       our_old: "{{ old_home if is_home else old_away }}"
       our_new: "{{ new_home if is_home else new_away }}"
       our_delta: "{{ our_new - our_old }}"
-
       opp_old: "{{ old_away if is_home else old_home }}"
       opp_new: "{{ new_away if is_home else new_home }}"
       opp_delta: "{{ opp_new - opp_old }}"
-
-      quarter: >-
+      quarter: >
         {{ state_attr('sensor.team_tracker_nebraska','quarter')
            or state_attr('sensor.team_tracker_nebraska','period')
-           or '—' }}
-      clock: "{{ state_attr('sensor.team_tracker_nebraska','clock') or '—' }}"
+           or '-' }}
+      clock: "{{ state_attr('sensor.team_tracker_nebraska','clock') or '-' }}"
       home_team: "{{ state_attr('sensor.team_tracker_nebraska','home_team') }}"
       away_team: "{{ state_attr('sensor.team_tracker_nebraska','away_team') }}"
       our_team: "{{ home_team if is_home else away_team }}"
@@ -65,7 +59,7 @@ automation:
           - conditions: "{{ our_delta > 0 }}"
             sequence:
               - variables:
-                  score_type: >-
+                  score_type: >
                     {% set d = our_delta|int(0) %}
                     {% if d == 8 %}td_2pt{% elif d == 7 %}td_xp{% elif d == 6 %}td{% elif d == 3 %}fg{% elif d == 2 %}safety_or_2pt{% elif d == 1 %}xp_or_point{% else %}unknown{% endif %}
               - event: huskers_score
@@ -86,14 +80,14 @@ automation:
                   - service: persistent_notification.create
                     data:
                       title: "Huskers Scored ({{ score_type }})"
-                      message: >-
-                        {{ our_team }} +{{ our_delta }} ({{ our_new }}–{{ opp_new }})
+                      message: >
+                        {{ our_team }} +{{ our_delta }} ({{ our_new }}-{{ opp_new }})
                         at {{ quarter }} {{ clock }}
 
           - conditions: "{{ opp_delta > 0 }}"
             sequence:
               - variables:
-                  score_type: >-
+                  score_type: >
                     {% set d = opp_delta|int(0) %}
                     {% if d == 8 %}td_2pt{% elif d == 7 %}td_xp{% elif d == 6 %}td{% elif d == 3 %}fg{% elif d == 2 %}safety_or_2pt{% elif d == 1 %}xp_or_point{% else %}unknown{% endif %}
               - event: huskers_opponent_score
@@ -114,12 +108,10 @@ automation:
                   - service: persistent_notification.create
                     data:
                       title: "Opponent Scored ({{ score_type }})"
-                      message: >-
-                        {{ opp_team }} +{{ opp_delta }} ({{ our_new }}–{{ opp_new }})
+                      message: >
+                        {{ opp_team }} +{{ opp_delta }} ({{ our_new }}-{{ opp_new }})
                         at {{ quarter }} {{ clock }}
 
-# Convenience: a trigger-based template sensor to expose the most recent event
-# Useful for UI badges and debugging; updates on either event type.
 template:
   - trigger:
       - platform: event
@@ -129,7 +121,7 @@ template:
     sensor:
       - name: "Huskers Last Score Event"
         unique_id: huskers_last_score_event
-        state: >-
+        state: >
           {% set t = trigger.event.event_type %}
           {% if t == 'huskers_score' %}huskers{% else %}opponent{% endif %}_{{ trigger.event.data.type }}
         attributes:
