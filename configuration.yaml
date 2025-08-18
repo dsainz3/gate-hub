@@ -21,4 +21,28 @@ light: !include light.yaml
 sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
+
 packages: !include_dir_named packages
+
+input_boolean:
+  huskers_color_show:
+    name: Huskers Color Show
+    icon: mdi:music
+
+input_number:
+  hail_varsity_bpm:
+    name: Hail Varsity BPM
+    min: 60
+    max: 220
+    step: 1
+    mode: slider
+    icon: mdi:metronome
+    initial: 152
+
+  beats_per_color:
+    name: Beats per Color (hold)
+    min: 1
+    max: 8
+    step: 1
+    icon: mdi:timer-outline
+    initial: 2
