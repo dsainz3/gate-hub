@@ -8,6 +8,7 @@ homeassistant:
   longitude: -95.9718365
   elevation: 1116
   time_zone: America/Chicago
+  packages: !include_dir_merge_named homeassistant/packages
 
   # Load frontend themes from the themes folder
 frontend:
