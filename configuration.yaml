@@ -21,3 +21,4 @@ light: !include light.yaml
 sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
+packages: !include_dir_named packages
