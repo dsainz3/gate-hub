@@ -1,28 +1,26 @@
 ###############################################################################
-# Huskers – Step 2 testing helpers
+# Huskers - Step 2 testing helpers
 # Adds two input buttons to manually fire our two custom events:
-# - input_button.huskers_test_score           -> fires `huskers_score`
-# - input_button.huskers_test_opponent_score  -> fires `huskers_opponent_score`
+# - input_button.huskers_test_score          -> fires `huskers_score`
+# - input_button.huskers_test_opponent_score -> fires `huskers_opponent_score`
 ###############################################################################
 
 input_button:
   huskers_test_score:
-    name: "Huskers Test: Our Score"
+    name: "Huskers Test Our Score"
     icon: mdi:trophy
   huskers_test_opponent_score:
-    name: "Huskers Test: Opponent Score"
+    name: "Huskers Test Opponent Score"
     icon: mdi:alert
 
 automation:
   - id: huskers_test_fire_our_score
-    alias: "Huskers – Test: Fire Our Score"
+    alias: "Huskers Test Fire Our Score"
     mode: single
     trigger:
       - platform: state
         entity_id: input_button.huskers_test_score
     variables:
-      # Use the same Team Tracker sensor so team names match your setup.
-      # Replace the sensor entity if you used a different one in scoring.yaml.
       team_sensor: sensor.team_tracker_nebraska
       is_home: "{{ state_attr(team_sensor, 'is_home') | bool(false) }}"
       home_team: "{{ state_attr(team_sensor,'home_team') or 'Nebraska' }}"
@@ -34,7 +32,6 @@ automation:
       # Fixed test payload: touchdown + extra point (+7)
       our_delta: 7
       score_type: "td_xp"
-      # Fake running score (adjust as you like)
       our_score: 21
       opp_score: 10
     action:
@@ -50,13 +47,13 @@ automation:
           clock: "{{ clock }}"
       - service: persistent_notification.create
         data:
-          title: "Test Event Fired: huskers_score"
+          title: "Test Event Fired huskers_score"
           message: >-
             {{ our_team }} +{{ our_delta }} ({{ our_score }}–{{ opp_score }})
             at {{ quarter }} {{ clock }}
 
   - id: huskers_test_fire_opponent_score
-    alias: "Huskers – Test: Fire Opponent Score"
+    alias: "Huskers Test Fire Opponent Score"
     mode: single
     trigger:
       - platform: state
@@ -88,7 +85,7 @@ automation:
           clock: "{{ clock }}"
       - service: persistent_notification.create
         data:
-          title: "Test Event Fired: huskers_opponent_score"
+          title: "Test Event Fired huskers_opponent_score"
           message: >-
             {{ opp_team }} +{{ opp_delta }} ({{ our_score }}–{{ opp_score }})
             at {{ quarter }} {{ clock }}
