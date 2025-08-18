@@ -205,7 +205,9 @@
     target:
       entity_id:
       - light.front_porch_lights
-      - light.garage_lights
+      - light.garage_center_2
+      - light.garage_left_2
+      - light.garage_right_2
   - type: turn_on
     device_id: 59ce59873a8a6b7c7b48b4d311af8606
     entity_id: 8a639fe5a1dfb86cffaafdd92550355b
@@ -232,7 +234,7 @@
   alias: Bedroom-purifier-off
   description: ''
   triggers:
-  - type: changed_states
+  - type: turned_off
     device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
     entity_id: 73dbec16d31025a64677606382fa35aa
     domain: switch
@@ -240,6 +242,22 @@
   conditions: []
   actions:
   - type: turn_on
+    device_id: 6e3a0d96120bc4222780d4f255f88414
+    entity_id: a0ac47bc0794f26c2cce245f4e4200d3
+    domain: switch
+  mode: single
+- id: '1755373002789'
+  alias: Purifier on bedroom
+  description: ''
+  triggers:
+  - type: changed_states
+    device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
+    entity_id: 73dbec16d31025a64677606382fa35aa
+    domain: switch
+    trigger: device
+  conditions: []
+  actions:
+  - type: turn_off
     device_id: 6e3a0d96120bc4222780d4f255f88414
     entity_id: a0ac47bc0794f26c2cce245f4e4200d3
     domain: switch
