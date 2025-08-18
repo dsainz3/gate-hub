@@ -1,23 +1,25 @@
-# Left red / Right green
-- name: Theater Left Red - Right Green
+- name: Huskers Scarlet (Theater)
+  id: scene_huskers_scarlet_theater
+  icon: mdi:palette
   entities:
     light.light_theater_left:
-      state: on
+      state: "on"
       brightness: 255
-      rgb_color: [255, 0, 0]
+      hs_color: [355, 90]
     light.light_theater_right:
-      state: on
+      state: "on"
       brightness: 255
-      rgb_color: [0, 255, 0]
+      hs_color: [355, 90]
 
-# Left green / Right red
-- name: Theater Left Green - Right Red
+- name: Huskers Cream (Theater)
+  id: scene_huskers_cream_theater
+  icon: mdi:palette
   entities:
     light.light_theater_left:
-      state: on
+      state: "on"
       brightness: 255
-      rgb_color: [0, 255, 0]
+      hs_color: [48, 12]
     light.light_theater_right:
-      state: on
+      state: "on"
       brightness: 255
-      rgb_color: [255, 0, 0]
+      hs_color: [48, 12]

@@ -92,13 +92,14 @@
         data: {}
       - target:
           entity_id:
-          - light.garage_left
-          - light.garage_right
-          - light.garage_center
           - light.front_porch_lights
+          device_id:
+          - fbe02d94b4a09788c1abfe4016865a79
+          - 02772e117da83fd7f1571bf6e5672e9c
+          - d909c213a7f2493b0c38857806ed82ff
         data:
           transition: 3
-          brightness_pct: 10
+          brightness_pct: 1
         action: light.turn_on
     - sequence:
       - target:
