@@ -22,6 +22,8 @@ sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
 
+packages: !include_dir_named packages
+
 input_boolean:
   huskers_color_show:
     name: Huskers Color Show
