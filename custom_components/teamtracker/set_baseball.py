@@ -1,4 +1,4 @@
-""" Baseball specific functionality"""
+"""Baseball specific functionality"""
 
 from .utils import async_get_value
 

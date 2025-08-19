@@ -1,4 +1,4 @@
-""" Miscellaneous Utilities """
+"""Miscellaneous Utilities"""
 
 import logging
 

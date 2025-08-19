@@ -1,4 +1,4 @@
-""" Hockey specific functionality"""
+"""Hockey specific functionality"""
 
 import logging
 

@@ -1,4 +1,4 @@
-""" Tennis specific functionality"""
+"""Tennis specific functionality"""
 
 import logging
 

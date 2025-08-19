@@ -44,3 +44,21 @@ input_number:
     step: 1
     icon: mdi:timer-outline
     initial: 2
+lovelace:
+  mode: yaml
+  resources: !include lovelace/resources.yaml
+  dashboards:
+    main-dashboard:
+      mode: yaml
+      filename: ui-lovelace/main.yaml
+      title: Home
+      icon: mdi:home
+      show_in_sidebar: true
+      require_admin: false
+    huskers-dashboard:
+      mode: yaml
+      filename: ui-lovelace/huskers.yaml
+      title: Huskers
+      icon: mdi:football-helmet
+      show_in_sidebar: true
+      require_admin: false

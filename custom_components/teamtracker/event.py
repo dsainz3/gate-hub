@@ -1,4 +1,4 @@
-""" Parse throught the API data and find the right event/competition"""
+"""Parse throught the API data and find the right event/competition"""
 
 from datetime import datetime
 import logging

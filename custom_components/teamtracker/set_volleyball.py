@@ -1,4 +1,4 @@
-""" Volleyball specific functionality"""
+"""Volleyball specific functionality"""
 
 import logging
 
