@@ -8,7 +8,7 @@ homeassistant:
   longitude: -95.9718365
   elevation: 1116
   time_zone: America/Chicago
-  packages: !include_dir_merge_named homeassistant/packages
+  # packages: !include_dir_named homeassistant/packages  # ← disabled
 
 frontend:
   themes: !include_dir_merge_named themes
@@ -21,3 +21,28 @@ light: !include light.yaml
 sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
+
+# === Huskers helpers (live here now) ===
+input_number:
+  huskers_pregame_minutes:
+    name: "Huskers – Pregame Minutes"
+    min: 0
+    max: 120
+    step: 5
+    initial: 20
+  huskers_postgame_minutes:
+    name: "Huskers – Postgame Minutes"
+    min: 0
+    max: 120
+    step: 5
+    initial: 20
+
+input_boolean:
+  huskers_debug:
+    name: "Huskers – Debug Mode"
+    initial: off
+
+input_text:
+  huskers_last_score:
+    name: "Huskers – Last Score"
+    max: 255

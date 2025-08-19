@@ -1,0 +1,7 @@
+# homeassistant/packages/templates.yaml
+template:
+  - sensor:
+      - name: "Huskers Last Score (test)"
+        unique_id: huskers_last_score_test
+        state: "{{ states('input_text.huskers_last_score') or '—' }}"
+        icon: mdi:scoreboard

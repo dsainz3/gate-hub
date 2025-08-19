@@ -1,3 +1,4 @@
+# List of template blocks
 - sensor:
     # ---- Pressure trend (rising / steady / falling) ----
     - name: KNEPLATT72 Pressure Trend
@@ -47,25 +48,7 @@
             | list | length }}
       icon: mdi:lan-check
 
-    - name: Internet Status
-      state: >-
-        {% if is_state('binary_sensor.internet_reachable','on') %}
-          Online ({{ states('sensor.internet_latency') }} ms)
-        {% else %}
-          Offline
-        {% endif %}
-
-    - name: TP-Link Clients Online
-      unique_id: tplink_clients_online
-      state: >-
-        {% set tpl = integration_entities('tplink_router') %}
-        {{ expand(tpl)
-           | selectattr('domain','equalto','device_tracker')
-           | selectattr('state','equalto','home')
-           | list | length }}
-      icon: mdi:wifi
-
-    # ---- Internet status (uses Ping integration entities) ----
+    # ---- Internet status (Ping entities) ----
     - name: Internet Status
       unique_id: internet_status
       state: >-
@@ -80,3 +63,9 @@
         {% else %}
           mdi:close-network
         {% endif %}
+
+    # ---- Huskers test sensor (mirrors input_text) ----
+    - name: "Huskers Last Score (test)"
+      unique_id: huskers_last_score_test
+      state: "{{ states('input_text.huskers_last_score') or '—' }}"
+      icon: mdi:scoreboard

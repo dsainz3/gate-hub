@@ -1,0 +1,42 @@
+# === Huskers test scripts ===
+huskers_test_our_score:
+  alias: "Huskers – Test: Our Score"
+  icon: mdi:football
+  mode: restart
+  sequence:
+    - event: huskers_score
+      event_data:
+        team: "Nebraska"
+        points: 6
+        play: "touchdown"
+        source: "test"
+    - action: persistent_notification.create
+      data:
+        title: "Huskers Test – Our Score"
+        message: "Event 'huskers_score' fired: Nebraska TD (+6)."
+    - action: logbook.log
+      data:
+        name: "Huskers Test"
+        message: "Nebraska scored (TD +6) [test]"
+        domain: script
+
+huskers_test_opponent_score:
+  alias: "Huskers – Test: Opponent Score"
+  icon: mdi:football-helmet
+  mode: restart
+  sequence:
+    - event: huskers_score
+      event_data:
+        team: "Opponent"
+        points: 3
+        play: "field_goal"
+        source: "test"
+    - action: persistent_notification.create
+      data:
+        title: "Huskers Test – Opponent Score"
+        message: "Event 'huskers_score' fired: Opponent FG (+3)."
+    - action: logbook.log
+      data:
+        name: "Huskers Test"
+        message: "Opponent scored (FG +3) [test]"
+        domain: script

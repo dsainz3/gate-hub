@@ -1,0 +1,9 @@
+# Minimal package to verify packages + REST integration load correctly
+rest:
+  - resource: https://httpbin.org/get
+    method: GET
+    scan_interval: 300
+    sensor:
+      - name: "REST Ping"
+        unique_id: rest_ping_ok
+        value_template: "{{ value_json.url if value_json is defined else 'nojson' }}"

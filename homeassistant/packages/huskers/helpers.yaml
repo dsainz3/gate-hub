@@ -1,0 +1,24 @@
+input_number:
+  huskers_pregame_minutes:
+    name: Huskers – Pregame Minutes
+    min: 0
+    max: 120
+    step: 5
+    initial: 20
+
+  huskers_postgame_minutes:
+    name: Huskers – Postgame Minutes
+    min: 0
+    max: 120
+    step: 5
+    initial: 20
+
+input_boolean:
+  huskers_debug:
+    name: Huskers – Debug Mode
+    initial: off
+
+input_text:
+  huskers_last_score:
+    name: Huskers – Last Score
+    max: 255
