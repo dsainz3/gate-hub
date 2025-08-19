@@ -1,195 +1,108 @@
-# Huskers Scoring – Project README
+# Huskers Dashboard
 
-This document describes the Huskers scoring test harness and outlines the path to a full, game‑time experience in Home Assistant.
-
----
-
-## 1) Goal
-
-Provide a clean, reliable flow to:
-- Fire **test scoring events** for Nebraska and the opponent.
-- Confirm **notifications/logbook** appear and **entities update**.
-- Establish a foundation for **live game‑time tracking**, **schedule awareness**, and a **Huskers dashboard**.
+This document outlines the Huskers-focused Lovelace dashboard configuration.  
+It is split into **three views**, each with a different purpose.
 
 ---
 
-## 2) What’s included (current state)
+## 1. Husker LED – Test (`/husker-led-test`)
 
-> Target platform: Home Assistant 2025.8+  
-> Branch: `feature/huskers-scoring`  
-> Packages: **not** used (we load via standard includes)
+**Purpose:** Validation sandbox for LED MQTT and scoring test scripts.  
 
-**Helpers (in `configuration.yaml`):**
-- `input_number.huskers_pregame_minutes`
-- `input_number.huskers_postgame_minutes`
-- `input_boolean.huskers_debug`
-- `input_text.huskers_last_score`
-
-**Scripts (in `scripts.yaml`):**
-- `script.huskers_test_our_score` — simulates Nebraska TD (+6)
-- `script.huskers_test_opponent_score` — simulates Opponent FG (+3)
-
-**Automation (in `automations.yaml`):**
-- `huskers_update_last_score_on_event` — listens for `huskers_score` and writes a summary to `input_text.huskers_last_score`.
-
-**Template Sensor (in `templates.yaml`):**
-- `sensor.huskers_last_score_test` — mirrors `input_text.huskers_last_score` for dashboards and quick visibility.
+**Includes:**
+- Entity panel with:
+  - `script.huskers_test_our_score`
+  - `script.huskers_test_opponent_score`
+  - `input_text.huskers_last_score`
+  - `sensor.huskers_last_score_test`
+- Markdown instructions for test usage
+- Buttons to:
+  - Start Husker LED Effect (`script.husker_led_start`)
+  - Stop / Revert to Monthly (`script.husker_led_stop`)
+- Related scripts + automation (`automation.exterior_led_monthly_effect`)
+- History Graph and Logbook for last 6h activity
 
 ---
 
-## 3) Event schema
+## 2. Huskers HQ (`/huskers-hq`)
 
-All scoring logic hinges on a single custom event:
+**Purpose:** The main **fan view**, designed for game days and everyday monitoring.  
 
-```yaml
-event_type: huskers_score
-event_data:
-  team: "Nebraska" | "Opponent"
-  points: <int>           # e.g., 6, 3, 1, 2
-  play: "touchdown" | "field_goal" | "safety" | "pat" | "two_point"
-  source: "test" | "live" | "import"
-```
+**Key Sections:**
+- **Header Quick Glance**  
+  Horizontal stack showing:
+  - `binary_sensor.huskers_game_in_progress_tt` (Game Live)
+  - `sensor.huskers_kickoff_in` (Kickoff countdown)
+  - `sensor.huskers_last_score_test` (Last score)
 
-- **Scripts** fire this event.
-- **Automations** and future logic should listen for it.
+- **Markdown Header:** GBR banner with current date/time.
 
----
+- **Conditional Game Live Panel**  
+  When `binary_sensor.huskers_game_in_progress_tt` is `on`, shows:
+  - Opponent + kickoff status
+  - Last score (test)
+  - Windows: `binary_sensor.huskers_pregame_window`, `binary_sensor.huskers_postgame_window`
 
-## 4) How it works (end‑to‑end)
+- **Next Game / Countdown**  
+  Opponent, kickoff, and countdown gauge.
 
-1. Run a test script.
-2. Script fires `huskers_score` with the payload above.
-3. Automation catches the event and writes a timestamped line to `input_text.huskers_last_score`.
-4. `sensor.huskers_last_score_test` mirrors that line.
-5. Script also raises a **persistent notification** and a **logbook** entry.
+- **Fan Mode Controls**  
+  - `script.huskers_touchdown_burst`
+  - `script.husker_led_start`
+  - `script.husker_led_stop`
+  - Last Score entities
+  - `automation.huskers_update_last_score_test`
 
----
+- **Team Snapshot / Controls**  
+  - Debug toggle and timing inputs
+  - Scenes: Scarlet Theater, Cream Theater, Govee One-Click Game
 
-## 5) File layout (where to edit)
-
-- `configuration.yaml`  
-  Adds helpers (input_*). Packages line is commented out.
-- `scripts.yaml`  
-  Contains both test scripts.
-- `automations.yaml`  
-  Contains the event→input_text mirror automation.
-- `templates.yaml`  
-  Contains `sensor.huskers_last_score_test` and other template sensors as needed.
-
-> We intentionally keep the Huskers bits isolated in those four places to simplify troubleshooting and future migration back to packages if desired.
+- **Husker News** (`iframe: https://huskers.com/news`)  
+- **Logbook:** Last 6h of Husker activity
 
 ---
 
-## 6) Validate & reload (no restart needed except where noted)
+## 3. Huskers Controls (`/huskers-controls`)
 
-1. **Config check**  
-   *Developer Tools → YAML → Check configuration* (or `ha core check`).
+**Purpose:** Centralized action view for **all Husker-related scenes, scripts, and automations**.  
 
-2. **Reload**  
-   - Helpers, Scripts, Template Entities, Automations (Developer Tools → YAML).
+**Sections:**
+- **Scenes**  
+  - `scene.huskers_scarlet_theater`
+  - `scene.huskers_cream_theater`
+  - `scene.govee_to_mqtt_one_click_default_husker_game`
 
-3. **Run tests**  
-   *Settings → Automations & Scenes → Scripts*  
-   - Run **Huskers – Test: Our Score** and **Huskers – Test: Opponent Score**.
+- **Scripts**  
+  - `script.huskers_touchdown_burst`
+  - `script.husker_led_start`
+  - `script.husker_led_stop`
+  - `script.huskers_test_our_score`
+  - `script.huskers_test_opponent_score`
 
-4. **Verify**  
-   - Notifications appear.  
-   - `input_text.huskers_last_score` updates.  
-   - `sensor.huskers_last_score_test` mirrors the new text.
-
-5. **Event bus (optional)**  
-   - *Developer Tools → Events → Listen to events* → `huskers_score` → Start listening → run a script to see the payload.
-
-> **Feedreader** is UI-only. Configure it in *Settings → Devices & Services*. It emits events only for **new** items; simulate via *Developer Tools → Events → Fire event* with `event_type: feedreader` and a dummy payload for testing.
-
----
-
-## 7) Usage patterns (extend me later)
-
-- Add more scripts for other scoring plays (PAT, 2‑pt, safety) with the same `huskers_score` event and distinct `points`/`play`.
-- In automations, branch on `trigger.event.data.team`, `points`, and `play` to update score totals, TTS, lights, etc.
+- **Automations**  
+  - Enable/disable toggles for:
+    - `automation.huskers_new_item_notifier`
+    - `automation.huskers_postgame_event`
+    - `automation.huskers_pregame_event`
+    - `automation.huskers_react_to_test_score`
+    - `automation.huskers_update_last_score_test`
+  - Trigger-now buttons for each of the above
 
 ---
 
-## 8) Roadmap
+## Usage Notes
 
-**A. Schedule + game‑time awareness**
-- Source: CSV/ICS/API of the Nebraska football schedule.
-- Entities:
-  - `sensor.huskers_next_game_start` (timestamp)
-  - `binary_sensor.huskers_pregame_window` / `postgame_window`
-  - `binary_sensor.huskers_game_in_progress`
-  - `sensor.huskers_kickoff_in` (relative timer)
-
-**B. Live game tracking**
-- Real-time input (manual or API) to produce `huskers_score` events with `source: "live"`.
-- Running totals, quarter, clock, possession.
-
-**C. Dashboard**
-- Upcoming schedule
-- In-game status (score, quarter/clock, possession)
-- News panel (Feedreader sensors)
-- Test controls (the two scripts + any future ones)
-
-**D. Notifications**
-- Persistent notifications and/or mobile push for:
-  - Scoring plays
-  - Game start / halftime / final
-  - Breaking news (via Feedreader events)
+- **HQ is the main fan-facing view.**  
+- **Controls is for testing and administration.**  
+- **LED Test is for MQTT validation and dev work.**  
+- Entities will evolve as game-tracking sensors are refined (next game data, score updates, etc.).
 
 ---
 
-## 9) Troubleshooting
+## Next Steps
 
-- **Scripts don’t appear**  
-  Check `configuration.yaml` contains `script: !include scripts.yaml` (exact filename). Run *Reload Scripts*. Look at *Settings → System → Logs* for YAML errors.
-
-- **Automation not firing**  
-  Ensure it’s enabled. Verify event name is exactly `huskers_score`. Use Events listener to confirm scripts emit the payload.
-
-- **Template sensor shows `unknown`**  
-  Reload Template Entities, run a script again, confirm `input_text.huskers_last_score` has content.
-
-- **Feedreader shows nothing**  
-  Add via **UI** (not YAML). It only emits events for **new** items; to test, fire a manual `feedreader` event.
+- Integrate finalized **game tracking sensors** for live scores.  
+- Add **theme automation** (scarlet & cream takeover) when game starts.  
+- Hook LED automations into **pregame/postgame windows**.  
 
 ---
-
-## 10) Conventions
-
-- **Event-first design:** all scoring runs through `huskers_score`.  
-- **Separation of concerns:** helpers (state), scripts (emit), automations (react), templates (display).  
-- **Idempotence:** avoid duplicating helper names across files.  
-- **HA 2025.8+ syntax:** modern `action:` blocks, no deprecated service syntax.
-
----
-
-## 11) Quick snippets
-
-**Listen to event (for debugging):**
-```
-Developer Tools → Events → Listen to events → "huskers_score"
-```
-
-**Manual Fire (to mimic any score):**
-```yaml
-event_type: huskers_score
-event_data:
-  team: "Nebraska"
-  points: 2
-  play: "safety"
-  source: "test"
-```
-
----
-
-## 12) Next steps (when you’re ready)
-
-1. Wire a schedule source and implement the pregame/postgame/game-in-progress sensors.
-2. Add score aggregation sensors and a simple “current score” entity.
-3. Build the Lovelace dashboard section for Huskers (controls + status + news).
-4. Optional: mobile notifications and light effects on scoring plays.
-
----
-
-_Last updated: 2025-08-19_
