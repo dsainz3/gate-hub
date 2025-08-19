@@ -46,10 +46,12 @@ node_modules/
 **/.prettier-cache
 **/.prettier-caches/
 
+# Vendor/caches
 node_modules/
 **/.cache/prettier/
 **/.prettier-caches/
 
+# Ignore vendor & Prettier caches
 node_modules/
 **/.cache/prettier/
 **/.prettier-caches/
