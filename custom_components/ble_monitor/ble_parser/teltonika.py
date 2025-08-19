@@ -1,4 +1,5 @@
 """Parser for Teltonika BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -33,7 +34,7 @@ def parse_teltonika(self, data: bytes, complete_local_name: str, mac: bytes):
     while data_size > 1:
         packet_size = data[packet_start] + 1
         if packet_size > 1 and packet_size <= data_size:
-            packet = data[packet_start:packet_start + packet_size]
+            packet = data[packet_start : packet_start + packet_size]
             packet_type = packet[1]
             if packet_type == 0x16 and packet_size > 4:
                 uuid16 = (packet[3] << 8) | packet[2]
@@ -90,14 +91,21 @@ def parse_teltonika(self, data: bytes, complete_local_name: str, mac: bytes):
                         # Most significant bit indicates movement state
                         # 15 least significant bits represent count of movement events.
                         moving = sensor_data[0] & (1 << 7)
-                        count = ((sensor_data[0] & 0b01111111) << 8) + sensor_data[1]
-                        result.update({"moving": moving, "movement counter": count})
+                        count = (
+                            (sensor_data[0] & 0b01111111) << 8
+                        ) + sensor_data[1]
+                        result.update(
+                            {"moving": moving, "movement counter": count}
+                        )
                         sensor_data = sensor_data[2:]
                     if flags & (1 << 5):  # bit 5
                         # Movement sensor angle
                         # Most significant byte – pitch (-90/+90)
                         # Two least significant bytes – roll (-180/+180)
-                        (pitch, roll,) = unpack(">bh", sensor_data[0:3])
+                        (
+                            pitch,
+                            roll,
+                        ) = unpack(">bh", sensor_data[0:3])
                         result.update({"roll": roll, "pitch": pitch})
                         sensor_data = sensor_data[3:]
                     if flags & (1 << 6):  # bit 6
@@ -116,14 +124,16 @@ def parse_teltonika(self, data: bytes, complete_local_name: str, mac: bytes):
                 "BLE ADV from UNKNOWN Teltonika DEVICE: MAC: %s, DEVICE TYPE: %s, ADV: %s",
                 to_mac(mac),
                 device_type,
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "data": True,
+        }
+    )
     return result

@@ -1,4 +1,5 @@
 """The tests for the Thermopro ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 

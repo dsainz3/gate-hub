@@ -1,4 +1,5 @@
 """Constants for the ble_parser"""
+
 from typing import Final
 
 CONF_MAC: Final = "mac"

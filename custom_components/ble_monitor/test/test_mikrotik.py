@@ -1,9 +1,11 @@
 """The tests for the Laica Smart Scale ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestLaica:
     """Tests for the Mikrotik parser"""
+
     def test_mikrotik_tg_bt5_in(self):
         """Test Mikrotik TG-BT5-IN parser."""
         data_string = "043E2202010300DD7B146E2CDC1615FF4F09010010A90000FDFF010000806BE866000062D5"
@@ -48,7 +50,7 @@ class TestLaica:
         assert sensor_msg["mac"] == "DC2C6E147BDD"
         assert sensor_msg["packet"] == "no packet id"
         assert sensor_msg["data"]
-        assert sensor_msg['temperature'] == 25.62890625
+        assert sensor_msg["temperature"] == 25.62890625
         assert sensor_msg["version"] == 1
         assert sensor_msg["acceleration x"] == 0.0
         assert sensor_msg["acceleration y"] == 255.98828125

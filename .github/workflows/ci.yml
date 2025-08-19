@@ -1,21 +1,25 @@
----
-name: CI
+name: pre-commit
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  push:
+    branches: [main, develop, feature/*, chore/*]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout with submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
 
-      - name: List repo files
-        run: ls -R
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit checks
+        run: pre-commit run --all-files --show-diff-on-failure

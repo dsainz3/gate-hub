@@ -1,4 +1,5 @@
 """Parser for Jaalee BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -12,20 +13,18 @@ def parse_jaalee(self, data: bytes, mac: bytes):
     msg_length = len(data)
     firmware = "Jaalee"
     result = {"firmware": firmware}
-    if msg_length == 28 and data[1:4] == b'\xff\x4c\x00' and data[20:22] == b'\xf5\x25':
+    if (
+        msg_length == 28
+        and data[1:4] == b"\xff\x4c\x00"
+        and data[20:22] == b"\xf5\x25"
+    ):
         device_type = "JHT"
         (temp, humi, _, batt) = unpack(">HHBB", data[22:])
         # data follows the iBeacon temperature and humidity definition
         temp = round(175 * temp / 65535 - 45, 2)
         humi = round(100 * humi / 65535, 2)
 
-        result.update(
-            {
-                "temperature": temp,
-                "humidity": humi,
-                "battery": batt
-            }
-        )
+        result.update({"temperature": temp, "humidity": humi, "battery": batt})
     elif msg_length in [15, 16]:
         device_type = "JHT"
         batt = data[4]
@@ -45,27 +44,23 @@ def parse_jaalee(self, data: bytes, mac: bytes):
         temp = round(175 * temp / 65535 - 45, 2)
         humi = round(100 * humi / 65535, 2)
 
-        result.update(
-            {
-                "temperature": temp,
-                "humidity": humi,
-                "battery": batt
-            }
-        )
+        result.update({"temperature": temp, "humidity": humi, "battery": batt})
     else:
         if self.report_unknown == "Jaalee":
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Jaalee DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

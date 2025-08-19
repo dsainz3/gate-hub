@@ -1,9 +1,11 @@
 """The tests for the Grundfos ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestGrundfos:
     """Tests for the Grundfos parser"""
+
     def test_grundfos_MI401(self):
         """Test Grundfos parser for ALPHA reader MI401."""
         data_string = "043E2A020103009565F1164DAC1E06084D4934303116FF14F230017A03059884103E0F19070D0114FFFFFFFFC0"
@@ -20,7 +22,9 @@ class TestGrundfos:
         assert sensor_msg["temperature"] == 13
         assert sensor_msg["flow"] == 645.2
         assert sensor_msg["water pressure"] == 0.119
-        assert sensor_msg["pump mode"] == "Constant differential pressure level 1"
+        assert (
+            sensor_msg["pump mode"] == "Constant differential pressure level 1"
+        )
         assert sensor_msg["pump id"] == 38917
         assert sensor_msg["battery status"] == 3
         assert sensor_msg["rssi"] == -64

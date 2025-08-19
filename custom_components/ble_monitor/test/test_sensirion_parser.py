@@ -1,9 +1,11 @@
 """The tests for the Sensirion ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestSensirion:
     """Tests for the Sensirion parser"""
+
     def test_Sensorion_MyCO2(self):
         """Test Sensirion MyCO2 parser."""
         data_string = "043e320d0113000135673cdceaf80100ff7fb0000000000000000000180201060dffd506000867355367925c0b0406094d79434f32"

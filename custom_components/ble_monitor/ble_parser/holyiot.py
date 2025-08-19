@@ -1,4 +1,5 @@
 """Parser for HolyIOT BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -38,7 +39,7 @@ def parse_holyiot(self, data: str, mac: bytes):
                 meas_value = value - fraction / 100
         elif meas_type == 2:
             measurement_type = "pressure"
-            value, = unpack(">h", data[15:17])
+            (value,) = unpack(">h", data[15:17])
             meas_value = 80000 + value
         elif meas_type == 3:
             measurement_type = "humidity"
@@ -57,26 +58,23 @@ def parse_holyiot(self, data: str, mac: bytes):
                 meas_value = "no press"
         else:
             return None
-        result.update(
-            {
-                measurement_type: meas_value,
-                "battery": batt
-            }
-        )
+        result.update({measurement_type: meas_value, "battery": batt})
     else:
         if self.report_unknown == "HolyIOT":
             _LOGGER.info(
                 "BLE ADV from UNKNOWN HolyIOT DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

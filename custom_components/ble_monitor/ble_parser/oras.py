@@ -1,4 +1,5 @@
 """Parser for Oras/Garnet BLE advertisements."""
+
 import logging
 
 from .helpers import to_mac, to_unformatted_mac
@@ -45,7 +46,7 @@ def parse_oras(self, data: bytes, mac: bytes):
             _LOGGER.error(
                 "Garnet SeeLevel II 709-BTP3 is reporting error %s for sensor %s",
                 error_code,
-                sensor_type
+                sensor_type,
             )
             return None
 
@@ -56,16 +57,18 @@ def parse_oras(self, data: bytes, mac: bytes):
         sensor_total = data[14:17].decode("ASCII")
         sensor_alarm = int(chr(data[17]))
 
-        result.update({
-            sensor_type: sensor_data,
-            "problem": sensor_alarm,
-        })
+        result.update(
+            {
+                sensor_type: sensor_data,
+                "problem": sensor_alarm,
+            }
+        )
         _LOGGER.debug(
             "BLE ADV from Garnet DEVICE: %s, result: %s, not implemented volume %s, total %s",
             device_type,
             result,
             sensor_volume,
-            sensor_total
+            sensor_total,
         )
     elif msg_length == 22:
         firmware = "Oras"
@@ -77,14 +80,16 @@ def parse_oras(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Oras/Garnet DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

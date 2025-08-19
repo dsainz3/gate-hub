@@ -1,10 +1,20 @@
 """Parser for HHCC BLE advertisements"""
+
 import logging
 from struct import unpack
 
-from .const import (CONF_BATTERY, CONF_CONDUCTIVITY, CONF_DATA, CONF_FIRMWARE,
-                    CONF_ILLUMINANCE, CONF_MAC, CONF_MOISTURE, CONF_PACKET,
-                    CONF_TEMPERATURE, CONF_TYPE)
+from .const import (
+    CONF_BATTERY,
+    CONF_CONDUCTIVITY,
+    CONF_DATA,
+    CONF_FIRMWARE,
+    CONF_ILLUMINANCE,
+    CONF_MAC,
+    CONF_MOISTURE,
+    CONF_PACKET,
+    CONF_TEMPERATURE,
+    CONF_TYPE,
+)
 from .helpers import to_mac, to_unformatted_mac
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,7 +29,7 @@ def parse_hhcc(self, data: str, mac: bytes):
         xvalue_3 = data[10:13]
         packet_id = data[4:13].hex()
         (moist, temp) = unpack(">BH", xvalue_1)
-        (illu,) = unpack(">i", b'\x00' + xvalue_2)
+        (illu,) = unpack(">i", b"\x00" + xvalue_2)
         (batt, cond) = unpack(">BH", xvalue_3)
         sensor_data = {
             CONF_TYPE: device_type,
@@ -38,7 +48,7 @@ def parse_hhcc(self, data: str, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN HHCC DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 

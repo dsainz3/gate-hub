@@ -1,9 +1,11 @@
 """The tests for the Jaalee ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestJaalee:
     """Tests for the Jaalee parser"""
+
     def test_jaalee_jht(self):
         """Test Jaalee parser for Jaalee JHT."""
         data_string = "043e22020104014b1ecdb4f3d216020a00030325f50e1625f5644b1ecdb4f3d27420591ad9"

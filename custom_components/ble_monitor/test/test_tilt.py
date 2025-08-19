@@ -1,9 +1,11 @@
 """The tests for the Tilt ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestTilt:
     """Tests for the Tilt parser"""
+
     def test_tilt_red(self):
         """Test Tilt parser for Tilt Red."""
         data_string = "043E27020100005A099B16A3041B1AFF4C000215A495BB10C5B14B44B5121370F02D74DE004403F8C5C7"

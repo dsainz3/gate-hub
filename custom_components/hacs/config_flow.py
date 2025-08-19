@@ -63,7 +63,11 @@ class HacsFlowHandler(ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="single_instance_allowed")
 
         if user_input:
-            if [x for x in user_input if x.startswith("acc_") and not user_input[x]]:
+            if [
+                x
+                for x in user_input
+                if x.startswith("acc_") and not user_input[x]
+            ]:
                 self._errors["base"] = "acc"
                 return await self._show_config_form(user_input)
 
@@ -79,13 +83,17 @@ class HacsFlowHandler(ConfigFlow, domain=DOMAIN):
 
         async def _wait_for_activation() -> None:
             try:
-                response = await self.device.activation(device_code=self._registration.device_code)
+                response = await self.device.activation(
+                    device_code=self._registration.device_code
+                )
                 self._activation = response.data
             finally:
 
                 async def _progress():
                     with suppress(UnknownFlow):
-                        await self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
+                        await self.hass.config_entries.flow.async_configure(
+                            flow_id=self.flow_id
+                        )
 
         if not self.device:
             integration = await async_get_integration(self.hass, DOMAIN)
@@ -102,12 +110,16 @@ class HacsFlowHandler(ConfigFlow, domain=DOMAIN):
                 return self.async_abort(reason="could_not_register")
 
         if self.activation_task is None:
-            self.activation_task = self.hass.async_create_task(_wait_for_activation())
+            self.activation_task = self.hass.async_create_task(
+                _wait_for_activation()
+            )
 
         if self.activation_task.done():
             if (exception := self.activation_task.exception()) is not None:
                 LOGGER.exception(exception)
-                return self.async_show_progress_done(next_step_id="could_not_register")
+                return self.async_show_progress_done(
+                    next_step_id="could_not_register"
+                )
             return self.async_show_progress_done(next_step_id="device_done")
 
         show_progress_kwargs = {
@@ -136,25 +148,44 @@ class HacsFlowHandler(ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required("acc_logs", default=user_input.get("acc_logs", False)): bool,
-                    vol.Required("acc_addons", default=user_input.get("acc_addons", False)): bool,
                     vol.Required(
-                        "acc_untested", default=user_input.get("acc_untested", False)
+                        "acc_logs", default=user_input.get("acc_logs", False)
                     ): bool,
-                    vol.Required("acc_disable", default=user_input.get("acc_disable", False)): bool,
+                    vol.Required(
+                        "acc_addons",
+                        default=user_input.get("acc_addons", False),
+                    ): bool,
+                    vol.Required(
+                        "acc_untested",
+                        default=user_input.get("acc_untested", False),
+                    ): bool,
+                    vol.Required(
+                        "acc_disable",
+                        default=user_input.get("acc_disable", False),
+                    ): bool,
                 }
             ),
             errors=self._errors,
         )
 
-    async def async_step_device_done(self, user_input: dict[str, bool] | None = None):
+    async def async_step_device_done(
+        self, user_input: dict[str, bool] | None = None
+    ):
         """Handle device steps"""
         if self._reauth:
-            existing_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
-            self.hass.config_entries.async_update_entry(
-                existing_entry, data={**existing_entry.data, "token": self._activation.access_token}
+            existing_entry = self.hass.config_entries.async_get_entry(
+                self.context["entry_id"]
             )
-            await self.hass.config_entries.async_reload(existing_entry.entry_id)
+            self.hass.config_entries.async_update_entry(
+                existing_entry,
+                data={
+                    **existing_entry.data,
+                    "token": self._activation.access_token,
+                },
+            )
+            await self.hass.config_entries.async_reload(
+                existing_entry.entry_id
+            )
             return self.async_abort(reason="reauth_successful")
 
         return self.async_create_entry(
@@ -207,7 +238,9 @@ class HacsOptionsFlowHandler(OptionsFlow):
         """Handle a flow initialized by the user."""
         hacs: HacsBase = self.hass.data.get(DOMAIN)
         if user_input is not None:
-            return self.async_create_entry(title="", data={**user_input, "experimental": True})
+            return self.async_create_entry(
+                title="", data={**user_input, "experimental": True}
+            )
 
         if hacs is None or hacs.configuration is None:
             return self.async_abort(reason="not_setup")
@@ -216,10 +249,20 @@ class HacsOptionsFlowHandler(OptionsFlow):
             return self.async_abort(reason="pending_tasks")
 
         schema = {
-            vol.Optional(SIDEPANEL_TITLE, default=hacs.configuration.sidepanel_title): str,
-            vol.Optional(SIDEPANEL_ICON, default=hacs.configuration.sidepanel_icon): str,
-            vol.Optional(COUNTRY, default=hacs.configuration.country): vol.In(LOCALE),
-            vol.Optional(APPDAEMON, default=hacs.configuration.appdaemon): bool,
+            vol.Optional(
+                SIDEPANEL_TITLE, default=hacs.configuration.sidepanel_title
+            ): str,
+            vol.Optional(
+                SIDEPANEL_ICON, default=hacs.configuration.sidepanel_icon
+            ): str,
+            vol.Optional(COUNTRY, default=hacs.configuration.country): vol.In(
+                LOCALE
+            ),
+            vol.Optional(
+                APPDAEMON, default=hacs.configuration.appdaemon
+            ): bool,
         }
 
-        return self.async_show_form(step_id="user", data_schema=vol.Schema(schema))
+        return self.async_show_form(
+            step_id="user", data_schema=vol.Schema(schema)
+        )

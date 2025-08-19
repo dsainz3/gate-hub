@@ -48,22 +48,44 @@ def reverseMac(mac) -> bytes:
 
 
 def mixA(mac, productID) -> bytes:
-    return bytes([mac[0], mac[2], mac[5], (productID & 0xff), (productID & 0xff), mac[4], mac[5], mac[1]])
+    return bytes(
+        [
+            mac[0],
+            mac[2],
+            mac[5],
+            (productID & 0xFF),
+            (productID & 0xFF),
+            mac[4],
+            mac[5],
+            mac[1],
+        ]
+    )
 
 
 def mixB(mac, productID) -> bytes:
-    return bytes([mac[0], mac[2], mac[5], ((productID >> 8) & 0xff), mac[4], mac[0], mac[5], (productID & 0xff)])
+    return bytes(
+        [
+            mac[0],
+            mac[2],
+            mac[5],
+            ((productID >> 8) & 0xFF),
+            mac[4],
+            mac[0],
+            mac[5],
+            (productID & 0xFF),
+        ]
+    )
 
 
 def cipherInit(key) -> bytes:
     perm = bytearray()
     for i in range(0, 256):
-        perm.extend(bytes([i & 0xff]))
+        perm.extend(bytes([i & 0xFF]))
     keyLen = len(key)
     j = 0
     for i in range(0, 256):
         j += perm[i] + key[i % keyLen]
-        j = j & 0xff
+        j = j & 0xFF
         perm[i], perm[j] = perm[j], perm[i]
     return perm
 
@@ -74,14 +96,14 @@ def cipherCrypt(input, perm) -> bytes:
     output = bytearray()
     for i in range(0, len(input)):
         index1 = index1 + 1
-        index1 = index1 & 0xff
+        index1 = index1 & 0xFF
         index2 += perm[index1]
-        index2 = index2 & 0xff
+        index2 = index2 & 0xFF
         perm[index1], perm[index2] = perm[index2], perm[index1]
         idx = perm[index1] + perm[index2]
-        idx = idx & 0xff
+        idx = idx & 0xFF
         outputByte = input[i] ^ perm[idx]
-        output.extend(bytes([outputByte & 0xff]))
+        output.extend(bytes([outputByte & 0xFF]))
     return output
 
 
@@ -122,9 +144,13 @@ async def get_beacon_key(mac, product_id):
         await client.write_gatt_char(HANDLE_AUTH_INIT, MI_KEY1, True)
         # Subscribe authCharacteristic.
         # (a lambda callback is used to set the futures result on the notification event)
-        await client.start_notify(HANDLE_AUTH, lambda _, data: future.set_result(data))
+        await client.start_notify(
+            HANDLE_AUTH, lambda _, data: future.set_result(data)
+        )
         # Send cipher(mixA(reversedMac, productID), token) to authCharacteristic.
-        await client.write_gatt_char(HANDLE_AUTH, cipher(mixA(reversed_mac, product_id), token), True)
+        await client.write_gatt_char(
+            HANDLE_AUTH, cipher(mixA(reversed_mac, product_id), token), True
+        )
         # Now you'll get a notification on authCharacteristic. You must wait for this notification before proceeding to next step
         await asyncio.wait_for(future, 10.0)
 
@@ -132,7 +158,9 @@ async def get_beacon_key(mac, product_id):
         print(f"notifyData:  '{future.result().hex()}'")
         # If you want to perform a check, compare cipher(mixB(reversedMac, productID), cipher(mixA(reversedMac, productID), res))
         # where res is received payload ...
-        print(f"cipheredRes: '{cipher(mixB(reversed_mac, product_id), cipher(mixA(reversed_mac, product_id), future.result())).hex()}'")
+        print(
+            f"cipheredRes: '{cipher(mixB(reversed_mac, product_id), cipher(mixA(reversed_mac, product_id), future.result())).hex()}'"
+        )
         # ... with your token, they must equal.
         print(f"randomToken: '{token.hex()}'")
 
@@ -141,10 +169,14 @@ async def get_beacon_key(mac, product_id):
         print("Successful authentication!")
 
         # Read
-        beacon_key = cipher(token, await client.read_gatt_char(HANDLE_BEACON_KEY)).hex()
+        beacon_key = cipher(
+            token, await client.read_gatt_char(HANDLE_BEACON_KEY)
+        ).hex()
         # Read from verCharacteristics. You can ignore the response data, you just have to perform a read to complete authentication process.
         # If the data is used, it will show the firmware version
-        firmware_version = cipher(token, await client.read_gatt_char(HANDLE_FIRMWARE_VERSION)).decode()
+        firmware_version = cipher(
+            token, await client.read_gatt_char(HANDLE_FIRMWARE_VERSION)
+        ).decode()
 
         print(f"beaconKey: '{beacon_key}'")
         print(f"firmware_version: '{firmware_version}'")
@@ -172,7 +204,9 @@ async def main(argv):
     # MAC
     mac = argv[1].upper()
     if not re.compile(MAC_PATTERN).match(mac):
-        print(f"[ERROR] The MAC address '{mac}' seems to be in the wrong format")
+        print(
+            f"[ERROR] The MAC address '{mac}' seems to be in the wrong format"
+        )
         return
 
     # PRODUCT_ID
@@ -180,12 +214,14 @@ async def main(argv):
     try:
         product_id = int(product_id)
     except Exception:
-        print(f"[ERROR] The Product Id '{product_id}' seems to be in the wrong format")
+        print(
+            f"[ERROR] The Product Id '{product_id}' seems to be in the wrong format"
+        )
         return
 
     # BEACON_KEY
     await get_beacon_key(mac, product_id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main(sys.argv))

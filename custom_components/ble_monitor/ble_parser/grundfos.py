@@ -1,4 +1,5 @@
 """Parser for Grundfos BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -46,13 +47,15 @@ def parse_grundfos(self, data: str, mac: bytes):
         _LOGGER.info(
             "BLE ADV from UNKNOWN Grundfos DEVICE: MAC: %s, ADV: %s",
             to_mac(mac),
-            data.hex()
+            data.hex(),
         )
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

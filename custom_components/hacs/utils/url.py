@@ -27,4 +27,6 @@ def github_archive(
     """Generate a download URL for a repository zip."""
     if GIT_SHA.match(version):
         return f"https://github.com/{repository}/archive/{version}.zip"
-    return f"https://github.com/{repository}/archive/refs/{variant}/{version}.zip"
+    return (
+        f"https://github.com/{repository}/archive/refs/{variant}/{version}.zip"
+    )

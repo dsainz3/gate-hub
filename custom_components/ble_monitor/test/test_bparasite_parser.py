@@ -1,4 +1,5 @@
 """The tests for the b-parasite ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
@@ -33,7 +34,9 @@ class TestBParasite:
         ble_parser = BleParser()
         sensor_msg, tracker_msg = ble_parser.parse_raw_data(data)
 
-        assert sensor_msg["firmware"] == "b-parasite V1.0.0 (without illuminance)"
+        assert (
+            sensor_msg["firmware"] == "b-parasite V1.0.0 (without illuminance)"
+        )
         assert sensor_msg["type"] == "b-parasite V1.0.0"
         assert sensor_msg["mac"] == "F0CAF0CA0201"
         assert sensor_msg["packet"] == 11

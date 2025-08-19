@@ -1,9 +1,11 @@
 """The tests for the Thermobeacon ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestThermobeacon:
     """Tests for the Thermobeacon parser"""
+
     def test_thermobeacon_smart_hygrometer(self):
         """Test thermobeacon Smart hygrometer parser."""
         data_string = "043e29020100002716000088061d0201060302f0ff15ff110000002716000088063c0c8f01a103b9d70300c8"

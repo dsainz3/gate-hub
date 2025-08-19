@@ -10,18 +10,15 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 from .const import (
     DOMAIN,
-
     TEMPUNIT,
     LENGTHUNIT,
     SPEEDUNIT,
     PRESSUREUNIT,
-
     FIELD_CONDITION_HUMIDITY,
     FIELD_CONDITION_PRESSURE,
     FIELD_CONDITION_TEMP,
     FIELD_CONDITION_WINDDIR,
     FIELD_CONDITION_WINDSPEED,
-
     FIELD_FORECAST_VALIDTIMEUTC,
     FIELD_FORECAST_PRECIPCHANCE,
     FIELD_FORECAST_QPF,
@@ -31,7 +28,8 @@ from .const import (
     FIELD_FORECAST_CALENDARDAYTEMPERATUREMIN,
     FIELD_FORECAST_WINDDIRECTIONCARDINAL,
     FIELD_FORECAST_WINDSPEED,
-    FIELD_FORECAST_ICONCODE, CONF_PWS_ID,
+    FIELD_FORECAST_ICONCODE,
+    CONF_PWS_ID,
 )
 
 import logging
@@ -48,7 +46,7 @@ from homeassistant.components.weather import (
     WeatherEntity,
     WeatherEntityFeature,
     Forecast,
-    DOMAIN as WEATHER_DOMAIN
+    DOMAIN as WEATHER_DOMAIN,
 )
 
 from homeassistant.core import HomeAssistant
@@ -61,20 +59,22 @@ ENTITY_ID_FORMAT = WEATHER_DOMAIN + ".{}"
 
 
 async def async_setup_entry(
-        hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Add weather entity."""
     pws_id: str = entry.data[CONF_PWS_ID]
-    coordinator: WundergroundPWSUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: WundergroundPWSUpdateCoordinator = hass.data[DOMAIN][
+        entry.entry_id
+    ]
     async_add_entities([WUWeather(pws_id, coordinator)])
 
 
 class WUWeather(CoordinatorEntity, WeatherEntity):
 
     def __init__(
-            self,
-            pws_id: str,
-            coordinator: WundergroundPWSUpdateCoordinator
+        self, pws_id: str, coordinator: WundergroundPWSUpdateCoordinator
     ):
         super().__init__(coordinator)
         """Initialize the sensor."""
@@ -164,11 +164,10 @@ class WUWeather(CoordinatorEntity, WeatherEntity):
         night = self.coordinator.get_forecast(FIELD_FORECAST_ICONCODE, 1)
         return self.coordinator._iconcode_to_condition(day or night)
 
-
     def _forecast(self) -> list[Forecast]:
         """Return the forecast in native units."""
         days = [0, 2, 4, 6, 8]
-        if self.coordinator.get_forecast('temperature', 0) is None:
+        if self.coordinator.get_forecast("temperature", 0) is None:
             days[0] += 1
         if self.coordinator._calendarday is True:
             caldaytempmax = FIELD_FORECAST_CALENDARDAYTEMPERATUREMAX
@@ -179,33 +178,40 @@ class WUWeather(CoordinatorEntity, WeatherEntity):
 
         forecast = []
         for period in days:
-            forecast.append(Forecast({
-                ATTR_FORECAST_CONDITION:
-                    self.coordinator._iconcode_to_condition(
-                        self.coordinator.get_forecast(
-                            FIELD_FORECAST_ICONCODE, period)
-                    ),
-                ATTR_FORECAST_PRECIPITATION:
-                    self.coordinator.get_forecast(FIELD_FORECAST_QPF, period),
-                ATTR_FORECAST_PRECIPITATION_PROBABILITY:
-                    self.coordinator.get_forecast(FIELD_FORECAST_PRECIPCHANCE, period),
-
-                ATTR_FORECAST_TEMP:
-                    self.coordinator.get_forecast(caldaytempmax, period),
-                ATTR_FORECAST_TEMP_LOW:
-                    self.coordinator.get_forecast(
-                        caldaytempmin, period),
-
-                ATTR_FORECAST_TIME:
-                    dt_util.utc_from_timestamp(self.coordinator.get_forecast(
-                        FIELD_FORECAST_VALIDTIMEUTC, period)).isoformat(),
-
-                ATTR_FORECAST_WIND_BEARING:
-                    self.coordinator.get_forecast(
-                        FIELD_FORECAST_WINDDIRECTIONCARDINAL, period),
-                ATTR_FORECAST_WIND_SPEED: self.coordinator.get_forecast(
-                    FIELD_FORECAST_WINDSPEED, period)
-            }))
+            forecast.append(
+                Forecast(
+                    {
+                        ATTR_FORECAST_CONDITION: self.coordinator._iconcode_to_condition(
+                            self.coordinator.get_forecast(
+                                FIELD_FORECAST_ICONCODE, period
+                            )
+                        ),
+                        ATTR_FORECAST_PRECIPITATION: self.coordinator.get_forecast(
+                            FIELD_FORECAST_QPF, period
+                        ),
+                        ATTR_FORECAST_PRECIPITATION_PROBABILITY: self.coordinator.get_forecast(
+                            FIELD_FORECAST_PRECIPCHANCE, period
+                        ),
+                        ATTR_FORECAST_TEMP: self.coordinator.get_forecast(
+                            caldaytempmax, period
+                        ),
+                        ATTR_FORECAST_TEMP_LOW: self.coordinator.get_forecast(
+                            caldaytempmin, period
+                        ),
+                        ATTR_FORECAST_TIME: dt_util.utc_from_timestamp(
+                            self.coordinator.get_forecast(
+                                FIELD_FORECAST_VALIDTIMEUTC, period
+                            )
+                        ).isoformat(),
+                        ATTR_FORECAST_WIND_BEARING: self.coordinator.get_forecast(
+                            FIELD_FORECAST_WINDDIRECTIONCARDINAL, period
+                        ),
+                        ATTR_FORECAST_WIND_SPEED: self.coordinator.get_forecast(
+                            FIELD_FORECAST_WINDSPEED, period
+                        ),
+                    }
+                )
+            )
         # _LOGGER.debug(f'{forecast=}')
         return forecast
 

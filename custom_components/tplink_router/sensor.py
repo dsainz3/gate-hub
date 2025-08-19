@@ -87,7 +87,9 @@ SENSOR_TYPES: tuple[TPLinkRouterSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=1,
-        value=lambda status: (status.cpu_usage * 100) if status.cpu_usage is not None else None,
+        value=lambda status: (
+            (status.cpu_usage * 100) if status.cpu_usage is not None else None
+        ),
     ),
     TPLinkRouterSensorEntityDescription(
         key="memory_used",
@@ -96,7 +98,9 @@ SENSOR_TYPES: tuple[TPLinkRouterSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
         suggested_display_precision=1,
-        value=lambda status: (status.mem_usage * 100) if status.mem_usage is not None else None,
+        value=lambda status: (
+            (status.mem_usage * 100) if status.mem_usage is not None else None
+        ),
     ),
     TPLinkRouterSensorEntityDescription(
         key="conn_type",
@@ -108,7 +112,9 @@ SENSOR_TYPES: tuple[TPLinkRouterSensorEntityDescription, ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
@@ -127,23 +133,29 @@ class TPLinkRouterSensor(
     entity_description: TPLinkRouterSensorEntityDescription
 
     def __init__(
-            self,
-            coordinator: TPLinkRouterCoordinator,
-            description: TPLinkRouterSensorEntityDescription,
+        self,
+        coordinator: TPLinkRouterCoordinator,
+        description: TPLinkRouterSensorEntityDescription,
     ) -> None:
         super().__init__(coordinator)
 
         self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{DOMAIN}_{description.key}"
+        self._attr_unique_id = (
+            f"{coordinator.unique_id}_{DOMAIN}_{description.key}"
+        )
         self.entity_description = description
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        self._attr_native_value = self.entity_description.value(self.coordinator.status)
+        self._attr_native_value = self.entity_description.value(
+            self.coordinator.status
+        )
         self.async_write_ha_state()
 
     @property
     def available(self) -> bool:
         """Return True if entity is available."""
-        return self.entity_description.value(self.coordinator.status) is not None
+        return (
+            self.entity_description.value(self.coordinator.status) is not None
+        )

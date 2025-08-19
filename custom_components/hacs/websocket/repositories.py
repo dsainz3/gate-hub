@@ -47,7 +47,9 @@ async def hacs_repositories_list(
                     "can_download": repo.can_download,
                     "category": repo.data.category,
                     "country": repo.repository_manifest.country,
-                    "custom": not hacs.repositories.is_default(str(repo.data.id)),
+                    "custom": not hacs.repositories.is_default(
+                        str(repo.data.id)
+                    ),
                     "description": repo.data.description,
                     "domain": repo.data.domain,
                     "downloads": repo.data.downloads,
@@ -68,7 +70,8 @@ async def hacs_repositories_list(
                     "topics": repo.data.topics,
                 }
                 for repo in hacs.repositories.list_all
-                if repo.data.category in msg.get("categories", hacs.common.categories)
+                if repo.data.category
+                in msg.get("categories", hacs.common.categories)
                 and not repo.ignored_by_country_configuration
                 and repo.data.last_fetched
             ],
@@ -99,7 +102,9 @@ async def hacs_repositories_clear_new(
 
     else:
         for repo in hacs.repositories.list_all:
-            if repo.data.new and repo.data.category in msg.get("categories", []):
+            if repo.data.new and repo.data.category in msg.get(
+                "categories", []
+            ):
                 hacs.log.debug(
                     "Clearing new flag from '%s'",
                     repo.data.full_name,
@@ -160,7 +165,9 @@ async def hacs_repositories_add(
         repository = renamed
 
     if category not in hacs.common.categories:
-        hacs.log.error("%s is not a valid category for %s", category, repository)
+        hacs.log.error(
+            "%s is not a valid category for %s", category, repository
+        )
 
     elif not hacs.repositories.get_by_full_name(repository):
         try:
@@ -170,8 +177,8 @@ async def hacs_repositories_add(
             )
 
         except (
-            BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
-        ) as exception:
+            BaseException
+        ) as exception:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
             hacs.async_dispatch(
                 HacsDispatchEvent.ERROR,
                 {

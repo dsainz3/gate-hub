@@ -1,4 +1,5 @@
 """Parser for Thermobeacon BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -23,7 +24,7 @@ def parse_thermobeacon(self, data: bytes, mac: bytes):
             "temperature": temp / 100,
             "humidity": humi / 100,
             "voltage": volt / 100,
-            "battery": batt
+            "battery": batt,
         }
     elif msg_length == 22:
         if device_id == 0x10:
@@ -53,7 +54,7 @@ def parse_thermobeacon(self, data: bytes, mac: bytes):
             "voltage": volt / 1000,
             "temperature": temp / 16,
             "humidity": humi / 16,
-            "battery": batt
+            "battery": batt,
         }
     else:
         device_type = None
@@ -63,7 +64,7 @@ def parse_thermobeacon(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Thermobeacon DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
@@ -72,11 +73,13 @@ def parse_thermobeacon(self, data: bytes, mac: bytes):
         _LOGGER.debug("Invalid MAC address for Thermobeacon device")
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

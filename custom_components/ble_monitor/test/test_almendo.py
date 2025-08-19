@@ -1,9 +1,11 @@
 """The tests for the Almendo ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestAlmendo:
     """Tests for the Almendo parser"""
+
     def test_almendo_blusensor_mini(self):
         """Test Almendo parser for bluSensor mini."""
         data_string = "043e26020103010eba64c4f5fc1a02010613ffe806010a0a08011800fb09e511a6030f0203020a09cc"

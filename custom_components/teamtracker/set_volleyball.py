@@ -13,7 +13,9 @@ async def async_set_volleyball_values(
     """Set volleyball specific values"""
 
     oppo_index = 1 - team_index
-    competition = await async_get_value(event, "competitions", competition_index)
+    competition = await async_get_value(
+        event, "competitions", competition_index
+    )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
@@ -41,7 +43,9 @@ async def async_set_volleyball_values(
     sets = len(await async_get_value(competitor, "linescores", default=[]))
 
     for x in range(0, sets):
-        new_values["last_play"] = new_values["last_play"] + " Set " + str(x + 1) + ": "
+        new_values["last_play"] = (
+            new_values["last_play"] + " Set " + str(x + 1) + ": "
+        )
         new_values["last_play"] = (
             new_values["last_play"] + new_values["team_abbr"] + " "
         )
@@ -63,7 +67,9 @@ async def async_set_volleyball_values(
             new_values["last_play"]
             + str(
                 int(
-                    await async_get_value(opponent, "linescores", x, "value", default=0)
+                    await async_get_value(
+                        opponent, "linescores", x, "value", default=0
+                    )
                 )
             )
             + "; "

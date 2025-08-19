@@ -1,12 +1,16 @@
 """The tests for the Xiaogui ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestXiaogui:
     """Tests for the Xiaogui parser"""
+
     def test_xiaogui_tzc4_stab(self):
         """Test Xiaogui parser for Xiaogui TZC4 (stabilized weight)."""
-        data_string = "043e1d0201030094e0e5295a5f1110ffc0a30276138b0002215f5a29e5e094bd"
+        data_string = (
+            "043e1d0201030094e0e5295a5f1110ffc0a30276138b0002215f5a29e5e094bd"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -26,7 +30,9 @@ class TestXiaogui:
 
     def test_xiaogui_tzc4_non_stab(self):
         """Test Xiaogui parser for Xiaogui TZC4 (not stabilized weight)."""
-        data_string = "043e1d0201030094e0e5295a5f1110ffc05d008c00000002205f5a29e5e094bf"
+        data_string = (
+            "043e1d0201030094e0e5295a5f1110ffc05d008c00000002205f5a29e5e094bf"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -46,7 +52,9 @@ class TestXiaogui:
 
     def test_xiaogui_maxxmee_qjj_stab(self):
         """Test Xiaogui parser for MaxxMee Mod QJ-J (stabilized weight)."""
-        data_string = "043e1d0201030094e0e5295a5f1110ffc07d2c4700000a01255f5a29e5e094bd"
+        data_string = (
+            "043e1d0201030094e0e5295a5f1110ffc07d2c4700000a01255f5a29e5e094bd"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -65,7 +73,9 @@ class TestXiaogui:
 
     def test_xiaogui_maxxmee_qjj_non_stab(self):
         """Test Xiaogui parser for MaxxMee Mod QJ-J (not stabilized weight)."""
-        data_string = "043e1d0201030094e0e5295a5f1110ffc024000000000a01245f5a29e5e094bd"
+        data_string = (
+            "043e1d0201030094e0e5295a5f1110ffc024000000000a01245f5a29e5e094bd"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable

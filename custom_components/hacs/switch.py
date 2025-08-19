@@ -39,7 +39,9 @@ class HacsRepositoryPreReleaseSwitchEntity(HacsRepositoryEntity, SwitchEntity):
     def __init__(self, hacs: HacsBase, repository: HacsRepository) -> None:
         """Initialize the repository pre-release switch."""
         super().__init__(hacs, repository)
-        self._attr_entity_registry_enabled_default = self.repository.data.show_beta
+        self._attr_entity_registry_enabled_default = (
+            self.repository.data.show_beta
+        )
 
     @property
     def is_on(self) -> bool:

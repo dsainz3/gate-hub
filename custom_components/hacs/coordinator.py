@@ -6,7 +6,9 @@ from collections.abc import Callable
 from typing import Any
 
 from homeassistant.core import CALLBACK_TYPE, callback
-from homeassistant.helpers.update_coordinator import BaseDataUpdateCoordinatorProtocol
+from homeassistant.helpers.update_coordinator import (
+    BaseDataUpdateCoordinatorProtocol,
+)
 
 
 class HacsUpdateCoordinator(BaseDataUpdateCoordinatorProtocol):
@@ -14,7 +16,9 @@ class HacsUpdateCoordinator(BaseDataUpdateCoordinatorProtocol):
 
     def __init__(self) -> None:
         """Initialize."""
-        self._listeners: dict[CALLBACK_TYPE, tuple[CALLBACK_TYPE, object | None]] = {}
+        self._listeners: dict[
+            CALLBACK_TYPE, tuple[CALLBACK_TYPE, object | None]
+        ] = {}
 
     @callback
     def async_add_listener(

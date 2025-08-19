@@ -15,7 +15,9 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import Platform, __version__ as HAVERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
+from homeassistant.helpers.entity_registry import (
+    async_get as async_get_entity_registry,
+)
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.start import async_at_start
 from homeassistant.loader import async_get_integration
@@ -43,7 +45,9 @@ async def _async_initialize_integration(
 
     if config_entry.source == SOURCE_IMPORT:
         # Import is not supported
-        hass.async_create_task(hass.config_entries.async_remove(config_entry.entry_id))
+        hass.async_create_task(
+            hass.config_entries.async_remove(config_entry.entry_id)
+        )
         return False
 
     hacs.configuration.update_from_dict(
@@ -78,8 +82,12 @@ async def _async_initialize_integration(
     hacs.core.lovelace_mode = LovelaceMode.YAML
     try:
         lovelace_info = await system_health_info(hacs.hass)
-        hacs.core.lovelace_mode = LovelaceMode(lovelace_info.get("mode", "yaml"))
-    except BaseException:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
+        hacs.core.lovelace_mode = LovelaceMode(
+            lovelace_info.get("mode", "yaml")
+        )
+    except (
+        BaseException
+    ):  # lgtm [py/catch-base-exception] pylint: disable=broad-except
         # If this happens, the users YAML is not valid, we assume YAML mode
         pass
     hacs.core.config_path = hacs.hass.config.path()
@@ -141,14 +149,18 @@ async def _async_initialize_integration(
         async_register_websocket_commands(hass)
         await async_register_frontend(hass, hacs)
 
-        await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
+        await hass.config_entries.async_forward_entry_setups(
+            config_entry, PLATFORMS
+        )
 
         hacs.set_stage(HacsStage.SETUP)
         if hacs.system.disabled:
             return False
 
         hacs.set_stage(HacsStage.WAITING)
-        hacs.log.info("Setup complete, waiting for Home Assistant before startup tasks starts")
+        hacs.log.info(
+            "Setup complete, waiting for Home Assistant before startup tasks starts"
+        )
 
         # Schedule startup tasks
         async_at_start(hass=hass, at_start_cb=hacs.startup_tasks)
@@ -179,15 +191,23 @@ async def _async_initialize_integration(
     return True
 
 
-async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> bool:
     """Set up this integration using UI."""
-    config_entry.async_on_unload(config_entry.add_update_listener(async_reload_entry))
-    setup_result = await _async_initialize_integration(hass=hass, config_entry=config_entry)
+    config_entry.async_on_unload(
+        config_entry.add_update_listener(async_reload_entry)
+    )
+    setup_result = await _async_initialize_integration(
+        hass=hass, config_entry=config_entry
+    )
     hacs: HacsBase = hass.data[DOMAIN]
     return setup_result and not hacs.system.disabled
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> bool:
     """Handle removal of an entry."""
     hacs: HacsBase = hass.data[DOMAIN]
 
@@ -212,7 +232,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     except AttributeError:
         pass
 
-    unload_ok = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        config_entry, PLATFORMS
+    )
 
     hacs.set_stage(None)
     hacs.disable_hacs(HacsDisabledReason.REMOVED)
@@ -222,7 +244,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def async_reload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+async def async_reload_entry(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> None:
     """Reload the HACS config entry."""
     if not await async_unload_entry(hass, config_entry):
         return

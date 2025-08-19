@@ -1,4 +1,5 @@
 """Helper for ble_monitor."""
+
 import logging
 import re
 from typing import Any, Optional
@@ -16,7 +17,7 @@ def identifier_normalize(value: str) -> str:
     if validate_uuid(value):
         return str(UUID(value))
 
-    if ':' in value:
+    if ":" in value:
         return value
 
     return ":".join(value[i : i + 2] for i in range(0, len(value), 2))
@@ -26,23 +27,31 @@ def detect_conf_type(value: str) -> str:
     return CONF_UUID if validate_uuid(value) else CONF_MAC
 
 
-def dict_get_or(data: dict, first: str = CONF_UUID, second: str = CONF_MAC) -> Optional[str]:
+def dict_get_or(
+    data: dict, first: str = CONF_UUID, second: str = CONF_MAC
+) -> Optional[str]:
     key = dict_get_key_or(data, first, second)
 
     return data[key] if key in data else None
 
 
-def dict_get_or_normalize(data: dict, first: str = CONF_UUID, second: str = CONF_MAC) -> Optional[str]:
+def dict_get_or_normalize(
+    data: dict, first: str = CONF_UUID, second: str = CONF_MAC
+) -> Optional[str]:
     key = dict_get_key_or(data, first, second)
 
     return identifier_normalize(data[key]) if key in data else None
 
 
-def dict_get_or_clean(data: dict, first: str = CONF_UUID, second: str = CONF_MAC) -> str:
+def dict_get_or_clean(
+    data: dict, first: str = CONF_UUID, second: str = CONF_MAC
+) -> str:
     return identifier_clean(dict_get_or(data, first, second))
 
 
-def dict_get_key_or(data: dict, first: str = CONF_UUID, second: str = CONF_MAC) -> str:
+def dict_get_key_or(
+    data: dict, first: str = CONF_UUID, second: str = CONF_MAC
+) -> str:
     return first if first in data and data[first] else second
 
 

@@ -1,4 +1,5 @@
 """The tests for the Xiaomi ble_parser."""
+
 import datetime
 
 from ble_monitor.ble_parser import BleParser
@@ -39,7 +40,9 @@ class TestXiaomi:
         allow_list = self.aeskeys.keys()
 
         # pylint: disable=unused-variable
-        ble_parser = BleParser(aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list)
+        ble_parser = BleParser(
+            aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list
+        )
         sensor_msg, tracker_msg = ble_parser.parse_raw_data(data)
 
         assert sensor_msg["firmware"] == "Xiaomi (MiBeacon V5 encrypted)"
@@ -59,7 +62,9 @@ class TestXiaomi:
         aeskey = "a3bfe9853dd85a620debe3620caaa351"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -106,7 +111,9 @@ class TestXiaomi:
         aeskey = "a115210eed7a88e50ad52662e732a9fb"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -132,7 +139,9 @@ class TestXiaomi:
         aeskey = "e9ea895fac7cca6d30532432a516f3a8"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -158,7 +167,9 @@ class TestXiaomi:
         aeskey = "b2cf9a553d53571b5657defd582d676e"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -219,7 +230,9 @@ class TestXiaomi:
         aeskey = "5b51a7c91cde6707c9ef18dfda143a58"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -245,7 +258,9 @@ class TestXiaomi:
         aeskey = "5b51a7c91cde6707c9ef18dfda143a58"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -323,7 +338,9 @@ class TestXiaomi:
         aeskey = "255e6cabb39b2eddd0de992b9fee2bf2"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -349,7 +366,9 @@ class TestXiaomi:
         aeskey = "33ede53321bc73c790a8daae4581f3d5"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -375,7 +394,9 @@ class TestXiaomi:
         aeskey = "9b4441bc2505db3c3484bae6b7631b34"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -404,7 +425,9 @@ class TestXiaomi:
         aeskey = "4d8f1373fb4d3bab557d0ebd1c78f8c4"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -423,7 +446,9 @@ class TestXiaomi:
 
     def test_Xiaomi_MUE4094RT(self):
         """Test Xiaomi parser for MUE4094RT."""
-        data_string = "043e1c020102010c39b2e870de100201060c1695fe4030dd032403000101c6"
+        data_string = (
+            "043e1c020102010c39b2e870de100201060c1695fe4030dd032403000101c6"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -448,7 +473,9 @@ class TestXiaomi:
         aeskey = "FFD8CE9C08AE7533A79BDAF0BB755E96"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -529,7 +556,9 @@ class TestXiaomi:
         aeskey = "1330b99cded13258acc391627e9771f7"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -545,7 +574,9 @@ class TestXiaomi:
         assert sensor_msg["data"]
         assert sensor_msg["toothbrush"] == 0
         assert sensor_msg["score"] == 83
-        assert sensor_msg["end time"] == datetime.datetime(2023, 6, 29, 10, 50, 43)
+        assert sensor_msg["end time"] == datetime.datetime(
+            2023, 6, 29, 10, 50, 43
+        )
         assert sensor_msg["rssi"] == -58
 
     def test_Xiaomi_ZNMS16LM_fingerprint(self):
@@ -597,7 +628,9 @@ class TestXiaomi:
         aeskey = "54d84797cb77f9538b224b305c877d1e"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -624,7 +657,9 @@ class TestXiaomi:
         aeskey = "54d84797cb77f9538b224b305c877d1e"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -686,7 +721,9 @@ class TestXiaomi:
         aeskey = "b853075158487ca39a5b5ea9"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -713,7 +750,9 @@ class TestXiaomi:
         aeskey = "b853075158487ca39a5b5ea9"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -749,7 +788,9 @@ class TestXiaomi:
         aeskey = "0fdcc30fe9289254876b5ef7c11ef1f0"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -775,7 +816,9 @@ class TestXiaomi:
         aeskey = "0fdcc30fe9289254876b5ef7c11ef1f0"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -801,7 +844,9 @@ class TestXiaomi:
         aeskey = "2c3795afa33019a8afdc17ba99e6f217"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -832,7 +877,9 @@ class TestXiaomi:
         aeskey = "2c3795afa33019a8afdc17ba99e6f217"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -859,7 +906,9 @@ class TestXiaomi:
         aeskey = "7475a4a77584401780ffc3ee62dd353c"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -885,7 +934,9 @@ class TestXiaomi:
         aeskey = "7475a4a77584401780ffc3ee62dd353c"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -912,7 +963,9 @@ class TestXiaomi:
         aeskey = "7475a4a77584401780ffc3ee62dd353c"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -940,7 +993,9 @@ class TestXiaomi:
         aeskey = "b26295a7a08fbac306c8706ade7f0fe4"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -966,7 +1021,9 @@ class TestXiaomi:
         aeskey = "b26295a7a08fbac306c8706ade7f0fe4"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -993,7 +1050,9 @@ class TestXiaomi:
         aeskey = "fb352ea2139ab095877a9e2ae600c912"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1007,7 +1066,9 @@ class TestXiaomi:
         assert sensor_msg["mac"] == "A4C138A4888A"
         assert sensor_msg["packet"] == 50
         assert sensor_msg["data"]
-        assert sensor_msg["occupancy"] == 0  # Should be implicitly set to 0 for data-only frames
+        assert (
+            sensor_msg["occupancy"] == 0
+        )  # Should be implicitly set to 0 for data-only frames
         assert sensor_msg["rssi"] == -58
 
     def test_MJZNZ018H_bed_occupancy(self):
@@ -1019,7 +1080,9 @@ class TestXiaomi:
         aeskey = "13f072b8c8469f54ac2c333ee746d771"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1045,7 +1108,9 @@ class TestXiaomi:
         aeskey = "13f072b8c8469f54ac2c333ee746d771"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1071,7 +1136,9 @@ class TestXiaomi:
         aeskey = "13f072b8c8469f54ac2c333ee746d771"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1097,7 +1164,9 @@ class TestXiaomi:
         aeskey = "c533a5ab361b0a24de4d21d1d9a3d8a1"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1124,7 +1193,9 @@ class TestXiaomi:
         aeskey = "c533a5ab361b0a24de4d21d1d9a3d8a1"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1151,7 +1222,9 @@ class TestXiaomi:
         aeskey = "c533a5ab361b0a24de4d21d1d9a3d8a1"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1178,7 +1251,9 @@ class TestXiaomi:
         aeskey = "a74510b40386d35ae6227a7451efc76e"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())
@@ -1205,7 +1280,9 @@ class TestXiaomi:
         aeskey = "685d647dc5e7bc9bcfcf5a1357bd2114"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())

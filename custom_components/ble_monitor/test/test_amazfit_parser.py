@@ -1,9 +1,11 @@
 """The tests for the Amazfit ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestAmazfit:
     """Tests for the Amazfit parser"""
+
     def test_amazfit_smart_scale(self):
         """Test acconeer parser for Amazfit Smart Scale."""
         data_string = "043e390d011300000ea4309e87700100ff7fb10000000000000000001f0201050302e0fe1716e0feba82e6c7fc3414a442bf46ec68000462bba30100"
@@ -29,6 +31,7 @@ class TestAmazfit:
 
 class TestMiBand:
     """Tests for the Mi Band parser"""
+
     def test_miband_heartrate(self):
         """Test Mi Band parser."""
         data_string = "043e390d011200004b0b893f09c50100ff7fb20000000000000000001f0201041bff5701020aff54ffffffffffffffffffffffffff03c5093f890b4b"

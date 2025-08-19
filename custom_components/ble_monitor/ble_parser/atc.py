@@ -1,4 +1,5 @@
 """Parser for ATC BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -27,7 +28,7 @@ def parse_atc(self, data: bytes, mac: bytes):
             "switch": (trg >> 1) & 1,
             "opening": (~trg ^ 1) & 1,
             "status": "opened",
-            "data": True
+            "data": True,
         }
         adv_priority = 39
     elif msg_length == 17:
@@ -40,7 +41,7 @@ def parse_atc(self, data: bytes, mac: bytes):
             "humidity": humi,
             "voltage": volt / 1000,
             "battery": batt,
-            "data": True
+            "data": True,
         }
         adv_priority = 29
     elif msg_length == 15:
@@ -65,7 +66,7 @@ def parse_atc(self, data: bytes, mac: bytes):
                 "switch": (trg >> 1) & 1,
                 "opening": (~trg ^ 1) & 1,
                 "status": "opened",
-                "data": True
+                "data": True,
             }
             adv_priority = 39
     elif msg_length == 12:
@@ -80,7 +81,7 @@ def parse_atc(self, data: bytes, mac: bytes):
         else:
             temp = decrypted_data[0] / 2 - 40.0
             humi = decrypted_data[1] / 2
-            batt = decrypted_data[2] & 0x7f
+            batt = decrypted_data[2] & 0x7F
             trg = decrypted_data[2] >> 7
             if batt > 100:
                 batt = 100
@@ -91,7 +92,7 @@ def parse_atc(self, data: bytes, mac: bytes):
                 "voltage": volt,
                 "battery": batt,
                 "switch": trg,
-                "data": True
+                "data": True,
             }
             adv_priority = 9
     else:
@@ -99,7 +100,7 @@ def parse_atc(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN ATC DEVICE: MAC: %s, AdStruct: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
@@ -128,12 +129,14 @@ def parse_atc(self, data: bytes, mac: bytes):
         return None
     self.lpacket_ids[atc_mac] = packet_id
 
-    result.update({
-        "mac": to_unformatted_mac(atc_mac),
-        "type": device_type,
-        "packet": packet_id,
-        "firmware": firmware
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(atc_mac),
+            "type": device_type,
+            "packet": packet_id,
+            "firmware": firmware,
+        }
+    )
 
     return result
 
@@ -143,10 +146,15 @@ def decrypt_atc(self, data, atc_mac):
     try:
         key = self.aeskeys[atc_mac]
         if len(key) != 16:
-            _LOGGER.error("Encryption key should be 16 bytes (32 characters) long")
+            _LOGGER.error(
+                "Encryption key should be 16 bytes (32 characters) long"
+            )
     except KeyError:
         # no encryption key found
-        _LOGGER.error("No encryption key found for ATC device with MAC: %s", to_mac(atc_mac))
+        _LOGGER.error(
+            "No encryption key found for ATC device with MAC: %s",
+            to_mac(atc_mac),
+        )
         return None
     # prepare the data for decryption
     nonce = b"".join([atc_mac[::-1], data[:5]])

@@ -1,24 +1,20 @@
----
 extends: default
-
-yaml-files:
-  - '*.yaml'
-  - '*.yml'
-  - '.github/**/*.yml'
-  - '.github/**/*.yaml'
-  - '.pre-commit-config.yaml'
-
-ignore: |
-  external/haos/
-  .git/
-
 rules:
-  # keep long lines from breaking builds (blueprints & GH workflows get wordy)
-  line-length:
-    max: 140
+  braces: disable
+  document-start: disable
+  comments:
+    min-spaces-from-content: 2
     level: warning
-    allow-non-breakable-words: true
-  truthy: disable
-  comments-indentation: disable
-  new-lines: disable
-  brackets: disable
+  line-length:
+    max: 200
+    level: warning
+  new-line-at-end-of-file: enable
+ignore: |
+  node_modules/
+  .git/
+  .venv/
+  .cache/
+  zigbee2mqtt/**
+  docs/addons/**
+  themes/**
+  blueprints/**

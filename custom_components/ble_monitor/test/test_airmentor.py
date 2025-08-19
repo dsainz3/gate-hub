@@ -1,12 +1,16 @@
 """The tests for the Air Mentor ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestAirMentor:
     """Tests for the Air Mentor parser"""
+
     def test_air_mentor_pro_2_set_1(self):
         """Test Air Mentor parser for Air Mentor Pro 2."""
-        data_string = "043E1B02010000A7808FE648540F0201060BFF222100b91963332d0145CC"
+        data_string = (
+            "043E1B02010000A7808FE648540F0201060BFF222100b91963332d0145CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
         # pylint: disable=unused-variable
         ble_parser = BleParser()
@@ -27,7 +31,9 @@ class TestAirMentor:
 
     def test_air_mentor_pro_2_set_2(self):
         """Test Air Mentor parser for Air Mentor Pro 2."""
-        data_string = "043E1B02010000A7808FE648540F0201060BFF21212710000300030000CC"
+        data_string = (
+            "043E1B02010000A7808FE648540F0201060BFF21212710000300030000CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
         # pylint: disable=unused-variable
         ble_parser = BleParser()

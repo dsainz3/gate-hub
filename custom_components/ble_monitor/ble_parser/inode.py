@@ -1,4 +1,5 @@
 """Parser for iNode BLE advertisements"""
+
 import logging
 import math
 from struct import unpack
@@ -18,7 +19,7 @@ INODE_CARE_SENSORS_IDS = {
     0x9A: "iNode Care Sensor T",
     0x9B: "iNode Care Sensor HT",
     0x9C: "iNode Care Sensor PT",
-    0x9D: "iNode Care Sensor PHT"
+    0x9D: "iNode Care Sensor PHT",
 }
 
 MEASUREMENTS = {
@@ -36,7 +37,7 @@ MEASUREMENTS = {
 
 
 def adj_acc(acc):
-    if(acc & 0x10) == 0x10:
+    if (acc & 0x10) == 0x10:
         acc = -1 * (32 - acc)
     return acc
 
@@ -51,7 +52,9 @@ def parse_inode(self, data: bytes, mac: bytes):
     # Advertisement structure information https://docs.google.com/document/d/1hcBpZ1RSgHRL6wu4SlTq2bvtKSL5_sFjXMu_HRyWZiQ
     if msg_length == 15 and device_id == 0x82:
         # iNode Energy Meter
-        (raw_avg, raw_sum, options, battery_light, week_day_data) = unpack("<HIHBH", xvalue)
+        (raw_avg, raw_sum, options, battery_light, week_day_data) = unpack(
+            "<HIHBH", xvalue
+        )
         # Average of previous minute (avg) and sum (sum)
         unit = (options >> 14) & 3
         constant = options & 0x3FFF
@@ -96,7 +99,7 @@ def parse_inode(self, data: bytes, mac: bytes):
                 "voltage": battery_voltage,
                 "light level": light_level,
                 "week day": week_day,
-                "week day total": week_day_total
+                "week day total": week_day_total,
             }
         )
     elif msg_length == 26 and device_id in INODE_CARE_SENSORS_IDS:
@@ -110,7 +113,7 @@ def parse_inode(self, data: bytes, mac: bytes):
             raw_h,
             raw_time1,
             raw_time2,
-            signature
+            signature,
         ) = unpack("<HHHHHHHQ", xvalue)
 
         if "temperature" in measurements:
@@ -144,25 +147,29 @@ def parse_inode(self, data: bytes, mac: bytes):
         if "magnetic field" in measurements:
             magnetic_field = raw_h
             magnetic_field_direction = data[3] << 4
-            result.update({
-                "magnetic field": magnetic_field,
-                "magnetic field direction": magnetic_field_direction,
-            })
+            result.update(
+                {
+                    "magnetic field": magnetic_field,
+                    "magnetic field direction": magnetic_field_direction,
+                }
+            )
         if "position" in measurements:
             motion = raw_p & 0x8000
             acc_x = adj_acc((raw_p >> 10) & 0x1F)
             acc_y = adj_acc((raw_p >> 5) & 0x1F)
             acc_z = adj_acc(raw_p & 0x1F)
 
-            acc = math.sqrt(acc_x ** 2 + acc_y ** 2 + acc_z ** 2)
-            result.update({
-                "motion": motion,
-                "motion timer": motion,
-                "acceleration": acc,
-                "acceleration x": acc_x,
-                "acceleration y": acc_y,
-                "acceleration z": acc_z
-            })
+            acc = math.sqrt(acc_x**2 + acc_y**2 + acc_z**2)
+            result.update(
+                {
+                    "motion": motion,
+                    "motion timer": motion,
+                    "acceleration": acc,
+                    "acceleration x": acc_x,
+                    "acceleration y": acc_y,
+                    "acceleration z": acc_z,
+                }
+            )
 
         # Alarm (not used in output)
         move_accelerometer = alarm >> 1
@@ -199,7 +206,7 @@ def parse_inode(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN iNode DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
     device_type = INODE_CARE_SENSORS_IDS[device_id]
@@ -217,11 +224,13 @@ def parse_inode(self, data: bytes, mac: bytes):
             return None
     self.lpacket_ids[mac] = packet_id
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": packet_id,
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": packet_id,
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

@@ -1,9 +1,11 @@
 """The tests for the Switchbot ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestSwitchbot:
     """Tests for the Switchbot parser"""
+
     def test_meter_th_s1(self):
         """Test Switchbot parser for Meter TH S1."""
         data_string = "043e2802010401f269352207ce1c11071bc5d5a50200b89fe6114d22000da2cb0916000d54006400990ec7"

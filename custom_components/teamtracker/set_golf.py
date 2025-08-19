@@ -13,7 +13,9 @@ async def async_set_golf_values(
     """Set golf specific values"""
 
     oppo_index = 1 if team_index == 0 else 0
-    competition = await async_get_value(event, "competitions", competition_index)
+    competition = await async_get_value(
+        event, "competitions", competition_index
+    )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
@@ -26,7 +28,9 @@ async def async_set_golf_values(
     if new_values["state"] in ["IN", "POST"]:
         #       _LOGGER.debug("%s: async_set_golf_values() 1.1: %s", sensor_name, sensor_name)
 
-        new_values["team_rank"] = await async_get_golf_position(competition, team_index)
+        new_values["team_rank"] = await async_get_golf_position(
+            competition, team_index
+        )
         new_values["opponent_rank"] = await async_get_golf_position(
             competition, oppo_index
         )
@@ -64,7 +68,9 @@ async def async_set_golf_values(
         for x in range(0, 10):
             p = await async_get_golf_position(competition, x)
             new_values["last_play"] = new_values["last_play"] + p + ". "
-            new_values["last_play"] = new_values["last_play"] + await async_get_value(
+            new_values["last_play"] = new_values[
+                "last_play"
+            ] + await async_get_value(
                 competition, "competitors", x, "athlete", "shortName"
             )
             new_values["last_play"] = (

@@ -39,7 +39,9 @@ class Backup:
                 + f"/hacs_persistent_{repository.data.category}/"
                 + repository.data.name
             )
-        self.backup_path_full = f"{self.backup_path}{self.local_path.split('/')[-1]}"
+        self.backup_path_full = (
+            f"{self.backup_path}{self.local_path.split('/')[-1]}"
+        )
 
     def _init_backup_dir(self) -> bool:
         """Init backup dir."""
@@ -76,8 +78,8 @@ class Backup:
                 self.backup_path_full,
             )
         except (
-            BaseException  # lgtm [py/catch-base-exception] pylint: disable=broad-except
-        ) as exception:
+            BaseException
+        ) as exception:  # lgtm [py/catch-base-exception] pylint: disable=broad-except
             self.hacs.log.warning("Could not create backup: %s", exception)
 
     def restore(self) -> None:
@@ -95,7 +97,11 @@ class Backup:
                 while os.path.exists(self.local_path):
                     sleep(0.1)
             shutil.copytree(self.backup_path_full, self.local_path)
-        self.hacs.log.debug("Restored %s, from backup %s", self.local_path, self.backup_path_full)
+        self.hacs.log.debug(
+            "Restored %s, from backup %s",
+            self.local_path,
+            self.backup_path_full,
+        )
 
     def cleanup(self) -> None:
         """Cleanup backup files."""

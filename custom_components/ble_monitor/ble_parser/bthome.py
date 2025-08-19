@@ -1,4 +1,5 @@
 """Parser for BTHome (DIY sensors) advertisements"""
+
 import logging
 import struct
 from datetime import datetime, timezone
@@ -16,7 +17,8 @@ def parse_uint(data_obj: bytes, factor: float = 1.0) -> float:
     """Convert bytes (as unsigned integer) and factor to float."""
     decimal_places = -int(f"{factor:e}".split("e")[-1])
     return round(
-        int.from_bytes(data_obj, "little", signed=False) * factor, decimal_places
+        int.from_bytes(data_obj, "little", signed=False) * factor,
+        decimal_places,
     )
 
 
@@ -24,7 +26,8 @@ def parse_int(data_obj: bytes, factor: float = 1.0) -> float:
     """Convert bytes (as signed integer) and factor to float."""
     decimal_places = -int(f"{factor:e}".split("e")[-1])
     return round(
-        int.from_bytes(data_obj, "little", signed=True) * factor, decimal_places
+        int.from_bytes(data_obj, "little", signed=True) * factor,
+        decimal_places,
     )
 
 
@@ -38,7 +41,9 @@ def parse_float(data_obj: bytes, factor: float = 1.0):
     elif len(data_obj) == 8:
         [val] = struct.unpack("d", data_obj)
     else:
-        _LOGGER.error("only 2, 4 or 8 byte long floats are supported in BTHome BLE")
+        _LOGGER.error(
+            "only 2, 4 or 8 byte long floats are supported in BTHome BLE"
+        )
         return None
     return round(val * factor, decimal_places)
 
@@ -228,7 +233,9 @@ def parse_payload(self, payload, sw_version):
             continue
 
         if payload_length < next_obj_start:
-            _LOGGER.debug("Invalid payload data length, payload: %s", payload.hex())
+            _LOGGER.debug(
+                "Invalid payload data length, payload: %s", payload.hex()
+            )
             break
         measurements.append(
             {
@@ -275,9 +282,14 @@ def parse_payload(self, payload, sw_version):
         value: None | str | int | float | datetime
         event_property = None
 
-        if meas["data format"] == 0 or meas["data format"] == "unsigned_integer":
+        if (
+            meas["data format"] == 0
+            or meas["data format"] == "unsigned_integer"
+        ):
             value = parse_uint(meas["measurement data"], meas_factor)
-        elif meas["data format"] == 1 or meas["data format"] == "signed_integer":
+        elif (
+            meas["data format"] == 1 or meas["data format"] == "signed_integer"
+        ):
             value = parse_int(meas["measurement data"], meas_factor)
         elif meas["data format"] == 2 or meas["data format"] == "float":
             value = parse_float(meas["measurement data"], meas_factor)
@@ -320,7 +332,7 @@ def parse_payload(self, payload, sw_version):
             _LOGGER.info(
                 "BLE ADV from BTHome DEVICE: MAC: %s, ADV: %s",
                 to_mac(self.mac),
-                payload.hex()
+                payload.hex(),
             )
         return None
 
@@ -343,13 +355,15 @@ def parse_payload(self, payload, sw_version):
     else:
         self.packet_id = "no packet id"
 
-    result.update({
-        "mac": to_unformatted_mac(self.mac),
-        "packet": self.packet_id,
-        "type": self.device_type,
-        "firmware": self.firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(self.mac),
+            "packet": self.packet_id,
+            "type": self.device_type,
+            "firmware": self.firmware,
+            "data": True,
+        }
+    )
     return result
 
 
@@ -357,17 +371,24 @@ def decrypt_data(self, data: bytes, sw_version: int):
     """Decrypt encrypted BTHome advertisements"""
     # check for minimum length of encrypted advertisement
     if len(data) < (15 if sw_version == 1 else 14):
-        _LOGGER.debug("Invalid data length (for decryption), adv: %s", data.hex())
+        _LOGGER.debug(
+            "Invalid data length (for decryption), adv: %s", data.hex()
+        )
     # try to find encryption key for current device
     try:
         key = self.aeskeys[self.mac]
         if len(key) != 16:
-            _LOGGER.error("Encryption key should be 16 bytes (32 characters) long")
+            _LOGGER.error(
+                "Encryption key should be 16 bytes (32 characters) long"
+            )
             return None, None
     except KeyError:
         # no encryption key found
         if self.mac not in self.no_key_message:
-            _LOGGER.error("No encryption key found for device with MAC %s", to_mac(self.mac))
+            _LOGGER.error(
+                "No encryption key found for device with MAC %s",
+                to_mac(self.mac),
+            )
             self.no_key_message.append(self.mac)
         return None, None
 

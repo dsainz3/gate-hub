@@ -1,4 +1,5 @@
 """Parser for KKM beacon BLE advertisements"""
+
 import logging
 import math
 from struct import unpack
@@ -18,9 +19,19 @@ def parse_kkm(self, data: bytes, mac: bytes):
     }
     if len(data) == 19:
         # K6 Sensor Beacon
-        (frame_type, version, control_byte, volt, temp, temp_frac, humi, humi_frac, accx, accy, accz) = unpack(
-            ">BBBHbBBBhhh", data[4:19]
-        )
+        (
+            frame_type,
+            version,
+            control_byte,
+            volt,
+            temp,
+            temp_frac,
+            humi,
+            humi_frac,
+            accx,
+            accy,
+            accz,
+        ) = unpack(">BBBHbBBBhhh", data[4:19])
         if frame_type == 0x21 and version == 1:
             temperature = temp + temp_frac / 256
             humidity = humi + humi_frac / 256
@@ -28,7 +39,9 @@ def parse_kkm(self, data: bytes, mac: bytes):
                 {
                     "temperature": temperature,
                     "humidity": humidity,
-                    "acceleration": round(math.sqrt(accx ** 2 + accy ** 2 + accz ** 2), 1),
+                    "acceleration": round(
+                        math.sqrt(accx**2 + accy**2 + accz**2), 1
+                    ),
                     "acceleration x": accx,
                     "acceleration y": accy,
                     "acceleration z": accz,

@@ -1,9 +1,11 @@
 """The tests for the Teltonika ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestTeltonika:
     """Tests for the Teltonica parser"""
+
     def test_blue_puck_T(self):
         """Test Teltonika parser for Blue Puck T."""
         data_string = "043e1e02010001e7e193546ec61202010605166e2a860b08095055434b5f5431dd"

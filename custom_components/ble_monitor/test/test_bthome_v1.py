@@ -1,12 +1,16 @@
 """The tests for the BTHome (DIY sensor) ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestBTHome:
     """Tests for the BTHome (DIY sensor) parser"""
+
     def test_bthome_packet_and_battery(self):
         """Test BTHome parser for battery measurement and packet number"""
-        data_string = "043E1902010000A5808FE648540D02010609161C18020009020161CC"
+        data_string = (
+            "043E1902010000A5808FE648540D02010609161C18020009020161CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -23,7 +27,9 @@ class TestBTHome:
 
     def test_bthome_temperature_and_humidity(self):
         """Test BTHome parser for temperature and humidity measurement"""
-        data_string = "043E1B02010000A5808FE648540F0201060B161C182302CA090303BF13CC"
+        data_string = (
+            "043E1B02010000A5808FE648540F0201060B161C182302CA090303BF13CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -52,7 +58,9 @@ class TestBTHome:
         allow_list = self.aeskeys.keys()
 
         # pylint: disable=unused-variable
-        ble_parser = BleParser(aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list)
+        ble_parser = BleParser(
+            aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list
+        )
         sensor_msg, tracker_msg = ble_parser.parse_raw_data(data)
 
         assert sensor_msg["firmware"] == "BTHome V1 (encrypted)"
@@ -66,7 +74,9 @@ class TestBTHome:
 
     def test_bthome_pressure(self):
         """Test BTHome parser for pressure measurement"""
-        data_string = "043E1B02010000A5808FE648540F0201060B161C1802000C0404138A01DC"
+        data_string = (
+            "043E1B02010000A5808FE648540F0201060B161C1802000C0404138A01DC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -185,7 +195,9 @@ class TestBTHome:
 
     def test_bthome_pm(self):
         """Test BTHome parser for PM2.5 and PM10 measurement"""
-        data_string = "043E1B02010000A5808FE648540F0201060B161C18030D120C030E021CDC"
+        data_string = (
+            "043E1B02010000A5808FE648540F0201060B161C18030D120C030E021CDC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable

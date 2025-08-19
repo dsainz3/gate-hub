@@ -1,9 +1,11 @@
 """The tests for the Hörmann ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestHormann:
     """Tests for the Hörmann parser"""
+
     def test_hormann_closed(self):
         """Test Air Mentor parser for Hörmann Supramatic E4 BS (closed)."""
         data_string = "043e4002010201da060f38c1a4340201061107B3585540506011E38F96080001909A6609FFB40701022D20000014FFB407140000000000000000efbbafa9d1a73b04CC"

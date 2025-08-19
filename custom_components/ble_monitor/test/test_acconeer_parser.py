@@ -1,9 +1,11 @@
 """The tests for the Acconeer ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestAcconeer:
     """Tests for the Acconeer parser"""
+
     def test_acconeer_xm122(self):
         """Test acconeer parser for Acconeer XM122."""
         data_string = "043e22020103013412b69009e01602010612ffc0ac806400160001000000000000000000c2"
@@ -24,7 +26,6 @@ class TestAcconeer:
         assert sensor_msg["motion"] == 1
         assert sensor_msg["rssi"] == -62
 
-
     def test_acconeer_xm126(self):
         """Test acconeer parser for Acconeer XM126."""
         data_string = "043e22020103013412b69009e01602010612ffc0ac916400160001000000000000000000c2"
@@ -44,7 +45,6 @@ class TestAcconeer:
         assert sensor_msg["temperature"] == 22
         assert sensor_msg["motion"] == 1
         assert sensor_msg["rssi"] == -62
-
 
     def test_acconeer_xm126_distance(self):
         """Test acconeer parser for Acconeer XM126 Distance."""

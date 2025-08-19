@@ -1,34 +1,68 @@
-﻿---
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+﻿repos:
+  # FORMAT: Prettier (YAML only, alpha tag per your request)
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-        args: [--fix=lf]
+      - id: prettier
+        files: '\.(ya?ml)$'
+
+  # HYGIENE + YAML parse (skip HA tags/dirs)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
       - id: check-yaml
-        exclude: (^blueprints/|^configuration\.yaml$)
-      - id: check-added-large-files
+        exclude: >
+          (?x)^(
+            configuration\.ya?ml|
+            blueprints/.*\.ya?ml|
+            custom_components/.*\.ya?ml|
+            zigbee2mqtt/.*\.ya?ml|
+            themes/.*\.ya?ml|
+            node_modules/.*\.ya?ml
+          )$
+      - id: end-of-file-fixer
+        exclude: >
+          (?x)^(
+            node_modules/|
+            \.cache/|
+            \.git/
+          )
+      - id: trailing-whitespace
+        exclude: >
+          (?x)^(
+            node_modules/|
+            \.cache/|
+            \.git/
+          )
+
+  # LINT: yamllint (HA-friendly rules assumed in .yamllint.yml)
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.37.1
     hooks:
       - id: yamllint
-        args: ["-c", ".yamllint.yml"]
-        files: \.(yaml|yml)$
+        args: ["-c", ".yamllint.yml", "."]
+
+  # PYTHON FORMAT: Black — only run on "our" code (adjust paths as needed)
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.8.0
     hooks:
       - id: black
+        files: >-
+          ^(scripts/|tools/|custom_components/huskers/).*\.py$
+        # If you don't yet have those dirs, you can temporarily disable by narrowing further.
+
+  # PYTHON LINT: Flake8 — exclude third-party integrations
   - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
+    rev: 7.1.1
     hooks:
       - id: flake8
-  - repo: local
-    hooks:
-      - id: hass-config-check
-        name: hass config check
-        entry: poetry run hass --script check_config
-        language: system
-        pass_filenames: false
-        files: ^configuration\.yaml$
+        files: '\.py$'
+        exclude: >
+          (?x)^(
+            custom_components/(ble_monitor|hacs|teamtracker|wundergroundpws|tplink_router)/
+            | custom_components/.*/tests?/
+            | node_modules/
+          )
+        additional_dependencies:
+          - flake8-bugbear==24.4.26
+          - flake8-builtins==2.5.0

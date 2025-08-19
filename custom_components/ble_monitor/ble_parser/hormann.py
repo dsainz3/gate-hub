@@ -1,4 +1,5 @@
 """Parser for Hormann BLE advertisements"""
+
 import logging
 
 from .helpers import to_mac, to_unformatted_mac
@@ -18,7 +19,7 @@ def parse_hormann(self, data: str, mac: bytes):
     while data_size > 1:
         packet_size = data[packet_start] + 1
         if packet_size > 1 and packet_size <= data_size:
-            packet = data[packet_start:packet_start + packet_size]
+            packet = data[packet_start : packet_start + packet_size]
             packet_type = packet[1]
 
             if packet_type == 0xFF and packet_size == 21:
@@ -50,14 +51,16 @@ def parse_hormann(self, data: str, mac: bytes):
                 "BLE ADV from UNKNOWN Hormann DEVICE: MAC: %s, DEVICE TYPE: %s, ADV: %s",
                 to_mac(mac),
                 device_type,
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "data": True,
+        }
+    )
     return result

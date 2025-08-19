@@ -1,4 +1,5 @@
 """ Home Assistant sensor processing """
+
 import logging
 from typing import Any
 
@@ -46,7 +47,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ),
         vol.Required(CONF_TEAM_ID): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_CONFERENCE_ID, default=DEFAULT_CONFERENCE_ID): cv.string,
+        vol.Optional(
+            CONF_CONFERENCE_ID, default=DEFAULT_CONFERENCE_ID
+        ): cv.string,
         vol.Optional(CONF_API_LANGUAGE): cv.string,
         vol.Optional(CONF_SPORT_PATH): cv.string,
         vol.Optional(CONF_LEAGUE_PATH): cv.string,
@@ -65,7 +68,7 @@ async def async_setup_platform(
 
     _LOGGER.info(
         "%s: Setting up sensor from YAML using TeamTracker %s, if you have any issues please report them here: %s",
-        sensor_name, 
+        sensor_name,
         VERSION,
         ISSUE_URL,
     )
@@ -74,8 +77,15 @@ async def async_setup_platform(
     try:
         vol.In(league_ids)(config[CONF_LEAGUE_ID])
     except vol.Invalid:
-        _LOGGER.warning("%s: `league_id` must be valid (one of %s)", sensor_name, league_ids)
-        _LOGGER.error("%s: Support for invalid `league_id` in YAML was deprecated in v0.7.6.  Correct config prior to next upgrade.", sensor_name)
+        _LOGGER.warning(
+            "%s: `league_id` must be valid (one of %s)",
+            sensor_name,
+            league_ids,
+        )
+        _LOGGER.error(
+            "%s: Support for invalid `league_id` in YAML was deprecated in v0.7.6.  Correct config prior to next upgrade.",
+            sensor_name,
+        )
         async_create(
             hass,
             f"{sensor_name} Error: `league_id` must be valid (one of {league_ids})",
@@ -89,11 +99,11 @@ async def async_setup_platform(
     if config[CONF_LEAGUE_ID] == "XXX" and not (
         CONF_SPORT_PATH in config and CONF_LEAGUE_PATH in config
     ):
-        error_msg = (
-            "Must specify sport and league path for custom league (league_id = XXX)"
-        )
+        error_msg = "Must specify sport and league path for custom league (league_id = XXX)"
         _LOGGER.warning("%s: %s", sensor_name, error_msg)
-        async_create(hass, f"{sensor_name} Error: {error_msg}", "Team Tracker", DOMAIN)
+        async_create(
+            hass, f"{sensor_name} Error: {error_msg}", "Team Tracker", DOMAIN
+        )
         return
 
     league_id = config[CONF_LEAGUE_ID].upper()
@@ -130,7 +140,9 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Setup sensors from a config entry created in the integrations UI."""
 
@@ -138,7 +150,7 @@ async def async_setup_entry(
 
     _LOGGER.info(
         "%s: Updating sensor from UI using TeamTracker %s, if you have any issues please report them here: %s",
-        sensor_name, 
+        sensor_name,
         VERSION,
         ISSUE_URL,
     )
@@ -154,7 +166,9 @@ async def async_setup_entry(
 class TeamTrackerScoresSensor(CoordinatorEntity):
     """Representation of a Sensor."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, config: ConfigType) -> None:
+    def __init__(
+        self, hass: HomeAssistant, entry: ConfigEntry, config: ConfigType
+    ) -> None:
         """Initialize the sensor."""
 
         if entry is not None:  # GUI setup, use entry_id as index
@@ -163,7 +177,7 @@ class TeamTrackerScoresSensor(CoordinatorEntity):
             super().__init__(sensor_coordinator)
             sport_path = entry.data.get(CONF_SPORT_PATH, DEFAULT_SPORT_PATH)
             sensor_name = entry.data[CONF_NAME]
-            
+
         else:  # YAML setup, use sensor_name as index (assumes sensor_name = entity_id)
             sensor_name = config[CONF_NAME]
             entry_id = slugify(f"{config.get(CONF_TEAM_ID)}")
@@ -332,23 +346,31 @@ class TeamTrackerScoresSensor(CoordinatorEntity):
         attrs["team_id"] = self.coordinator.data["team_id"]
         attrs["team_record"] = self.coordinator.data["team_record"]
         attrs["team_rank"] = self.coordinator.data["team_rank"]
-        attrs["team_conference_id"] = self.coordinator.data["team_conference_id"]
+        attrs["team_conference_id"] = self.coordinator.data[
+            "team_conference_id"
+        ]
         attrs["team_homeaway"] = self.coordinator.data["team_homeaway"]
         attrs["team_logo"] = self.coordinator.data["team_logo"]
         attrs["team_url"] = self.coordinator.data["team_url"]
         attrs["team_colors"] = self.coordinator.data["team_colors"]
         #        attrs["team_colors_rbg"] = self.colors2rgb(self.coordinator.data["team_colors"])
         attrs["team_score"] = self.coordinator.data["team_score"]
-        attrs["team_win_probability"] = self.coordinator.data["team_win_probability"]
+        attrs["team_win_probability"] = self.coordinator.data[
+            "team_win_probability"
+        ]
         attrs["team_winner"] = self.coordinator.data["team_winner"]
         attrs["team_timeouts"] = self.coordinator.data["team_timeouts"]
 
         attrs["opponent_name"] = self.coordinator.data["opponent_name"]
-        attrs["opponent_long_name"] = self.coordinator.data["opponent_long_name"]
+        attrs["opponent_long_name"] = self.coordinator.data[
+            "opponent_long_name"
+        ]
         attrs["opponent_id"] = self.coordinator.data["opponent_id"]
         attrs["opponent_record"] = self.coordinator.data["opponent_record"]
         attrs["opponent_rank"] = self.coordinator.data["opponent_rank"]
-        attrs["opponent_conference_id"] = self.coordinator.data["opponent_conference_id"]
+        attrs["opponent_conference_id"] = self.coordinator.data[
+            "opponent_conference_id"
+        ]
         attrs["opponent_homeaway"] = self.coordinator.data["opponent_homeaway"]
         attrs["opponent_logo"] = self.coordinator.data["opponent_logo"]
         attrs["opponent_url"] = self.coordinator.data["opponent_url"]
@@ -358,16 +380,16 @@ class TeamTrackerScoresSensor(CoordinatorEntity):
         attrs["opponent_win_probability"] = self.coordinator.data[
             "opponent_win_probability"
         ]
-        attrs["opponent_winner"] = self.coordinator.data[
-            "opponent_winner"
-        ]
+        attrs["opponent_winner"] = self.coordinator.data["opponent_winner"]
         attrs["opponent_timeouts"] = self.coordinator.data["opponent_timeouts"]
 
         attrs["quarter"] = self.coordinator.data["quarter"]
         attrs["clock"] = self.coordinator.data["clock"]
         attrs["possession"] = self.coordinator.data["possession"]
         attrs["last_play"] = self.coordinator.data["last_play"]
-        attrs["down_distance_text"] = self.coordinator.data["down_distance_text"]
+        attrs["down_distance_text"] = self.coordinator.data[
+            "down_distance_text"
+        ]
 
         attrs["outs"] = self.coordinator.data["outs"]
         attrs["balls"] = self.coordinator.data["balls"]
@@ -376,12 +398,16 @@ class TeamTrackerScoresSensor(CoordinatorEntity):
         attrs["on_second"] = self.coordinator.data["on_second"]
         attrs["on_third"] = self.coordinator.data["on_third"]
 
-        attrs["team_shots_on_target"] = self.coordinator.data["team_shots_on_target"]
+        attrs["team_shots_on_target"] = self.coordinator.data[
+            "team_shots_on_target"
+        ]
         attrs["team_total_shots"] = self.coordinator.data["team_total_shots"]
         attrs["opponent_shots_on_target"] = self.coordinator.data[
             "opponent_shots_on_target"
         ]
-        attrs["opponent_total_shots"] = self.coordinator.data["opponent_total_shots"]
+        attrs["opponent_total_shots"] = self.coordinator.data[
+            "opponent_total_shots"
+        ]
 
         attrs["team_sets_won"] = self.coordinator.data["team_sets_won"]
         attrs["opponent_sets_won"] = self.coordinator.data["opponent_sets_won"]

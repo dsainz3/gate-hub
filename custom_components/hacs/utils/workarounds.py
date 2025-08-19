@@ -21,6 +21,7 @@ try:
         await hass.http.async_register_static_paths(
             [StaticPathConfig(url_path, path, cache_headers)]
         )
+
 except ImportError:
 
     async def async_register_static_path(

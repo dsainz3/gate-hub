@@ -1,4 +1,5 @@
 """Parser for Acconeer BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -26,29 +27,27 @@ def parse_acconeer(self, data: bytes, mac: bytes):
         device_type = ACCONEER_SENSOR_IDS[device_id]
 
         if device_id == 0x90:
-            (
-                battery_level,
-                temperature,
-                distance_mm,
-                reserved2
-            ) = unpack("<HhHQ", xvalue)
-            result.update({
-                "distance mm": distance_mm,
-                "temperature": temperature,
-                "battery": battery_level,
-            })
+            (battery_level, temperature, distance_mm, reserved2) = unpack(
+                "<HhHQ", xvalue
+            )
+            result.update(
+                {
+                    "distance mm": distance_mm,
+                    "temperature": temperature,
+                    "battery": battery_level,
+                }
+            )
         else:
-            (
-                battery_level,
-                temperature,
-                presence,
-                reserved2
-            ) = unpack("<HhHQ", xvalue)
-            result.update({
-                "motion": 0 if presence == 0 else 1,
-                "temperature": temperature,
-                "battery": battery_level,
-            })
+            (battery_level, temperature, presence, reserved2) = unpack(
+                "<HhHQ", xvalue
+            )
+            result.update(
+                {
+                    "motion": 0 if presence == 0 else 1,
+                    "temperature": temperature,
+                    "battery": battery_level,
+                }
+            )
     else:
         device_type = None
 
@@ -57,7 +56,7 @@ def parse_acconeer(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Acconeer DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
@@ -74,11 +73,13 @@ def parse_acconeer(self, data: bytes, mac: bytes):
             return None
     self.lpacket_ids[mac] = packet_id
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": packet_id,
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": packet_id,
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

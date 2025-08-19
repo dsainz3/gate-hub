@@ -1,9 +1,11 @@
 """The tests for the Relsib ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestRelsib:
     """Tests for the Relsib parser"""
+
     def test_relsib_AA20(self):
         """Test Relsib parser for AA20 packet type."""
         data_string = "043e2b0201030130ddf27cb6fa1f040945436f191620aa84000000b20a200a15030080f04700c2eb0b010b0300c2"

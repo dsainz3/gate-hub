@@ -1,9 +1,11 @@
 """The tests for the HolyIOT ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestHolyIOT:
     """Tests for the HolyIOT parser"""
+
     def test_holyiot_temperature(self):
         """Test HolyIOT parser for BLE tracker mini."""
         data_string = "043e49020102018ef1f645b5c63d0201061AFF4C0002159976AED5F58C49AF85EBD0AC7281E3F6271B4CB9240D0962696E2D747261636B657200101642524164C6B545F6F18E060601ED25CC"

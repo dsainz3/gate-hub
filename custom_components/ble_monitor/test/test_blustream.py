@@ -1,9 +1,11 @@
 """The tests for the Blustream ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestBlustream:
     """Tests for the TestBlustream parser"""
+
     def test_blustream_taylorsense(self):
         """Test Blustream parser for Blustream."""
         data_string = "043E3102010000DEF902101A0C250201060CFF940101DEF902BE0FF107D0020AFE11067126001F369264BCE6115BFC365D9302DE"

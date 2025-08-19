@@ -1,4 +1,5 @@
 """Parser for Relsib EClerk-Eco-RHTC BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -27,7 +28,7 @@ def parse_relsib(self, data: bytes, mac: bytes):
         # Device is sending placeholder when sensor is not ready
         nan = 0x8000
 
-        (temp, humi, co2) = unpack("<HHH", data[xdata_point:xdata_point + 6])
+        (temp, humi, co2) = unpack("<HHH", data[xdata_point : xdata_point + 6])
         if temp != nan:
             result.update({"temperature": temp / 100})
         if humi != nan:
@@ -46,15 +47,23 @@ def parse_relsib(self, data: bytes, mac: bytes):
     elif uuid16 in [0x1809] and msg_length == 20:
         device_type = "WH52"
         try:
-            temp = round((int.from_bytes(data[4:6], byteorder='big') / 65535) * 175 - 45, 2)
-            humi = round((int.from_bytes(data[10:12], byteorder='big') / 65535) * 175 - 45, 2)
+            temp = round(
+                (int.from_bytes(data[4:6], byteorder="big") / 65535) * 175
+                - 45,
+                2,
+            )
+            humi = round(
+                (int.from_bytes(data[10:12], byteorder="big") / 65535) * 175
+                - 45,
+                2,
+            )
             result.update({"temperature": temp, "humidity": humi})
         except ValueError:
             device_type = None
     elif uuid16 in [0x1809] and msg_length == 10:
         device_type = "WT51"
         try:
-            temp = (float(data[4:].decode("utf-8")))
+            temp = float(data[4:].decode("utf-8"))
             result.update({"temperature": temp})
         except ValueError:
             device_type = None
@@ -65,12 +74,9 @@ def parse_relsib(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Relsib DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "type": device_type,
-        "data": True
-    })
+    result.update({"type": device_type, "data": True})
     return result

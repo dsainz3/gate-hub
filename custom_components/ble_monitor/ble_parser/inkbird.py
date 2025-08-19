@@ -1,4 +1,5 @@
 """Parser for Inkbird BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -36,7 +37,7 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
             _LOGGER.error(
                 "Inkbird is reporting different probe number. Please report the "
                 "following data to the developers. data: %s ",
-                data.hex()
+                data.hex(),
             )
             return None
 
@@ -56,7 +57,7 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
         if mac not in [inkbird_mac, inkbird_mac[::-1]]:
             _LOGGER.debug(
                 "Inkbird MAC address doesn't match data MAC address. Data: %s",
-                data.hex()
+                data.hex(),
             )
             return None
         (temp_1,) = unpack("<h", xvalue)
@@ -72,7 +73,7 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
         if mac not in [inkbird_mac, inkbird_mac[::-1]]:
             _LOGGER.debug(
                 "Inkbird MAC address doesn't match data MAC address. Data: %s",
-                data.hex()
+                data.hex(),
             )
             return None
         (temp_1, temp_2) = unpack("<HH", xvalue)
@@ -88,7 +89,7 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
         if mac not in [inkbird_mac, inkbird_mac[::-1]]:
             _LOGGER.debug(
                 "Inkbird MAC address doesn't match data MAC address. Data: %s",
-                data.hex()
+                data.hex(),
             )
             return None
         device_type = "iBBQ-4"
@@ -105,10 +106,15 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
         inkbird_mac = data[6:12]
         xvalue = data[12:24]
         if mac not in [inkbird_mac, inkbird_mac[::-1]]:
-            _LOGGER.debug("Inkbird MAC address doesn't match data MAC address. Data: %s", data.hex())
+            _LOGGER.debug(
+                "Inkbird MAC address doesn't match data MAC address. Data: %s",
+                data.hex(),
+            )
             return None
         device_type = "iBBQ-6"
-        (temp_1, temp_2, temp_3, temp_4, temp_5, temp_6) = unpack("<hhhhhh", xvalue)
+        (temp_1, temp_2, temp_3, temp_4, temp_5, temp_6) = unpack(
+            "<hhhhhh", xvalue
+        )
         result.update(
             {
                 "temperature probe 1": convert_temperature(temp_1),
@@ -124,15 +130,17 @@ def parse_inkbird(self, data: bytes, complete_local_name: str, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Inkbird DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

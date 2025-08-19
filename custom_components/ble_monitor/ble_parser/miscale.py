@@ -1,4 +1,5 @@
 """Parser for Xiaomi Mi Scale BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -23,18 +24,20 @@ def parse_miscale(self, data: bytes, mac: bytes):
 
         if control_byte & (1 << 0):
             weight = weight / 100
-            weight_unit = 'lbs'
+            weight_unit = "lbs"
         elif control_byte & (1 << 4):
             weight = weight / 100
-            weight_unit = 'jin'
+            weight_unit = "jin"
         else:
             weight = weight / 200
-            weight_unit = 'kg'
+            weight_unit = "kg"
 
     elif msg_length == 17 and uuid16 == 0x181B:  # Mi Scale V2
         device_type = "Mi Scale V2"
         xvalue = data[4:]
-        (control_byte_1, control_byte_2, impedance, weight) = unpack("<BB7xHH", xvalue)
+        (control_byte_1, control_byte_2, impedance, weight) = unpack(
+            "<BB7xHH", xvalue
+        )
         has_impedance = control_byte_2 & (1 << 1)
         is_stabilized = control_byte_2 & (1 << 5)
         weight_removed = control_byte_2 & (1 << 7)
@@ -63,7 +66,7 @@ def parse_miscale(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Mi Scale DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
@@ -71,7 +74,7 @@ def parse_miscale(self, data: bytes, mac: bytes):
         "non-stabilized weight": weight,
         "weight unit": weight_unit,
         "weight removed": 0 if weight_removed == 0 else 1,
-        "stabilized": 0 if is_stabilized == 0 else 1
+        "stabilized": 0 if is_stabilized == 0 else 1,
     }
 
     if device_type == "Mi Scale V1":
@@ -105,11 +108,13 @@ def parse_miscale(self, data: bytes, mac: bytes):
             # ignore first message after a restart
             return None
 
-    result.update({
-        "type": device_type,
-        "firmware": firmware,
-        "mac": to_unformatted_mac(mac),
-        "packet": packet_id,
-        "data": True,
-    })
+    result.update(
+        {
+            "type": device_type,
+            "firmware": firmware,
+            "mac": to_unformatted_mac(mac),
+            "packet": packet_id,
+            "data": True,
+        }
+    )
     return result

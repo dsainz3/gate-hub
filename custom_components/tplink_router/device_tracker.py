@@ -20,9 +20,9 @@ MAC_ADDR: TypeAlias = str
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
     tracked: dict[MAC_ADDR, TPLinkTracker] = {}
@@ -38,9 +38,9 @@ async def async_setup_entry(
 
 @callback
 def update_items(
-        coordinator: TPLinkRouterCoordinator,
-        async_add_entities: AddEntitiesCallback,
-        tracked: dict[MAC_ADDR, TPLinkTracker],
+    coordinator: TPLinkRouterCoordinator,
+    async_add_entities: AddEntitiesCallback,
+    tracked: dict[MAC_ADDR, TPLinkTracker],
 ) -> None:
     """Update tracked device state from the hub."""
     new_tracked: list[TPLinkTracker] = []
@@ -52,13 +52,27 @@ def update_items(
             tracked[device.macaddr] = TPLinkTracker(coordinator, device)
             new_tracked.append(tracked[device.macaddr])
             if fire_event:
-                coordinator.hass.bus.fire(EVENT_NEW_DEVICE, tracked[device.macaddr].data)
+                coordinator.hass.bus.fire(
+                    EVENT_NEW_DEVICE, tracked[device.macaddr].data
+                )
         else:
             tracked[device.macaddr].device = device
-            if fire_event and not tracked[device.macaddr].active and device.active:
-                coordinator.hass.bus.fire(EVENT_ONLINE, tracked[device.macaddr].data)
-            if fire_event and tracked[device.macaddr].active and not device.active:
-                coordinator.hass.bus.fire(EVENT_OFFLINE, tracked[device.macaddr].data)
+            if (
+                fire_event
+                and not tracked[device.macaddr].active
+                and device.active
+            ):
+                coordinator.hass.bus.fire(
+                    EVENT_ONLINE, tracked[device.macaddr].data
+                )
+            if (
+                fire_event
+                and tracked[device.macaddr].active
+                and not device.active
+            ):
+                coordinator.hass.bus.fire(
+                    EVENT_OFFLINE, tracked[device.macaddr].data
+                )
         tracked[device.macaddr].active = device.active
 
     if new_tracked:
@@ -74,9 +88,9 @@ class TPLinkTracker(CoordinatorEntity, ScannerEntity):
     """Representation of network device."""
 
     def __init__(
-            self,
-            coordinator: TPLinkRouterCoordinator,
-            data: Device,
+        self,
+        coordinator: TPLinkRouterCoordinator,
+        data: Device,
     ) -> None:
         """Initialize the tracked device."""
         self.device = data
@@ -97,7 +111,11 @@ class TPLinkTracker(CoordinatorEntity, ScannerEntity):
     @property
     def name(self) -> str:
         """Return the name of the client."""
-        return self.device.hostname if self.device.hostname != '' else self.device.macaddr
+        return (
+            self.device.hostname
+            if self.device.hostname != ""
+            else self.device.macaddr
+        )
 
     @property
     def hostname(self) -> str:
@@ -127,23 +145,29 @@ class TPLinkTracker(CoordinatorEntity, ScannerEntity):
     @property
     def extra_state_attributes(self) -> dict[str, str]:
         attributes = {
-            'connection': self.device.type.get_type(),
-            'band': self.device.type.get_band(),
-            'packets_sent': self.device.packets_sent,
-            'packets_received': self.device.packets_received
+            "connection": self.device.type.get_type(),
+            "band": self.device.type.get_band(),
+            "packets_sent": self.device.packets_sent,
+            "packets_received": self.device.packets_received,
         }
-        if self.device.down_speed is not None or self.device.up_speed is not None:
-            attributes['up_speed'] = self.device.up_speed
-            attributes['down_speed'] = self.device.down_speed
+        if (
+            self.device.down_speed is not None
+            or self.device.up_speed is not None
+        ):
+            attributes["up_speed"] = self.device.up_speed
+            attributes["down_speed"] = self.device.down_speed
         return attributes
 
     @property
     def data(self) -> dict[str, str]:
-        return dict(self.extra_state_attributes.items() | {
-            'hostname': self.hostname,
-            'ip_address': self.ip_address,
-            'mac_address': self.mac_address,
-        }.items())
+        return dict(
+            self.extra_state_attributes.items()
+            | {
+                "hostname": self.hostname,
+                "ip_address": self.ip_address,
+                "mac_address": self.mac_address,
+            }.items()
+        )
 
     @property
     def entity_registry_enabled_default(self) -> bool:

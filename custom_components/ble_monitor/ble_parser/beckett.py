@@ -171,7 +171,9 @@ def unwrap_mfg_data(mfg_data: bytes) -> Optional[BeckettMfgData]:
     )
 
 
-def _parse_legacy_genisys_state(info: BeckettMfgData) -> Optional[BeckettMfgData]:
+def _parse_legacy_genisys_state(
+    info: BeckettMfgData,
+) -> Optional[BeckettMfgData]:
     if info.product_id == BeckettProductKey.LegacyGenisys:
         raw = info.raw_data
         state = int.from_bytes(bytes(raw[4:6]), "big")
@@ -232,8 +234,10 @@ def parse_beckett(self, data: str, mac: bytes):
             }
         )
     except Exception:
-        _LOGGER.warning("Error parsing Beckett manufacturer data:", exc_info=True)
-        #raise
+        _LOGGER.warning(
+            "Error parsing Beckett manufacturer data:", exc_info=True
+        )
+        # raise
         return None
 
     #### BOILERPLATE

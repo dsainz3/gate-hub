@@ -58,7 +58,9 @@ class GoveeLearningStorage(GoveeAbstractLearningStorage):
 
     async def write(self, learned_info):
         """Save to yaml file."""
-        leaned_dict = {device: asdict(learned_info[device]) for device in learned_info}
+        leaned_dict = {
+            device: asdict(learned_info[device]) for device in learned_info
+        }
         save_yaml(self._config_dir + LEARNING_STORAGE_YAML, leaned_dict)
         _LOGGER.info(
             "Stored learning information to %s.",

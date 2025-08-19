@@ -16,28 +16,40 @@ async def async_set_soccer_values(
     oppoPP = None
 
     oppo_index = 1 - team_index
-    competition = await async_get_value(event, "competitions", competition_index)
+    competition = await async_get_value(
+        event, "competitions", competition_index
+    )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
     if competition is None or competitor is None or opponent is None:
-        _LOGGER.debug("%s: async_set_soccer_values() 0: %s", sensor_name, sensor_name)
+        _LOGGER.debug(
+            "%s: async_set_soccer_values() 0: %s", sensor_name, sensor_name
+        )
         return False
 
     #    _LOGGER.debug("%s: async_set_soccer_values() 1: %s", sensor_name, sensor_name)
 
     new_values["team_shots_on_target"] = 0
     new_values["team_total_shots"] = 0
-    for statistic in await async_get_value(competitor, "statistics", default=[]):
-        if "shotsOnTarget" in await async_get_value(statistic, "name", default=[]):
+    for statistic in await async_get_value(
+        competitor, "statistics", default=[]
+    ):
+        if "shotsOnTarget" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             new_values["team_shots_on_target"] = await async_get_value(
                 statistic, "displayValue"
             )
-        if "totalShots" in await async_get_value(statistic, "name", default=[]):
+        if "totalShots" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             new_values["team_total_shots"] = await async_get_value(
                 statistic, "displayValue"
             )
-        if "possessionPct" in await async_get_value(statistic, "name", default=[]):
+        if "possessionPct" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             teamPP = await async_get_value(statistic, "displayValue")
 
     #    _LOGGER.debug("%s: async_set_soccer_values() 2: %s", sensor_name, sensor_name)
@@ -45,15 +57,21 @@ async def async_set_soccer_values(
     new_values["opponent_shots_on_target"] = 0
     new_values["opponent_total_shots"] = 0
     for statistic in await async_get_value(opponent, "statistics", default=[]):
-        if "shotsOnTarget" in await async_get_value(statistic, "name", default=[]):
+        if "shotsOnTarget" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             new_values["opponent_shots_on_target"] = await async_get_value(
                 statistic, "displayValue"
             )
-        if "totalShots" in await async_get_value(statistic, "name", default=[]):
+        if "totalShots" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             new_values["opponent_total_shots"] = await async_get_value(
                 statistic, "displayValue"
             )
-        if "possessionPct" in await async_get_value(statistic, "name", default=[]):
+        if "possessionPct" in await async_get_value(
+            statistic, "name", default=[]
+        ):
             oppoPP = await async_get_value(statistic, "displayValue")
 
     #    _LOGGER.debug("%s: async_set_soccer_values() 3: %s", sensor_name, sensor_name)
@@ -74,7 +92,9 @@ async def async_set_soccer_values(
         event, "competitions", 0, "details", default=[]
     ):
         try:
-            mls_team_id = await async_get_value(detail, "team", "id", default=0)
+            mls_team_id = await async_get_value(
+                detail, "team", "id", default=0
+            )
 
             new_values["last_play"] = (
                 new_values["last_play"]
@@ -86,7 +106,9 @@ async def async_set_soccer_values(
             new_values["last_play"] = (
                 new_values["last_play"]
                 + "  "
-                + await async_get_value(detail, "type", "text", default="{type}")
+                + await async_get_value(
+                    detail, "type", "text", default="{type}"
+                )
             )
             new_values["last_play"] = (
                 new_values["last_play"]
@@ -101,7 +123,10 @@ async def async_set_soccer_values(
             )
             if mls_team_id == new_values["team_id"]:
                 new_values["last_play"] = (
-                    new_values["last_play"] + " (" + new_values["team_abbr"] + ")"
+                    new_values["last_play"]
+                    + " ("
+                    + new_values["team_abbr"]
+                    + ")"
                 )
             else:
                 new_values["last_play"] = (

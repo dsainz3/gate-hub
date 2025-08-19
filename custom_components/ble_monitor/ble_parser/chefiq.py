@@ -1,4 +1,5 @@
 """Parser for Chef iQ BLE advertisements."""
+
 import logging
 from struct import unpack
 
@@ -15,9 +16,17 @@ def parse_chefiq(self, data: str, mac: bytes):
     if msg_length == 22:
         # Chef iQ CQ60
         device_type = "CQ60"
-        (batt, temp_probe_3, _, temp_meat, temp_tip, temp_probe_1, temp_probe_2, temp_ambient, _) = unpack(
-            "<BBHHHHHHh", msg
-        )
+        (
+            batt,
+            temp_probe_3,
+            _,
+            temp_meat,
+            temp_tip,
+            temp_probe_1,
+            temp_probe_2,
+            temp_ambient,
+            _,
+        ) = unpack("<BBHHHHHHh", msg)
         log_cnt = "no packet id"
         result = {
             "battery": batt,
@@ -33,15 +42,17 @@ def parse_chefiq(self, data: str, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Chef iQ DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": log_cnt,
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": log_cnt,
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result
