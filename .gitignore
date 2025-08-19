@@ -39,3 +39,8 @@ zigbee2mqtt/log/
 zigbee2mqtt/database.db
 zigbee2mqtt/database.db.backup
 zigbee2mqtt/*.lock
+
+# Vendor + Prettier caches
+node_modules/
+**/.prettier-caches/
+**/.cache/prettier/
