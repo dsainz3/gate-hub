@@ -1,25 +1,52 @@
-name: pre-commit
+name: CI
 
 on:
   pull_request:
   push:
-    branches: [main, develop, feature/*, chore/*]
+    branches:
+      - main
+      - develop
+      - feature/**
+      - chore/**
+      - fix/**
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  pre-commit:
+    name: Pre-commit hooks
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install pre-commit
         run: pip install pre-commit
 
-      - name: Run pre-commit checks
+      - name: Run pre-commit on all files
         run: pre-commit run --all-files --show-diff-on-failure
+
+  ha-config:
+    name: Home Assistant config check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # (Optional) If your config expects secrets, ensure an empty file exists so check_config doesn't fail
+      - name: Ensure secrets.yaml exists
+        run: |
+          if [ ! -f secrets.yaml ]; then
+            echo "# CI placeholder" > secrets.yaml
+          fi
+
+      # Validate HA configuration using the official action
+      - name: Run Home Assistant check_config
+        uses: frenck/action-home-assistant@v1
+        with:
+          path: "."
+          version: "2025.8.2"
