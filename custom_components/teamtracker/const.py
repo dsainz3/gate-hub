@@ -1,4 +1,4 @@
-""" Constants for teamtracker sensor"""
+"""Constants for teamtracker sensor"""
 
 from homeassistant.const import Platform
 from datetime import timedelta

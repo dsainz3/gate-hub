@@ -1,4 +1,4 @@
-""" Cricket specific functionality"""
+"""Cricket specific functionality"""
 
 import logging
 

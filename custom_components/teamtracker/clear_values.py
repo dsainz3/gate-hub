@@ -1,4 +1,4 @@
-""" Clear all sensor values """
+"""Clear all sensor values"""
 
 
 async def async_clear_values() -> dict:

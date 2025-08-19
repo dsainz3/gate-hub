@@ -1,4 +1,4 @@
-""" TeamTracker Team Status """
+"""TeamTracker Team Status"""
 
 import asyncio
 from datetime import date, datetime, timedelta, timezone

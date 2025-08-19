@@ -1,4 +1,4 @@
-""" Home Assistant sensor processing """
+"""Home Assistant sensor processing"""
 
 import logging
 from typing import Any

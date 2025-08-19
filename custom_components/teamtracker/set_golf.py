@@ -1,4 +1,4 @@
-""" Golf specific functionality"""
+"""Golf specific functionality"""
 
 import logging
 

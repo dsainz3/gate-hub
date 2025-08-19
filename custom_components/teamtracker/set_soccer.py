@@ -1,4 +1,4 @@
-""" Soccer specific functionality"""
+"""Soccer specific functionality"""
 
 import logging
 

@@ -1,4 +1,4 @@
-""" Racing specific functionality"""
+"""Racing specific functionality"""
 
 import logging
 

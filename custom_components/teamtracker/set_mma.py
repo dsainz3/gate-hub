@@ -1,4 +1,4 @@
-""" MMA specific functionality"""
+"""MMA specific functionality"""
 
 import logging
 

@@ -1,4 +1,4 @@
-""" Set non-sport specific values """
+"""Set non-sport specific values"""
 
 import codecs
 import logging
