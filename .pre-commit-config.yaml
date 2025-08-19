@@ -1,18 +1,29 @@
 ﻿repos:
-  # FORMAT: Prettier (YAML only, alpha tag per your request)
+  # FORMAT: Prettier (YAML only)
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         files: '\.(ya?ml)$'
+        # avoid Lovelace & vendor YAML (HA tags like !include break generic parsers)
+        exclude: >
+          (?x)^(
+            ui-lovelace/.*\.ya?ml|
+            blueprints/.*\.ya?ml|
+            custom_components/.*\.ya?ml|
+            zigbee2mqtt/.*\.ya?ml|
+            themes/.*\.ya?ml|
+            node_modules/.*\.ya?ml
+          )$
 
-  # HYGIENE + YAML parse (skip HA tags/dirs)
+  # HYGIENE + YAML parse (skip HA-tagged YAML)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: check-yaml
         exclude: >
           (?x)^(
+            ui-lovelace/.*\.ya?ml|
             configuration\.ya?ml|
             blueprints/.*\.ya?ml|
             custom_components/.*\.ya?ml|
@@ -21,37 +32,25 @@
             node_modules/.*\.ya?ml
           )$
       - id: end-of-file-fixer
-        exclude: >
-          (?x)^(
-            node_modules/|
-            \.cache/|
-            \.git/
-          )
+        exclude: '(node_modules/|\.cache/|\.git/)'
       - id: trailing-whitespace
-        exclude: >
-          (?x)^(
-            node_modules/|
-            \.cache/|
-            \.git/
-          )
+        exclude: '(node_modules/|\.cache/|\.git/)'
 
-  # LINT: yamllint (HA-friendly rules assumed in .yamllint.yml)
+  # LINT: yamllint (uses your .yamllint.yml)
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
     hooks:
       - id: yamllint
         args: ["-c", ".yamllint.yml", "."]
 
-  # PYTHON FORMAT: Black — only run on "our" code (adjust paths as needed)
+  # PY: Black (only your code paths, not vendor)
   - repo: https://github.com/psf/black
     rev: 24.8.0
     hooks:
       - id: black
-        files: >-
-          ^(scripts/|tools/|custom_components/huskers/).*\.py$
-        # If you don't yet have those dirs, you can temporarily disable by narrowing further.
+        files: '^(scripts/|tools/|custom_components/huskers/).*\.py$'
 
-  # PYTHON LINT: Flake8 — exclude third-party integrations
+  # PY: flake8 (exclude vendor)
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.1
     hooks:
@@ -66,3 +65,13 @@
         additional_dependencies:
           - flake8-bugbear==24.4.26
           - flake8-builtins==2.5.0
+
+  # HA config check (portable script you already have)
+  - repo: local
+    hooks:
+      - id: hass-config-check
+        name: Home Assistant config check (portable)
+        entry: bash scripts/hass_check.sh
+        language: system
+        types: [yaml]
+        pass_filenames: false

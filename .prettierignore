@@ -1,8 +1,5 @@
-node_modules/
-.git/
-.venv/
-.cache/
-www/
-zigbee2mqtt/
-themes/
-docs/addons/
+ui-lovelace/**
+blueprints/**
+custom_components/**/*.yaml
+zigbee2mqtt/**
+themes/**
