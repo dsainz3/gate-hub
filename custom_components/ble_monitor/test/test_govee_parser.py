@@ -1,12 +1,16 @@
 """The tests for the Govee ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestGovee:
     """Tests for the Govee parser"""
+
     def test_Govee_H5051(self):
         """Test Govee H5051 parser."""
-        data_string = "043e1902010400aabb615960e30d0cff88ec00ba0af90f63020101b7"
+        data_string = (
+            "043e1902010400aabb615960e30d0cff88ec00ba0af90f63020101b7"
+        )
         data = bytes(bytearray.fromhex(data_string))
         # pylint: disable=unused-variable
         ble_parser = BleParser()
@@ -192,7 +196,9 @@ class TestGovee:
 
     def test_Govee_H5179(self):
         """Test Govee H5179 parser."""
-        data_string = "043E19020104006F18128132E30D0CFF0188EC000101A00AA2175BB6"
+        data_string = (
+            "043E19020104006F18128132E30D0CFF0188EC000101A00AA2175BB6"
+        )
         data = bytes(bytearray.fromhex(data_string))
         # pylint: disable=unused-variable
         ble_parser = BleParser()

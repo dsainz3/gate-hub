@@ -15,7 +15,9 @@ async def async_set_mma_values(
     _LOGGER.debug("%s: async_set_mma_values() 1: %s", sensor_name, sensor_name)
 
     oppo_index = 1 - team_index
-    competition = await async_get_value(event, "competitions", competition_index)
+    competition = await async_get_value(
+        event, "competitions", competition_index
+    )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
@@ -78,7 +80,9 @@ async def async_get_prior_fights(event, sensor_name) -> str:
 
     #    _LOGGER.debug("%s: async_get_prior_fights() 1: %s", sensor_name, sensor_name)
     c = 1
-    for competition in await async_get_value(event, "competitions", default=[]):
+    for competition in await async_get_value(
+        event, "competitions", default=[]
+    ):
         #        _LOGGER.debug("%s: async_get_prior_fights() 2: %s", sensor_name, sensor_name)
 
         if (
@@ -245,7 +249,9 @@ async def async_get_prior_fights(event, sensor_name) -> str:
                     )
                 )
             else:
-                prior_fights = prior_fights + " (Dec: " + str(f1) + "-" + str(f2)
+                prior_fights = (
+                    prior_fights + " (Dec: " + str(f1) + "-" + str(f2)
+                )
                 if t != 0:
                     prior_fights = prior_fights + "-" + str(t)
 

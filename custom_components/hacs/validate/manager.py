@@ -42,12 +42,18 @@ class ValidationManager:
 
         async def _load_module(module: str) -> None:
             task_module = import_module(f"{__package__}.{module}")
-            if task := await task_module.async_setup_validator(repository=repository):
+            if task := await task_module.async_setup_validator(
+                repository=repository
+            ):
                 self._validators[task.slug] = task
 
-        await asyncio.gather(*[_load_module(task) for task in validator_modules])
+        await asyncio.gather(
+            *[_load_module(task) for task in validator_modules]
+        )
 
-    async def async_run_repository_checks(self, repository: HacsRepository) -> None:
+    async def async_run_repository_checks(
+        self, repository: HacsRepository
+    ) -> None:
         """Run all validators for a repository."""
         if not self.hacs.system.action:
             return
@@ -63,19 +69,29 @@ class ValidationManager:
             validator
             for validator in self.validators or []
             if (
-                (not validator.categories or repository.data.category in validator.categories)
-                and validator.slug not in os.getenv("INPUT_IGNORE", "").split(" ")
+                (
+                    not validator.categories
+                    or repository.data.category in validator.categories
+                )
+                and validator.slug
+                not in os.getenv("INPUT_IGNORE", "").split(" ")
                 and (not is_pull_from_fork or validator.allow_fork)
             )
         ]
 
-        await asyncio.gather(*[validator.execute_validation() for validator in validators])
+        await asyncio.gather(
+            *[validator.execute_validation() for validator in validators]
+        )
 
         total = len(validators)
         failed = len([x for x in validators if x.failed])
 
         if failed != 0:
-            repository.logger.error("%s %s/%s checks failed", repository.string, failed, total)
+            repository.logger.error(
+                "%s %s/%s checks failed", repository.string, failed, total
+            )
             exit(1)
         else:
-            repository.logger.info("%s All (%s) checks passed", repository.string, total)
+            repository.logger.info(
+                "%s All (%s) checks passed", repository.string, total
+            )

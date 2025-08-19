@@ -26,7 +26,9 @@ async def validate_api_key(hass: core.HomeAssistant, user_input):
     Return info that you want to store in the config entry.
     """
     api_key = user_input[CONF_API_KEY]
-    async with Govee(api_key, learning_storage=GoveeNoLearningStorage()) as hub:
+    async with Govee(
+        api_key, learning_storage=GoveeNoLearningStorage()
+    ) as hub:
         _, error = await hub.get_devices()
         if error:
             raise CannotConnect(error)
@@ -35,7 +37,9 @@ async def validate_api_key(hass: core.HomeAssistant, user_input):
     return user_input
 
 
-async def validate_disabled_attribute_updates(hass: core.HomeAssistant, user_input):
+async def validate_disabled_attribute_updates(
+    hass: core.HomeAssistant, user_input
+):
     """Validate format of the ignore_device_attributes parameter string
 
     Return info that you want to store in the config entry.
@@ -141,19 +145,24 @@ class GoveeOptionsFlowHandler(config_entries.OptionsFlow):
                 )
 
                 # apply settings to the running instance
-                if DOMAIN in self.hass.data and "hub" in self.hass.data[DOMAIN]:
+                if (
+                    DOMAIN in self.hass.data
+                    and "hub" in self.hass.data[DOMAIN]
+                ):
                     hub = self.hass.data[DOMAIN]["hub"]
                     if hub:
-                        disable_str = user_input[CONF_DISABLE_ATTRIBUTE_UPDATES]
+                        disable_str = user_input[
+                            CONF_DISABLE_ATTRIBUTE_UPDATES
+                        ]
                         hub.ignore_device_attributes(disable_str)
             except GoveeError as govee_ex:
                 _LOGGER.exception(
                     "Wrong input format for validate_disabled_attribute_updates: %s",
                     govee_ex,
                 )
-                errors[
-                    CONF_DISABLE_ATTRIBUTE_UPDATES
-                ] = "disabled_attribute_updates_wrong"
+                errors[CONF_DISABLE_ATTRIBUTE_UPDATES] = (
+                    "disabled_attribute_updates_wrong"
+                )
 
             if not errors:
                 # update options flow values
@@ -178,11 +187,15 @@ class GoveeOptionsFlowHandler(config_entries.OptionsFlow):
                 # to options flow
                 vol.Required(
                     CONF_USE_ASSUMED_STATE,
-                    default=self.config_entry.options.get(CONF_USE_ASSUMED_STATE, True),
+                    default=self.config_entry.options.get(
+                        CONF_USE_ASSUMED_STATE, True
+                    ),
                 ): cv.boolean,
                 vol.Required(
                     CONF_OFFLINE_IS_OFF,
-                    default=self.config_entry.options.get(CONF_OFFLINE_IS_OFF, False),
+                    default=self.config_entry.options.get(
+                        CONF_OFFLINE_IS_OFF, False
+                    ),
                 ): cv.boolean,
                 # TODO: validator doesn't work, change to list?
                 vol.Optional(

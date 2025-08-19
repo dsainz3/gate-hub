@@ -1,9 +1,11 @@
 """The tests for the KKM ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestKKM:
     """Tests for the KKM parser"""
+
     def test_kkm_k6(self):
         """Test KKM BLE parser for K6 sensors"""
         data_string = "043E26020100016CD0060234DD1A0201060303AAFE1216AAFE2101070e5b16531f95FFFCFFEC03EBD3"

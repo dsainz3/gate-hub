@@ -1,4 +1,5 @@
 """Parser for Kegtron BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -34,7 +35,9 @@ def parse_kegtron(self, data: bytes, mac: bytes):
 
         xvalue = data[4:]
 
-        (keg_size, vol_start, vol_disp, port, port_name) = unpack(">HHHB20s", xvalue)
+        (keg_size, vol_start, vol_disp, port, port_name) = unpack(
+            ">HHHB20s", xvalue
+        )
 
         if keg_size in KEGTRON_SIZE_DICT:
             keg_size = KEGTRON_SIZE_DICT[keg_size]
@@ -56,7 +59,7 @@ def parse_kegtron(self, data: bytes, mac: bytes):
         else:
             port_count = "Single port device"
 
-        port_name = str(port_name.decode("utf-8").rstrip('\x00'))
+        port_name = str(port_name.decode("utf-8").rstrip("\x00"))
 
         result = {
             "keg size": keg_size,
@@ -64,7 +67,7 @@ def parse_kegtron(self, data: bytes, mac: bytes):
             "port state": port_state,
             "port index": port_index,
             "port count": port_count,
-            "port name": port_name
+            "port name": port_name,
         }
 
         if port_index == 1:
@@ -74,19 +77,21 @@ def parse_kegtron(self, data: bytes, mac: bytes):
         else:
             return None
 
-        result.update({
-            "type": device_type,
-            "firmware": firmware,
-            "mac": to_unformatted_mac(mac),
-            "packet": "no packet id",
-            "data": True,
-        })
+        result.update(
+            {
+                "type": device_type,
+                "firmware": firmware,
+                "mac": to_unformatted_mac(mac),
+                "packet": "no packet id",
+                "data": True,
+            }
+        )
         return result
     else:
         if self.report_unknown == "Kegtron":
             _LOGGER.debug(
                 "UNKNOWN dataobject from Kegtron DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None

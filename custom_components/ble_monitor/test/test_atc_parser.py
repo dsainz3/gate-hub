@@ -1,4 +1,5 @@
 """The tests for the ATC ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
@@ -7,7 +8,9 @@ class TestATC:
 
     def test_atc_atc1441(self):
         """Test ATC parser for ATC 1441 format."""
-        data_string = "043e1d02010000f4830238c1a41110161a18a4c1380283f400a22f5f0bf819df"
+        data_string = (
+            "043e1d02010000f4830238c1a41110161a18a4c1380283f400a22f5f0bf819df"
+        )
         data = bytes(bytearray.fromhex(data_string))
         # pylint: disable=unused-variable
         ble_parser = BleParser()
@@ -103,13 +106,17 @@ class TestATC:
     def test_atc_custom_encrypted(self):
         """Test ATC parser for ATC custom format (encrypted)."""
         self.aeskeys = {}
-        data_string = "043e1b02010000b2188d38c1a40f0e161a1811d603fbfa7b6dfb1e26fde2"
+        data_string = (
+            "043e1b02010000b2188d38c1a40f0e161a1811d603fbfa7b6dfb1e26fde2"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         aeskey = "b9ea895fac7eea6d30532432a516f3a3"
 
         is_ext_packet = True if data[3] == 0x0D else False
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         mac_address = mac.hex()
         p_mac = bytes.fromhex(mac_address.replace(":", "").lower())
         p_key = bytes.fromhex(aeskey.lower())

@@ -1,4 +1,5 @@
 """Parser for Switchbot BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -15,7 +16,7 @@ def parse_switchbot(self, data: bytes, mac: bytes):
     if msg_length == 10 and device_id in [0x54, 0x69]:
         xvalue = data[6:10]
         (batt, temp_frac, temp_int, humi) = unpack("<BBBB", xvalue)
-        batt = (batt & 127)
+        batt = batt & 127
 
         temp_sign = temp_int & 128
         temp = float(temp_int & 127) + float((temp_frac & 15) / 10.0)
@@ -23,7 +24,7 @@ def parse_switchbot(self, data: bytes, mac: bytes):
             # Negative temperature
             temp = -1 * temp
 
-        humi = (humi & 127)
+        humi = humi & 127
         if device_id == 0x54:
             device_type = "Meter TH S1"
         elif device_id == 0x69:
@@ -31,11 +32,7 @@ def parse_switchbot(self, data: bytes, mac: bytes):
         else:
             device_type = "unknown"
         firmware = "Switchbot"
-        result = {
-            "temperature": temp,
-            "humidity": humi,
-            "battery": batt
-        }
+        result = {"temperature": temp, "humidity": humi, "battery": batt}
     else:
         device_type = "unknown"
 
@@ -44,15 +41,17 @@ def parse_switchbot(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Switchbot DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

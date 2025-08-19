@@ -1,9 +1,11 @@
 """The tests for the Oras ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestOras:
     """Tests for the Oras parser"""
+
     def test_oras_faucet(self):
         """Test Oras parser for Electra Washbin Faucet."""
         data_string = "043e2b02010201da060f38c1a41f02010605094F52415315FF3101006400323131313030373933350020202020CC"

@@ -80,13 +80,13 @@ Use **Developer Tools → States** to find the entities by name and test **Servi
 ---
 
 ## Troubleshooting
-- **Purifier not appearing**  
+- **Purifier not appearing**
   Double‑check `enable_iot: true` and the correct Govee email/password. Power‑cycle the device. Check the add‑on log for “unsupported device”.
 
-- **Effects list missing**  
+- **Effects list missing**
   Add your `govee_api_key` to help fetch metadata. Some models expose fewer effects over cloud vs. LAN.
 
-- **No MQTT discovery messages**  
+- **No MQTT discovery messages**
   Ensure the MQTT integration is connected; in Developer Tools → MQTT listen to `homeassistant/#` and restart the add‑on.
 
 ---

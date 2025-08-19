@@ -1,4 +1,5 @@
 """The tests for the BTHome (DIY sensor) ble_parser."""
+
 import datetime
 
 from ble_monitor.ble_parser import BleParser
@@ -6,6 +7,7 @@ from ble_monitor.ble_parser import BleParser
 
 class TestBTHome:
     """Tests for the BTHome V2 (DIY sensor) parser"""
+
     def test_bthome_v2_packet_and_battery(self):
         """Test BTHome V2 parser for battery measurement and packet number"""
         data_string = "043E1802010000A5808FE648540C0201060816D2FC4000090161CC"
@@ -25,7 +27,9 @@ class TestBTHome:
 
     def test_bhtome_v2_temperature_and_humidity(self):
         """Test BTHome V2 parser for temperature and humidity measurement"""
-        data_string = "043E1A02010000A5808FE648540E0201060A16D2FC4002CA0903BF13CC"
+        data_string = (
+            "043E1A02010000A5808FE648540E0201060A16D2FC4002CA0903BF13CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -54,7 +58,9 @@ class TestBTHome:
         allow_list = self.aeskeys.keys()
 
         # pylint: disable=unused-variable
-        ble_parser = BleParser(aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list)
+        ble_parser = BleParser(
+            aeskeys=self.aeskeys, discovery=False, sensor_whitelist=allow_list
+        )
         sensor_msg, tracker_msg = ble_parser.parse_raw_data(data)
 
         assert sensor_msg["firmware"] == "BTHome V2 (encrypted)"
@@ -68,7 +74,9 @@ class TestBTHome:
 
     def test_bthome_v2_pressure(self):
         """Test BTHome parser for pressure measurement"""
-        data_string = "043E1A02010000A5808FE648540E0201060A16D2FC40000C04138A01DC"
+        data_string = (
+            "043E1A02010000A5808FE648540E0201060A16D2FC40000C04138A01DC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -187,7 +195,9 @@ class TestBTHome:
 
     def test_bthome_v2_pm(self):
         """Test BTHome parser for PM2.5 and PM10 measurement"""
-        data_string = "043E1A02010000A5808FE648540E0201060A16D2FC400D120C0E021CDC"
+        data_string = (
+            "043E1A02010000A5808FE648540E0201060A16D2FC400D120C0E021CDC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -818,7 +828,9 @@ class TestBTHome:
 
     def test_bthome_v2_count_4_bytes(self):
         """Test BTHome parser for count measurement with 4 bytes"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC403E33AE3221CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC403E33AE3221CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1056,7 +1068,9 @@ class TestBTHome:
 
     def test_bthome_v2_gas_4_bytes(self):
         """Test BTHome parser for gas measurement with 4 bytes"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC404C41018A01CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC404C41018A01CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1073,7 +1087,9 @@ class TestBTHome:
 
     def test_bthome_v2_energy_4_bytes(self):
         """Test BTHome parser for energy measurement with 4 bytes"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC404D12138A14CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC404D12138A14CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1090,7 +1106,9 @@ class TestBTHome:
 
     def test_bthome_v2_volume_4_bytes(self):
         """Test BTHome parser for volume measurement with 4 bytes"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC404E87562A01CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC404E87562A01CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1107,7 +1125,9 @@ class TestBTHome:
 
     def test_bthome_v2_water_4_bytes(self):
         """Test BTHome parser for water measurement with 4 bytes"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC404F87562A01CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC404F87562A01CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1124,7 +1144,9 @@ class TestBTHome:
 
     def test_bthome_v2_timestamp(self):
         """Test BTHome parser for timestamp measurement"""
-        data_string = "043E1902010000A5808FE648540D0201060916D2FC40505d396164CC"
+        data_string = (
+            "043E1902010000A5808FE648540D0201060916D2FC40505d396164CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -1136,7 +1158,9 @@ class TestBTHome:
         assert sensor_msg["mac"] == "5448E68F80A5"
         assert sensor_msg["packet"] == "no packet id"
         assert sensor_msg["data"]
-        assert sensor_msg["timestamp"] == datetime.datetime(2023, 5, 14, 19, 41, 17, tzinfo=datetime.timezone.utc)
+        assert sensor_msg["timestamp"] == datetime.datetime(
+            2023, 5, 14, 19, 41, 17, tzinfo=datetime.timezone.utc
+        )
         assert sensor_msg["rssi"] == -52
 
     def test_bthome_v2_acceleration(self):
@@ -1192,7 +1216,9 @@ class TestBTHome:
 
     def test_bthome_v2_double_temperature(self):
         """Test BTHome parser for double temperature measurement, which isn't supported (yet)"""
-        data_string = "043E1A02010000A5808FE648540E0201060A16D2FC40450101450301CC"
+        data_string = (
+            "043E1A02010000A5808FE648540E0201060A16D2FC40450101450301CC"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable

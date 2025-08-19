@@ -1,9 +1,11 @@
 """The tests for the Jinou ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestJinou:
     """Tests for the Jinou parser"""
+
     def test_jinou_bc07_5_beacon(self):
         """Test Jinou parser for BC07-5 beacon"""
         data_string = "043e22020100009306bed281f816020106030220aa0eff00120700360264f881d2be0693db"

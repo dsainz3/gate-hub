@@ -1,4 +1,5 @@
 """Parser for Xiaogui Scale BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -16,7 +17,10 @@ def parse_xiaogui(self, data: bytes, mac: bytes):
         xiaogui_mac = data[11:]
 
         if xiaogui_mac != mac:
-            _LOGGER.error("Xiaogui MAC address doesn't match data MAC address. Data: %s", data.hex())
+            _LOGGER.error(
+                "Xiaogui MAC address doesn't match data MAC address. Data: %s",
+                data.hex(),
+            )
             return None
 
         result = {
@@ -26,7 +30,9 @@ def parse_xiaogui(self, data: bytes, mac: bytes):
         }
 
         xvalue = data[3:11]
-        (frame_cnt, weight, impedance, control, stablilized_byte) = unpack(">BHHHB", xvalue)
+        (frame_cnt, weight, impedance, control, stablilized_byte) = unpack(
+            ">BHHHB", xvalue
+        )
         packet_id = frame_cnt << 8 | stablilized_byte
 
         result.update({"packet": packet_id})
@@ -59,7 +65,7 @@ def parse_xiaogui(self, data: bytes, mac: bytes):
             _LOGGER.error(
                 "Stabilized byte of Xiaogui scale is reporting a new value, "
                 "please report an issue to the developers with this error: Payload is %s",
-                data.hex()
+                data.hex(),
             )
             device_type = None
     else:
@@ -70,7 +76,7 @@ def parse_xiaogui(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Xiaogui DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
     else:

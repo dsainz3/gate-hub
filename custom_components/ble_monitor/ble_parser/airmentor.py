@@ -1,4 +1,5 @@
 """Parser for Air Mentor BLE advertisements"""
+
 import logging
 import math
 from struct import unpack
@@ -41,9 +42,14 @@ def parse_pro2(msg_type, xvalue):
         temperature = (temp - 4000) * 0.01
         temperature_calibrated = temperature - temp_cal * 0.1
         humi = round(
-            humi * math.exp(temperature * 17.62 / (temperature + 243.12)) / math.exp(
-                temperature_calibrated * 17.62 / (temperature_calibrated + 243.12)
-            ), 2
+            humi
+            * math.exp(temperature * 17.62 / (temperature + 243.12))
+            / math.exp(
+                temperature_calibrated
+                * 17.62
+                / (temperature_calibrated + 243.12)
+            ),
+            2,
         )
         air_quality = aqi_to_air_quality(aqi)
         return {
@@ -52,7 +58,7 @@ def parse_pro2(msg_type, xvalue):
             "temperature calibrated": round(temperature_calibrated, 2),
             "humidity": round(humi, 2),
             "aqi": aqi,
-            "air quality": air_quality
+            "air quality": air_quality,
         }
     elif msg_type in [0x11, 0x21]:
         (co2, pm25, pm10, co, o3) = unpack(">HHHBB", xvalue)
@@ -69,7 +75,9 @@ def parse_pro2(msg_type, xvalue):
 def parse_2s(msg_type, xvalue):
     if msg_type in [0x12, 0x22]:
         # 4 unknown bytes at the end.
-        (tvoc_ppb, temp, temp_cal, humi, aqi, _, _) = unpack(">HHBBHHH", xvalue)
+        (tvoc_ppb, temp, temp_cal, humi, aqi, _, _) = unpack(
+            ">HHBBHHH", xvalue
+        )
 
         tvoc_ugm3 = tvoc_ppb_to_ugm3(tvoc_ppb)
         temperature = (temp - 4000) * 0.01
@@ -85,7 +93,7 @@ def parse_2s(msg_type, xvalue):
             "temperature calibrated": round(temperature_calibrated, 2),
             "humidity": round(humi, 2),
             "aqi": aqi,
-            "air quality": air_quality
+            "air quality": air_quality,
         }
     elif msg_type in [0x11, 0x21]:
         (co2, pm25, pm10, _, hcho_ppb, _) = unpack(">HHHHHH", xvalue)
@@ -98,7 +106,7 @@ def parse_2s(msg_type, xvalue):
             "co2": co2,
             "pm2.5": pm25,
             "pm10": pm10,
-            "formaldehyde": round(hcho_mgm3, 6)
+            "formaldehyde": round(hcho_mgm3, 6),
         }
     else:
         return None
@@ -128,15 +136,17 @@ def parse_airmentor(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Air Mentor DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

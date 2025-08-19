@@ -1,4 +1,5 @@
 """Parser for Moat BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -31,27 +32,30 @@ def parse_moat(self, data: bytes, mac: bytes):
             batt = (volt - 2100) * (6 / 340)
         else:
             batt = 0
-        result.update({
-            "temperature": round(temperature, 3),
-            "humidity": round(humidity, 3),
-            "voltage": voltage,
-            "battery": round(batt, 1)
-        })
+        result.update(
+            {
+                "temperature": round(temperature, 3),
+                "humidity": round(humidity, 3),
+                "voltage": voltage,
+                "battery": round(batt, 1),
+            }
+        )
     else:
         if self.report_unknown == "Moat":
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Moat DEVICE: MAC: %s, ADV: %s",
-
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

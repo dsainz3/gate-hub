@@ -74,13 +74,13 @@ mqtt:
 ---
 
 ## Troubleshooting
-- **MQTT shows “Disconnected” in the integration**  
+- **MQTT shows “Disconnected” in the integration**
   Re‑enter the correct broker host (`core-mosquitto`) and credentials; confirm the Mosquitto add‑on is running.
 
-- **No messages in Developer Tools → MQTT**  
+- **No messages in Developer Tools → MQTT**
   Ensure **Advanced Mode** is ON. Confirm something is actually publishing (restart Zigbee2MQTT, etc.).
 
-- **Duped or missing entities**  
+- **Duped or missing entities**
   Clear retained discovery topics for the device (`homeassistant/.../config`), then restart the publisher.
 
 ---

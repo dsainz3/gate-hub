@@ -1,9 +1,11 @@
 """The tests for the HHCC ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestHHCC:
     """Tests for the HHCC parser"""
+
     def test_hhcc_HHCCJCY10(self):
         """Test HHCC BLE parser for HHCCJCY10"""
         data_string = "043e2002010001c211e44d23dc14020106030250fd0c1650fd0e006e0134a428005bae"

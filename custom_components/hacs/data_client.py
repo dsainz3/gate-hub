@@ -55,13 +55,17 @@ class HacsDataClient:
         except TimeoutError:
             raise HacsException("Timeout of 60s reached") from None
         except Exception as exception:
-            raise HacsException(f"Error fetching data from HACS: {exception}") from exception
+            raise HacsException(
+                f"Error fetching data from HACS: {exception}"
+            ) from exception
 
         self._etags[endpoint] = response.headers.get("etag")
 
         return await response.json()
 
-    async def get_data(self, section: str | None, *, validate: bool) -> dict[str, dict[str, Any]]:
+    async def get_data(
+        self, section: str | None, *, validate: bool
+    ) -> dict[str, dict[str, Any]]:
         """Get data."""
         data = await self._do_request(filename="data.json", section=section)
         if not validate:
@@ -71,10 +75,14 @@ class HacsDataClient:
             validated = {}
             for key, repo_data in data.items():
                 try:
-                    validated[key] = VALIDATE_FETCHED_V2_REPO_DATA[section](repo_data)
+                    validated[key] = VALIDATE_FETCHED_V2_REPO_DATA[section](
+                        repo_data
+                    )
                 except vol.Invalid as exception:
                     LOGGER.info(
-                        "Got invalid data for %s (%s)", repo_data.get("full_name", key), exception
+                        "Got invalid data for %s (%s)",
+                        repo_data.get("full_name", key),
+                        exception,
                     )
                     continue
 
@@ -95,4 +103,6 @@ class HacsDataClient:
 
     async def get_repositories(self, section: str) -> list[str]:
         """Get repositories."""
-        return await self._do_request(filename="repositories.json", section=section)
+        return await self._do_request(
+            filename="repositories.json", section=section
+        )

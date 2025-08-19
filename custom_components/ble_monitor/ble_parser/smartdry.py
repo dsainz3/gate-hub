@@ -1,4 +1,5 @@
 """Parser for SmartDry BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -26,7 +27,7 @@ def parse_smartdry(self, data: bytes, mac: bytes):
             "temperature": temp,
             "humidity": humi,
             "shake": shake,
-            "switch": wake
+            "switch": wake,
         }
         if wake is True:
             volt = volt / 1000
@@ -50,10 +51,7 @@ def parse_smartdry(self, data: bytes, mac: bytes):
                 batt = 0
 
         if volt is not None:
-            result.update({
-                "voltage": volt,
-                "battery": batt
-            })
+            result.update({"voltage": volt, "battery": batt})
     else:
         device_type = None
         firmware = None
@@ -62,15 +60,17 @@ def parse_smartdry(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN SmartDry DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

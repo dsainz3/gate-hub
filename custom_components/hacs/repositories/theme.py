@@ -76,7 +76,9 @@ class HacsThemeRepository(HacsRepository):
         """Reload frontend themes."""
         self.logger.debug("%s Reloading frontend themes", self.string)
         try:
-            await self.hacs.hass.services.async_call("frontend", "reload_themes", {})
+            await self.hacs.hass.services.async_call(
+                "frontend", "reload_themes", {}
+            )
         except HomeAssistantError as exception:
             self.logger.exception("%s %s", self.string, exception)
 

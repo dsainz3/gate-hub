@@ -1,37 +1,25 @@
 """Parser for SensorPush BLE advertisements"""
+
 import logging
 
 from .helpers import to_mac, to_unformatted_mac
 
 _LOGGER = logging.getLogger(__name__)
 
-SENSORPUSH_DEVICE_TYPES = {
-    64: "HTP.xw",
-    65: "HT.w"
-}
+SENSORPUSH_DEVICE_TYPES = {64: "HTP.xw", 65: "HT.w"}
 
 SENSORPUSH_PACK_PARAMS = {
     64: [
         [-40.0, 140.0, 0.0025],
         [0.0, 100.0, 0.0025],
-        [30000.0, 125000.0, 1.0]
+        [30000.0, 125000.0, 1.0],
     ],
-    65: [
-        [-40.0, 125.0, 0.0025],
-        [0.0, 100.0, 0.0025]
-    ]
+    65: [[-40.0, 125.0, 0.0025], [0.0, 100.0, 0.0025]],
 }
 
 SENSORPUSH_DATA_TYPES = {
-    64: [
-        "temperature",
-        "humidity",
-        "pressure"
-    ],
-    65: [
-        "temperature",
-        "humidity"
-    ]
+    64: ["temperature", "humidity", "pressure"],
+    65: ["temperature", "humidity"],
 }
 
 
@@ -83,14 +71,16 @@ def parse_sensorpush(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN SensorPush DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "data": True,
+        }
+    )
     return result

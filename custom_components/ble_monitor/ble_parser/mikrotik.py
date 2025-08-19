@@ -1,4 +1,5 @@
 """Parser for Mikrotik BLE advertisements"""
+
 import logging
 import math
 from struct import unpack
@@ -27,13 +28,17 @@ def parse_mikrotik(self, data: bytes, mac: bytes):
             version,
             user_data,
             _,
-            acc_x_frac, acc_x,
-            acc_y_frac, acc_y,
-            acc_z_frac, acc_z,
-            temp_frac, temp,
+            acc_x_frac,
+            acc_x,
+            acc_y_frac,
+            acc_y,
+            acc_z_frac,
+            acc_z,
+            temp_frac,
+            temp,
             uptime,
             flags,
-            batt
+            batt,
         ) = unpack("<BBHBBBBBBBbIBB", xvalue)
 
         # Check if the device uses encryption
@@ -51,12 +56,24 @@ def parse_mikrotik(self, data: bytes, mac: bytes):
         acceleration_z = convert_8_8_to_float(acc_z, acc_z_frac)
         temperature = convert_8_8_to_float(temp, temp_frac)
 
-        reed_switch = flags & 1   # if set to 1, shows that the reed switch was closed at the moment of advertising
-        accel_tilt = flags & 2    # if set to 1, shows that the advertisement was sent by tilting the device
-        accel_drop = flags & 4    # if set to 1, shows that the advertisement was sent by dropping the device
-        impact_x = flags & 8      # if set to 1, shows that there was an impact on the x-axis at the moment of advertising
-        impact_y = flags & 16     # if set to 1, shows that there was an impact on the y-axis at the moment of advertising
-        impact_z = flags & 32     # if set to 1, shows that there was an impact on the z-axis at the moment of advertising
+        reed_switch = (
+            flags & 1
+        )  # if set to 1, shows that the reed switch was closed at the moment of advertising
+        accel_tilt = (
+            flags & 2
+        )  # if set to 1, shows that the advertisement was sent by tilting the device
+        accel_drop = (
+            flags & 4
+        )  # if set to 1, shows that the advertisement was sent by dropping the device
+        impact_x = (
+            flags & 8
+        )  # if set to 1, shows that there was an impact on the x-axis at the moment of advertising
+        impact_y = (
+            flags & 16
+        )  # if set to 1, shows that there was an impact on the y-axis at the moment of advertising
+        impact_z = (
+            flags & 32
+        )  # if set to 1, shows that there was an impact on the z-axis at the moment of advertising
 
         if impact_x or impact_y or impact_z:
             impact = 1
@@ -70,7 +87,9 @@ def parse_mikrotik(self, data: bytes, mac: bytes):
                 "acceleration x": acceleration_x,
                 "acceleration y": acceleration_y,
                 "acceleration z": acceleration_z,
-                "acceleration": math.sqrt(acceleration_x ** 2 + acceleration_y ** 2 + acceleration_z ** 2),
+                "acceleration": math.sqrt(
+                    acceleration_x**2 + acceleration_y**2 + acceleration_z**2
+                ),
                 "uptime": uptime,
                 "battery": batt,
                 "switch": reed_switch,
@@ -93,15 +112,17 @@ def parse_mikrotik(self, data: bytes, mac: bytes):
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Mikrotik DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

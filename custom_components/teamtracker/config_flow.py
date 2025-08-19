@@ -52,14 +52,20 @@ def _get_schema(
 
     return vol.Schema(
         {
-            vol.Required(CONF_LEAGUE_ID, default=_get_default(CONF_LEAGUE_ID)): vol.In(
+            vol.Required(
+                CONF_LEAGUE_ID, default=_get_default(CONF_LEAGUE_ID)
+            ): vol.In(
                 {
                     **{k: k for k in sorted(LEAGUE_MAP)},
                     "XXX": "Custom: Specify sport and league path",
                 }
             ),
-            vol.Required(CONF_TEAM_ID, default=_get_default(CONF_TEAM_ID)): cv.string,
-            vol.Optional(CONF_NAME, default=_get_default(CONF_NAME)): cv.string,
+            vol.Required(
+                CONF_TEAM_ID, default=_get_default(CONF_TEAM_ID)
+            ): cv.string,
+            vol.Optional(
+                CONF_NAME, default=_get_default(CONF_NAME)
+            ): cv.string,
             vol.Optional(
                 CONF_CONFERENCE_ID, default=_get_default(CONF_CONFERENCE_ID)
             ): cv.string,
@@ -78,8 +84,12 @@ def _get_path_schema(hass: Any, user_input: list, default_dict: list) -> Any:
 
     return vol.Schema(
         {
-            vol.Required(CONF_SPORT_PATH, default=_get_default(CONF_SPORT_PATH)): str,
-            vol.Required(CONF_LEAGUE_PATH, default=_get_default(CONF_LEAGUE_PATH)): str,
+            vol.Required(
+                CONF_SPORT_PATH, default=_get_default(CONF_SPORT_PATH)
+            ): str,
+            vol.Required(
+                CONF_LEAGUE_PATH, default=_get_default(CONF_LEAGUE_PATH)
+            ): str,
         }
     )
 
@@ -89,7 +99,7 @@ class TeamTrackerScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for TeamTracker."""
 
     VERSION = 3
-#    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    #    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
         """Initialize."""
@@ -114,7 +124,9 @@ class TeamTrackerScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             self._errors["base"] = "league"
         return await self._show_config_form(user_input)
 
-    async def async_step_path(self, user_input: Optional[Dict[str, Any]] = None):
+    async def async_step_path(
+        self, user_input: Optional[Dict[str, Any]] = None
+    ):
         # pylint: disable=deprecated-typing-alias
         # pylint: disable=consider-alternative-union-syntax
 
@@ -123,7 +135,9 @@ class TeamTrackerScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             self._data.update(user_input)
-            return self.async_create_entry(title=self._data[CONF_NAME], data=self._data)
+            return self.async_create_entry(
+                title=self._data[CONF_NAME], data=self._data
+            )
         return await self._show_path_form(user_input)
 
     async def _show_config_form(self, user_input):
@@ -156,11 +170,11 @@ class TeamTrackerScoresFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=self._errors,
         )
 
-
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
         return TeamTrackerScoresOptionsFlow(config_entry)
+
 
 class TeamTrackerScoresOptionsFlow(config_entries.OptionsFlow):
     """Options flow for TeamTracker."""
@@ -183,12 +197,20 @@ class TeamTrackerScoresOptionsFlow(config_entries.OptionsFlow):
         """Show the options form to edit location data."""
 
         lang = None
-        if self.entry and self.entry.options and CONF_API_LANGUAGE in self.entry.options:
-                lang = self.entry.options[CONF_API_LANGUAGE]
+        if (
+            self.entry
+            and self.entry.options
+            and CONF_API_LANGUAGE in self.entry.options
+        ):
+            lang = self.entry.options[CONF_API_LANGUAGE]
 
         options_schema = vol.Schema(
             {
-                vol.Optional(CONF_API_LANGUAGE, description={"suggested_value": lang}, default=""): cv.string,
+                vol.Optional(
+                    CONF_API_LANGUAGE,
+                    description={"suggested_value": lang},
+                    default="",
+                ): cv.string,
             }
         )
 

@@ -1,4 +1,5 @@
 """Parser for Thermopro BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -22,22 +23,24 @@ def parse_thermopro(self, data: bytes, device_type, mac: bytes):
         result = {
             "temperature": temp / 10,
             "humidity": humi,
-            "battery low": batt_low
+            "battery low": batt_low,
         }
     else:
         if self.report_unknown == "Thermopro":
             _LOGGER.info(
                 "BLE ADV from UNKNOWN Thermopro DEVICE: MAC: %s, ADV: %s",
                 to_mac(mac),
-                data.hex()
+                data.hex(),
             )
         return None
 
-    result.update({
-        "mac": to_unformatted_mac(mac),
-        "type": device_type,
-        "packet": "no packet id",
-        "firmware": firmware,
-        "data": True
-    })
+    result.update(
+        {
+            "mac": to_unformatted_mac(mac),
+            "type": device_type,
+            "packet": "no packet id",
+            "firmware": firmware,
+            "data": True,
+        }
+    )
     return result

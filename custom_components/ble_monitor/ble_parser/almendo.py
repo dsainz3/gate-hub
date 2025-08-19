@@ -1,4 +1,5 @@
 """Parser for Almendo bluSensor BLE advertisements"""
+
 import logging
 from struct import unpack
 
@@ -12,7 +13,7 @@ def parse_almendo(self, data: bytes, mac: bytes):
     result = {
         "mac": to_unformatted_mac(mac),
         "data": False,
-        "packet": "no packet id"
+        "packet": "no packet id",
     }
     adstruct_type = data[1]
     if adstruct_type == 0xFF:
@@ -47,8 +48,7 @@ def parse_almendo(self, data: bytes, mac: bytes):
     if result is None:
         if self.report_unknown == "Almendo":
             _LOGGER.info(
-                "BLE ADV from UNKNOWN Almendo DEVICE: "
-                "MAC: %s, ADV: %s",
+                "BLE ADV from UNKNOWN Almendo DEVICE: " "MAC: %s, ADV: %s",
                 to_mac(mac),
                 data.hex(),
             )

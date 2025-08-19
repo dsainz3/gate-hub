@@ -10,27 +10,27 @@ call_api:
       name: Sport
       description: Sport path
       required: true
-      example: 'football'
+      example: "football"
       selector:
         text:
     league_path:
       name: League
       description: League path
       required: true
-      example: 'nfl'
+      example: "nfl"
       selector:
         text:
     team_id:
       name: Team
       description: Team ID
       required: true
-      example: 'CLE'
+      example: "CLE"
       selector:
         text:
     conference_id:
       name: Conference
       description: Conference ID (only for NCAA)
       required: false
-      example: '5'
+      example: "5"
       selector:
         text:

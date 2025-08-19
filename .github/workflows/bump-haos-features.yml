@@ -3,7 +3,7 @@ name: Bump haos-features submodule
 
 on:
   schedule:
-    - cron: "15 6 * * 1,4"   # Mon/Thu 06:15 UTC
+    - cron: "15 6 * * 1,4" # Mon/Thu 06:15 UTC
   workflow_dispatch:
 
 permissions:

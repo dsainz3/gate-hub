@@ -1,4 +1,5 @@
 """The tests for the Chef iQ ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 

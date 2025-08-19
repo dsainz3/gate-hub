@@ -1,4 +1,5 @@
 """The tests for the MOCREO ble_parser."""
+
 import datetime
 
 from ble_monitor.ble_parser import BleParser
@@ -111,7 +112,6 @@ class TestMOCREO:
         assert sensor_msg["battery"] == 100
         assert sensor_msg["data"]
         assert sensor_msg["rssi"] == -45
-
 
     def test_MOCREO_MS2(self):
         """Test MOCREO parser for MS2."""

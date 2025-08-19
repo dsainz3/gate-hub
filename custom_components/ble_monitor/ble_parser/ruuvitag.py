@@ -31,7 +31,9 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                     encoded = encoded[:8]
                 decoded = bytearray(base64.b64decode(encoded, "-_"))
 
-                (version, humi, temp, frac, press) = struct.unpack(">BBbBH", decoded)
+                (version, humi, temp, frac, press) = struct.unpack(
+                    ">BBbBH", decoded
+                )
 
                 temp_val = (temp & 127) + frac / 100
                 sign = (temp >> 7) & 1
@@ -50,7 +52,11 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                     }
                 )
             except (base64.binascii.Error, struct.error):
-                _LOGGER.debug("Encoded value: %s from data: %s not valid", encoded, data.hex())
+                _LOGGER.debug(
+                    "Encoded value: %s from data: %s not valid",
+                    encoded,
+                    data.hex(),
+                )
                 return None
         else:
             result = None
@@ -61,8 +67,8 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
             version = data[4]
             if version == 3:
                 # Ruuvitag V3 format
-                (version, humi, temp, frac, press, accx, accy, accz, volt) = struct.unpack(
-                    ">BBbBHhhhH", data[4:18]
+                (version, humi, temp, frac, press, accx, accy, accz, volt) = (
+                    struct.unpack(">BBbBHhhhH", data[4:18])
                 )
 
                 # See https://github.com/ttu/ruuvitag-sensor/blob/master/ruuvitag_sensor/decoder.py
@@ -84,7 +90,7 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                         "humidity": humi * 0.5,
                         "temperature": temperature,
                         "pressure": round((press + 50000) / 100, 2),
-                        "acceleration": math.sqrt(accx ** 2 + accy ** 2 + accz ** 2),
+                        "acceleration": math.sqrt(accx**2 + accy**2 + accz**2),
                         "acceleration x": accx,
                         "acceleration y": accy,
                         "acceleration z": accz,
@@ -96,9 +102,18 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                 )
             elif version == 5:
                 # Ruuvitag V5 format
-                (version, temp, humi, press, accx, accy, accz, power, move_cnt, packet_id) = struct.unpack(
-                    ">BhHHhhhHBH", data[4:22]
-                )
+                (
+                    version,
+                    temp,
+                    humi,
+                    press,
+                    accx,
+                    accy,
+                    accz,
+                    power,
+                    move_cnt,
+                    packet_id,
+                ) = struct.unpack(">BhHHhhhHBH", data[4:22])
 
                 # Check for duplicate messages
                 try:
@@ -132,7 +147,7 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                         "temperature": round(temp / 200, 2),
                         "humidity": round(humi / 400, 2),
                         "pressure": round((press + 50000) / 100, 2),
-                        "acceleration": math.sqrt(accx ** 2 + accy ** 2 + accz ** 2),
+                        "acceleration": math.sqrt(accx**2 + accy**2 + accz**2),
                         "acceleration x": accx,
                         "acceleration y": accy,
                         "acceleration z": accz,
@@ -152,12 +167,9 @@ def parse_ruuvitag(self, data: bytes, mac: bytes):
                     result.pop("humidity")
                 if result["pressure"] == 1155.35:
                     result.pop("pressure")
-                if (
-                    result["acceleration x"] == -32768 or (
-                        result["acceleration y"] == -32768 or (
-                            result["acceleration z"] == -32768
-                        )
-                    )
+                if result["acceleration x"] == -32768 or (
+                    result["acceleration y"] == -32768
+                    or (result["acceleration z"] == -32768)
                 ):
                     result.pop("acceleration")
                     result.pop("acceleration x")

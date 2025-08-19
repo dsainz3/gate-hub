@@ -1,9 +1,11 @@
 """The tests for the Inkbird ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestInkbird:
     """Tests for the Inkbird parser"""
+
     def test_inkbird_iBBQ_1_probes(self):
         """Test Inkbird parser for Inkbird iBBQ with 1 probe."""
         data_string = "043e2102010000d7652e9aec28150201060302f0ff0dff0000000028ec9a2e65d7f000b5"
@@ -81,7 +83,9 @@ class TestInkbird:
 
     def test_inkbird_IBS_TH(self):
         """Test Inkbird parser for Inkbird IBS-TH."""
-        data_string = "043e1c020104007a63000842491004097370730aff9c08f41000ba4e6408cc"
+        data_string = (
+            "043e1c020104007a63000842491004097370730aff9c08f41000ba4e6408cc"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -100,7 +104,9 @@ class TestInkbird:
 
     def test_inkbird_IBS_TH_external(self):
         """Test Inkbird parser for Inkbird IBS-TH external probe."""
-        data_string = "043e1c020104007a63000842491004097370730aff3b0af815018cbc6408cc"
+        data_string = (
+            "043e1c020104007a63000842491004097370730aff3b0af815018cbc6408cc"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable
@@ -119,7 +125,9 @@ class TestInkbird:
 
     def test_inkbird_IBS_TH2_T_only(self):
         """Test Inkbird parser for Inkbird IBS-TH2/P01R."""
-        data_string = "043e1c02010400561d000742491004097470730affff0700000031603306c5"
+        data_string = (
+            "043e1c02010400561d000742491004097470730affff0700000031603306c5"
+        )
         data = bytes(bytearray.fromhex(data_string))
 
         # pylint: disable=unused-variable

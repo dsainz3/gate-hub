@@ -1,9 +1,11 @@
 """The tests for the Laica Smart Scale ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestLaica:
     """Tests for the Laica parser"""
+
     def test_laica(self):
         """Test Laica parser."""
         data_string = "043e2b02010300a02bbe5e91a01f0201040303b0ff0fffaca0a02bbe5e91a0a02c92140dbf0709414141303032d9"

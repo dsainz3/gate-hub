@@ -1,4 +1,5 @@
 """ TeamTracker Team Status """
+
 import asyncio
 from datetime import date, datetime, timedelta, timezone
 import json
@@ -14,12 +15,15 @@ from async_timeout import timeout
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_registry import ( # pylint: disable=reimported
+from homeassistant.helpers.entity_registry import (  # pylint: disable=reimported
     async_entries_for_config_entry,
     async_get,
     async_get as async_get_entity_registry,
 )
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
 
 from .clear_values import async_clear_values
 from .const import (
@@ -58,7 +62,6 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Load the saved entities."""
 
-
     async def get_entry_id_from_entity_id(hass: HomeAssistant, entity_id: str):
         """Retrieve entry_id from entity_id."""
         # Get the entity registry
@@ -72,7 +75,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         return None
 
-
     async def async_call_api_service(call):
         """Handle the service action call."""
 
@@ -85,20 +87,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         for entity_id in entity_ids:
             entry_id = await get_entry_id_from_entity_id(hass, entity_id)
 
-            if entry_id: # Set up from UI, use entry_id as index
+            if entry_id:  # Set up from UI, use entry_id as index
                 sensor_coordinator = hass.data[DOMAIN][entry_id][COORDINATOR]
-                sensor_coordinator.update_team_info(sport_path, league_path, team_id, conference_id)
+                sensor_coordinator.update_team_info(
+                    sport_path, league_path, team_id, conference_id
+                )
                 await sensor_coordinator.async_refresh()
-            else: # Set up from YAML, use sensor_name (from entity_name) as index
-                sensor_name = entity_id.split('.')[-1]
-                if sensor_name in hass.data[DOMAIN] and COORDINATOR in hass.data[DOMAIN][sensor_name]:
-                    sensor_coordinator = hass.data[DOMAIN][sensor_name][COORDINATOR]
-                    sensor_coordinator.update_team_info(sport_path, league_path, team_id, conference_id)
+            else:  # Set up from YAML, use sensor_name (from entity_name) as index
+                sensor_name = entity_id.split(".")[-1]
+                if (
+                    sensor_name in hass.data[DOMAIN]
+                    and COORDINATOR in hass.data[DOMAIN][sensor_name]
+                ):
+                    sensor_coordinator = hass.data[DOMAIN][sensor_name][
+                        COORDINATOR
+                    ]
+                    sensor_coordinator.update_team_info(
+                        sport_path, league_path, team_id, conference_id
+                    )
                     await sensor_coordinator.async_refresh()
-                else: # YAML had duplicate names so it doesn't match the entity_name
+                else:  # YAML had duplicate names so it doesn't match the entity_name
                     _LOGGER.info(
                         "%s: [service=call_api] No entry_id found (likely because of non-unique sensor names in YAML) for entity_id: %s",
-                        sensor_name, 
+                        sensor_name,
                         entity_id,
                     )
 
@@ -108,7 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _LOGGER.info(
         "%s: Setting up sensor from UI configuration using TeamTracker %s, if you have any issues please report them here: %s",
-        sensor_name, 
+        sensor_name,
         VERSION,
         ISSUE_URL,
     )
@@ -119,19 +130,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if entry.unique_id is not None:
         _LOGGER.info(
             "%s: async_setup_entry() - entry.unique_id is not None: %s",
-            sensor_name, 
+            sensor_name,
             entry.unique_id,
         )
         hass.config_entries.async_update_entry(entry, unique_id=None)
 
         ent_reg = async_get(hass)
         for entity in async_entries_for_config_entry(ent_reg, entry.entry_id):
-            ent_reg.async_update_entity(entity.entity_id, new_unique_id=entry.entry_id)
+            ent_reg.async_update_entity(
+                entity.entity_id, new_unique_id=entry.entry_id
+            )
 
     # Setup the data coordinator
-    coordinator = TeamTrackerDataUpdateCoordinator(
-        hass, entry.data, entry
-    )
+    coordinator = TeamTrackerDataUpdateCoordinator(hass, entry.data, entry)
 
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_refresh()
@@ -142,10 +153,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-#
-#  Register services for sensor
-#
-    hass.services.async_register(DOMAIN, SERVICE_NAME_CALL_API, async_call_api_service,)
+    #
+    #  Register services for sensor
+    #
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_NAME_CALL_API,
+        async_call_api_service,
+    )
 
     return True
 
@@ -197,9 +212,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             updated_config.update(LEAGUE_MAP[league_id])
 
         if updated_config != entry.data:
-            hass.config_entries.async_update_entry(entry, data=updated_config, version=3)
+            hass.config_entries.async_update_entry(
+                entry, data=updated_config, version=3
+            )
 
-        _LOGGER.debug("%s: Migration to version %s complete", sensor_name, entry.version)
+        _LOGGER.debug(
+            "%s: Migration to version %s complete", sensor_name, entry.version
+        )
 
     return True
 
@@ -211,7 +230,7 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
     last_update = {}
     c_cache = {}
 
-    def __init__(self, hass, config, entry: ConfigEntry=None):
+    def __init__(self, hass, config, entry: ConfigEntry = None):
         """Initialize."""
         self.name = config[CONF_NAME]
         self.api_url = ""
@@ -226,13 +245,16 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
 
         self.config = config
         self.hass = hass
-        self.entry = entry #None if setup from YAML
+        self.entry = entry  # None if setup from YAML
 
-        super().__init__(hass, _LOGGER, name=self.name, update_interval=DEFAULT_REFRESH_RATE)
-        _LOGGER.debug(
-            "%s: Using default refresh rate (%s)", self.name, self.update_interval
+        super().__init__(
+            hass, _LOGGER, name=self.name, update_interval=DEFAULT_REFRESH_RATE
         )
-
+        _LOGGER.debug(
+            "%s: Using default refresh rate (%s)",
+            self.name,
+            self.update_interval,
+        )
 
     #
     #  Return the language to use for the API
@@ -250,16 +272,22 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
 
         if CONF_API_LANGUAGE in self.config.keys():
             lang = self.config[CONF_API_LANGUAGE].lower()
-        if self.entry and self.entry.options and CONF_API_LANGUAGE in self.entry.options and len(self.entry.options[CONF_API_LANGUAGE])>=2:
-                lang = self.entry.options[CONF_API_LANGUAGE].lower()
+        if (
+            self.entry
+            and self.entry.options
+            and CONF_API_LANGUAGE in self.entry.options
+            and len(self.entry.options[CONF_API_LANGUAGE]) >= 2
+        ):
+            lang = self.entry.options[CONF_API_LANGUAGE].lower()
 
         return lang
-
 
     #
     #  Set team info from service call
     #
-    def update_team_info(self, sport_path, league_path, team_id, conference_id=""):
+    def update_team_info(
+        self, sport_path, league_path, team_id, conference_id=""
+    ):
         """update team information when call_api service is called."""
 
         self.sport_path = sport_path
@@ -274,7 +302,6 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
         if key in TeamTrackerDataUpdateCoordinator.data_cache:
             del TeamTrackerDataUpdateCoordinator.data_cache[key]
 
-
     #
     #  Top-level method called from HA to update data for all teamtracker sensors
     #
@@ -282,25 +309,35 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
         """Update data."""
         async with timeout(DEFAULT_TIMEOUT):
             try:
-                data = await self.async_update_game_data(self.config, self.hass)
+                data = await self.async_update_game_data(
+                    self.config, self.hass
+                )
 
                 # update the interval based on flag
                 if data["private_fast_refresh"]:
                     if self.update_interval != RAPID_REFRESH_RATE:
                         self.update_interval = RAPID_REFRESH_RATE
                         _LOGGER.debug(
-                            "%s: Switching to rapid refresh rate (%s)", self.name, self.update_interval
+                            "%s: Switching to rapid refresh rate (%s)",
+                            self.name,
+                            self.update_interval,
                         )
                 else:
                     if self.update_interval != DEFAULT_REFRESH_RATE:
                         self.update_interval = DEFAULT_REFRESH_RATE
                         _LOGGER.debug(
-                            "%s: Switching to default refresh rate (%s)", self.name, self.update_interval
+                            "%s: Switching to default refresh rate (%s)",
+                            self.name,
+                            self.update_interval,
                         )
             except Exception as error:
                 _LOGGER.debug("%s: Error updating data: %s", self.name, error)
-                _LOGGER.debug("%s: Error type: %s", self.name, type(error).__name__)
-                _LOGGER.debug("%s: Additional information: %s", self.name, str(error))
+                _LOGGER.debug(
+                    "%s: Error type: %s", self.name, type(error).__name__
+                )
+                _LOGGER.debug(
+                    "%s: Additional information: %s", self.name, str(error)
+                )
                 raise UpdateFailed(error) from error
             return data
 
@@ -321,15 +358,20 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
         #
         if key in self.data_cache:
             expiration = (
-                datetime.fromisoformat(self.last_update[key]) + self.update_interval
+                datetime.fromisoformat(self.last_update[key])
+                + self.update_interval
             )
             now = datetime.now(timezone.utc)
 
             if now < expiration:
                 data = self.data_cache[key]
-                values = await self.async_update_values(config, hass, data, lang)
+                values = await self.async_update_values(
+                    config, hass, data, lang
+                )
                 if values["api_message"]:
-                    values["api_message"] = "Cached data: " + values["api_message"]
+                    values["api_message"] = (
+                        "Cached data: " + values["api_message"]
+                    )
                 else:
                     values["api_message"] = "Cached data"
                 return values
@@ -349,17 +391,21 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
         if file_override:
             path = "/share/tt/results/" + sensor_name + ".json"
             if not os.path.exists(path):
-                _LOGGER.debug("%s: Creating results file '%s'", sensor_name, path)
-                values[
-                    "last_update"
-                ] = DEFAULT_LAST_UPDATE  # set to fixed time for compares
+                _LOGGER.debug(
+                    "%s: Creating results file '%s'", sensor_name, path
+                )
+                values["last_update"] = (
+                    DEFAULT_LAST_UPDATE  # set to fixed time for compares
+                )
                 values["kickoff_in"] = DEFAULT_KICKOFF_IN
                 try:
                     with open(path, "w", encoding="utf-8") as convert_file:
                         convert_file.write(json.dumps(values, indent=4))
                 except:
                     _LOGGER.debug(
-                        "%s: Error creating results file '%s'", sensor_name, path
+                        "%s: Error creating results file '%s'",
+                        sensor_name,
+                        path,
                     )
         return values
 
@@ -441,7 +487,14 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
                     if self.conference_id == "9999":
                         file_override = True
 
-                url = URL_HEAD + sport_path + "/" + league_path + URL_TAIL + url_parms
+                url = (
+                    URL_HEAD
+                    + sport_path
+                    + "/"
+                    + league_path
+                    + URL_TAIL
+                    + url_parms
+                )
 
                 async with aiohttp.ClientSession() as session:
                     try:
@@ -485,7 +538,14 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
                     if self.conference_id == "9999":
                         file_override = True
 
-                url = URL_HEAD + sport_path + "/" + league_path + URL_TAIL + url_parms
+                url = (
+                    URL_HEAD
+                    + sport_path
+                    + "/"
+                    + league_path
+                    + URL_TAIL
+                    + url_parms
+                )
 
                 async with aiohttp.ClientSession() as session:
                     try:
@@ -501,7 +561,7 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
                     except:
                         data = None
         self.api_url = url
-        
+
         return data, file_override
 
     async def async_update_values(self, config, hass, data, lang) -> dict:
@@ -530,7 +590,9 @@ class TeamTrackerDataUpdateCoordinator(DataUpdateCoordinator):
         if data is None:
             values["api_message"] = "API error, no data returned"
             _LOGGER.warning(
-                "%s: API did not return any data for team '%s'", sensor_name, team_id
+                "%s: API did not return any data for team '%s'",
+                sensor_name,
+                team_id,
             )
             return values
 

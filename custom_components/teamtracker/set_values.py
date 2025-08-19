@@ -5,7 +5,12 @@ import logging
 
 import arrow
 
-from .const import DEFAULT_LOGO, DEFAULT_PROB, DEFAULT_REFRESH_RATE, RAPID_REFRESH_RATE
+from .const import (
+    DEFAULT_LOGO,
+    DEFAULT_PROB,
+    DEFAULT_REFRESH_RATE,
+    RAPID_REFRESH_RATE,
+)
 from .set_baseball import async_set_baseball_values
 from .set_cricket import async_set_cricket_values
 from .set_golf import async_set_golf_values
@@ -26,7 +31,13 @@ oppo_prob = {}
 #  Set Values
 #
 async def async_set_values(
-    new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+    new_values,
+    event,
+    grouping_index,
+    competition_index,
+    team_index,
+    lang,
+    sensor_name,
 ) -> bool:
     """Function to set all new_values for the specified event/competition/team"""
 
@@ -35,9 +46,13 @@ async def async_set_values(
     oppo_index = 1 if team_index == 0 else 0
     grouping = await async_get_value(event, "groupings", grouping_index)
     if grouping is None:
-        competition = await async_get_value(event, "competitions", competition_index)
+        competition = await async_get_value(
+            event, "competitions", competition_index
+        )
     else:
-        competition = await async_get_value(grouping, "competitions", competition_index)
+        competition = await async_get_value(
+            grouping, "competitions", competition_index
+        )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
@@ -50,7 +65,13 @@ async def async_set_values(
         return False
 
     rc = await async_set_universal_values(
-        new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+        new_values,
+        event,
+        grouping_index,
+        competition_index,
+        team_index,
+        lang,
+        sensor_name,
     )
     if not rc:
         _LOGGER.debug(
@@ -65,7 +86,13 @@ async def async_set_values(
     #
     if await async_get_value(competitor, "type") == "team":
         rc = await async_set_team_values(
-            new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+            new_values,
+            event,
+            grouping_index,
+            competition_index,
+            team_index,
+            lang,
+            sensor_name,
         )
         if not rc:
             _LOGGER.debug(
@@ -89,7 +116,12 @@ async def async_set_values(
 
     if new_values["state"] == "IN":
         rc = await async_set_in_values(
-            new_values, event, grouping_index, competition_index, team_index, sensor_name
+            new_values,
+            event,
+            grouping_index,
+            competition_index,
+            team_index,
+            sensor_name,
         )
         if not rc:
             _LOGGER.debug(
@@ -124,7 +156,13 @@ async def async_set_values(
         )
     elif new_values["sport"] == "tennis":
         rc = await async_set_tennis_values(
-            new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+            new_values,
+            event,
+            grouping_index,
+            competition_index,
+            team_index,
+            lang,
+            sensor_name,
         )
     elif new_values["sport"] == "mma":
         rc = await async_set_mma_values(
@@ -151,14 +189,14 @@ async def async_set_values(
     if new_values["state"] == "IN":
         new_values["private_fast_refresh"] = True
     if new_values["state"] == "PRE" and (
-        abs((arrow.get(new_values["date"]) - arrow.now()).total_seconds()) < 
-        (int(DEFAULT_REFRESH_RATE.total_seconds())*2)
+        abs((arrow.get(new_values["date"]) - arrow.now()).total_seconds())
+        < (int(DEFAULT_REFRESH_RATE.total_seconds()) * 2)
     ):
         _LOGGER.debug(
             "%s: Event is within %s minutes, setting refresh rate to %s seconds.",
             sensor_name,
-            int(DEFAULT_REFRESH_RATE.total_seconds()/60)*2,
-            int(RAPID_REFRESH_RATE.total_seconds())
+            int(DEFAULT_REFRESH_RATE.total_seconds() / 60) * 2,
+            int(RAPID_REFRESH_RATE.total_seconds()),
         )
         new_values["private_fast_refresh"] = True
 
@@ -171,7 +209,13 @@ async def async_set_values(
 #  Set Universal Values
 #
 async def async_set_universal_values(
-    new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+    new_values,
+    event,
+    grouping_index,
+    competition_index,
+    team_index,
+    lang,
+    sensor_name,
 ) -> bool:
     """Function to set new_values common for all sports"""
 
@@ -180,15 +224,21 @@ async def async_set_universal_values(
     oppo_index = 1 if team_index == 0 else 0
     grouping = await async_get_value(event, "groupings", grouping_index)
     if grouping is None:
-        competition = await async_get_value(event, "competitions", competition_index)
+        competition = await async_get_value(
+            event, "competitions", competition_index
+        )
     else:
-        competition = await async_get_value(grouping, "competitions", competition_index)
+        competition = await async_get_value(
+            grouping, "competitions", competition_index
+        )
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
 
     if competition is None or competitor is None or opponent is None:
         _LOGGER.debug(
-            "%s: async_set_universal_values() 1.1: %s", sensor_name, sensor_name
+            "%s: async_set_universal_values() 1.1: %s",
+            sensor_name,
+            sensor_name,
         )
         return False
 
@@ -212,7 +262,9 @@ async def async_set_universal_values(
     #    _LOGGER.debug("%s: async_set_universal_values() 2: %s", sensor_name, sensor_name)
 
     try:
-        new_values["kickoff_in"] = arrow.get(new_values["date"]).humanize(locale=lang)
+        new_values["kickoff_in"] = arrow.get(new_values["date"]).humanize(
+            locale=lang
+        )
     except:
         try:
             new_values["kickoff_in"] = arrow.get(new_values["date"]).humanize(
@@ -269,43 +321,55 @@ async def async_set_universal_values(
         competitor,
         "team",
         "shortDisplayName",
-        default=await async_get_value(competitor, "athlete", "displayName",
-            default=await async_get_value(competitor, "roster", "shortDisplayName")
+        default=await async_get_value(
+            competitor,
+            "athlete",
+            "displayName",
+            default=await async_get_value(
+                competitor, "roster", "shortDisplayName"
+            ),
         ),
     )
     new_values["team_long_name"] = await async_get_value(
         competitor,
         "team",
         "displayName",
-        default=await async_get_value(competitor, "athlete", "displayName",
-            default=await async_get_value(competitor, "roster", "displayName")
+        default=await async_get_value(
+            competitor,
+            "athlete",
+            "displayName",
+            default=await async_get_value(competitor, "roster", "displayName"),
         ),
     )
     new_values["team_conference_id"] = await async_get_value(
-        competitor,
-        "team",
-        "conferenceId"
+        competitor, "team", "conferenceId"
     )
     new_values["opponent_name"] = await async_get_value(
         opponent,
         "team",
         "shortDisplayName",
-        default=await async_get_value(opponent, "athlete", "displayName",
-            default=await async_get_value(opponent, "roster", "shortDisplayName"),
+        default=await async_get_value(
+            opponent,
+            "athlete",
+            "displayName",
+            default=await async_get_value(
+                opponent, "roster", "shortDisplayName"
+            ),
         ),
     )
     new_values["opponent_long_name"] = await async_get_value(
         opponent,
         "team",
         "displayName",
-        default=await async_get_value(opponent, "athlete", "displayName",
-            default=await async_get_value(opponent, "roster", "displayName")
+        default=await async_get_value(
+            opponent,
+            "athlete",
+            "displayName",
+            default=await async_get_value(opponent, "roster", "displayName"),
         ),
     )
     new_values["opponent_conference_id"] = await async_get_value(
-        opponent,
-        "team",
-        "conferenceId"
+        opponent, "team", "conferenceId"
     )
     new_values["team_record"] = await async_get_value(
         competitor, "records", 0, "summary"
@@ -336,14 +400,14 @@ async def async_set_universal_values(
         "links",
         0,
         "href",
-        )
+    )
     new_values["opponent_url"] = await async_get_value(
         opponent,
         "team",
         "links",
         0,
         "href",
-        )
+    )
     #    _LOGGER.debug("%s: async_set_universal_values() 4: %s", sensor_name, sensor_name)
 
     new_values["quarter"] = await async_get_value(
@@ -363,7 +427,11 @@ async def async_set_universal_values(
         new_values["team_score"] = (
             str(await async_get_value(competitor, "score"))
             + "("
-            + str(event["competitions"][0]["competitors"][team_index]["shootoutScore"])
+            + str(
+                event["competitions"][0]["competitors"][team_index][
+                    "shootoutScore"
+                ]
+            )
             + ")"
         )
     except:
@@ -372,7 +440,11 @@ async def async_set_universal_values(
         new_values["opponent_score"] = (
             str(await async_get_value(opponent, "score"))
             + "("
-            + str(event["competitions"][0]["competitors"][oppo_index]["shootoutScore"])
+            + str(
+                event["competitions"][0]["competitors"][oppo_index][
+                    "shootoutScore"
+                ]
+            )
             + ")"
         )
     except:
@@ -382,15 +454,15 @@ async def async_set_universal_values(
 
     new_values["team_winner"] = await async_get_value(competitor, "winner")
     if new_values["team_winner"] == "true":
-        new_values["team_winner"] = True;
+        new_values["team_winner"] = True
     elif new_values["team_winner"] == "false":
-        new_values["team_winner"] = False;
+        new_values["team_winner"] = False
 
     new_values["opponent_winner"] = await async_get_value(opponent, "winner")
     if new_values["opponent_winner"] == "true":
-        new_values["opponent_winner"] = True;
+        new_values["opponent_winner"] = True
     elif new_values["opponent_winner"] == "false":
-        new_values["opponent_winner"] = False;
+        new_values["opponent_winner"] = False
 
     new_values["team_rank"] = await async_get_value(
         competitor, "curatedRank", "current"
@@ -413,7 +485,13 @@ async def async_set_universal_values(
 #  Set Team Values
 #
 async def async_set_team_values(
-    new_values, event, grouping_index, competition_index, team_index, lang, sensor_name
+    new_values,
+    event,
+    grouping_index,
+    competition_index,
+    team_index,
+    lang,
+    sensor_name,
 ) -> bool:
     """Function to set new_values for team sports"""
 
@@ -422,9 +500,13 @@ async def async_set_team_values(
     oppo_index = 1 if team_index == 0 else 0
     grouping = await async_get_value(event, "groupings", grouping_index)
     if grouping is None:
-        competition = await async_get_value(event, "competitions", competition_index)
+        competition = await async_get_value(
+            event, "competitions", competition_index
+        )
     else:
-        competition = await async_get_value(grouping, "competitions", competition_index)
+        competition = await async_get_value(
+            grouping, "competitions", competition_index
+        )
 
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)
@@ -435,7 +517,9 @@ async def async_set_team_values(
 
     #    _LOGGER.debug("%s: async_set_team_values() 2: %s", sensor_name, sensor_name)
 
-    new_values["team_abbr"] = await async_get_value(competitor, "team", "abbreviation")
+    new_values["team_abbr"] = await async_get_value(
+        competitor, "team", "abbreviation"
+    )
     new_values["opponent_abbr"] = await async_get_value(
         opponent, "team", "abbreviation"
     )
@@ -443,17 +527,25 @@ async def async_set_team_values(
     #    _LOGGER.debug("%s: async_set_team_values() 3: %s", sensor_name, new_values)
 
     new_values["team_homeaway"] = await async_get_value(competitor, "homeAway")
-    new_values["opponent_homeaway"] = await async_get_value(opponent, "homeAway")
+    new_values["opponent_homeaway"] = await async_get_value(
+        opponent, "homeAway"
+    )
 
     team_color = str(
         await async_get_value(competitor, "team", "color", default="D3D3D3")
     )
-    oppo_color = str(await async_get_value(opponent, "team", "color", default="A9A9A9"))
+    oppo_color = str(
+        await async_get_value(opponent, "team", "color", default="A9A9A9")
+    )
     team_alt_color = str(
-        await async_get_value(competitor, "team", "alternateColor", default=team_color)
+        await async_get_value(
+            competitor, "team", "alternateColor", default=team_color
+        )
     )
     oppo_alt_color = str(
-        await async_get_value(opponent, "team", "alternateColor", default=oppo_color)
+        await async_get_value(
+            opponent, "team", "alternateColor", default=oppo_color
+        )
     )
 
     #    _LOGGER.debug("%s: async_set_team_values() 4: %s", sensor_name, team_color)
@@ -486,7 +578,12 @@ async def async_set_pre_values(new_values, event) -> bool:
 #  IN
 #
 async def async_set_in_values(
-    new_values, event, grouping_index, competition_index, team_index, sensor_name
+    new_values,
+    event,
+    grouping_index,
+    competition_index,
+    team_index,
+    sensor_name,
 ) -> dict:
     """Function to set new_values common for IN state"""
 
@@ -502,9 +599,13 @@ async def async_set_in_values(
 
     grouping = await async_get_value(event, "groupings", grouping_index)
     if grouping is None:
-        competition = await async_get_value(event, "competitions", competition_index)
+        competition = await async_get_value(
+            event, "competitions", competition_index
+        )
     else:
-        competition = await async_get_value(grouping, "competitions", competition_index)
+        competition = await async_get_value(
+            grouping, "competitions", competition_index
+        )
 
     competitor = await async_get_value(competition, "competitors", team_index)
     opponent = await async_get_value(competition, "competitors", oppo_index)

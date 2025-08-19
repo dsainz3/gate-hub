@@ -1,4 +1,5 @@
 """Parser for passive BLE advertisements."""
+
 import logging
 from typing import Optional
 
@@ -55,6 +56,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class BleParser:
     """Parser for BLE advertisements"""
+
     def __init__(
         self,
         report_unknown=False,
@@ -63,7 +65,7 @@ class BleParser:
         sensor_whitelist=None,
         tracker_whitelist=None,
         report_unknown_whitelist=None,
-        aeskeys=None
+        aeskeys=None,
     ):
         self.report_unknown = report_unknown
         self.discovery = discovery
@@ -104,9 +106,10 @@ class BleParser:
         # check for BTLE msg size
         msg_length = data[2] + 3
         if (
-            msg_length <= adpayload_start or msg_length != len(data) or msg_length != (
-                adpayload_start + adpayload_size + (0 if is_ext_packet else 1)
-            )
+            msg_length <= adpayload_start
+            or msg_length != len(data)
+            or msg_length
+            != (adpayload_start + adpayload_size + (0 if is_ext_packet else 1))
         ):
             return None, None
         # extract RSSI byte
@@ -116,7 +119,9 @@ class BleParser:
         if rssi > 127:
             rssi = rssi - 256
         # MAC address
-        mac = (data[8 if is_ext_packet else 7:14 if is_ext_packet else 13])[::-1]
+        mac = (data[8 if is_ext_packet else 7 : 14 if is_ext_packet else 13])[
+            ::-1
+        ]
         complete_local_name = ""
         shortened_local_name = ""
         service_class_uuid16 = None
@@ -127,7 +132,9 @@ class BleParser:
         while adpayload_size > 1:
             adstuct_size = data[adpayload_start] + 1
             if adstuct_size > 1 and adstuct_size <= adpayload_size:
-                adstruct = data[adpayload_start:adpayload_start + adstuct_size]
+                adstruct = data[
+                    adpayload_start : adpayload_start + adstuct_size
+                ]
                 # https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/
                 adstuct_type = adstruct[1]
                 if adstuct_type == 0x02:
@@ -173,19 +180,19 @@ class BleParser:
             service_class_uuid128,
             local_name,
             service_data_list,
-            man_spec_data_list
+            man_spec_data_list,
         )
         return sensor_data, tracker_data
 
     def parse_advertisement(
-            self,
-            mac: bytes,
-            rssi: int,
-            service_class_uuid16: Optional[int] = None,
-            service_class_uuid128: Optional[bytes] = None,
-            local_name: Optional[str] = "",
-            service_data_list: Optional[list] = None,
-            man_spec_data_list: Optional[list] = None
+        self,
+        mac: bytes,
+        rssi: int,
+        service_class_uuid16: Optional[int] = None,
+        service_class_uuid128: Optional[bytes] = None,
+        local_name: Optional[str] = "",
+        service_data_list: Optional[list] = None,
+        man_spec_data_list: Optional[list] = None,
     ):
         """parse BLE advertisement"""
         sensor_data = {}
@@ -205,7 +212,9 @@ class BleParser:
                     if uuid16 == 0x1809:
                         # UUID16 = Health Thermometer service (used by Relsib)
                         if len(service_data_list) == 3:
-                            uuid16_2 = (service_data_list[1][3] << 8) | service_data_list[1][2]
+                            uuid16_2 = (
+                                service_data_list[1][3] << 8
+                            ) | service_data_list[1][2]
                             if uuid16_2 == 0x181A:
                                 service_data = b"".join(service_data_list)
                         sensor_data = parse_relsib(self, service_data, mac)
@@ -213,7 +222,9 @@ class BleParser:
                     if uuid16 == 0x181A:
                         # UUID16 = Environmental Sensing (used by ATC or b-parasite)
                         if len(service_data) == 22 or len(service_data) == 20:
-                            sensor_data = parse_bparasite(self, service_data, mac)
+                            sensor_data = parse_bparasite(
+                                self, service_data, mac
+                            )
                         else:
                             sensor_data = parse_atc(self, service_data, mac)
                         break
@@ -223,13 +234,18 @@ class BleParser:
                         break
                     elif uuid16 in [0x181C, 0x181E]:
                         # UUID16 = User Data and Bond Management (used by BTHome)
-                        sensor_data = parse_bthome(self, service_data, uuid16, mac)
+                        sensor_data = parse_bthome(
+                            self, service_data, uuid16, mac
+                        )
                         break
                     elif uuid16 == 0x5242:
                         # UUID16 = HolyIOT
                         sensor_data = parse_holyiot(self, service_data, mac)
                         break
-                    elif uuid16 in [0xAA20, 0xAA21, 0xAA22] and local_name == "ECo":
+                    elif (
+                        uuid16 in [0xAA20, 0xAA21, 0xAA22]
+                        and local_name == "ECo"
+                    ):
                         # UUID16 = Relsib
                         sensor_data = parse_relsib(self, service_data, mac)
                         break
@@ -239,7 +255,9 @@ class BleParser:
                         break
                     elif uuid16 == 0xFCD2:
                         # UUID16 = Allterco Robotics ltd (BTHome V2)
-                        sensor_data = parse_bthome(self, service_data, uuid16, mac)
+                        sensor_data = parse_bthome(
+                            self, service_data, uuid16, mac
+                        )
                         break
                     elif uuid16 in [0xFD3D, 0x0D00]:
                         # UUID16 = unknown (used by Switchbot)
@@ -264,7 +282,9 @@ class BleParser:
                             break
                         elif len(service_data) >= 23:
                             # UUID16 = Google (used by Ruuvitag V2/V4)
-                            sensor_data = parse_ruuvitag(self, service_data, mac)
+                            sensor_data = parse_ruuvitag(
+                                self, service_data, mac
+                            )
                             break
                     elif uuid16 == 0xFEE0:
                         # UUID16 = Anhui Huami Information Technology Co., Ltd. (Amazfit)
@@ -272,7 +292,9 @@ class BleParser:
                             man_spec_data = man_spec_data_list[0]
                         else:
                             man_spec_data = None
-                        sensor_data = parse_amazfit(self, service_data, man_spec_data, mac)
+                        sensor_data = parse_amazfit(
+                            self, service_data, man_spec_data, mac
+                        )
                     elif uuid16 == 0xFFF9:
                         # UUID16 = FIDO (used by Cleargrass)
                         sensor_data = parse_qingping(self, service_data, mac)
@@ -281,7 +303,9 @@ class BleParser:
                         # UUID16 = Temperature and Humidity (used by Teltonika)
                         if len(service_data_list) == 2:
                             service_data = b"".join(service_data_list)
-                        sensor_data = parse_teltonika(self, service_data, local_name, mac)
+                        sensor_data = parse_teltonika(
+                            self, service_data, local_name, mac
+                        )
                         break
                     else:
                         unknown_sensor = True
@@ -291,31 +315,62 @@ class BleParser:
                     comp_id = (man_spec_data[3] << 8) | man_spec_data[2]
                     data_len = man_spec_data[0]
                     # Filter on Company Identifier
-                    if comp_id == 0x0001 and data_len in [0x09, 0x0C, 0x22, 0x25]:
+                    if comp_id == 0x0001 and data_len in [
+                        0x09,
+                        0x0C,
+                        0x22,
+                        0x25,
+                    ]:
                         # Govee H5101/H5102/H5106/H5177
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif comp_id == 0x004C and man_spec_data[4] == 0x02:
                         # iBeacon
-                        if int.from_bytes(man_spec_data[6:22], byteorder='big') in TILT_TYPES:
+                        if (
+                            int.from_bytes(
+                                man_spec_data[6:22], byteorder="big"
+                            )
+                            in TILT_TYPES
+                        ):
                             # Tilt
-                            sensor_data, tracker_data = parse_tilt(self, man_spec_data, mac)
+                            sensor_data, tracker_data = parse_tilt(
+                                self, man_spec_data, mac
+                            )
                             uuid = man_spec_data[6:22]
                             break
-                        elif int.from_bytes(man_spec_data[6:22], byteorder='big') in JAALEE_TYPES:
+                        elif (
+                            int.from_bytes(
+                                man_spec_data[6:22], byteorder="big"
+                            )
+                            in JAALEE_TYPES
+                        ):
                             # Jaalee
-                            sensor_data = parse_jaalee(self, man_spec_data, mac)
+                            sensor_data = parse_jaalee(
+                                self, man_spec_data, mac
+                            )
                             break
                         elif len(man_spec_data_list) == 2:
                             # Teltonika Eye (can send both iBeacon and Teltonika data in one message)
                             second_man_spec_data = man_spec_data_list[1]
-                            second_comp_id = (second_man_spec_data[3] << 8) | second_man_spec_data[2]
+                            second_comp_id = (
+                                second_man_spec_data[3] << 8
+                            ) | second_man_spec_data[2]
                             if second_comp_id == 0x089A:
-                                sensor_data = parse_teltonika(self, second_man_spec_data, local_name, mac)
+                                sensor_data = parse_teltonika(
+                                    self, second_man_spec_data, local_name, mac
+                                )
                                 break
                         else:
                             # iBeacon
-                            sensor_data, tracker_data = parse_ibeacon(self, man_spec_data, mac)
+                            sensor_data, tracker_data = parse_ibeacon(
+                                self, man_spec_data, mac
+                            )
                             uuid = man_spec_data[6:22]
                             break
                     elif comp_id == 0x00DC and data_len == 0x0E:
@@ -332,7 +387,9 @@ class BleParser:
                         break
                     elif comp_id == 0x0157 and data_len == 0x1B:
                         # Miband
-                        sensor_data = parse_amazfit(self, None, man_spec_data, mac)
+                        sensor_data = parse_amazfit(
+                            self, None, man_spec_data, mac
+                        )
                         break
                     elif comp_id == 0x0194 and data_len == 0x0C:
                         # Blustream
@@ -346,7 +403,9 @@ class BleParser:
                         # Teltonika (Ela rebrand)
                         if len(man_spec_data_list) == 2:
                             man_spec_data = b"".join(man_spec_data_list)
-                        sensor_data = parse_teltonika(self, man_spec_data, local_name, mac)
+                        sensor_data = parse_teltonika(
+                            self, man_spec_data, local_name, mac
+                        )
                         break
                     elif comp_id == 0x07B4:
                         # Hörmann
@@ -356,7 +415,9 @@ class BleParser:
                         break
                     elif comp_id == 0x089A:
                         # Teltonika
-                        sensor_data = parse_teltonika(self, man_spec_data, local_name, mac)
+                        sensor_data = parse_teltonika(
+                            self, man_spec_data, local_name, mac
+                        )
                         break
                     elif comp_id == 0x094F and data_len == 0x15:
                         # Mikrotik
@@ -372,7 +433,9 @@ class BleParser:
                         break
                     elif comp_id == 0x0133 and data_len in [0x11, 0x15]:
                         # BlueMaestro
-                        sensor_data = parse_bluemaestro(self, man_spec_data, mac)
+                        sensor_data = parse_bluemaestro(
+                            self, man_spec_data, mac
+                        )
                         break
                     elif comp_id == 0x01AE and data_len == 0x0F:
                         # SmartDry
@@ -380,50 +443,121 @@ class BleParser:
                         break
                     elif comp_id == 0x06D5:
                         # Sensirion
-                        sensor_data = parse_sensirion(self, man_spec_data, local_name, mac)
+                        sensor_data = parse_sensirion(
+                            self, man_spec_data, local_name, mac
+                        )
                         break
-                    elif comp_id in [0x2111, 0x2112, 0x2121, 0x2122] and data_len == 0x0B:
+                    elif (
+                        comp_id in [0x2111, 0x2112, 0x2121, 0x2122]
+                        and data_len == 0x0B
+                    ):
                         # Air Mentor
                         sensor_data = parse_airmentor(self, man_spec_data, mac)
                         break
                     elif comp_id == 0x2730 and data_len in [0x14, 0x2D]:
                         # Govee H5182
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif comp_id == 0x1B36 and data_len in [0x14, 0x2D]:
                         # Govee H5184
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
-                    elif comp_id in [0x4A32, 0x332, 0x4C32] and data_len in [0x17, 0x2D]:
+                    elif comp_id in [0x4A32, 0x332, 0x4C32] and data_len in [
+                        0x17,
+                        0x2D,
+                    ]:
                         # Govee H5185
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
-                    elif comp_id in [0x67DD, 0xE02F, 0xF79F] and data_len in [0x11, 0x2A]:
+                    elif comp_id in [0x67DD, 0xE02F, 0xF79F] and data_len in [
+                        0x11,
+                        0x2A,
+                    ]:
                         # Govee H5183
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
-                    elif comp_id in [0x5112, 0x5122, 0x6111, 0x6121] and data_len == 0x0f:
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
+                    elif (
+                        comp_id in [0x5112, 0x5122, 0x6111, 0x6121]
+                        and data_len == 0x0F
+                    ):
                         # Air Mentor 2S
                         sensor_data = parse_airmentor(self, man_spec_data, mac)
                         break
                     elif comp_id == 0x8801 and data_len in [0x0C, 0x25]:
                         # Govee H5179
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif comp_id == 0xAA55 and data_len == 0x14:
                         # Thermobeacon
-                        sensor_data = parse_thermobeacon(self, man_spec_data, mac)
+                        sensor_data = parse_thermobeacon(
+                            self, man_spec_data, mac
+                        )
                         break
                     elif comp_id == 0xAC63 and data_len in [0x17, 0x2D]:
                         # Govee H5191
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif comp_id == 0xEA1C and data_len == 0x17:
                         # Govee H50555
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
-                    elif comp_id == 0xEC88 and data_len in [0x09, 0x0A, 0x0C, 0x22, 0x24, 0x25]:
+                    elif comp_id == 0xEC88 and data_len in [
+                        0x09,
+                        0x0A,
+                        0x0C,
+                        0x22,
+                        0x24,
+                        0x25,
+                    ]:
                         # Govee H5051/H5071/H5072/H5075/H5074
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif comp_id == 0xF214 and data_len == 0x16:
                         # Grundfos
@@ -433,7 +567,11 @@ class BleParser:
                         # Kegtron
                         sensor_data = parse_kegtron(self, man_spec_data, mac)
                         break
-                    elif comp_id == 0xA0AC and data_len == 0x0F and man_spec_data[14] in [0x06, 0x0D]:
+                    elif (
+                        comp_id == 0xA0AC
+                        and data_len == 0x0F
+                        and man_spec_data[14] in [0x06, 0x0D]
+                    ):
                         # Laica
                         sensor_data = parse_laica(self, man_spec_data, mac)
                         break
@@ -454,9 +592,22 @@ class BleParser:
                         # iNode
                         sensor_data = parse_inode(self, man_spec_data, mac)
                         break
-                    elif man_spec_data[3] in [
-                        0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x9A, 0x9B, 0x9C, 0x9D
-                    ] and data_len == 0x19:
+                    elif (
+                        man_spec_data[3]
+                        in [
+                            0x91,
+                            0x92,
+                            0x93,
+                            0x94,
+                            0x95,
+                            0x96,
+                            0x9A,
+                            0x9B,
+                            0x9C,
+                            0x9D,
+                        ]
+                        and data_len == 0x19
+                    ):
                         # iNode Care Sensors
                         sensor_data = parse_inode(self, man_spec_data, mac)
                         break
@@ -466,62 +617,119 @@ class BleParser:
                         # Jinou BEC07-5
                         sensor_data = parse_jinou(self, man_spec_data, mac)
                         break
-                    elif service_class_uuid16 in [0x5182, 0x5184] and data_len in [0x14, 0x2D]:
+                    elif service_class_uuid16 in [
+                        0x5182,
+                        0x5184,
+                    ] and data_len in [0x14, 0x2D]:
                         # Govee H5182 and H5184
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
-                    elif service_class_uuid16 == 0x5183 and data_len in [0x11, 0x2A]:
+                    elif service_class_uuid16 == 0x5183 and data_len in [
+                        0x11,
+                        0x2A,
+                    ]:
                         # Govee H5183
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
-                    elif service_class_uuid16 in [0x5185, 0x5198] and data_len in [0x17, 0x30]:
+                    elif service_class_uuid16 in [
+                        0x5185,
+                        0x5198,
+                    ] and data_len in [0x17, 0x30]:
                         # Govee H5185 and H5198
-                        sensor_data = parse_govee(self, man_spec_data, service_class_uuid16, local_name, mac)
+                        sensor_data = parse_govee(
+                            self,
+                            man_spec_data,
+                            service_class_uuid16,
+                            local_name,
+                            mac,
+                        )
                         break
                     elif service_class_uuid16 == 0xF0FF:
-                        if comp_id in [0x0010, 0x0011, 0x0015, 0x0018, 0x001B] and data_len in [0x15, 0x17]:
+                        if comp_id in [
+                            0x0010,
+                            0x0011,
+                            0x0015,
+                            0x0018,
+                            0x001B,
+                        ] and data_len in [0x15, 0x17]:
                             # Thermobeacon
-                            sensor_data = parse_thermobeacon(self, man_spec_data, mac)
+                            sensor_data = parse_thermobeacon(
+                                self, man_spec_data, mac
+                            )
                             break
-                        elif (comp_id in [0x0000, 0x0001] or local_name in ["iBBQ", "xBBQ", "sps", "tps"]) and (
-                            data_len in [0x0A, 0x0D, 0x0F, 0x13, 0x17]
-                        ):
+                        elif (
+                            comp_id in [0x0000, 0x0001]
+                            or local_name in ["iBBQ", "xBBQ", "sps", "tps"]
+                        ) and (data_len in [0x0A, 0x0D, 0x0F, 0x13, 0x17]):
                             # Inkbird
-                            sensor_data = parse_inkbird(self, man_spec_data, local_name, mac)
+                            sensor_data = parse_inkbird(
+                                self, man_spec_data, local_name, mac
+                            )
                             break
                         else:
                             unknown_sensor = True
 
                     # Filter on service class uuid128
                     elif service_class_uuid128 == (
-                        b'\xb0\x0a\x09\xec\xd7\x9d\xb8\x93\xba\x42\xd6\x11\x00\x00\x09\xef'
+                        b"\xb0\x0a\x09\xec\xd7\x9d\xb8\x93\xba\x42\xd6\x11\x00\x00\x09\xef"
                     ) and data_len in [0x06, 0x08]:
                         # Sensorpush
-                        sensor_data = parse_sensorpush(self, man_spec_data, mac)
+                        sensor_data = parse_sensorpush(
+                            self, man_spec_data, mac
+                        )
                         break
 
                     # Filter on complete local name
                     elif local_name in ["sps", "tps"] and data_len == 0x0A:
                         # Inkbird IBS-TH
-                        sensor_data = parse_inkbird(self, man_spec_data, local_name, mac)
+                        sensor_data = parse_inkbird(
+                            self, man_spec_data, local_name, mac
+                        )
                         break
                     elif local_name == "MOCREO" and data_len == 0x13:
                         # MOCREO
-                        sensor_data = parse_mocreo(self, man_spec_data, local_name, mac)
+                        sensor_data = parse_mocreo(
+                            self, man_spec_data, local_name, mac
+                        )
                         break
-                    elif local_name[0:5] in ["TP357", "TP359"] and data_len >= 0x07:
+                    elif (
+                        local_name[0:5] in ["TP357", "TP359"]
+                        and data_len >= 0x07
+                    ):
                         # Thermopro
-                        sensor_data = parse_thermopro(self, man_spec_data, local_name[0:5], mac)
+                        sensor_data = parse_thermopro(
+                            self, man_spec_data, local_name[0:5], mac
+                        )
                         break
 
                     # Filter on other parts of the manufacturer specific data
-                    elif data_len == 0x1B and ((man_spec_data[4] << 8) | man_spec_data[5]) == 0xBEAC:
+                    elif (
+                        data_len == 0x1B
+                        and ((man_spec_data[4] << 8) | man_spec_data[5])
+                        == 0xBEAC
+                    ):
                         # AltBeacon
-                        sensor_data, tracker_data = parse_altbeacon(self, man_spec_data, comp_id, mac)
+                        sensor_data, tracker_data = parse_altbeacon(
+                            self, man_spec_data, comp_id, mac
+                        )
                         uuid = man_spec_data[6:22]
                         break
 
-                    elif man_spec_data[0] == 0x12 and comp_id == 0xACC0:  # Acconeer
+                    elif (
+                        man_spec_data[0] == 0x12 and comp_id == 0xACC0
+                    ):  # Acconeer
                         sensor_data = parse_acconeer(self, man_spec_data, mac)
                         break
                     else:
@@ -547,31 +755,49 @@ class BleParser:
 
         # Ignore sensor data for MAC addresses not in sensor whitelist, when discovery is disabled
         if self.discovery is False and mac not in self.sensor_whitelist:
-            _LOGGER.debug("Discovery is disabled. MAC: %s is not whitelisted!", to_mac(mac))
+            _LOGGER.debug(
+                "Discovery is disabled. MAC: %s is not whitelisted!",
+                to_mac(mac),
+            )
             sensor_data = None
         # Ignore sensor data for UUID not in sensor whitelist, when discovery is disabled
-        if self.discovery is False and uuid and uuid not in self.sensor_whitelist:
-            _LOGGER.debug("Discovery is disabled. UUID: %s is not whitelisted!", to_uuid(uuid))
+        if (
+            self.discovery is False
+            and uuid
+            and uuid not in self.sensor_whitelist
+        ):
+            _LOGGER.debug(
+                "Discovery is disabled. UUID: %s is not whitelisted!",
+                to_uuid(uuid),
+            )
 
             sensor_data = None
         # add rssi and local name to the sensor_data output
         if sensor_data:
-            sensor_data.update({
-                "rssi": rssi,
-                "local_name": local_name,
-            })
+            sensor_data.update(
+                {
+                    "rssi": rssi,
+                    "local_name": local_name,
+                }
+            )
         else:
             sensor_data = None
 
         # check for monitored device trackers
-        tracker_id = tracker_data['tracker_id'] if tracker_data and 'tracker_id' in tracker_data else mac
+        tracker_id = (
+            tracker_data["tracker_id"]
+            if tracker_data and "tracker_id" in tracker_data
+            else mac
+        )
         if tracker_id in self.tracker_whitelist:
-            tracker_data.update({
-                "is connected": True,
-                "mac": to_unformatted_mac(mac),
-                "rssi": rssi,
-                "local_name": local_name,
-            })
+            tracker_data.update(
+                {
+                    "is connected": True,
+                    "mac": to_unformatted_mac(mac),
+                    "rssi": rssi,
+                    "local_name": local_name,
+                }
+            )
         else:
             tracker_data = None
 
@@ -589,7 +815,7 @@ class BleParser:
                     man_spec_data_list,
                     local_name,
                     service_class_uuid16,
-                    service_class_uuid128
+                    service_class_uuid128,
                 )
 
         return sensor_data, tracker_data

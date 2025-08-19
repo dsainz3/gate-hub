@@ -1,4 +1,5 @@
 """Component providing support for TPLinkRouter button entities."""
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -42,9 +43,9 @@ BUTTON_TYPES = (
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
@@ -55,18 +56,22 @@ async def async_setup_entry(
     async_add_entities(buttons, False)
 
 
-class TPLinkRouterButtonEntity(CoordinatorEntity[TPLinkRouterCoordinator], ButtonEntity):
+class TPLinkRouterButtonEntity(
+    CoordinatorEntity[TPLinkRouterCoordinator], ButtonEntity
+):
     entity_description: TPLinkButtonEntityDescription
 
     def __init__(
-            self,
-            coordinator: TPLinkRouterCoordinator,
-            description: TPLinkButtonEntityDescription,
+        self,
+        coordinator: TPLinkRouterCoordinator,
+        description: TPLinkButtonEntityDescription,
     ) -> None:
         super().__init__(coordinator)
 
         self._attr_device_info = coordinator.device_info
-        self._attr_unique_id = f"{coordinator.unique_id}_{DOMAIN}_{description.key}"
+        self._attr_unique_id = (
+            f"{coordinator.unique_id}_{DOMAIN}_{description.key}"
+        )
         self.entity_description = description
 
     async def async_press(self) -> None:

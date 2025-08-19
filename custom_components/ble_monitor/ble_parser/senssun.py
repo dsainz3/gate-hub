@@ -12,6 +12,7 @@ def read_stable(ctr1):
     """Parse Stable"""
     return int((ctr1 & 0xA0) == 0xA0)
 
+
 def parse_senssun(self, data: bytes, mac: bytes):
     """Parser for Senssun Scales."""
     xvalue = data[13:19]
@@ -44,7 +45,9 @@ def parse_senssun(self, data: bytes, mac: bytes):
             # ignore first message after a restart
             return None
 
-    result.update({
+    result.update(
+        {
             "packet": packet_id,
-    })
+        }
+    )
     return result

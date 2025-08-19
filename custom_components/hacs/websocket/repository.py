@@ -67,7 +67,9 @@ async def hacs_repository_info(
                 "category": repository.data.category,
                 "config_flow": repository.data.config_flow,
                 "country": repository.repository_manifest.country,
-                "custom": not hacs.repositories.is_default(str(repository.data.id)),
+                "custom": not hacs.repositories.is_default(
+                    str(repository.data.id)
+                ),
                 "default_branch": repository.data.default_branch,
                 "description": repository.data.description,
                 "domain": repository.data.domain,
@@ -324,7 +326,9 @@ async def hacs_repository_release_notes(
                 }
                 for x in repository.releases.objects
                 if not repository.data.installed_version
-                or version_left_higher_then_right(x.tag_name, repository.data.installed_version)
+                or version_left_higher_then_right(
+                    x.tag_name, repository.data.installed_version
+                )
             ],
         )
     )

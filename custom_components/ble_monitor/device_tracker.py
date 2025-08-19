@@ -1,35 +1,54 @@
 """Passive BLE monitor device tracker platform."""
+
 import asyncio
 import logging
 from datetime import timedelta
 
 from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import ScannerEntity
-from homeassistant.const import (CONF_DEVICES, CONF_MAC, CONF_NAME,
-                                 CONF_UNIQUE_ID, MATCH_ALL, STATE_HOME,
-                                 STATE_NOT_HOME)
+from homeassistant.const import (
+    CONF_DEVICES,
+    CONF_MAC,
+    CONF_NAME,
+    CONF_UNIQUE_ID,
+    MATCH_ALL,
+    STATE_HOME,
+    STATE_NOT_HOME,
+)
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import dt
 
-from .const import (CONF_DEVICE_RESTORE_STATE, CONF_DEVICE_TRACK,
-                    CONF_DEVICE_TRACKER_CONSIDER_HOME,
-                    CONF_DEVICE_TRACKER_SCAN_INTERVAL, CONF_GATEWAY_ID,
-                    CONF_PERIOD, CONF_RESTORE_STATE, CONF_UUID,
-                    DEFAULT_DEVICE_TRACK, DEFAULT_DEVICE_TRACKER_CONSIDER_HOME,
-                    DEFAULT_DEVICE_TRACKER_SCAN_INTERVAL, DOMAIN)
-from .helper import (detect_conf_type, dict_get_or, identifier_clean,
-                     identifier_normalize)
+from .const import (
+    CONF_DEVICE_RESTORE_STATE,
+    CONF_DEVICE_TRACK,
+    CONF_DEVICE_TRACKER_CONSIDER_HOME,
+    CONF_DEVICE_TRACKER_SCAN_INTERVAL,
+    CONF_GATEWAY_ID,
+    CONF_PERIOD,
+    CONF_RESTORE_STATE,
+    CONF_UUID,
+    DEFAULT_DEVICE_TRACK,
+    DEFAULT_DEVICE_TRACKER_CONSIDER_HOME,
+    DEFAULT_DEVICE_TRACKER_SCAN_INTERVAL,
+    DOMAIN,
+)
+from .helper import (
+    detect_conf_type,
+    dict_get_or,
+    identifier_clean,
+    identifier_normalize,
+)
 
 RESTORE_ATTRIBUTES = [
-    'rssi',
+    "rssi",
     CONF_GATEWAY_ID,
-    'major',
-    'minor',
-    'measured_power',
-    'cypress_temperature',
-    'cypress_humidity'
+    "major",
+    "minor",
+    "measured_power",
+    "cypress_temperature",
+    "cypress_humidity",
 ]
 
 
@@ -96,7 +115,9 @@ class BLEupdaterTracker:
                 key = dict_get_or(device)
                 if CONF_DEVICE_TRACK in device and device[CONF_DEVICE_TRACK]:
                     # setup device trackers from device registry
-                    dev = dev_registry.async_get_device({(DOMAIN, key.upper())}, set())
+                    dev = dev_registry.async_get_device(
+                        {(DOMAIN, key.upper())}, set()
+                    )
                     if dev:
                         key = identifier_clean(key)
                         trackers = await async_add_device_tracker(key)
@@ -191,18 +212,22 @@ class BleScannerEntity(ScannerEntity, RestoreEntity):
             self.ready_for_update = True
             return
         if "last_seen" in old_state.attributes:
-            self._last_seen = dt.parse_datetime(old_state.attributes["last_seen"])
+            self._last_seen = dt.parse_datetime(
+                old_state.attributes["last_seen"]
+            )
             self._extra_state_attributes["last_seen"] = dt.parse_datetime(
                 old_state.attributes["last_seen"]
             )
 
         restore_attr = RESTORE_ATTRIBUTES
-        restore_attr.append('mac_address' if self.is_beacon else 'uuid')
+        restore_attr.append("mac_address" if self.is_beacon else "uuid")
 
         for attr in restore_attr:
             if attr in old_state.attributes:
-                if attr in ['uuid', 'mac_address']:
-                    self._extra_state_attributes[attr] = identifier_normalize(old_state.attributes[attr])
+                if attr in ["uuid", "mac_address"]:
+                    self._extra_state_attributes[attr] = identifier_normalize(
+                        old_state.attributes[attr]
+                    )
                     continue
 
                 self._extra_state_attributes[attr] = old_state.attributes[attr]
@@ -262,15 +287,18 @@ class BleScannerEntity(ScannerEntity, RestoreEntity):
         if not self.is_beacon:
             return self._fkey
 
-        if 'mac_address' in self._extra_state_attributes:
-            return self._extra_state_attributes['mac_address']
+        if "mac_address" in self._extra_state_attributes:
+            return self._extra_state_attributes["mac_address"]
 
         return None
 
     @property
     def device_info(self):
         """Return device info."""
-        return {"name": self._device_name, "identifiers": {(DOMAIN, self._fkey.upper())}}
+        return {
+            "name": self._device_name,
+            "identifiers": {(DOMAIN, self._fkey.upper())},
+        }
 
     def get_device_settings(self):
         """Set device settings."""
@@ -299,15 +327,23 @@ class BleScannerEntity(ScannerEntity, RestoreEntity):
                         dev_name = device[id_selector]
                     if CONF_DEVICE_RESTORE_STATE in device:
                         if isinstance(device[CONF_DEVICE_RESTORE_STATE], bool):
-                            dev_restore_state = device[CONF_DEVICE_RESTORE_STATE]
+                            dev_restore_state = device[
+                                CONF_DEVICE_RESTORE_STATE
+                            ]
                         else:
-                            dev_restore_state = self._config[CONF_RESTORE_STATE]
+                            dev_restore_state = self._config[
+                                CONF_RESTORE_STATE
+                            ]
                     if CONF_DEVICE_TRACK in device:
                         dev_track = device[CONF_DEVICE_TRACK]
                     if CONF_DEVICE_TRACKER_SCAN_INTERVAL in device:
-                        dev_scan_interval = device[CONF_DEVICE_TRACKER_SCAN_INTERVAL]
+                        dev_scan_interval = device[
+                            CONF_DEVICE_TRACKER_SCAN_INTERVAL
+                        ]
                     if CONF_DEVICE_TRACKER_CONSIDER_HOME in device:
-                        dev_consider_home = device[CONF_DEVICE_TRACKER_CONSIDER_HOME]
+                        dev_consider_home = device[
+                            CONF_DEVICE_TRACKER_CONSIDER_HOME
+                        ]
         device_settings = {
             "name": dev_name,
             "restore state": dev_restore_state,
@@ -317,7 +353,7 @@ class BleScannerEntity(ScannerEntity, RestoreEntity):
         }
         _LOGGER.debug(
             "Device tracker device with %s %s has the following settings. Name: %s. Restore state: %s. Track device: %s. Scan interval: %s. Consider home interval: %s. ",
-            'uuid' if self.is_beacon else 'mac address',
+            "uuid" if self.is_beacon else "mac address",
             self._fkey,
             device_settings["name"],
             device_settings["restore state"],
@@ -346,13 +382,15 @@ class BleScannerEntity(ScannerEntity, RestoreEntity):
         self._last_seen = now
         self._extra_state_attributes["last_seen"] = self._last_seen
         restore_attr = RESTORE_ATTRIBUTES
-        restore_attr.append('mac_address' if self.is_beacon else 'uuid')
+        restore_attr.append("mac_address" if self.is_beacon else "uuid")
 
         for attr in restore_attr:
-            key = CONF_MAC if attr == 'mac_address' else attr
+            key = CONF_MAC if attr == "mac_address" else attr
             if key in data:
-                if attr in ['uuid', 'mac_address']:
-                    self._extra_state_attributes[attr] = identifier_normalize(data[key])
+                if attr in ["uuid", "mac_address"]:
+                    self._extra_state_attributes[attr] = identifier_normalize(
+                        data[key]
+                    )
                     continue
 
                 self._extra_state_attributes[attr] = data[key]

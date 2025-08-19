@@ -24,12 +24,17 @@ async def async_register_frontend(hass: HomeAssistant, hacs: HacsBase) -> None:
     """Register the frontend."""
 
     # Register frontend
-    if hacs.configuration.dev and (frontend_path := os.getenv("HACS_FRONTEND_DIR")):
+    if hacs.configuration.dev and (
+        frontend_path := os.getenv("HACS_FRONTEND_DIR")
+    ):
         hacs.log.warning(
             "<HacsFrontend> Frontend development mode enabled. Do not run in production!"
         )
         await async_register_static_path(
-            hass, f"{URL_BASE}/frontend", f"{frontend_path}/hacs_frontend", cache_headers=False
+            hass,
+            f"{URL_BASE}/frontend",
+            f"{frontend_path}/hacs_frontend",
+            cache_headers=False,
         )
         hacs.frontend_version = "dev"
     else:
@@ -40,7 +45,9 @@ async def async_register_frontend(hass: HomeAssistant, hacs: HacsBase) -> None:
 
     # Custom iconset
     await async_register_static_path(
-        hass, f"{URL_BASE}/iconset.js", str(hacs.integration_dir / "iconset.js")
+        hass,
+        f"{URL_BASE}/iconset.js",
+        str(hacs.integration_dir / "iconset.js"),
     )
     add_extra_js_url(hass, f"{URL_BASE}/iconset.js")
 

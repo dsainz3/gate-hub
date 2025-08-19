@@ -1,4 +1,5 @@
 """BT helpers for ble_monitor."""
+
 import logging
 import time
 
@@ -12,12 +13,16 @@ _LOGGER = logging.getLogger(__name__)
 # check rfkill state
 def rfkill_list_bluetooth(hci):
     """Execute the rfkill list bluetooth command."""
-    hci_idx = f'hci{hci}'
+    hci_idx = f"hci{hci}"
     rfkill_dict = rfkill.rfkill_list()
     try:
         rfkill_hci_state = rfkill_dict[hci_idx]
     except KeyError:
-        _LOGGER.error('RF kill switch check failed - no data for %s. Available data: %s', hci_idx, rfkill_dict)
+        _LOGGER.error(
+            "RF kill switch check failed - no data for %s. Available data: %s",
+            hci_idx,
+            rfkill_dict,
+        )
         return None, None
     soft_block = rfkill_hci_state["soft"]
     hard_block = rfkill_hci_state["hard"]
@@ -32,7 +37,7 @@ class MGMTBluetoothCtl:
         self.mac = None
         self._hci = hci
         self.presented_list = {}
-        idxdata = btmgmt_sync.send('ReadControllerIndexList', None)
+        idxdata = btmgmt_sync.send("ReadControllerIndexList", None)
         if idxdata.event_frame.status.value != 0x00:  # 0x00 - Success
             _LOGGER.error(
                 "Unable to get hci controllers index list! Event frame status: %s",
@@ -40,15 +45,20 @@ class MGMTBluetoothCtl:
             )
             return
         if idxdata.cmd_response_frame.num_controllers == 0:
-            _LOGGER.warning("There are no BT controllers present in the system!")
+            _LOGGER.warning(
+                "There are no BT controllers present in the system!"
+            )
             return
-        hci_idx_list = getattr(idxdata.cmd_response_frame, "controller_index[i]")
+        hci_idx_list = getattr(
+            idxdata.cmd_response_frame, "controller_index[i]"
+        )
         for idx in hci_idx_list:
-            hci_info = btmgmt_sync.send('ReadControllerInformation', idx)
+            hci_info = btmgmt_sync.send("ReadControllerInformation", idx)
             _LOGGER.debug(hci_info)
             # bit 9 == LE capability (https://github.com/bluez/bluez/blob/master/doc/mgmt-api.txt)
             bt_le = bool(
-                hci_info.cmd_response_frame.supported_settings & 0b000000001000000000
+                hci_info.cmd_response_frame.supported_settings
+                & 0b000000001000000000
             )
             if bt_le is not True:
                 _LOGGER.warning(
@@ -66,7 +76,7 @@ class MGMTBluetoothCtl:
     def powered(self):
         """Powered state of the interface"""
         if self.idx is not None:
-            response = btmgmt_sync.send('ReadControllerInformation', self.idx)
+            response = btmgmt_sync.send("ReadControllerInformation", self.idx)
             return response.cmd_response_frame.current_settings.get(
                 btmgmt_protocol.SupportedSettings.Powered
             )
@@ -74,7 +84,9 @@ class MGMTBluetoothCtl:
 
     @powered.setter
     def powered(self, new_state):
-        response = btmgmt_sync.send('SetPowered', self.idx, int(new_state is True))
+        response = btmgmt_sync.send(
+            "SetPowered", self.idx, int(new_state is True)
+        )
         if response.event_frame.status.value == 0x00:  # 0x00 - Success
             return True
         return False
@@ -130,7 +142,7 @@ def reset_bluetooth(hci):
     elif pstate_before is False:
         _LOGGER.warning(
             "Current power state of bluetooth adapter hci%i is OFF, trying to turn it back ON.",
-            hci
+            hci,
         )
     else:
         _LOGGER.debug(
@@ -145,13 +157,17 @@ def reset_bluetooth(hci):
     pstate_after = adapter.powered
     if pstate_after is True:
         if pstate_before is False:
-            _LOGGER.warning("Bluetooth adapter hci%i successfully turned back ON.", hci)
+            _LOGGER.warning(
+                "Bluetooth adapter hci%i successfully turned back ON.", hci
+            )
         else:
-            _LOGGER.debug("Power state of bluetooth adapter is ON after power cycle.")
+            _LOGGER.debug(
+                "Power state of bluetooth adapter is ON after power cycle."
+            )
     elif pstate_after is False:
         _LOGGER.warning(
             "Power state of bluetooth adapter hci%i is OFF after power cycle.",
-            hci
+            hci,
         )
     else:
         _LOGGER.debug(
@@ -163,7 +179,9 @@ BT_INTERFACES = hci_get_mac([0, 1, 2, 3])
 if BT_INTERFACES:
     DEFAULT_BT_INTERFACE = list(BT_INTERFACES.items())[0][1]
     DEFAULT_HCI_INTERFACE = list(BT_INTERFACES.items())[0][0]
-    BT_MULTI_SELECT = {value: f'{value} (hci{key})' for (key, value) in BT_INTERFACES.items()}
+    BT_MULTI_SELECT = {
+        value: f"{value} (hci{key})" for (key, value) in BT_INTERFACES.items()
+    }
 else:
     DEFAULT_BT_INTERFACE = "disable"
     DEFAULT_HCI_INTERFACE = "disable"

@@ -16,7 +16,10 @@ from homeassistant.components.light import (
     LightEntity,
 )
 from homeassistant.const import CONF_DELAY
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import (
+    DataUpdateCoordinator,
+    UpdateFailed,
+)
 from homeassistant.util import color
 
 from .const import (
@@ -112,14 +115,18 @@ class GoveeDataUpdateCoordinator(DataUpdateCoordinator):
                 if self.config_offline_is_off:
                     hub.config_offline_is_off = True
                 else:
-                    hub.config_offline_is_off = None  # allow override in learning info
+                    hub.config_offline_is_off = (
+                        None  # allow override in learning info
+                    )
 
                 # govee will change this to a single request in 2021
                 device_states = await hub.get_states()
                 for device in device_states:
                     if device.error:
                         self.logger.warning(
-                            "update failed for %s: %s", device.device, device.error
+                            "update failed for %s: %s",
+                            device.device,
+                            device.error,
                         )
                 return device_states
         except GoveeError as ex:
@@ -175,7 +182,9 @@ class GoveeLightEntity(LightEntity):
     async def async_turn_on(self, **kwargs):
         """Turn device on."""
         _LOGGER.debug(
-            "async_turn_on for Govee light %s, kwargs: %s", self._device.device, kwargs
+            "async_turn_on for Govee light %s, kwargs: %s",
+            self._device.device,
+            kwargs,
         )
         err = None
 
@@ -205,7 +214,8 @@ class GoveeLightEntity(LightEntity):
         # debug log unknown commands
         if kwargs:
             _LOGGER.debug(
-                "async_turn_on doesnt know how to handle kwargs: %s", repr(kwargs)
+                "async_turn_on doesnt know how to handle kwargs: %s",
+                repr(kwargs),
             )
         # warn on any error
         if err:
@@ -314,7 +324,9 @@ class GoveeLightEntity(LightEntity):
             # rate limiting information on Govee API
             "rate_limit_total": self._hub.rate_limit_total,
             "rate_limit_remaining": self._hub.rate_limit_remaining,
-            "rate_limit_reset_seconds": round(self._hub.rate_limit_reset_seconds, 2),
+            "rate_limit_reset_seconds": round(
+                self._hub.rate_limit_reset_seconds, 2
+            ),
             "rate_limit_reset": datetime.fromtimestamp(
                 self._hub.rate_limit_reset
             ).isoformat(),

@@ -1,9 +1,11 @@
 """The tests for the SensorPush ble_parser."""
+
 from ble_monitor.ble_parser import BleParser
 
 
 class TestSensorPush:
     """Tests for the SensorPush parser"""
+
     def test_SensorPush_HTw(self):
         """Test SensorPush HT.w parser."""
         data_string = "043E280201000090F083F134A41C0201061106B00A09ECD79DB893BA42D611000009EF06FF04E9187D39D3"
