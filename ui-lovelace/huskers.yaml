@@ -1,4 +1,4 @@
-title: Huskers
+﻿title: Huskers
 views:
   - !include ui-lovelace/views/huskers_led_test.yaml
   - !include ui-lovelace/views/huskers_hq.yaml

@@ -1,4 +1,4 @@
-call_api:
+﻿call_api:
   name: Teamtracker Call API
   description: Sets the teamtracker sensor based on the input parameters, calls the ESPN API, and populates the sensor attributes.
   target:

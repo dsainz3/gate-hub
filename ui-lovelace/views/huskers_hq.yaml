@@ -1,4 +1,4 @@
-title: Huskers – HQ
+﻿title: Huskers â€“ HQ
 path: huskers-hq
 icon: mdi:football-helmet
 badges: []
@@ -12,11 +12,11 @@ cards:
       {% set clock = states('sensor.huskers_game_clock') %}
       {% set status = states('sensor.huskers_game_status') %}
 
-      {% if our in ['unknown','unavailable','none','None',''] %}{% set our = '—' %}{% endif %}
-      {% if opp in ['unknown','unavailable','none','None',''] %}{% set opp = '—' %}{% endif %}
+      {% if our in ['unknown','unavailable','none','None',''] %}{% set our = 'â€”' %}{% endif %}
+      {% if opp in ['unknown','unavailable','none','None',''] %}{% set opp = 'â€”' %}{% endif %}
       {% if opp_name in ['unknown','unavailable','none','None',''] %}{% set opp_name = 'Opponent' %}{% endif %}
-      {% if qtr in ['unknown','unavailable','none','None',''] %}{% set qtr = '—' %}{% endif %}
-      {% if clock in ['unknown','unavailable','none','None',''] %}{% set clock = '—' %}{% endif %}
+      {% if qtr in ['unknown','unavailable','none','None',''] %}{% set qtr = 'â€”' %}{% endif %}
+      {% if clock in ['unknown','unavailable','none','None',''] %}{% set clock = 'â€”' %}{% endif %}
       {% if status in ['unknown','unavailable','none','None',''] %}{% set status = 'No game data' %}{% endif %}
 
       # Huskers HQ

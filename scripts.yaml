@@ -22,35 +22,42 @@ huskers_touchdown_burst:
         sequence:
           # Left red, right cream
           - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
+            target:
+              entity_id: light.light_theater_left
             data:
-              {
-                hs_color: [355, 90],
-                brightness: 255,
-                transition: "{{ trans }}",
-              }
+              hs_color: [355, 90]
+              brightness: 255
+              transition: "{{ trans }}"
           - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
+            target:
+              entity_id: light.light_theater_right
             data:
-              { hs_color: [48, 12], brightness: 255, transition: "{{ trans }}" }
-          - delay: "{{ on_time }}"
-          # Swap: left cream, right red
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data:
-              { hs_color: [48, 12], brightness: 255, transition: "{{ trans }}" }
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data:
-              {
-                hs_color: [355, 90],
-                brightness: 255,
-                transition: "{{ trans }}",
-              }
+              hs_color: [48, 12]
+              brightness: 255
+              transition: "{{ trans }}"
           - delay: "{{ on_time }}"
 
-    # 4) Small settle, then restore the snapshot (previous state)
+          # Swap: left cream, right red
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              hs_color: [48, 12]
+              brightness: 255
+              transition: "{{ trans }}"
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: "{{ trans }}"
+          - delay: "{{ on_time }}"
+
+    # 4) Settle and restore the snapshot
     - delay: 0.2
     - service: scene.turn_on
-      target: { entity_id: scene.huskers_theater_pre_burst }
-      data: { transition: 1.0 }
+      target:
+        entity_id: scene.huskers_theater_pre_burst
+      data:
+        transition: 1.0
