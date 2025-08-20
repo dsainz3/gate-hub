@@ -89,7 +89,7 @@
     hooks:
       - id: hass-config-check
         name: Home Assistant config check (portable)
-        entry: bash scripts/hass_check.sh
-        language: system
+        entry: python scripts/hass_check.py
+        language: python
         types: [yaml]
         pass_filenames: false
