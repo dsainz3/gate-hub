@@ -1,5 +1,16 @@
-ui-lovelace/**
+
 blueprints/**
 custom_components/**/*.yaml
 zigbee2mqtt/**
 themes/**
+
+# vendor / caches
+node_modules/
+**/.cache/
+**/.prettier-cache/
+**/.prettier-caches/
+
+# HA vendor assets that shouldn't be reformatted
+www/
+www/community/
+custom_components/**/hacs_frontend/

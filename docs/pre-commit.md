@@ -18,5 +18,5 @@ code style.
 Run all checks locally with:
 
 ```bash
-poetry run pre-commit run --all-files
+pre-commit run --all-files
 ```

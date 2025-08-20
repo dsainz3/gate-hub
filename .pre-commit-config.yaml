@@ -4,6 +4,8 @@
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
+        name: Prettier (YAML)
+        args: [--write, --parser=yaml]
         files: '\.(ya?ml)$'
         # avoid Lovelace & vendor YAML (HA tags like !include break generic parsers)
         exclude: >
@@ -15,6 +17,22 @@
             themes/.*\.ya?ml|
             node_modules/.*\.ya?ml
           )$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+        exclude: >
+          (?x)(
+            ^configuration\.ya?ml$|
+            ^ui-lovelace/.*\.ya?ml$|
+            ^blueprints/.*\.ya?ml$|
+            ^custom_components/.*/services\.ya?ml$|
+            ^zigbee2mqtt/.*\.ya?ml$
+          )
 
   # HYGIENE + YAML parse (skip HA-tagged YAML)
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -45,14 +63,14 @@
 
   # PY: Black (only your code paths, not vendor)
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 25.1.0
     hooks:
       - id: black
         files: '^(scripts/|tools/|custom_components/huskers/).*\.py$'
 
   # PY: flake8 (exclude vendor)
   - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.3.0
     hooks:
       - id: flake8
         files: '\.py$'
@@ -71,7 +89,7 @@
     hooks:
       - id: hass-config-check
         name: Home Assistant config check (portable)
-        entry: bash scripts/hass_check.sh
-        language: system
+        entry: python scripts/hass_check.py
+        language: python
         types: [yaml]
         pass_filenames: false
