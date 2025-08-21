@@ -56,9 +56,9 @@
               target:
                 entity_id:
                   - light.permanent_outdoor_lights
-                  - light.garage_left
-                  - light.garage_right
-                  - light.garage_center
+                  - light.garage_l
+                  - light.garage_r
+                  - light.garage_c
                   - light.front_porch_lights
         - conditions:
             - condition: trigger
