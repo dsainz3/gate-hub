@@ -1,0 +1,146 @@
+# Huskers Lovelace Dashboard (YAML mode)
+# Converted from .storage JSON for use in Home Assistant YAML dashboards/packages
+
+# To use: reference this file in your configuration.yaml under lovelace: dashboards:
+# Example:
+# lovelace:
+#   mode: yaml
+#   dashboards:
+#     huskers:
+#       mode: yaml
+#       filename: packages/huskers/dashboard_huskers.yaml
+#       title: Huskers
+#       icon: mdi:football-helmet
+#       show_in_sidebar: true
+
+views:
+  - title: Huskers – LED Test
+    path: husker-led-test
+    icon: mdi:led-strip-variant
+    badges: []
+    cards:
+      - type: markdown
+        content: |
+          # Husker LED – MQTT Test
+          Use the buttons below to start the **Husker (scarlet & cream)** effect on your permanent outdoor LEDs, or **revert to your monthly effect**.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            name: Touchdown Burst (Test)
+            icon: mdi:firework
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_touchdown_burst
+          - type: button
+            name: Start Game-Day Effect
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_gameday_start
+          - type: button
+            name: Stop Effect (Restore Previous)
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_stop
+          - type: button
+            name: Revert to Monthly Effect
+            icon: mdi:backup-restore
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_revert_monthly
+      - type: markdown
+        content: |
+          {% set v = states('sensor.huskers_last_score_test') %} **Last score (test):** {{ '—' if v in ['unknown','unavailable','none','None',''] else v }}
+
+  - title: Huskers – HQ
+    path: huskers-hq
+    icon: mdi:football-helmet
+    badges: []
+    cards:
+      - type: markdown
+        content: |
+          {% set our = states('sensor.huskers_our_score') %} {% set opp = states('sensor.huskers_opponent_score') %} {% set opp_name = states('sensor.huskers_opponent_name') %} {% set qtr = states('sensor.huskers_quarter') %} {% set clock = states('sensor.huskers_game_clock') %} {% set status = states('sensor.huskers_game_status') %}
+          # Huskers HQ
+          **Nebraska** {{ '—' if our in ['unknown','unavailable','none','None',''] else our }} vs **{{ 'Opponent' if opp_name in ['unknown','unavailable','none','None',''] else opp_name }}** {{ '—' if opp in ['unknown','unavailable','none','None',''] else opp }}
+          **Quarter:** {{ '—' if qtr in ['unknown','unavailable','none','None',''] else qtr }} **Clock:** {{ '—' if clock in ['unknown','unavailable','none','None',''] else clock }} **Status:** {{ 'No game data' if status in ['unknown','unavailable','none','None',''] else status }}
+      - type: entities
+        title: Game Data (Raw)
+        entities:
+          - entity: sensor.huskers_our_score
+            name: Nebraska Score
+          - entity: sensor.huskers_opponent_score
+            name: Opponent Score
+          - entity: sensor.huskers_opponent_name
+            name: Opponent Name
+          - entity: sensor.huskers_quarter
+            name: Quarter
+          - entity: sensor.huskers_game_clock
+            name: Game Clock
+          - entity: sensor.huskers_game_status
+            name: Game Status
+      - type: history-graph
+        title: Score Timeline
+        hours_to_show: 6
+        refresh_interval: 0
+        entities:
+          - entity: sensor.huskers_our_score
+            name: Nebraska Score
+          - entity: sensor.huskers_opponent_score
+            name: Opponent Score
+
+  - title: Huskers – Controls
+    path: huskers-controls
+    icon: mdi:gesture-tap-button
+    badges: []
+    cards:
+      - type: markdown
+        content: |
+          # Huskers Controls
+          Quick actions for game-day lighting and validation.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            name: Start Game-Day Effect
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_gameday_start
+          - type: button
+            name: Stop Effect
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_stop
+          - type: button
+            name: Revert to Monthly
+            icon: mdi:backup-restore
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_revert_monthly
+          - type: button
+            name: Update Last Score (Test)
+            icon: mdi:scoreboard
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_update_last_score_test
