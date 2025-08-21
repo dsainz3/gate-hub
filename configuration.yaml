@@ -1,5 +1,4 @@
 # Loads default set of integrations. Do not remove.
----
 default_config:
 
 homeassistant:
@@ -9,7 +8,10 @@ homeassistant:
   elevation: 1116
   time_zone: America/Chicago
 
-  # Load frontend themes from the themes folder
+  # 👇 Packages must live under "homeassistant"
+  packages: !include_dir_merge_named packages
+
+# 👇 Use merge_named so each theme file can define its own theme name
 frontend:
   themes: !include_dir_merge_named themes
 
@@ -22,6 +24,7 @@ sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
 
+# If these helpers are now in packages/huskers/inputs.yaml, DELETE this block to avoid duplicates
 input_boolean:
   huskers_color_show:
     name: Huskers Color Show
@@ -44,6 +47,7 @@ input_number:
     step: 1
     icon: mdi:timer-outline
     initial: 2
+
 lovelace:
   mode: yaml
   resources: !include lovelace/resources.yaml

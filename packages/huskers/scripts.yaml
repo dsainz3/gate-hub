@@ -1,0 +1,41 @@
+huskers:
+  script:
+    huskers_touchdown_burst:
+      alias: "Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)"
+      mode: restart
+      sequence: [] # TODO: paste your existing sequence here
+
+    husker_led_start:
+      alias: "Start Husker LED Effect"
+      mode: restart
+      sequence: [] # Example:
+      # - service: light.turn_on
+      #   target:
+      #     entity_id: light.permanent_outdoor_lights
+      #   data:
+      #     effect: LED_Huskers
+
+    husker_led_stop:
+      alias: "Stop Husker LED Effect (Revert to Monthly)"
+      mode: restart
+      sequence: []
+
+    huskers_hail_varsity_show_start:
+      alias: "Huskers: Hail Varsity Show (Start)"
+      mode: restart
+      sequence: []
+
+    huskers_hail_varsity_show_stop:
+      alias: "Huskers: Hail Varsity Show (Stop)"
+      mode: restart
+      sequence: []
+
+    huskers_test_our_score:
+      alias: "Huskers (Test): Our Score"
+      mode: single
+      sequence: []
+
+    huskers_test_opponent_score:
+      alias: "Huskers (Test): Opponent Score"
+      mode: single
+      sequence: []
