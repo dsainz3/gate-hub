@@ -5,6 +5,7 @@ zigbee.db*
 /.storage/
 /.cloud/
 /secrets.yaml
+/.project/
 
 # General logs and databases
 *.db
