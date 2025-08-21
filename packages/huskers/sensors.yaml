@@ -1,0 +1,8 @@
+huskers:
+  # Define any non-template sources here (REST/Team Tracker/etc.)
+  # Example placeholder for an upstream feed you may re-enable:
+  # sensor:
+  #   - platform: rest
+  #     name: nebraska_football
+  #     resource: https://example/api/nebraska/football
+  #     value_template: "{{ value_json.status }}"

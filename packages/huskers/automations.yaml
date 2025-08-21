@@ -1,0 +1,44 @@
+huskers:
+  automation:
+    - alias: "Huskers: Pregame Event"
+      id: huskers_pregame_event
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: binary_sensor.huskers_pregame_window
+          to: "on"
+      action:
+        - service: script.husker_led_start
+
+    - alias: "Huskers: Postgame Event"
+      id: huskers_postgame_event
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: binary_sensor.huskers_postgame_window
+          to: "on"
+      action:
+        - service: script.husker_led_stop
+
+    - alias: "Huskers: Update Last Score (Test)"
+      id: huskers_update_last_score_test
+      mode: restart
+      trigger:
+        - platform: state
+          entity_id: input_text.huskers_last_score
+      action: []
+
+    - alias: "Huskers: React to Test Score"
+      id: huskers_react_to_test_score
+      mode: single
+      trigger:
+        - platform: state
+          entity_id: sensor.huskers_last_score_test
+      action: []
+
+    - alias: "Huskers: New Item Notifier"
+      id: huskers_new_item_notifier
+      mode: single
+      trigger: []
+      condition: []
+      action: []
