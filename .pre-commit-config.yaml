@@ -1,5 +1,4 @@
 ﻿repos:
-  # FORMAT: Prettier (YAML only)
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:
@@ -7,12 +6,12 @@
         name: Prettier (YAML)
         args: [--write, --parser=yaml]
         files: '\.(ya?ml)$'
-        # Exclude only HA-tagged aggregators & vendor dirs; keep views formatted
+        language_version: system
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^packages/[^/]+\.ya?ml$|        # e.g. packages/huskers.yaml (aggregator)
-            ^ui-lovelace/[^/]+\.ya?ml$|     # e.g. ui-lovelace/huskers.yaml, main.yaml
+            ^packages/[^/]+\.ya?ml$|
+            ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
             ^custom_components/.*\.ya?ml$|
@@ -21,7 +20,6 @@
             ^node_modules/.*\.ya?ml$
           )
 
-  # HYGIENE + YAML parse (skip HA-tagged aggregators only)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -34,29 +32,26 @@
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^packages/[^/]+\.ya?ml$|        # aggregators with !include*
-            ^ui-lovelace/[^/]+\.ya?ml$|     # dashboard aggregators
+            ^packages/[^/]+\.ya?ml$|
+            ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
             ^custom_components/.*/services\.ya?ml$|
             ^zigbee2mqtt/.*\.ya?ml$
           )
 
-  # LINT: yamllint (uses your .yamllint.yml)
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
     hooks:
       - id: yamllint
         args: ["-c", ".yamllint.yml", "."]
 
-  # PY: Black (only your code paths, not vendor)
   - repo: https://github.com/psf/black
     rev: 25.1.0
     hooks:
       - id: black
         files: '^(scripts/|tools/|custom_components/huskers/).*\.py$'
 
-  # PY: flake8 (exclude vendor)
   - repo: https://github.com/pycqa/flake8
     rev: 7.3.0
     hooks:
@@ -64,20 +59,19 @@
         files: '\.py$'
         exclude: |
           (?x)(
-            custom_components/(ble_monitor|hacs|teamtracker|wundergroundpws|tplink_router)/
-            | custom_components/.*/tests?/
-            | node_modules/
+            custom_components/(ble_monitor|hacs|teamtracker|wundergroundpws|tplink_router)/|
+            custom_components/.*/tests?/|
+            node_modules/
           )
         additional_dependencies:
           - flake8-bugbear==24.4.26
           - flake8-builtins==2.5.0
 
-  # HA config check (portable script you already have)
+  # HA CONFIG CHECK (portable via script)
   - repo: local
     hooks:
       - id: hass-config-check
         name: Home Assistant config check (portable)
-        entry: python scripts/hass_check.py
-        language: python
-        types: [yaml]
+        language: system
         pass_filenames: false
+        entry: scripts/ha_check_portable.sh
