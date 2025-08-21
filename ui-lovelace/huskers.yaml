@@ -1,5 +1,5 @@
 ﻿title: Huskers
-views:
-  - !include ui-lovelace/views/huskers_led_test.yaml
-  - !include ui-lovelace/views/huskers_hq.yaml
-  - !include ui-lovelace/views/huskers_controls.yaml
+icon: mdi:football-helmet
+path: huskers
+# optional: theme: Mushroom
+views: !include_dir_list ui-lovelace/views/huskers

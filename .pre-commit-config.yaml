@@ -7,16 +7,21 @@
         name: Prettier (YAML)
         args: [--write, --parser=yaml]
         files: '\.(ya?ml)$'
-        # avoid Lovelace & vendor YAML (HA tags like !include break generic parsers)
-        exclude: >
-          (?x)^(
-            ui-lovelace/.*\.ya?ml|
-            blueprints/.*\.ya?ml|
-            custom_components/.*\.ya?ml|
-            zigbee2mqtt/.*\.ya?ml|
-            themes/.*\.ya?ml|
-            node_modules/.*\.ya?ml
-          )$
+        # Exclude only HA-tagged aggregators & vendor dirs; keep views formatted
+        exclude: |
+          (?x)(
+            ^configuration\.ya?ml$|
+            ^packages/[^/]+\.ya?ml$|        # e.g. packages/huskers.yaml (aggregator)
+            ^ui-lovelace/[^/]+\.ya?ml$|     # e.g. ui-lovelace/huskers.yaml, main.yaml
+            ^ui-lovelace/resources\.ya?ml$|
+            ^blueprints/.*\.ya?ml$|
+            ^custom_components/.*\.ya?ml$|
+            ^zigbee2mqtt/.*\.ya?ml$|
+            ^themes/.*\.ya?ml$|
+            ^node_modules/.*\.ya?ml$
+          )
+
+  # HYGIENE + YAML parse (skip HA-tagged aggregators only)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -25,34 +30,17 @@
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-yaml
-        exclude: >
+        args: [--allow-multiple-documents]
+        exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^ui-lovelace/.*\.ya?ml$|
+            ^packages/[^/]+\.ya?ml$|        # aggregators with !include*
+            ^ui-lovelace/[^/]+\.ya?ml$|     # dashboard aggregators
+            ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
             ^custom_components/.*/services\.ya?ml$|
             ^zigbee2mqtt/.*\.ya?ml$
           )
-
-  # HYGIENE + YAML parse (skip HA-tagged YAML)
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: check-yaml
-        exclude: >
-          (?x)^(
-            ui-lovelace/.*\.ya?ml|
-            configuration\.ya?ml|
-            blueprints/.*\.ya?ml|
-            custom_components/.*\.ya?ml|
-            zigbee2mqtt/.*\.ya?ml|
-            themes/.*\.ya?ml|
-            node_modules/.*\.ya?ml
-          )$
-      - id: end-of-file-fixer
-        exclude: '(node_modules/|\.cache/|\.git/)'
-      - id: trailing-whitespace
-        exclude: '(node_modules/|\.cache/|\.git/)'
 
   # LINT: yamllint (uses your .yamllint.yml)
   - repo: https://github.com/adrienverge/yamllint
@@ -74,8 +62,8 @@
     hooks:
       - id: flake8
         files: '\.py$'
-        exclude: >
-          (?x)^(
+        exclude: |
+          (?x)(
             custom_components/(ble_monitor|hacs|teamtracker|wundergroundpws|tplink_router)/
             | custom_components/.*/tests?/
             | node_modules/
