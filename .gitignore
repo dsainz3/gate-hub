@@ -7,6 +7,18 @@ zigbee.db*
 /secrets.yaml
 /.project/
 
+node_modules/
+.venv/
+.cache/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+deps/
+.vscode/settings.json
+home-assistant_v2.db
+home-assistant.log*
+
+
 # General logs and databases
 *.db
 *.db-shm
