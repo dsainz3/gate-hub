@@ -1,60 +1,68 @@
 script:
   huskers_led_gameday_start:
     alias: Start Game-Day Effect
+    mode: single
     sequence:
       - service: light.turn_on
         target:
           entity_id: light.permanent_outdoor_lights
         data:
           effect: LED_Huskers
+
   huskers_led_stop:
     alias: Stop Effect (Restore Previous)
+    mode: single
     sequence:
       - service: light.turn_off
         target:
           entity_id: light.permanent_outdoor_lights
+
   huskers_led_revert_monthly:
     alias: Revert to Monthly Effect
+    mode: single
     sequence:
       - service: light.turn_on
         target:
           entity_id: light.permanent_outdoor_lights
         data:
           effect: Monthly
+
   huskers_touchdown_burst:
     alias: Touchdown Burst (Test)
+    mode: single
     sequence:
       - service: light.turn_on
         target:
           entity_id: light.permanent_outdoor_lights
         data:
           effect: Touchdown
+
   huskers_update_last_score_test:
     alias: Update Last Score (Test)
+    mode: single
     sequence:
       - service: input_text.set_value
         target:
           entity_id: input_text.huskers_last_score
         data:
           value: "Test Score Update"
-    # Add any additional scripts here, all under the top-level script: key
 
-    huskers_hail_varsity_show_start:
-      alias: "Huskers: Hail Varsity Show (Start)"
-      mode: restart
-      sequence: []
+  huskers_hail_varsity_show_start:
+    alias: "Huskers: Hail Varsity Show (Start)"
+    mode: restart
+    sequence: []
 
-    huskers_hail_varsity_show_stop:
-      alias: "Huskers: Hail Varsity Show (Stop)"
-      mode: restart
-      sequence: []
+  huskers_hail_varsity_show_stop:
+    alias: "Huskers: Hail Varsity Show (Stop)"
+    mode: restart
+    sequence: []
 
-    huskers_test_our_score:
-      alias: "Huskers (Test): Our Score"
-      mode: single
-      sequence: []
+  huskers_test_our_score:
+    alias: "Huskers (Test): Our Score"
+    mode: single
+    sequence: []
 
-    huskers_test_opponent_score:
-      alias: "Huskers (Test): Opponent Score"
-      mode: single
-      sequence: []
+  huskers_test_opponent_score:
+    alias: "Huskers (Test): Opponent Score"
+    mode: single
+    sequence: []
