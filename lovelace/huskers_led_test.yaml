@@ -1,0 +1,48 @@
+# Huskers LED Test View
+- title: Huskers – LED Test
+  path: husker-led-test
+  icon: mdi:led-strip-variant
+  badges: []
+  cards:
+    - type: markdown
+      content: |
+        # Husker LED – MQTT Test
+        Use the buttons below to start the **Husker (scarlet & cream)** effect on your permanent outdoor LEDs, or **revert to your monthly effect**.
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: button
+          name: Touchdown Burst (Test)
+          icon: mdi:firework
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_touchdown_burst
+        - type: button
+          name: Start Game-Day Effect
+          icon: mdi:football
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_gameday_start
+        - type: button
+          name: Stop Effect (Restore Previous)
+          icon: mdi:stop-circle
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_stop
+        - type: button
+          name: Revert to Monthly Effect
+          icon: mdi:backup-restore
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_revert_monthly
+    - type: markdown
+      content: "{% set v = states('sensor.huskers_last_score_test') %} **Last score (test):** {{ '—' if v in ['unknown','unavailable','none','None',''] else v }}"
