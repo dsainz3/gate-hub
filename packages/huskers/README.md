@@ -7,7 +7,7 @@ The Huskers package provides input helpers, scripts, and automations to support 
 
 ## Structure
 
-- **inputs.yaml**: Defines all input helpers (input_number, input_text, input_boolean) used for tracking scores, game status, and controlling effects.
+- **input_number.yaml**, **input_text.yaml**, **input_boolean.yaml**: Define input helpers used for tracking scores, game status, and controlling effects.
 - **scripts.yaml**: Contains scripts for starting/stopping effects, touchdown bursts, and test actions.
 - **automations.yaml**: (Not shown here) Should contain automations for pregame, postgame, and score-based triggers.
 - **scenes.yaml**: (Not shown here) Should define lighting scenes for Huskers events.
@@ -54,7 +54,9 @@ This package provides all logic and entities needed for the Huskers Lovelace das
 - `automations.yaml` – Huskers automations (add your game logic here)
 - `scripts.yaml` – Scripts for LED effects and score updates
 - `sensors.yaml` – Template sensors for game data
-- `inputs.yaml` – Input helpers for scores, opponent, quarter, etc.
+- `input_number.yaml` – Input numbers for scores and effect timing
+- `input_text.yaml` – Input texts for opponent, quarter, status, etc.
+- `input_boolean.yaml` – Input booleans for toggling effects
 - `scenes.yaml` – (Optional) Scenes for lighting
 - `templates.yaml` – (Optional) Additional templates
 
