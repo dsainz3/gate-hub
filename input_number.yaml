@@ -1,0 +1,27 @@
+huskers_our_score:
+  name: Nebraska Score
+  min: 0
+  max: 100
+  step: 1
+  mode: box
+huskers_opponent_score:
+  name: Opponent Score
+  min: 0
+  max: 100
+  step: 1
+  mode: box
+hail_varsity_bpm:
+  name: Hail Varsity BPM
+  min: 60
+  max: 220
+  step: 1
+  mode: slider
+  icon: mdi:metronome
+beats_per_color:
+  name: Beats Per Color
+  min: 1
+  max: 16
+  step: 1
+  mode: slider
+  icon: mdi:palette
+

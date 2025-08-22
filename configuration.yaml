@@ -8,9 +8,6 @@ homeassistant:
   elevation: 1116
   time_zone: America/Chicago
 
-  # 👇 Packages must live under "homeassistant"
-  packages: !include_dir_named packages
-
 # 👇 Use merge_named so each theme file can define its own theme name
 frontend:
   themes: !include_dir_merge_named themes
@@ -22,6 +19,10 @@ light: !include light.yaml
 sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
+input_boolean: !include input_boolean.yaml
+input_number: !include input_number.yaml
+input_text: !include input_text.yaml
+script: !include scripts.yaml
 
 
 lovelace:
