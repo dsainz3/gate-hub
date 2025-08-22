@@ -1,1 +1,2 @@
-huskers: !include_dir_merge_named packages/huskers
+# Huskers package configuration
+!include_dir_merge_named huskers
