@@ -167,3 +167,31 @@ cards:
             service: script.turn_on
             target:
               entity_id: script.huskers_hail_varsity_show_stop
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_theater_show_start
+            state_not: unavailable
+        card:
+          type: button
+          name: Theater Show (Start)
+          icon: mdi:spotlight
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_theater_show_start
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_theater_show_stop
+            state_not: unavailable
+        card:
+          type: button
+          name: Theater Show (Stop)
+          icon: mdi:spotlight-off
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_theater_show_stop
