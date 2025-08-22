@@ -19,11 +19,3 @@ sensor:
       huskers_game_status:
         friendly_name: "Game Status"
         value_template: "{{ states('input_text.huskers_game_status') }}"
-huskers:
-  # Define any non-template sources here (REST/Team Tracker/etc.)
-  # Example placeholder for an upstream feed you may re-enable:
-  # sensor:
-  #   - platform: rest
-  #     name: nebraska_football
-  #     resource: https://example/api/nebraska/football
-  #     value_template: "{{ value_json.status }}"

@@ -32,7 +32,7 @@
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^packages/[^/]+\.ya?ml$|
+            ^packages/.*\.ya?ml$|
             ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
