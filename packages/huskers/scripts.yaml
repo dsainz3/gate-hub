@@ -45,6 +45,7 @@ script:
           on_time: 0.35 # hold time for each color
           trans: 0.25 # smooth transition time
 
+
       # 3) Alternate Scarlet <-> Cream
       - repeat:
           count: "{{ flashes }}"
