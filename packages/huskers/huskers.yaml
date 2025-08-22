@@ -1,2 +1,0 @@
-# Merge all domain files from the sibling "huskers" folder into one package
-!include_dir_merge_named huskers
