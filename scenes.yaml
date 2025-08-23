@@ -5,12 +5,15 @@
     light.light_theater_left:
       state: "on"
       brightness: 255
-      hs_color: [355, 90]
+      hs_color:
+        - 355
+        - 90
     light.light_theater_right:
       state: "on"
       brightness: 255
-      hs_color: [355, 90]
-
+      hs_color:
+        - 355
+        - 90
 - name: Huskers Cream (Theater)
   id: scene_huskers_cream_theater
   icon: mdi:palette
@@ -18,8 +21,12 @@
     light.light_theater_left:
       state: "on"
       brightness: 255
-      hs_color: [48, 12]
+      hs_color:
+        - 48
+        - 12
     light.light_theater_right:
       state: "on"
       brightness: 255
-      hs_color: [48, 12]
+      hs_color:
+        - 48
+        - 12

@@ -4,26 +4,29 @@ sensor:
       huskers_our_score:
         friendly_name: "Nebraska Score"
         value_template: "{{ states('input_number.huskers_our_score') | int(0) }}"
+
       huskers_opponent_score:
         friendly_name: "Opponent Score"
         value_template: "{{ states('input_number.huskers_opponent_score') | int(0) }}"
+
       huskers_opponent_name:
         friendly_name: "Opponent Name"
         value_template: "{{ states('input_text.huskers_opponent_name') }}"
+
       huskers_quarter:
         friendly_name: "Quarter"
         value_template: "{{ states('input_text.huskers_quarter') }}"
+
       huskers_game_clock:
         friendly_name: "Game Clock"
         value_template: "{{ states('input_text.huskers_game_clock') }}"
+
       huskers_game_status:
         friendly_name: "Game Status"
         value_template: "{{ states('input_text.huskers_game_status') }}"
-huskers:
-  # Define any non-template sources here (REST/Team Tracker/etc.)
-  # Example placeholder for an upstream feed you may re-enable:
-  # sensor:
-  #   - platform: rest
-  #     name: nebraska_football
-  #     resource: https://example/api/nebraska/football
-  #     value_template: "{{ value_json.status }}"
+
+  # 👇 Placeholder for future Huskers sensor sources (REST API, team tracker, etc.)
+  # - platform: rest
+  #   name: Nebraska Football Status
+  #   resource: https://example/api/nebraska/football
+  #   value_template: "{{ value_json.status }}"

@@ -1,5 +1,4 @@
 - sensor:
-    # ---- Pressure trend (rising / steady / falling) ----
     - name: KNEPLATT72 Pressure Trend
       unique_id: kneplatt72_pressure_trend
       state: >-
@@ -11,61 +10,42 @@
         {% set s = this.state %}
         {% if s == 'rising' %}mdi:arrow-up-bold
         {% elif s == 'falling' %}mdi:arrow-down-bold
-        {% else %}mdi:arrow-right-bold
-        {% endif %}
+        {% else %}mdi:arrow-right-bold{% endif %}
       attributes:
         delta_hpa: >-
           {{ (
-              states('sensor.kneplatt72_pressure_24h_change')|float(0) *
-              (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
-            ) | round(2) }}
+            states('sensor.kneplatt72_pressure_24h_change')|float(0) *
+            (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
+          ) | round(2) }}
         delta_inhg: >-
           {{ (
-              (states('sensor.kneplatt72_pressure_24h_change')|float(0) / 33.8638866667)
-              if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') in ['hPa','mbar'])
-              else states('sensor.kneplatt72_pressure_24h_change')|float(0)
-            ) | round(3) }}
+            (states('sensor.kneplatt72_pressure_24h_change')|float(0) / 33.8638866667)
+            if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') in ['hPa','mbar'])
+            else states('sensor.kneplatt72_pressure_24h_change')|float(0)
+          ) | round(3) }}
         threshold_hpa: "3.0"
 
-    # ---- Nmap metrics ----
     - name: Nmap Active Hosts
       unique_id: nmap_active_hosts
       state: >-
         {% set nmap = integration_entities('nmap_tracker') %}
-        {{ expand(nmap)
-            | selectattr('domain', 'equalto', 'device_tracker')
-            | selectattr('state', 'equalto', 'home')
-            | list | length }}
+        {{ expand(nmap) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('state', 'equalto', 'home') | list | length }}
       icon: mdi:lan
 
     - name: Nmap Known Hosts
       unique_id: nmap_known_hosts
       state: >-
         {% set nmap = integration_entities('nmap_tracker') %}
-        {{ expand(nmap)
-            | selectattr('domain', 'equalto', 'device_tracker')
-            | list | length }}
+        {{ expand(nmap) | selectattr('domain', 'equalto', 'device_tracker') | list | length }}
       icon: mdi:lan-check
-
-    - name: Internet Status
-      state: >-
-        {% if is_state('binary_sensor.internet_reachable','on') %}
-          Online ({{ states('sensor.internet_latency') }} ms)
-        {% else %}
-          Offline
-        {% endif %}
 
     - name: TP-Link Clients Online
       unique_id: tplink_clients_online
       state: >-
         {% set tpl = integration_entities('tplink_router') %}
-        {{ expand(tpl)
-           | selectattr('domain','equalto','device_tracker')
-           | selectattr('state','equalto','home')
-           | list | length }}
+        {{ expand(tpl) | selectattr('domain','equalto','device_tracker') | selectattr('state','equalto','home') | list | length }}
       icon: mdi:wifi
 
-    # ---- Internet status (uses Ping integration entities) ----
     - name: Internet Status
       unique_id: internet_status
       state: >-
@@ -80,3 +60,40 @@
         {% else %}
           mdi:close-network
         {% endif %}
+
+- sensor:
+    - name: Huskers Our Score
+      unique_id: huskers_our_score
+      state: "{{ states('input_number.huskers_our_score') | int(0) }}"
+      attributes: {}
+      icon: mdi:information-outline
+
+    - name: Huskers Opponent Score
+      unique_id: huskers_opponent_score
+      state: "{{ states('input_number.huskers_opponent_score') | int(0) }}"
+      attributes: {}
+      icon: mdi:information-outline
+
+    - name: Huskers Opponent Name
+      unique_id: huskers_opponent_name
+      state: "{{ states('input_text.huskers_opponent_name') }}"
+      attributes: {}
+      icon: mdi:information-outline
+
+    - name: Huskers Quarter
+      unique_id: huskers_quarter
+      state: "{{ states('input_text.huskers_quarter') }}"
+      attributes: {}
+      icon: mdi:information-outline
+
+    - name: Huskers Game Clock
+      unique_id: huskers_game_clock
+      state: "{{ states('input_text.huskers_game_clock') }}"
+      attributes: {}
+      icon: mdi:information-outline
+
+    - name: Huskers Game Status
+      unique_id: huskers_game_status
+      state: "{{ states('input_text.huskers_game_status') }}"
+      attributes: {}
+      icon: mdi:information-outline

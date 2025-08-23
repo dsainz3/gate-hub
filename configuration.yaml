@@ -8,15 +8,11 @@ homeassistant:
   elevation: 1116
   time_zone: America/Chicago
 
-  # 👇 Packages must live under "homeassistant"
-  packages: !include_dir_merge_named packages
-
-# 👇 Use merge_named so each theme file can define its own theme name
 frontend:
   themes: !include_dir_merge_named themes
 
+# Keep these for now (we haven't migrated them yet)
 automation: !include automations.yaml
-script: !include scripts.yaml
 scene: !include scenes.yaml
 group: !include group.yaml
 light: !include light.yaml
@@ -24,29 +20,21 @@ sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
 
-# If these helpers are now in packages/huskers/inputs.yaml, DELETE this block to avoid duplicates
-input_boolean:
-  huskers_color_show:
-    name: Huskers Color Show
-    icon: mdi:music
+# REMOVE this whole input_boolean block (moved to package)
+# input_boolean:
+#   huskers_color_show:
+#     name: Huskers Color Show
+#     icon: mdi:music
 
-input_number:
-  hail_varsity_bpm:
-    name: Hail Varsity BPM
-    min: 60
-    max: 220
-    step: 1
-    mode: slider
-    icon: mdi:metronome
-    initial: 152
+# REMOVE this whole input_number block (moved to package; initial values preserved below)
+# input_number:
+#   hail_varsity_bpm: ...
+#   beats_per_color: ...
 
-  beats_per_color:
-    name: Beats per Color (hold)
-    min: 1
-    max: 8
-    step: 1
-    icon: mdi:timer-outline
-    initial: 2
+# IMPORTANT for scripts:
+# Option A (quick + safe): keep scripts.yaml, but delete ONLY the Huskers scripts from it
+# Option B: comment out the line below AFTER we migrate all remaining scripts into packages
+script: !include scripts.yaml
 
 lovelace:
   mode: yaml

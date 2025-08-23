@@ -1,100 +1,39 @@
 automation:
-  - alias: "Huskers: Pregame Event"
-    id: huskers_pregame_event
+  - id: huskers_pregame_event
+    alias: "Huskers: Pregame Event"
+    description: "Start Huskers game-day effect when pregame window opens."
     mode: single
     trigger:
       - platform: state
         entity_id: binary_sensor.huskers_pregame_window
         to: "on"
+    condition: []
     action:
-      - service: script.huskers_led_gameday_start
+      - action: script.huskers_led_gameday_start
 
-  - alias: "Huskers: Postgame Event"
-    id: huskers_postgame_event
+  - id: huskers_postgame_event
+    alias: "Huskers: Postgame Event"
+    description: "Stop Huskers/theater shows when the postgame window closes."
     mode: single
     trigger:
       - platform: state
         entity_id: binary_sensor.huskers_postgame_window
-        to: "on"
-    action:
-      - service: script.huskers_led_stop
-
-  - alias: "Huskers: Update Last Score (Test)"
-    id: huskers_update_last_score_test
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id: input_text.huskers_last_score
-    action: []
-
-  - alias: "Huskers: React to Test Score"
-    id: huskers_react_to_test_score
-    mode: single
-    trigger:
-      - platform: state
-        entity_id: sensor.huskers_last_score_test
-    action: []
-
-  - alias: "Huskers: New Item Notifier"
-    id: huskers_new_item_notifier
-    mode: single
-    trigger: []
+        from: "on"
+        to: "off"
     condition: []
-    action: []
-
-  - alias: "Huskers: Pregame Theater Alternating"
-    id: huskers_pregame_theater_alternating
-    mode: restart
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.huskers_kickoff_in
-        below: 21
-        above: 19
     action:
-      - repeat:
-          while:
-            - condition: template
-              value_template: "{{ states('sensor.huskers_kickoff_in')|int(0) > 0 }}"
-          sequence:
-            - service: light.turn_on
-              target:
-                entity_id: light.light_theater_left
-              data:
-                hs_color: [355, 90]
-                brightness: 255
-                transition: 3
-            - service: light.turn_on
-              target:
-                entity_id: light.light_theater_right
-              data:
-                hs_color: [48, 12]
-                brightness: 255
-                transition: 3
-            - delay: 3
-            - service: light.turn_on
-              target:
-                entity_id: light.light_theater_left
-              data:
-                hs_color: [48, 12]
-                brightness: 255
-                transition: 3
-            - service: light.turn_on
-              target:
-                entity_id: light.light_theater_right
-              data:
-                hs_color: [355, 90]
-                brightness: 255
-                transition: 3
-            - delay: 3
+      - action: script.huskers_led_stop
 
-  - alias: "Huskers: Touchdown Boost"
-    id: huskers_touchdown_boost
+  - id: huskers_touchdown_boost
+    alias: "Huskers: Touchdown Boost"
+    description: "When our score increases, fire a touchdown burst."
     mode: single
     trigger:
       - platform: state
         entity_id: sensor.huskers_our_score
     condition:
       - condition: template
-        value_template: "{{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}"
+        value_template: >-
+          {{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}
     action:
-      - service: script.huskers_touchdown_burst
+      - action: script.huskers_touchdown_burst

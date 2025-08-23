@@ -1,1 +1,139 @@
-huskers: !include_dir_merge_named packages/huskers
+script:
+  huskers_led_gameday_start:
+    alias: Start Game-Day Effect
+    mode: single
+    actions:
+      - service: light.turn_on
+        target:
+          entity_id: light.permanent_outdoor_lights
+        data:
+          effect: LED_Huskers
+
+  huskers_led_stop:
+    alias: Stop Effect (Restore Previous)
+    mode: single
+    actions:
+      - service: light.turn_off
+        target:
+          entity_id: light.permanent_outdoor_lights
+
+  huskers_led_revert_monthly:
+    alias: Revert to Monthly Effect
+    mode: single
+    actions:
+      - service: light.turn_on
+        target:
+          entity_id: light.permanent_outdoor_lights
+        data:
+          effect: Monthly
+
+  huskers_touchdown_burst:
+    alias: "Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)"
+    mode: restart
+    actions:
+      - service: scene.create
+        data:
+          scene_id: huskers_theater_pre_burst
+          snapshot_entities:
+            - light.light_theater_left
+            - light.light_theater_right
+
+      - variables:
+          flashes: 6
+          on_time: 0.35
+          trans: 0.25
+
+      - repeat:
+          count: "{{ flashes }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: light.light_theater_left
+              data:
+                hs_color: [355, 90]
+                brightness: 255
+                transition: "{{ trans }}"
+            - service: light.turn_on
+              target:
+                entity_id: light.light_theater_right
+              data:
+                hs_color: [48, 12]
+                brightness: 255
+                transition: "{{ trans }}"
+            - delay: "{{ on_time }}"
+            - service: light.turn_on
+              target:
+                entity_id: light.light_theater_left
+              data:
+                hs_color: [48, 12]
+                brightness: 255
+                transition: "{{ trans }}"
+            - service: light.turn_on
+              target:
+                entity_id: light.light_theater_right
+              data:
+                hs_color: [355, 90]
+                brightness: 255
+                transition: "{{ trans }}"
+            - delay: "{{ on_time }}"
+
+      - delay: 0.2
+      - service: scene.turn_on
+        target:
+          entity_id: scene.huskers_theater_pre_burst
+        data:
+          transition: 1.0
+
+  huskers_update_last_score_test:
+    alias: Update Last Score (Test)
+    mode: single
+    actions:
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.huskers_last_score
+        data:
+          value: "Test Score Update"
+
+  huskers_hail_varsity_show_start:
+    alias: "Huskers: Hail Varsity Show (Start)"
+    mode: restart
+    actions: []
+
+  huskers_hail_varsity_show_stop:
+    alias: "Huskers: Hail Varsity Show (Stop)"
+    mode: restart
+    actions: []
+
+  huskers_test_our_score:
+    alias: "Huskers (Test): Our Score"
+    mode: single
+    actions: []
+
+  huskers_test_opponent_score:
+    alias: "Huskers (Test): Opponent Score"
+    mode: single
+    actions: []
+
+  huskers_led_toggle_color_show:
+    alias: Toggle Huskers Color Show
+    mode: single
+    actions:
+      - service: input_boolean.toggle
+        target:
+          entity_id: input_boolean.huskers_color_show
+
+  huskers_led_set_color_show_on:
+    alias: Set Huskers Color Show On
+    mode: single
+    actions:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.huskers_color_show
+
+  huskers_led_set_color_show_off:
+    alias: Set Huskers Color Show Off
+    mode: single
+    actions:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.huskers_color_show

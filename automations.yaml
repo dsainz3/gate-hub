@@ -1,7 +1,8 @@
----
 - id: humidor_plug_temp_control
-  alias: "Humidor Plug – Temperature Control"
-  description: "Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F."
+  alias: "Humidor Plug \u2013 Temperature Control"
+  description:
+    "Turn ON humidor plug when temp > 74\xB0F; turn OFF when temp < 68\xB0\
+    F."
   trigger:
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
@@ -35,9 +36,8 @@
               target:
                 entity_id: switch.plug_humidor
   mode: single
-
 - id: outdoor_lights_control
-  alias: "Outdoor Lights Control - Sunrise/Sunset"
+  alias: Outdoor Lights Control - Sunrise/Sunset
   trigger:
     - platform: sun
       event: sunrise
@@ -72,19 +72,18 @@
             - service: light.turn_on
               target:
                 entity_id:
-                  - light.garage_left
-                  - light.garage_right
-                  - light.garage_center
+                  - light.garage_l
+                  - light.garage_r
+                  - light.garage_c
                   - light.front_porch_lights
               data:
                 brightness_pct: 1
   mode: single
-
 - id: early_morning_lights
-  alias: "3:30 AM Light Activation"
+  alias: 3:30 AM Light Activation
   trigger:
     - platform: time
-      at: "03:30:00"
+      at: 03:30:00
   condition: []
   action:
     - parallel:
@@ -95,9 +94,9 @@
             - service: light.turn_on
               target:
                 entity_id:
-                  - light.garage_left
-                  - light.garage_right
-                  - light.garage_center
+                  - light.garage_l
+                  - light.garage_r
+                  - light.garage_c
                   - light.front_porch_lights
               data:
                 transition: 3
@@ -112,13 +111,12 @@
               data:
                 brightness_pct: 10
   mode: single
-
 - id: exterior_led_monthly_effect
-  alias: "Exterior LED - Monthly Effect"
+  alias: Exterior LED - Monthly Effect
   mode: single
   trigger:
     - platform: time
-      at: "00:00:00"
+      at: 00:00:00
   variables:
     current_month: "{{ now().month }}"
     monthly_effects:
@@ -139,20 +137,20 @@
     - variables:
         target_effect: "{{ monthly_effects[current_month] }}"
     - condition: template
-      value_template: >-
-        {{ target_effect in (state_attr('light.permanent_outdoor_lights', 'effect_list') or []) }}
+      value_template:
+        "{{ target_effect in (state_attr('light.permanent_outdoor_lights',
+        'effect_list') or []) }}"
     - service: light.turn_on
       target:
         entity_id: light.permanent_outdoor_lights
       data:
         effect: "{{ target_effect }}"
-
 - id: interior_lights_sunrise_off
-  alias: "Interior Lights Off - 15 Minutes After Sunrise"
+  alias: Interior Lights Off - 15 Minutes After Sunrise
   trigger:
     - platform: sun
       event: sunrise
-      offset: "00:15:00"
+      offset: 00:15:00
   condition: []
   action:
     - service: light.turn_off
@@ -162,10 +160,11 @@
           - light.livingroom_light
           - light.diningroom_light
   mode: single
-
 - id: lights_off_except_porch_garage_attic_2330
-  alias: "Lights Off Except Porch/Garage/Attic @ 23:30"
-  description: "At 11:30 PM, turn OFF all lights except the front porch, garage, and attic."
+  alias: Lights Off Except Porch/Garage/Attic @ 23:30
+  description:
+    At 11:30 PM, turn OFF all lights except the front porch, garage, and
+    attic.
   trigger:
     - platform: time
       at: "23:30:00"
@@ -174,16 +173,11 @@
     - variables:
         exceptions:
           - light.front_porch_lights
-          - light.front_porch
           - light.garage_lights
-          - light.garage
-          - light.attic_light
-          - light.attic
-        turn_off_list: >-
-          {{ states.light
-             | rejectattr('entity_id', 'in', exceptions)
-             | selectattr('state', 'eq', 'on')
-             | map(attribute='entity_id') | list }}
+        turn_off_list:
+          "{{ states.light\n   | rejectattr('entity_id', 'in', exceptions)\n\
+          \   | selectattr('state', 'eq', 'on')\n   | map(attribute='entity_id') | list\
+          \ }}"
     - choose:
         - conditions:
             - condition: template
@@ -193,13 +187,12 @@
               target:
                 entity_id: "{{ turn_off_list }}"
   mode: single
-
 - id: "1755305405794"
-  alias: "Midnight lights"
+  alias: Midnight lights
   description: ""
   trigger:
     - platform: time
-      at: "00:00:00"
+      at: 00:00:00
   condition: []
   action:
     - service: light.turn_off
@@ -215,9 +208,8 @@
       domain: light
       brightness_pct: 20
   mode: single
-
 - id: "1755305842459"
-  alias: "Bedroom-purifier on"
+  alias: Bedroom-purifier on
   description: ""
   trigger:
     - platform: device
@@ -232,9 +224,8 @@
       entity_id: a0ac47bc0794f26c2cce245f4e4200d3
       domain: switch
   mode: single
-
 - id: "1755305876272"
-  alias: "Bedroom-purifier-off"
+  alias: Bedroom-purifier-off
   description: ""
   trigger:
     - platform: device
@@ -249,10 +240,9 @@
       entity_id: a0ac47bc0794f26c2cce245f4e4200d3
       domain: switch
   mode: single
-
 - id: "1755373002789"
-  alias: "Purifier on bedroom (mirror on any change)"
-  description: "When the bedroom purifier turns on or off, turn OFF the paired device."
+  alias: Purifier on bedroom (mirror on any change)
+  description: When the bedroom purifier turns on or off, turn OFF the paired device.
   trigger:
     - platform: device
       type: turned_on

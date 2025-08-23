@@ -2,14 +2,14 @@
 # Place this file outside of packages/ (e.g., in lovelace/)
 
 views:
-  - title: Huskers – LED Test
+  - title: Huskers - LED Test
     path: husker-led-test
     icon: mdi:led-strip-variant
     badges: []
     cards:
       - type: markdown
         content: |
-          # Husker LED – MQTT Test
+          # Husker LED - MQTT Test
           Use the buttons below to start the **Husker (scarlet & cream)** effect on your permanent outdoor LEDs, or **revert to your monthly effect**.
       - type: grid
         columns: 2
@@ -51,7 +51,7 @@ views:
         content: |
           {% set v = states('sensor.huskers_last_score_test') %} **Last score (test):** {{ '—' if v in ['unknown','unavailable','none','None',''] else v }}
 
-  - title: Huskers – HQ
+  - title: Huskers - HQ
     path: huskers-hq
     icon: mdi:football-helmet
     badges: []
@@ -87,7 +87,7 @@ views:
           - entity: sensor.huskers_opponent_score
             name: Opponent Score
 
-  - title: Huskers – Controls
+  - title: Huskers - Controls
     path: huskers-controls
     icon: mdi:gesture-tap-button
     badges: []

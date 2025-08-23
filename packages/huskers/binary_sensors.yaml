@@ -1,0 +1,26 @@
+binary_sensor:
+  - platform: template
+    sensors:
+      huskers_pregame_window:
+        friendly_name: "Huskers Pregame Window"
+        value_template: >-
+          {% set s = states('input_text.huskers_game_status') | lower %}
+          {{ 'pre' in s and 'game' in s and 'post' not in s }}
+        icon_template: >-
+          {% if is_state('binary_sensor.huskers_pregame_window','on') %}
+            mdi:timer-sand
+          {% else %}
+            mdi:timer-sand-paused
+          {% endif %}
+
+      huskers_postgame_window:
+        friendly_name: "Huskers Postgame Window"
+        value_template: >-
+          {% set s = states('input_text.huskers_game_status') | lower %}
+          {{ 'post' in s and 'game' in s }}
+        icon_template: >-
+          {% if is_state('binary_sensor.huskers_postgame_window','on') %}
+            mdi:flag-checkered
+          {% else %}
+            mdi:flag-outline
+          {% endif %}
