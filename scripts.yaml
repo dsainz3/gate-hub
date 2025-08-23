@@ -40,9 +40,9 @@ huskers_touchdown_burst:
 
     # 2) Burst variables
     - variables:
-        flashes: 6  # total swaps (12 color hits)
-        on_time: 0.35  # hold time for each color
-        trans: 0.25  # smooth transition time
+        flashes: 6 # total swaps (12 color hits)
+        on_time: 0.35 # hold time for each color
+        trans: 0.25 # smooth transition time
 
     # 3) Alternate Scarlet <-> Cream
     - repeat:
@@ -190,7 +190,6 @@ huskers_theater_show_start:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_color_show
-
 huskers_theater_show_stop:
   alias: "Huskers: Theater Show (Stop)"
   mode: single
@@ -198,4 +197,3 @@ huskers_theater_show_stop:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_color_show
-

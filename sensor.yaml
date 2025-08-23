@@ -94,10 +94,10 @@
   max_age:
     hours: 24
 
-  # ---- Storm watch if pressure drop > ~3 hPa in 24h ----
-  - platform: template
-    sensors:
-      kneplatt72_storm_watch:
+# ---- Storm watch if pressure drop > ~3 hPa in 24h ----
+- platform: template
+  sensors:
+    kneplatt72_storm_watch:
         friendly_name: "KNEPLATT72 Storm Watch"
         value_template: >-
           {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
