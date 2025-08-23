@@ -1,11 +1,11 @@
-﻿title: Huskers â€“ LED Test
+title: Huskers – LED Test
 path: husker-led-test
 icon: mdi:led-strip-variant
 badges: []
 cards:
   - type: markdown
     content: >
-      # Husker LED â€“ MQTT Test
+      # Husker LED – MQTT Test
 
       Use the buttons below to start the **Husker (scarlet & cream)** effect
       on your permanent outdoor LEDs, or **revert to your monthly effect**.
@@ -70,7 +70,7 @@ cards:
   - type: markdown
     content: >-
       {% set v = states('sensor.huskers_last_score_test') %}
-      {% if v in ['unknown','unavailable','none','None',''] %}{% set v = 'â€”' %}{% endif %}
+      {% if v in ['unknown','unavailable','none','None',''] %}{% set v = '—' %}{% endif %}
       **Last score (test):** {{ v }}
 
       **Notes:** Buttons appear only when their matching script exists.
