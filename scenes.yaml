@@ -39,7 +39,7 @@
 # =========================================================
 # CATEGORY: HUSKERS – EXTERIOR (ALTERNATING)
 # =========================================================
-# TIP: Transition time is set when activating the scene (see example below).
+# TIP: Transition time is set when activating the scene (e.g., scene.turn_on + data.transition).
 
 # PURPOSE: Alternating scarlet/cream starting with scarlet.
 # PATTERN: Scarlet (front left), Cream (front right), Scarlet (garage L),
@@ -56,7 +56,6 @@
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
-
     light.garage_l:
       state: 'on'
       brightness: 255
@@ -85,7 +84,6 @@
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
-
     light.garage_l:
       state: 'on'
       brightness: 255

@@ -28,25 +28,22 @@ huskers_led_gameday_start:
 huskers_led_stop:
   alias: Stop Effect (Restore Previous)
   mode: single
+  variables:
+    snapshot_scene: scene.huskers_outdoor_pre_gameday
   sequence:
     - choose:
         - conditions:
-            - condition: state
-              entity_id: scene.huskers_outdoor_pre_gameday
-              state: 'scening' # scene entities created by `scene.create` are always available; guard anyway
-              # NOTE: Some HA setups don't expose dynamic scenes in the state machine.
-              # We'll try to restore regardless; if it fails, fallback runs.
-              # You can remove this condition if your HA doesn't track dynamic scenes.
+            - condition: template
+              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              target:
-                entity_id: scene.huskers_outdoor_pre_gameday
               data:
+                entity_id: '{{ snapshot_scene }}'
                 transition: 1
             - delay: 0.1
             - service: scene.delete
-              target:
-                entity_id: scene.huskers_outdoor_pre_gameday
+              data:
+                entity_id: '{{ snapshot_scene }}'
       default:
         - service: light.turn_off
           target:
@@ -73,6 +70,8 @@ huskers_led_revert_monthly:
 huskers_touchdown_burst:
   alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
   mode: restart
+  variables:
+    snapshot_scene: scene.huskers_theater_pre_burst
   sequence:
     # 1) Snapshot
     - service: scene.create
@@ -93,50 +92,42 @@ huskers_touchdown_burst:
         count: '{{ flashes }}'
         sequence:
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              hs_color: [355, 90] # Scarlet
-              brightness: 255
-              transition: '{{ trans }}'
+            target: { entity_id: light.light_theater_left }
+            data: { hs_color: [355, 90], brightness: 255, transition: '{{ trans }}' }
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              hs_color: [48, 12] # Cream
-              brightness: 255
-              transition: '{{ trans }}'
+            target: { entity_id: light.light_theater_right }
+            data: { hs_color: [48, 12], brightness: 255, transition: '{{ trans }}' }
+          - delay: '{{ on_time }}'
+          - service: light.turn_on
+            target: { entity_id: light.light_theater_left }
+            data: { hs_color: [48, 12], brightness: 255, transition: '{{ trans }}' }
+          - service: light.turn_on
+            target: { entity_id: light.light_theater_right }
+            data: { hs_color: [355, 90], brightness: 255, transition: '{{ trans }}' }
           - delay: '{{ on_time }}'
 
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              hs_color: [48, 12] # Cream
-              brightness: 255
-              transition: '{{ trans }}'
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              hs_color: [355, 90] # Scarlet
-              brightness: 255
-              transition: '{{ trans }}'
-          - delay: '{{ on_time }}'
-
-    # 4) Restore snapshot
+    # 4) Restore snapshot (guarded)
     - delay: 0.2
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_theater_pre_burst
-      data:
-        transition: 1.0
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              data:
+                entity_id: '{{ snapshot_scene }}'
+                transition: 1.0
+            - service: scene.delete
+              data:
+                entity_id: '{{ snapshot_scene }}'
 
 # PURPOSE: Start an alternating scarlet/cream theater show until turned off.
 # CONTROL: Uses input_boolean.huskers_color_show as the run/stop flag.
 huskers_theater_show_start:
   alias: 'Huskers: Theater Show (Start)'
   mode: restart
+  variables:
+    snapshot_scene: scene.huskers_theater_show_restore
   sequence:
     - service: scene.create
       data:
@@ -146,22 +137,15 @@ huskers_theater_show_start:
           - light.light_theater_right
 
     - service: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.huskers_color_show
+      target: { entity_id: input_boolean.huskers_color_show }
 
     # Seed colors
     - service: light.turn_on
-      target:
-        entity_id: light.light_theater_left
-      data:
-        hs_color: [48, 12] # Cream
-        brightness: 255
+      target: { entity_id: light.light_theater_left }
+      data: { hs_color: [48, 12], brightness: 255 }
     - service: light.turn_on
-      target:
-        entity_id: light.light_theater_right
-      data:
-        hs_color: [355, 90] # Scarlet
-        brightness: 255
+      target: { entity_id: light.light_theater_right }
+      data: { hs_color: [355, 90], brightness: 255 }
 
     # Alternate while the boolean remains on
     - repeat:
@@ -171,46 +155,34 @@ huskers_theater_show_start:
             state: 'on'
         sequence:
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 10
+            target: { entity_id: light.light_theater_left }
+            data: { hs_color: [355, 90], brightness: 255, transition: 10 }
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              hs_color: [48, 12]
-              brightness: 255
-              transition: 10
+            target: { entity_id: light.light_theater_right }
+            data: { hs_color: [48, 12], brightness: 255, transition: 10 }
           - delay: 10
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              hs_color: [48, 12]
-              brightness: 255
-              transition: 10
+            target: { entity_id: light.light_theater_left }
+            data: { hs_color: [48, 12], brightness: 255, transition: 10 }
           - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 10
+            target: { entity_id: light.light_theater_right }
+            data: { hs_color: [355, 90], brightness: 255, transition: 10 }
           - delay: 10
 
-    # Restore and cleanup
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_theater_show_restore
-    - service: scene.delete
-      target:
-        entity_id: scene.huskers_theater_show_restore
+    # Restore and cleanup (guarded)
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              data:
+                entity_id: '{{ snapshot_scene }}'
+            - service: scene.delete
+              data:
+                entity_id: '{{ snapshot_scene }}'
     - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_color_show
+      target: { entity_id: input_boolean.huskers_color_show }
 
 # PURPOSE: Stop the theater color show (sets the run/stop flag off).
 huskers_theater_show_stop:
@@ -218,60 +190,47 @@ huskers_theater_show_stop:
   mode: single
   sequence:
     - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_color_show
+      target: { entity_id: input_boolean.huskers_color_show }
 
 # =========================================================
 # CATEGORY: HUSKERS – TEST & PLACEHOLDERS
 # =========================================================
 
-# PURPOSE: Quick helper to poke the "last score" input for downstream tests.
 huskers_update_last_score_test:
   alias: Update Last Score (Test)
   mode: single
   sequence:
     - service: input_text.set_value
-      target:
-        entity_id: input_text.huskers_last_score
-      data:
-        value: 'Test Score Update'
+      target: { entity_id: input_text.huskers_last_score }
+      data: { value: 'Test Score Update' }
 
-# PURPOSE: Placeholder shows (future) – keep as validating no-ops with a log note.
 huskers_hail_varsity_show_start:
   alias: 'Huskers: Hail Varsity Show (Start)'
   mode: restart
   sequence:
     - service: logbook.log
-      data:
-        name: 'Huskers – Hail Varsity'
-        message: 'Start show: TODO implement sequence.'
+      data: { name: 'Huskers – Hail Varsity', message: 'Start show: TODO implement sequence.' }
 
 huskers_hail_varsity_show_stop:
   alias: 'Huskers: Hail Varsity Show (Stop)'
   mode: restart
   sequence:
     - service: logbook.log
-      data:
-        name: 'Huskers – Hail Varsity'
-        message: 'Stop show: TODO implement sequence.'
+      data: { name: 'Huskers – Hail Varsity', message: 'Stop show: TODO implement sequence.' }
 
 huskers_test_our_score:
   alias: 'Huskers (Test): Our Score'
   mode: single
   sequence:
     - service: logbook.log
-      data:
-        name: 'Huskers – Test'
-        message: 'Our Score: TODO implement action.'
+      data: { name: 'Huskers – Test', message: 'Our Score: TODO implement action.' }
 
 huskers_test_opponent_score:
   alias: 'Huskers (Test): Opponent Score'
   mode: single
   sequence:
     - service: logbook.log
-      data:
-        name: 'Huskers – Test'
-        message: 'Opponent Score: TODO implement action.'
+      data: { name: 'Huskers – Test', message: 'Opponent Score: TODO implement action.' }
 
 # =========================================================
 # CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS
@@ -284,22 +243,44 @@ huskers_test_opponent_score:
 huskers_exterior_alternating_start:
   alias: 'Huskers: Exterior Alternating – Start'
   mode: single
+  variables:
+    scene_id: scene.huskers_alternating_exterior
   sequence:
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_alternating_exterior
-      data:
-        transition: 5
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states(scene_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              data:
+                entity_id: '{{ scene_id }}'
+                transition: 5
+      default:
+        - service: logbook.log
+          data:
+            name: 'Huskers – Exterior Scenes'
+            message: 'Scene not found: {{ scene_id }} (did you reload Scenes?)'
 
 huskers_exterior_alternating_inverted_start:
   alias: 'Huskers: Exterior Alternating (Inverted) – Start'
   mode: single
+  variables:
+    scene_id: scene.huskers_alternating_exterior_inverted
   sequence:
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_alternating_exterior_inverted
-      data:
-        transition: 5
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states(scene_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              data:
+                entity_id: '{{ scene_id }}'
+                transition: 5
+      default:
+        - service: logbook.log
+          data:
+            name: 'Huskers – Exterior Scenes'
+            message: 'Scene not found: {{ scene_id }} (did you reload Scenes?)'
 
 # OPTIONAL: One-button toggle between normal and inverted exterior scenes.
 huskers_exterior_alternating_toggle:
@@ -308,18 +289,15 @@ huskers_exterior_alternating_toggle:
   sequence:
     - choose:
         - conditions:
-            - condition: state
-              entity_id: scene.huskers_alternating_exterior
-              state: 'scening' # not always tracked; we use this as a hint only
+            - condition: template
+              value_template: "{{ states('scene.huskers_alternating_exterior') != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              target:
-                entity_id: scene.huskers_alternating_exterior_inverted
               data:
+                entity_id: scene.huskers_alternating_exterior_inverted
                 transition: 5
       default:
         - service: scene.turn_on
-          target:
-            entity_id: scene.huskers_alternating_exterior
           data:
+            entity_id: scene.huskers_alternating_exterior
             transition: 5
