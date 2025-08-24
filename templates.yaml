@@ -1,136 +1,135 @@
 # =========================================================
 # TEMPLATE SENSORS & BINARY SENSORS (MODERN STYLE)
 # =========================================================
-template:
-  # --------------------------
-  # General / Network / Weather
-  # --------------------------
-  - sensor:
-      # ---- Pressure trend (rising / steady / falling) ----
-      - name: 'KNEPLATT72 Pressure Trend'
-        unique_id: kneplatt72_pressure_trend
-        state: >-
-          {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
-          {% set raw = states('sensor.kneplatt72_pressure_24h_change') %}
-          {% if raw in ['unknown','unavailable','none',''] %}
-            unknown
+# --------------------------
+# General / Network / Weather
+# --------------------------
+- sensor:
+    # ---- Pressure trend (rising / steady / falling) ----
+    - name: 'KNEPLATT72 Pressure Trend'
+      unique_id: kneplatt72_pressure_trend
+      state: >-
+        {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
+        {% set raw = states('sensor.kneplatt72_pressure_24h_change') %}
+        {% if raw in ['unknown','unavailable','none',''] %}
+          unknown
+        {% else %}
+          {% set d = raw|float(0) %}
+          {% set delta_hpa = d if u in ['hPa','mbar'] else (d * 33.8638866667) %}
+          {% if delta_hpa > 0.7 %}rising
+          {% elif delta_hpa < -0.7 %}falling
+          {% else %}steady{% endif %}
+        {% endif %}
+      icon: >-
+        {% set s = this.state %}
+        {% if s == 'rising' %}mdi:arrow-up-bold
+        {% elif s == 'falling' %}mdi:arrow-down-bold
+        {% else %}mdi:arrow-right-bold{% endif %}
+      attributes:
+        delta_hpa: >-
+          {{
+            (states('sensor.kneplatt72_pressure_24h_change')|float(0)) *
+            (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
+            | round(2)
+          }}
+        delta_inhg: >-
+          {% set d = states('sensor.kneplatt72_pressure_24h_change')|float(0) %}
+          {% if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') in ['hPa','mbar']) %}
+            {{ (d / 33.8638866667) | round(3) }}
           {% else %}
-            {% set d = raw|float(0) %}
-            {% set delta_hpa = d if u in ['hPa','mbar'] else (d * 33.8638866667) %}
-            {% if delta_hpa > 0.7 %}rising
-            {% elif delta_hpa < -0.7 %}falling
-            {% else %}steady{% endif %}
+            {{ d | round(3) }}
           {% endif %}
-        icon: >-
-          {% set s = this.state %}
-          {% if s == 'rising' %}mdi:arrow-up-bold
-          {% elif s == 'falling' %}mdi:arrow-down-bold
-          {% else %}mdi:arrow-right-bold{% endif %}
-        attributes:
-          delta_hpa: >-
-            {{
-              (states('sensor.kneplatt72_pressure_24h_change')|float(0)) *
-              (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
-              | round(2)
-            }}
-          delta_inhg: >-
-            {% set d = states('sensor.kneplatt72_pressure_24h_change')|float(0) %}
-            {% if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') in ['hPa','mbar']) %}
-              {{ (d / 33.8638866667) | round(3) }}
-            {% else %}
-              {{ d | round(3) }}
-            {% endif %}
-          threshold_hpa: 0.7 # trend threshold (not storm threshold)
+        threshold_hpa: 0.7 # trend threshold (not storm threshold)
 
-      # ---- Nmap metrics ----
-      - name: 'Nmap Active Hosts'
-        unique_id: nmap_active_hosts
-        state: >-
-          {% set nmap = integration_entities('nmap_tracker') or [] %}
-          {{ expand(nmap)
-             | selectattr('domain','equalto','device_tracker')
-             | selectattr('state','equalto','home')
-             | list | length }}
-        icon: mdi:lan
+    # ---- Nmap metrics ----
+    - name: 'Nmap Active Hosts'
+      unique_id: nmap_active_hosts
+      state: >-
+        {% set nmap = integration_entities('nmap_tracker') or [] %}
+        {{ expand(nmap)
+           | selectattr('domain','equalto','device_tracker')
+           | selectattr('state','equalto','home')
+           | list | length }}
+      icon: mdi:lan
 
-      - name: 'Nmap Known Hosts'
-        unique_id: nmap_known_hosts
-        state: >-
-          {% set nmap = integration_entities('nmap_tracker') or [] %}
-          {{ expand(nmap)
-             | selectattr('domain','equalto','device_tracker')
-             | list | length }}
-        icon: mdi:lan-check
+    - name: 'Nmap Known Hosts'
+      unique_id: nmap_known_hosts
+      state: >-
+        {% set nmap = integration_entities('nmap_tracker') or [] %}
+        {{ expand(nmap)
+           | selectattr('domain','equalto','device_tracker')
+           | list | length }}
+      icon: mdi:lan-check
 
-      # ---- TP-Link Deco clients online ----
-      - name: 'TP-Link Clients Online'
-        unique_id: tplink_clients_online
-        state: >-
-          {% set tpl = integration_entities('tplink_router') or [] %}
-          {{ expand(tpl)
-             | selectattr('domain','equalto','device_tracker')
-             | selectattr('state','equalto','home')
-             | list | length }}
-        icon: mdi:wifi
+    # ---- TP-Link Deco clients online ----
+    - name: 'TP-Link Clients Online'
+      unique_id: tplink_clients_online
+      state: >-
+        {% set tpl = integration_entities('tplink_router') or [] %}
+        {{ expand(tpl)
+           | selectattr('domain','equalto','device_tracker')
+           | selectattr('state','equalto','home')
+           | list | length }}
+      icon: mdi:wifi
 
-      # ---- Internet status (Ping integration) ----
-      # De-duplicated: keep one canonical "Internet Status" with a unique_id
-      - name: 'Internet Status'
-        unique_id: internet_status
-        state: >-
-          {% if is_state('binary_sensor.internet_reachable','on') %}
-            Online ({{ states('sensor.internet_reachable_latency') }} ms)
-          {% else %}
-            Offline
-          {% endif %}
-        icon: >-
-          {% if is_state('binary_sensor.internet_reachable','on') %}
-            mdi:check-network
-          {% else %}
-            mdi:close-network
-          {% endif %}
+    # ---- Internet status (Ping integration) ----
+    # De-duplicated: keep one canonical "Internet Status" with a unique_id
+    - name: 'Internet Status'
+      unique_id: internet_status
+      state: >-
+        {% if is_state('binary_sensor.internet_reachable','on') %}
+          Online ({{ states('sensor.internet_reachable_latency') }} ms)
+        {% else %}
+          Offline
+        {% endif %}
+      icon: >-
+        {% if is_state('binary_sensor.internet_reachable','on') %}
+          mdi:check-network
+        {% else %}
+          mdi:close-network
+        {% endif %}
 
-  # --------------------------
-  # Huskers derived sensors
-  # --------------------------
-  - sensor:
-      - name: 'Huskers Next Game Start'
-        unique_id: huskers_next_game_start
-        state: >-
-          {{ states('sensor.nebraska_football') }}
+# --------------------------
+# Huskers derived sensors
+# --------------------------
+- sensor:
+    - name: 'Huskers Next Game Start'
+      unique_id: huskers_next_game_start
+      state: >-
+        {{ states('sensor.nebraska_football') }}
 
-      - name: 'Huskers Next Game Status'
-        unique_id: huskers_next_game_status
-        state: >-
-          {{ 'pregame' if is_state('binary_sensor.huskers_pregame_window','on')
-             else 'postgame' if is_state('binary_sensor.huskers_postgame_window','on')
-             else 'in_progress' if is_state('binary_sensor.huskers_game_in_progress_tt','on')
-             else 'idle' }}
+    - name: 'Huskers Next Game Status'
+      unique_id: huskers_next_game_status
+      state: >-
+        {{ 'pregame' if is_state('binary_sensor.huskers_pregame_window','on')
+           else 'postgame' if is_state('binary_sensor.huskers_postgame_window','on')
+           else 'in_progress' if is_state('binary_sensor.huskers_game_in_progress_tt','on')
+           else 'idle' }}
 
-      - name: 'Huskers Kickoff In'
-        unique_id: huskers_kickoff_in
-        unit_of_measurement: 'min'
-        state: >-
-          {% set t = states('sensor.huskers_next_game_start') %}
-          {% if t not in ['unknown','unavailable','none','', 'NOT_FOUND'] %}
-            {% set dt = as_datetime(t) %}
-            {% if dt %}{{ ((dt - now()).total_seconds() / 60) | round(0) }}
-            {% else %}unknown{% endif %}
+    - name: 'Huskers Kickoff In'
+      unique_id: huskers_kickoff_in
+      unit_of_measurement: 'min'
+      state: >-
+        {% set t = states('sensor.huskers_next_game_start') %}
+        {% if t not in ['unknown','unavailable','none','', 'NOT_FOUND'] %}
+          {% set dt = as_datetime(t) %}
+          {% if dt %}{{ ((dt - now()).total_seconds() / 60) | round(0) }}
           {% else %}unknown{% endif %}
+        {% else %}unknown{% endif %}
 
-  - binary_sensor:
-      - name: 'Huskers Pregame Window'
-        unique_id: huskers_pregame_window
-        state: >-
-          {% set mins = states('sensor.huskers_kickoff_in')|int(-9999) %}
-          {{ 0 < mins <= 120 }}
+- binary_sensor:
+    - name: 'Huskers Pregame Window'
+      unique_id: huskers_pregame_window
+      state: >-
+        {% set mins = states('sensor.huskers_kickoff_in')|int(-9999) %}
+        {{ 0 < mins <= 120 }}
 
-      - name: 'Huskers Postgame Window'
-        unique_id: huskers_postgame_window
-        state: >-
-          {{ false }}  {# TODO: implement when game end signal available #}
+    - name: 'Huskers Postgame Window'
+      unique_id: huskers_postgame_window
+      state: >-
+        {{ false }}  {# TODO: implement when game end signal available #}
 
-      - name: 'Huskers Game In Progress (TT)'
-        unique_id: huskers_game_in_progress_tt
-        state: >-
-          {{ false }}  {# TODO: wire to upstream if available #}
+    - name: 'Huskers Game In Progress (TT)'
+      unique_id: huskers_game_in_progress_tt
+      state: >-
+        {{ false }}  {# TODO: wire to upstream if available #}
