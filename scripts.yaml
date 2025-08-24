@@ -27,7 +27,7 @@ huskers_led_revert_monthly:
         effect: Monthly
 
 huskers_touchdown_burst:
-  alias: "Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)"
+  alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
   mode: restart
   sequence:
     # 1) Snapshot current state of both theater lights
@@ -40,13 +40,13 @@ huskers_touchdown_burst:
 
     # 2) Burst variables
     - variables:
-        flashes: 6  # total swaps (12 color hits)
-        on_time: 0.35  # hold time for each color
-        trans: 0.25  # smooth transition time
+        flashes: 6 # total swaps (12 color hits)
+        on_time: 0.35 # hold time for each color
+        trans: 0.25 # smooth transition time
 
     # 3) Alternate Scarlet <-> Cream
     - repeat:
-        count: "{{ flashes }}"
+        count: '{{ flashes }}'
         sequence:
           # Left red, right cream
           - service: light.turn_on
@@ -55,15 +55,15 @@ huskers_touchdown_burst:
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: "{{ trans }}"
+              transition: '{{ trans }}'
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
               hs_color: [48, 12]
               brightness: 255
-              transition: "{{ trans }}"
-          - delay: "{{ on_time }}"
+              transition: '{{ trans }}'
+          - delay: '{{ on_time }}'
 
           # Swap: left cream, right red
           - service: light.turn_on
@@ -72,15 +72,15 @@ huskers_touchdown_burst:
             data:
               hs_color: [48, 12]
               brightness: 255
-              transition: "{{ trans }}"
+              transition: '{{ trans }}'
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: "{{ trans }}"
-          - delay: "{{ on_time }}"
+              transition: '{{ trans }}'
+          - delay: '{{ on_time }}'
 
     # 4) Settle and restore the snapshot
     - delay: 0.2
@@ -98,30 +98,30 @@ huskers_update_last_score_test:
       target:
         entity_id: input_text.huskers_last_score
       data:
-        value: "Test Score Update"
+        value: 'Test Score Update'
 
 huskers_hail_varsity_show_start:
-  alias: "Huskers: Hail Varsity Show (Start)"
+  alias: 'Huskers: Hail Varsity Show (Start)'
   mode: restart
   sequence: []
 
 huskers_hail_varsity_show_stop:
-  alias: "Huskers: Hail Varsity Show (Stop)"
+  alias: 'Huskers: Hail Varsity Show (Stop)'
   mode: restart
   sequence: []
 
 huskers_test_our_score:
-  alias: "Huskers (Test): Our Score"
+  alias: 'Huskers (Test): Our Score'
   mode: single
   sequence: []
 
 huskers_test_opponent_score:
-  alias: "Huskers (Test): Opponent Score"
+  alias: 'Huskers (Test): Opponent Score'
   mode: single
   sequence: []
 
 huskers_theater_show_start:
-  alias: "Huskers: Theater Show (Start)"
+  alias: 'Huskers: Theater Show (Start)'
   mode: restart
   sequence:
     - service: scene.create
@@ -149,7 +149,7 @@ huskers_theater_show_start:
         while:
           - condition: state
             entity_id: input_boolean.huskers_color_show
-            state: "on"
+            state: 'on'
         sequence:
           - service: light.turn_on
             target:
@@ -192,10 +192,9 @@ huskers_theater_show_start:
         entity_id: input_boolean.huskers_color_show
 
 huskers_theater_show_stop:
-  alias: "Huskers: Theater Show (Stop)"
+  alias: 'Huskers: Theater Show (Stop)'
   mode: single
   sequence:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_color_show
-

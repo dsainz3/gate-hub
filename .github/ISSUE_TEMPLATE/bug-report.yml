@@ -1,7 +1,7 @@
 ---
-name: "Bug report"
+name: 'Bug report'
 description: Report a problem in config or docs
-labels: ["bug"]
+labels: ['bug']
 body:
   - type: textarea
     id: steps

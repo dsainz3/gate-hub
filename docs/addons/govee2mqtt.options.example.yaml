@@ -8,6 +8,6 @@ publish_state_updates: true
 persist_state: true
 cache_ttl_seconds: 900
 log_level: info
-govee_email: "<set in Add-on UI>"
-govee_password: "<set in Add-on UI>"
-govee_api_key: "<set in Add-on UI>"
+govee_email: '<set in Add-on UI>'
+govee_password: '<set in Add-on UI>'
+govee_api_key: '<set in Add-on UI>'

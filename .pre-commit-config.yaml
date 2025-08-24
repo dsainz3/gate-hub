@@ -4,13 +4,14 @@
     hooks:
       - id: prettier
         name: Prettier (YAML)
-        args: [--write, --parser=yaml]
         files: '\.(ya?ml)$'
-        language_version: system
+        args: [--write, --parser=yaml]
+        additional_dependencies:
+          - prettier@3.3.3
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^packages/[^/]+\.ya?ml$|
+            ^homeassistant/packages/[^/]+\.ya?ml$|
             ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
@@ -32,7 +33,7 @@
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
-            ^packages/.*\.ya?ml$|
+            ^homeassistant/packages/.*\.ya?ml$|
             ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
             ^blueprints/.*\.ya?ml$|
@@ -44,7 +45,7 @@
     rev: v1.37.1
     hooks:
       - id: yamllint
-        args: ["-c", ".yamllint.yml", "."]
+        args: ['-c', '.yamllint.yml', '.']
 
   - repo: https://github.com/psf/black
     rev: 25.1.0
@@ -66,12 +67,10 @@
         additional_dependencies:
           - flake8-bugbear==24.4.26
           - flake8-builtins==2.5.0
-
-  # HA CONFIG CHECK (portable via script)
   - repo: local
     hooks:
       - id: hass-config-check
-        name: Home Assistant config check (portable)
+        name: Home Assistant config check (portable, Python)
+        entry: python scripts/ha_check_portable.py
         language: system
         pass_filenames: false
-        entry: scripts/ha_check_portable.sh

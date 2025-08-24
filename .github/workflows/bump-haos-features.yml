@@ -3,7 +3,7 @@ name: Bump haos-features submodule
 
 on:
   schedule:
-    - cron: "15 6 * * 1,4" # Mon/Thu 06:15 UTC
+    - cron: '15 6 * * 1,4' # Mon/Thu 06:15 UTC
   workflow_dispatch:
 
 permissions:
@@ -27,9 +27,9 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "chore(submodule): bump haos-features"
-          commit-message: "chore(submodule): bump haos-features"
-          body: "Automated submodule bump to latest commit on haos-features@main."
+          title: 'chore(submodule): bump haos-features'
+          commit-message: 'chore(submodule): bump haos-features'
+          body: 'Automated submodule bump to latest commit on haos-features@main.'
           branch: chore/bump-haos-features
           base: main
           add-paths: |
