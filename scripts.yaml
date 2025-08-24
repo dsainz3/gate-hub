@@ -329,7 +329,18 @@ util_fade_color:
 huskers_exterior_alternating_start:
   alias: "Huskers: Exterior Alternating \u2013 Start (Loop)"
   mode: restart
+  variables:
+    snapshot_id: huskers_exterior_pre_alternating
   sequence:
+    - service: scene.create
+      data:
+        scene_id: "{{ snapshot_id }}"
+        snapshot_entities:
+          - light.light_front_left
+          - light.light_front_right
+          - light.garage_l
+          - light.garage_c
+          - light.garage_r
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_exterior_color_show
@@ -527,7 +538,16 @@ huskers_theater_cream_fade:
 huskers_exterior_alternating_stop:
   alias: "Huskers: Exterior Alternating \u2013 Stop"
   mode: single
+  variables:
+    snapshot_id: huskers_exterior_pre_alternating
   sequence:
+    - service: scene.turn_on
+      data:
+        entity_id: scene.{{ snapshot_id }}
+    - delay: 0.1
+    - service: scene.delete
+      data:
+        entity_id: scene.{{ snapshot_id }}
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_exterior_color_show
