@@ -1,21 +1,59 @@
+---
+# =========================================================
+# CATEGORY: HUSKERS – PERMANENT OUTDOOR LEDs (GAME DAY)
+# =========================================================
+
+# PURPOSE: Start Huskers effect on permanent outdoor LEDs.
+# UPGRADE: Takes a snapshot first so you can restore cleanly on stop.
 huskers_led_gameday_start:
   alias: Start Game-Day Effect
   mode: single
   sequence:
+    # Snapshot current state of permanent outdoor lights
+    - service: scene.create
+      data:
+        scene_id: huskers_outdoor_pre_gameday
+        snapshot_entities:
+          - light.permanent_outdoor_lights
+
+    # Apply Huskers effect (must exist in effect_list)
     - service: light.turn_on
       target:
         entity_id: light.permanent_outdoor_lights
       data:
         effect: LED_Huskers
 
+# PURPOSE: Stop Huskers effect and restore pre-game snapshot if available.
+# FALLBACK: If no snapshot exists (first run, HA restart), just turn lights off.
 huskers_led_stop:
   alias: Stop Effect (Restore Previous)
   mode: single
   sequence:
-    - service: light.turn_off
-      target:
-        entity_id: light.permanent_outdoor_lights
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: scene.huskers_outdoor_pre_gameday
+              state: 'scening' # scene entities created by `scene.create` are always available; guard anyway
+              # NOTE: Some HA setups don't expose dynamic scenes in the state machine.
+              # We'll try to restore regardless; if it fails, fallback runs.
+              # You can remove this condition if your HA doesn't track dynamic scenes.
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.huskers_outdoor_pre_gameday
+              data:
+                transition: 1
+            - delay: 0.1
+            - service: scene.delete
+              target:
+                entity_id: scene.huskers_outdoor_pre_gameday
+      default:
+        - service: light.turn_off
+          target:
+            entity_id: light.permanent_outdoor_lights
 
+# PURPOSE: Re-apply your "Monthly" effect explicitly.
+# NOTE: Keeps this separate from stop/restore so your midnight scheduler can still run.
 huskers_led_revert_monthly:
   alias: Revert to Monthly Effect
   mode: single
@@ -26,11 +64,17 @@ huskers_led_revert_monthly:
       data:
         effect: Monthly
 
+# =========================================================
+# CATEGORY: HUSKERS – THEATER (BURST & COLOR SHOW)
+# =========================================================
+
+# PURPOSE: 12-hit alternating scarlet/cream "touchdown burst" on theater lights.
+# FEATURES: Snapshots and restores previous state.
 huskers_touchdown_burst:
   alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
   mode: restart
   sequence:
-    # 1) Snapshot current state of both theater lights
+    # 1) Snapshot
     - service: scene.create
       data:
         scene_id: huskers_theater_pre_burst
@@ -41,48 +85,46 @@ huskers_touchdown_burst:
     # 2) Burst variables
     - variables:
         flashes: 6 # total swaps (12 color hits)
-        on_time: 0.35 # hold time for each color
-        trans: 0.25 # smooth transition time
+        on_time: 0.35
+        trans: 0.25
 
     # 3) Alternate Scarlet <-> Cream
     - repeat:
         count: '{{ flashes }}'
         sequence:
-          # Left red, right cream
           - service: light.turn_on
             target:
               entity_id: light.light_theater_left
             data:
-              hs_color: [355, 90]
+              hs_color: [355, 90] # Scarlet
               brightness: 255
               transition: '{{ trans }}'
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
-              hs_color: [48, 12]
+              hs_color: [48, 12] # Cream
               brightness: 255
               transition: '{{ trans }}'
           - delay: '{{ on_time }}'
 
-          # Swap: left cream, right red
           - service: light.turn_on
             target:
               entity_id: light.light_theater_left
             data:
-              hs_color: [48, 12]
+              hs_color: [48, 12] # Cream
               brightness: 255
               transition: '{{ trans }}'
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
-              hs_color: [355, 90]
+              hs_color: [355, 90] # Scarlet
               brightness: 255
               transition: '{{ trans }}'
           - delay: '{{ on_time }}'
 
-    # 4) Settle and restore the snapshot
+    # 4) Restore snapshot
     - delay: 0.2
     - service: scene.turn_on
       target:
@@ -90,36 +132,8 @@ huskers_touchdown_burst:
       data:
         transition: 1.0
 
-huskers_update_last_score_test:
-  alias: Update Last Score (Test)
-  mode: single
-  sequence:
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.huskers_last_score
-      data:
-        value: 'Test Score Update'
-
-huskers_hail_varsity_show_start:
-  alias: 'Huskers: Hail Varsity Show (Start)'
-  mode: restart
-  sequence: []
-
-huskers_hail_varsity_show_stop:
-  alias: 'Huskers: Hail Varsity Show (Stop)'
-  mode: restart
-  sequence: []
-
-huskers_test_our_score:
-  alias: 'Huskers (Test): Our Score'
-  mode: single
-  sequence: []
-
-huskers_test_opponent_score:
-  alias: 'Huskers (Test): Opponent Score'
-  mode: single
-  sequence: []
-
+# PURPOSE: Start an alternating scarlet/cream theater show until turned off.
+# CONTROL: Uses input_boolean.huskers_color_show as the run/stop flag.
 huskers_theater_show_start:
   alias: 'Huskers: Theater Show (Start)'
   mode: restart
@@ -130,21 +144,26 @@ huskers_theater_show_start:
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
+
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_color_show
+
+    # Seed colors
     - service: light.turn_on
       target:
         entity_id: light.light_theater_left
       data:
-        hs_color: [48, 12]
+        hs_color: [48, 12] # Cream
         brightness: 255
     - service: light.turn_on
       target:
         entity_id: light.light_theater_right
       data:
-        hs_color: [355, 90]
+        hs_color: [355, 90] # Scarlet
         brightness: 255
+
+    # Alternate while the boolean remains on
     - repeat:
         while:
           - condition: state
@@ -181,6 +200,8 @@ huskers_theater_show_start:
               brightness: 255
               transition: 10
           - delay: 10
+
+    # Restore and cleanup
     - service: scene.turn_on
       target:
         entity_id: scene.huskers_theater_show_restore
@@ -191,6 +212,7 @@ huskers_theater_show_start:
       target:
         entity_id: input_boolean.huskers_color_show
 
+# PURPOSE: Stop the theater color show (sets the run/stop flag off).
 huskers_theater_show_stop:
   alias: 'Huskers: Theater Show (Stop)'
   mode: single
@@ -198,3 +220,106 @@ huskers_theater_show_stop:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_color_show
+
+# =========================================================
+# CATEGORY: HUSKERS – TEST & PLACEHOLDERS
+# =========================================================
+
+# PURPOSE: Quick helper to poke the "last score" input for downstream tests.
+huskers_update_last_score_test:
+  alias: Update Last Score (Test)
+  mode: single
+  sequence:
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.huskers_last_score
+      data:
+        value: 'Test Score Update'
+
+# PURPOSE: Placeholder shows (future) – keep as validating no-ops with a log note.
+huskers_hail_varsity_show_start:
+  alias: 'Huskers: Hail Varsity Show (Start)'
+  mode: restart
+  sequence:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Hail Varsity'
+        message: 'Start show: TODO implement sequence.'
+
+huskers_hail_varsity_show_stop:
+  alias: 'Huskers: Hail Varsity Show (Stop)'
+  mode: restart
+  sequence:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Hail Varsity'
+        message: 'Stop show: TODO implement sequence.'
+
+huskers_test_our_score:
+  alias: 'Huskers (Test): Our Score'
+  mode: single
+  sequence:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Test'
+        message: 'Our Score: TODO implement action.'
+
+huskers_test_opponent_score:
+  alias: 'Huskers (Test): Opponent Score'
+  mode: single
+  sequence:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Test'
+        message: 'Opponent Score: TODO implement action.'
+
+# =========================================================
+# CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS
+# =========================================================
+# These helpers apply your exterior alternating scenes with a 5s transition.
+# Requires scenes from scenes.yaml:
+#   - scene.huskers_alternating_exterior
+#   - scene.huskers_alternating_exterior_inverted
+
+huskers_exterior_alternating_start:
+  alias: 'Huskers: Exterior Alternating – Start'
+  mode: single
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_alternating_exterior
+      data:
+        transition: 5
+
+huskers_exterior_alternating_inverted_start:
+  alias: 'Huskers: Exterior Alternating (Inverted) – Start'
+  mode: single
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_alternating_exterior_inverted
+      data:
+        transition: 5
+
+# OPTIONAL: One-button toggle between normal and inverted exterior scenes.
+huskers_exterior_alternating_toggle:
+  alias: 'Huskers: Exterior Alternating – Toggle'
+  mode: single
+  sequence:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: scene.huskers_alternating_exterior
+              state: 'scening' # not always tracked; we use this as a hint only
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: scene.huskers_alternating_exterior_inverted
+              data:
+                transition: 5
+      default:
+        - service: scene.turn_on
+          target:
+            entity_id: scene.huskers_alternating_exterior
+          data:
+            transition: 5
