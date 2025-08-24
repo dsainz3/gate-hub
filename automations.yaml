@@ -158,7 +158,6 @@
           - light.sunroom_light
           - light.livingroom_light
           - light.diningroom_light
-
 - id: '1755305405794'
   alias: Midnight lights
   mode: single
@@ -281,3 +280,23 @@
           - delay: '{{ delay_seconds }}'
           - service: script.huskers_exterior_alternating_inverted_start
           - delay: '{{ delay_seconds }}'
+- id: huskers_exterior_show_auto_start
+  alias: 'Huskers: Exterior Show Auto Start'
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.huskers_kickoff_in
+      below: 21
+      above: 19
+  action:
+    - action: script.huskers_exterior_show_start
+- id: huskers_exterior_show_auto_stop
+  alias: 'Huskers: Exterior Show Auto Stop'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.huskers_postgame_window
+      from: 'on'
+      to: 'off'
+  action:
+    - action: script.huskers_exterior_show_stop
