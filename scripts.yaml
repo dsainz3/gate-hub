@@ -779,3 +779,16 @@ huskers_test_score_update:
         message: Manual score update triggered
     - action: script.huskers_touchdown_burst
     - action: script.huskers_exterior_touchdown_burst
+huskers_game_time_everywhere_start:
+  alias: 'Huskers: Game Time – Everywhere (Start)'
+  mode: restart
+  sequence:
+    - action: script.huskers_theater_show_start
+    - action: script.huskers_exterior_alternating_start
+
+huskers_game_time_everywhere_stop:
+  alias: 'Huskers: Game Time – Everywhere (Stop)'
+  mode: single
+  sequence:
+    - action: script.huskers_exterior_alternating_stop
+    - action: script.huskers_theater_show_stop
