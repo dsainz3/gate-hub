@@ -54,6 +54,7 @@
     light.light_front_left:
       state: 'on'
       brightness: 255
+
       hs_color: [355, 90]  # Scarlet
     light.light_front_right:
       state: 'on'

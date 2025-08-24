@@ -39,7 +39,9 @@
           {% else %}
             {{ d | round(3) }}
           {% endif %}
-        threshold_hpa: 0.7  # trend threshold (not storm threshold)
+
+          # prettier-ignore
+          threshold_hpa: 0.7  # trend threshold (not storm threshold)
 
     # ---- Nmap metrics ----
     - name: 'Nmap Active Hosts'
