@@ -1,6 +1,7 @@
 - id: humidor_plug_temp_control
-  alias: Humidor Plug – Temperature Control
-  description: Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F.
+  alias: "Humidor Plug \u2013 Temperature Control"
+  description: "Turn ON humidor plug when temp > 74\xB0F; turn OFF when temp < 68\xB0\
+    F."
   mode: single
   trigger:
     - platform: numeric_state
@@ -231,7 +232,7 @@
   action:
     - service: logbook.log
       data:
-        name: Huskers – Update Last Score (Test)
+        name: "Huskers \u2013 Update Last Score (Test)"
         message: 'Placeholder: add actions here.'
 - id: huskers_react_to_test_score
   alias: 'Huskers: React to Test Score'
@@ -242,7 +243,7 @@
   action:
     - service: logbook.log
       data:
-        name: Huskers – React to Test Score
+        name: "Huskers \u2013 React to Test Score"
         message: 'Placeholder: add actions here.'
 - id: huskers_new_item_notifier
   alias: 'Huskers: New Item Notifier'
@@ -252,7 +253,7 @@
   action:
     - service: logbook.log
       data:
-        name: Huskers – New Item Notifier
+        name: "Huskers \u2013 New Item Notifier"
         message: 'Placeholder: add triggers/actions.'
 - id: huskers_theater_show_auto_start
   alias: 'Huskers: Theater Show Auto Start'
@@ -286,3 +287,24 @@
         | int(0)) }}'
   action:
     - service: script.huskers_touchdown_burst
+- id: huskers_exterior_alternating_loop
+  alias: 'Huskers: Exterior Alternating Loop (Start)'
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_boolean.huskers_exterior_color_show
+      to: 'on'
+  variables:
+    delay_seconds: 20
+  condition: []
+  action:
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_exterior_color_show
+            state: 'on'
+        sequence:
+          - service: script.huskers_exterior_alternating_start
+          - delay: '{{ delay_seconds }}'
+          - service: script.huskers_exterior_alternating_inverted_start
+          - delay: '{{ delay_seconds }}'
