@@ -1,3 +1,13 @@
+---
+# =========================================================
+# CATEGORY: HUSKERS – THEATER COLOR SCENES
+# =========================================================
+# NOTES:
+# - brightness: 0–255 (255 = max).
+# - hs_color: [hue 0–360, saturation 0–100].
+
+# PURPOSE: Bold scarlet scene for theater lights (Huskers primary color).
+# COLORS: HS(355°, 90%); Brightness 255 (max).
 - name: Huskers Scarlet (Theater)
   id: scene_huskers_scarlet_theater
   icon: mdi:palette
@@ -11,6 +21,8 @@
       brightness: 255
       hs_color: [355, 90]
 
+# PURPOSE: Cream/warm-white companion scene for theater lights.
+# COLORS: HS(48°, 12%); Brightness 255 (max).
 - name: Huskers Cream (Theater)
   id: scene_huskers_cream_theater
   icon: mdi:palette
@@ -23,3 +35,66 @@
       state: 'on'
       brightness: 255
       hs_color: [48, 12]
+
+# =========================================================
+# CATEGORY: HUSKERS – EXTERIOR (ALTERNATING)
+# =========================================================
+# TIP: Transition time is set when activating the scene (see example below).
+
+# PURPOSE: Alternating scarlet/cream starting with scarlet.
+# PATTERN: Scarlet (front left), Cream (front right), Scarlet (garage L),
+#          Cream (garage C), Scarlet (garage R).
+- name: Huskers Alternating (Exterior)
+  id: scene_huskers_alternating_exterior
+  icon: mdi:palette
+  entities:
+    light.front_left:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+    light.front_right:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+
+    light.garage_l:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+    light.garage_c:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+    light.garage_r:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+
+# PURPOSE: Alternating scarlet/cream starting with cream (inverse of above).
+# PATTERN: Cream (front left), Scarlet (front right), Cream (garage L),
+#          Scarlet (garage C), Cream (garage R).
+- name: Huskers Alternating Inverted (Exterior)
+  id: scene_huskers_alternating_exterior_inverted
+  icon: mdi:palette
+  entities:
+    light.front_left:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+    light.front_right:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+
+    light.garage_l:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+    light.garage_c:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+    light.garage_r:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream

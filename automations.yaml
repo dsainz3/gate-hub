@@ -1,7 +1,15 @@
 ---
+# =========================================================
+# CATEGORY: OTHER / DEVICES
+# =========================================================
+
+# PURPOSE: Maintain humidor temperature via smart plug hysteresis.
+# TRIGGERS: Temp > 74°F (turn ON); Temp < 68°F (turn OFF).
+# ACTIONS: Toggle switch.plug_humidor only when state differs (avoid flapping).
 - id: humidor_plug_temp_control
   alias: 'Humidor Plug – Temperature Control'
   description: 'Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F.'
+  mode: single
   trigger:
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
@@ -34,10 +42,17 @@
             - service: switch.turn_off
               target:
                 entity_id: switch.plug_humidor
-  mode: single
 
+# =========================================================
+# CATEGORY: LIGHTS / SCHEDULE
+# =========================================================
+
+# PURPOSE: Turn exterior groups OFF at sunrise; ON at sunset to set brightness baseline.
+# TRIGGERS: sunrise, sunset (with trigger IDs).
+# ACTIONS: Off at sunrise; On at sunset with brightness levels.
 - id: outdoor_lights_control
   alias: 'Outdoor Lights Control - Sunrise/Sunset'
+  mode: single
   trigger:
     - platform: sun
       event: sunrise
@@ -78,10 +93,13 @@
                   - light.front_porch_lights
               data:
                 brightness_pct: 1
-  mode: single
 
+# PURPOSE: Pre-dawn helper — softly bring up exterior + select interior lights for your day start.
+# TRIGGERS: 03:30 daily.
+# ACTIONS: Parallel sequences; exterior to baseline, interior rooms to 10% with 3s transition outside.
 - id: early_morning_lights
   alias: '3:30 AM Light Activation'
+  mode: single
   trigger:
     - platform: time
       at: '03:30:00'
@@ -111,8 +129,10 @@
                   - light.livingroom_light
               data:
                 brightness_pct: 10
-  mode: single
 
+# PURPOSE: Monthly effect scheduler for permanent outdoor LEDs.
+# TRIGGERS: Midnight daily.
+# ACTIONS: Look up month→effect map; apply only if effect exists in device's effect_list.
 - id: exterior_led_monthly_effect
   alias: 'Exterior LED - Monthly Effect'
   mode: single
@@ -147,8 +167,11 @@
       data:
         effect: '{{ target_effect }}'
 
+# PURPOSE: After sunrise, ensure selected interior lights are off.
+# TRIGGERS: 15 minutes after sunrise.
 - id: interior_lights_sunrise_off
   alias: 'Interior Lights Off - 15 Minutes After Sunrise'
+  mode: single
   trigger:
     - platform: sun
       event: sunrise
@@ -161,11 +184,15 @@
           - light.sunroom_light
           - light.livingroom_light
           - light.diningroom_light
-  mode: single
 
+# PURPOSE: Nightly sweep — turn OFF all lights that are ON except a defined exception list.
+# TRIGGERS: 23:30 daily.
+# ACTIONS: Build dynamic list of ON lights; subtract exceptions; turn them OFF.
+# NOTE: Update 'exceptions' to match your actual entities.
 - id: lights_off_except_porch_garage_attic_2330
   alias: 'Lights Off Except Porch/Garage/Attic @ 23:30'
   description: 'At 11:30 PM, turn OFF all lights except the front porch, garage, and attic.'
+  mode: single
   trigger:
     - platform: time
       at: '23:30:00'
@@ -180,10 +207,13 @@
           - light.attic_light
           - light.attic
         turn_off_list: >-
-          {{ states.light
-             | rejectattr('entity_id', 'in', exceptions)
-             | selectattr('state', 'eq', 'on')
-             | map(attribute='entity_id') | list }}
+          {{
+            states.light
+            | selectattr('state', 'eq', 'on')
+            | map(attribute='entity_id')
+            | reject('in', exceptions)
+            | list
+          }}
     - choose:
         - conditions:
             - condition: template
@@ -192,11 +222,13 @@
             - service: light.turn_off
               target:
                 entity_id: '{{ turn_off_list }}'
-  mode: single
 
+# PURPOSE: Midnight adjustments — turn off porch/garage lights and set permanent LEDs to 20%.
+# TRIGGERS: Midnight daily.
 - id: '1755305405794'
   alias: 'Midnight lights'
   description: ''
+  mode: single
   trigger:
     - platform: time
       at: '00:00:00'
@@ -210,11 +242,16 @@
           - light.garage_l
           - light.garage_r
     - type: turn_on
-      entity_id: light.permanent_outdoor_lights
       domain: light
+      entity_id: light.permanent_outdoor_lights
       brightness_pct: 20
-  mode: single
 
+# =========================================================
+# CATEGORY: HUSKERS
+# =========================================================
+
+# PURPOSE: Start game-day LED effect in the pregame window.
+# TRIGGERS: binary_sensor.huskers_pregame_window turns ON.
 - id: huskers_pregame_event
   alias: 'Huskers: Pregame Event'
   mode: single
@@ -225,6 +262,8 @@
   action:
     - service: script.huskers_led_gameday_start
 
+# PURPOSE: Stop game-day LED effect when postgame window opens.
+# TRIGGERS: binary_sensor.huskers_postgame_window turns ON.
 - id: huskers_postgame_event
   alias: 'Huskers: Postgame Event'
   mode: single
@@ -235,29 +274,53 @@
   action:
     - service: script.huskers_led_stop
 
+# PURPOSE: Placeholder to react when you manually update 'input_text.huskers_last_score'.
+# TRIGGERS: Any change to input_text.huskers_last_score.
+# ACTIONS: Currently logs a note (so the automation validates). Replace with real logic later.
 - id: huskers_update_last_score_test
   alias: 'Huskers: Update Last Score (Test)'
   mode: restart
   trigger:
     - platform: state
       entity_id: input_text.huskers_last_score
-  action: []
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Update Last Score (Test)'
+        message: 'Placeholder: add actions here.'
 
+# PURPOSE: Placeholder to respond to sensor.huskers_last_score_test changes.
+# TRIGGERS: Any state change.
+# ACTIONS: Currently logs a note; replace with real logic later.
 - id: huskers_react_to_test_score
   alias: 'Huskers: React to Test Score'
   mode: single
   trigger:
     - platform: state
       entity_id: sensor.huskers_last_score_test
-  action: []
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – React to Test Score'
+        message: 'Placeholder: add actions here.'
 
+# PURPOSE: Placeholder for future notification when new Huskers items arrive.
+# TRIGGERS: None (manual run only for now).
+# ACTIONS: Logs a note; set initial_state: false to keep disabled until implemented.
 - id: huskers_new_item_notifier
   alias: 'Huskers: New Item Notifier'
   mode: single
+  # initial_state: false
   trigger: []
   condition: []
-  action: []
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – New Item Notifier'
+        message: 'Placeholder: add triggers/actions.'
 
+# PURPOSE: Auto start theater show close to kickoff (between 19–21 minutes remaining).
+# TRIGGERS: numeric_state on sensor.huskers_kickoff_in between 19 and 21.
 - id: huskers_theater_show_auto_start
   alias: 'Huskers: Theater Show Auto Start'
   mode: single
@@ -269,6 +332,8 @@
   action:
     - service: script.huskers_theater_show_start
 
+# PURPOSE: Auto stop theater show when postgame window closes.
+# TRIGGERS: binary_sensor.huskers_postgame_window transitions on→off.
 - id: huskers_theater_show_auto_stop
   alias: 'Huskers: Theater Show Auto Stop'
   mode: single
@@ -280,6 +345,8 @@
   action:
     - service: script.huskers_theater_show_stop
 
+# PURPOSE: Trigger touchdown burst when our score increases.
+# TRIGGERS: sensor.huskers_our_score increases vs. previous state.
 - id: huskers_touchdown_boost
   alias: 'Huskers: Touchdown Boost'
   mode: single
@@ -288,6 +355,7 @@
       entity_id: sensor.huskers_our_score
   condition:
     - condition: template
-      value_template: '{{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}'
+      value_template: >-
+        {{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}
   action:
     - service: script.huskers_touchdown_burst
