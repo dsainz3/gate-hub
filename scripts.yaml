@@ -3,28 +3,24 @@
 # CATEGORY: HUSKERS – PERMANENT OUTDOOR LEDs (GAME DAY)
 # =========================================================
 
-# PURPOSE: Start Huskers effect on permanent outdoor LEDs.
-# UPGRADE: Takes a snapshot first so you can restore cleanly on stop.
+# Start Huskers effect on permanent outdoor LEDs (snapshots first).
 huskers_led_gameday_start:
   alias: Start Game-Day Effect
   mode: single
   sequence:
-    # Snapshot current state of permanent outdoor lights
     - service: scene.create
       data:
         scene_id: huskers_outdoor_pre_gameday
         snapshot_entities:
           - light.permanent_outdoor_lights
 
-    # Apply Huskers effect (must exist in effect_list)
     - service: light.turn_on
       target:
         entity_id: light.permanent_outdoor_lights
       data:
         effect: LED_Huskers
 
-# PURPOSE: Stop Huskers effect and restore pre-game snapshot if available.
-# FALLBACK: If no snapshot exists (first run, HA restart), just turn lights off.
+# Stop Huskers effect and restore snapshot (guarded).
 huskers_led_stop:
   alias: Stop Effect (Restore Previous)
   mode: single
@@ -49,8 +45,7 @@ huskers_led_stop:
           target:
             entity_id: light.permanent_outdoor_lights
 
-# PURPOSE: Re-apply your "Monthly" effect explicitly.
-# NOTE: Keeps this separate from stop/restore so your midnight scheduler can still run.
+# Re-apply your "Monthly" effect.
 huskers_led_revert_monthly:
   alias: Revert to Monthly Effect
   mode: single
@@ -65,15 +60,13 @@ huskers_led_revert_monthly:
 # CATEGORY: HUSKERS – THEATER (BURST & COLOR SHOW)
 # =========================================================
 
-# PURPOSE: 12-hit alternating scarlet/cream "touchdown burst" on theater lights.
-# FEATURES: Snapshots and restores previous state.
+# 12-hit alternating scarlet/cream burst on theater lights (snapshot/restore; guarded for availability).
 huskers_touchdown_burst:
   alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
   mode: restart
   variables:
     snapshot_scene: scene.huskers_theater_pre_burst
   sequence:
-    # 1) Snapshot
     - service: scene.create
       data:
         scene_id: huskers_theater_pre_burst
@@ -81,13 +74,26 @@ huskers_touchdown_burst:
           - light.light_theater_left
           - light.light_theater_right
 
-    # 2) Burst variables
+    # Availability guard (avoid spamming if devices are down)
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('light.light_theater_left') not in ['unavailable','unknown','none',''] and
+                   states('light.light_theater_right') not in ['unavailable','unknown','none',''] }}
+          sequence: []
+      default:
+        - service: logbook.log
+          data:
+            name: 'Huskers – Theater'
+            message: 'Theater lights unavailable; skipping burst.'
+        - stop: 'Theater lights unavailable'
+
     - variables:
-        flashes: 6 # total swaps (12 color hits)
+        flashes: 6
         on_time: 0.35
         trans: 0.25
 
-    # 3) Alternate Scarlet <-> Cream
     - repeat:
         count: '{{ flashes }}'
         sequence:
@@ -106,7 +112,6 @@ huskers_touchdown_burst:
             data: { hs_color: [355, 90], brightness: 255, transition: '{{ trans }}' }
           - delay: '{{ on_time }}'
 
-    # 4) Restore snapshot (guarded)
     - delay: 0.2
     - choose:
         - conditions:
@@ -114,15 +119,11 @@ huskers_touchdown_burst:
               value_template: "{{ states(snapshot_scene) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              data:
-                entity_id: '{{ snapshot_scene }}'
-                transition: 1.0
+              data: { entity_id: '{{ snapshot_scene }}', transition: 1.0 }
             - service: scene.delete
-              data:
-                entity_id: '{{ snapshot_scene }}'
+              data: { entity_id: '{{ snapshot_scene }}' }
 
-# PURPOSE: Start an alternating scarlet/cream theater show until turned off.
-# CONTROL: Uses input_boolean.huskers_color_show as the run/stop flag.
+# Alternating scarlet/cream theater show loop until stopped (snapshot/restore; guarded).
 huskers_theater_show_start:
   alias: 'Huskers: Theater Show (Start)'
   mode: restart
@@ -135,6 +136,21 @@ huskers_theater_show_start:
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
+
+    # Availability guard
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ states('light.light_theater_left') not in ['unavailable','unknown','none',''] and
+                   states('light.light_theater_right') not in ['unavailable','unknown','none',''] }}
+          sequence: []
+      default:
+        - service: logbook.log
+          data:
+            name: 'Huskers – Theater'
+            message: 'Theater lights unavailable; skipping show.'
+        - stop: 'Theater lights unavailable'
 
     - service: input_boolean.turn_on
       target: { entity_id: input_boolean.huskers_color_show }
@@ -176,15 +192,12 @@ huskers_theater_show_start:
               value_template: "{{ states(snapshot_scene) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              data:
-                entity_id: '{{ snapshot_scene }}'
+              data: { entity_id: '{{ snapshot_scene }}' }
             - service: scene.delete
-              data:
-                entity_id: '{{ snapshot_scene }}'
+              data: { entity_id: '{{ snapshot_scene }}' }
     - service: input_boolean.turn_off
       target: { entity_id: input_boolean.huskers_color_show }
 
-# PURPOSE: Stop the theater color show (sets the run/stop flag off).
 huskers_theater_show_stop:
   alias: 'Huskers: Theater Show (Stop)'
   mode: single
@@ -233,10 +246,10 @@ huskers_test_opponent_score:
       data: { name: 'Huskers – Test', message: 'Opponent Score: TODO implement action.' }
 
 # =========================================================
-# CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS
+# CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS (UPDATED)
 # =========================================================
-# These helpers apply your exterior alternating scenes with a 5s transition.
-# Requires scenes from scenes.yaml:
+# These call your exterior alternating scenes with a 5s transition.
+# IDs:
 #   - scene.huskers_alternating_exterior
 #   - scene.huskers_alternating_exterior_inverted
 
@@ -282,7 +295,7 @@ huskers_exterior_alternating_inverted_start:
             name: 'Huskers – Exterior Scenes'
             message: 'Scene not found: {{ scene_id }} (did you reload Scenes?)'
 
-# OPTIONAL: One-button toggle between normal and inverted exterior scenes.
+# Toggle between normal and inverted exterior scenes.
 huskers_exterior_alternating_toggle:
   alias: 'Huskers: Exterior Alternating – Toggle'
   mode: single
