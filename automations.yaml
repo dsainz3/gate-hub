@@ -157,34 +157,7 @@
           - light.sunroom_light
           - light.livingroom_light
           - light.diningroom_light
-- id: lights_off_except_porch_garage_attic_2330
-  alias: Lights Off Except Porch/Garage/Attic @ 23:30
-  description: At 11:30 PM, turn OFF all lights except the front porch, garage, and
-    attic.
-  mode: single
-  trigger:
-    - platform: time
-      at: '23:30:00'
-  condition: []
-  action:
-    - variables:
-        exceptions:
-          - light.front_porch_lights
-          - light.front_porch
-          - light.garage_lights
-          - light.garage
-          - light.attic_light
-          - light.attic
-        turn_off_list: "{{\n  states.light\n  | selectattr('state', 'eq', 'on')\n  |\
-          \ map(attribute='entity_id')\n  | reject('in', exceptions)\n  | list\n}}"
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: '{{ turn_off_list | length > 0 }}'
-          sequence:
-            - service: light.turn_off
-              target:
-                entity_id: '{{ turn_off_list }}'
+
 - id: '1755305405794'
   alias: Midnight lights
   mode: single
