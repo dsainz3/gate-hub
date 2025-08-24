@@ -39,6 +39,7 @@
           {% else %}
             {{ d | round(3) }}
           {% endif %}
+
           # prettier-ignore
           threshold_hpa: 0.7  # trend threshold (not storm threshold)
 
