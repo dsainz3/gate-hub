@@ -65,21 +65,21 @@
            | list | length }}
       icon: mdi:wifi
 
-    # ---- Internet status (uses Ping integration entities) ----
-      - name: Internet Status
-        unique_id: internet_status
-        state: >-
-          {% if is_state('binary_sensor.internet_reachable','on') %}
-            Online ({{ states('sensor.internet_reachable_latency') }} ms)
-          {% else %}
-            Offline
-          {% endif %}
-        icon: >-
-          {% if is_state('binary_sensor.internet_reachable','on') %}
-            mdi:check-network
-          {% else %}
-            mdi:close-network
-          {% endif %}
+  # ---- Internet status (uses Ping integration entities) ----
+    - name: Internet Status
+      unique_id: internet_status
+      state: >-
+        {% if is_state('binary_sensor.internet_reachable','on') %}
+          Online ({{ states('sensor.internet_reachable_latency') }} ms)
+        {% else %}
+          Offline
+        {% endif %}
+      icon: >-
+        {% if is_state('binary_sensor.internet_reachable','on') %}
+          mdi:check-network
+        {% else %}
+          mdi:close-network
+        {% endif %}
 
 - sensor:
     - name: "Huskers Next Game Start"

@@ -16,7 +16,7 @@ deps/
 .vscode/settings.json
 home-assistant_v2.db
 home-assistant.log*
-
+/.storage/
 
 # General logs and databases
 *.db

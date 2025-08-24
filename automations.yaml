@@ -72,9 +72,9 @@
             - service: light.turn_on
               target:
                 entity_id:
-                  - light.garage_left
-                  - light.garage_right
-                  - light.garage_center
+                  - light.garage_l
+                  - light.garage_r
+                  - light.garage_c
                   - light.front_porch_lights
               data:
                 brightness_pct: 1
@@ -95,9 +95,9 @@
             - service: light.turn_on
               target:
                 entity_id:
-                  - light.garage_left
-                  - light.garage_right
-                  - light.garage_center
+                  - light.garage_l
+                  - light.garage_r
+                  - light.garage_c
                   - light.front_porch_lights
               data:
                 transition: 3
@@ -214,63 +214,6 @@
       entity_id: 8a639fe5a1dfb86cffaafdd92550355b
       domain: light
       brightness_pct: 20
-  mode: single
-
-- id: "1755305842459"
-  alias: "Bedroom-purifier on"
-  description: ""
-  trigger:
-    - platform: device
-      type: turned_on
-      device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
-      entity_id: 73dbec16d31025a64677606382fa35aa
-      domain: switch
-  condition: []
-  action:
-  - type: turn_off
-      device_id: 6e3a0d96120bc4222780d4f255f88414
-      entity_id: a0ac47bc0794f26c2cce245f4e4200d3
-      domain: switch
-  mode: single
-
-
-- id: "1755305876272"
-  alias: "Bedroom-purifier-off"
-  description: ""
-  trigger:
-    - platform: device
-      type: turned_off
-      device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
-      entity_id: 73dbec16d31025a64677606382fa35aa
-      domain: switch
-  condition: []
-  action:
-    - type: turn_on
-      device_id: 6e3a0d96120bc4222780d4f255f88414
-      entity_id: a0ac47bc0794f26c2cce245f4e4200d3
-      domain: switch
-  mode: single
-
-- id: "1755373002789"
-  alias: "Purifier on bedroom (mirror on any change)"
-  description: "When the bedroom purifier turns on or off, turn OFF the paired device."
-  trigger:
-    - platform: device
-      type: turned_on
-      device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
-      entity_id: 73dbec16d31025a64677606382fa35aa
-      domain: switch
-    - platform: device
-      type: turned_off
-      device_id: f4d2eb3ede17ec2db2485c5f094bf6ad
-      entity_id: 73dbec16d31025a64677606382fa35aa
-      domain: switch
-  condition: []
-  action:
-    - type: turn_off
-      device_id: 6e3a0d96120bc4222780d4f255f88414
-      entity_id: a0ac47bc0794f26c2cce245f4e4200d3
-      domain: switch
   mode: single
 
 - id: huskers_pregame_event
