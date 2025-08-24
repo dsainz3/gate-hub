@@ -327,54 +327,110 @@ util_fade_color:
         brightness: '{{ brightness | int }}'
         transition: '{{ transition | int }}'
 huskers_exterior_alternating_start:
-  alias: "Huskers: Exterior Alternating \u2013 Start (2-step fade)"
-  mode: single
+  alias: "Huskers: Exterior Alternating \u2013 Start (Loop)"
+  mode: restart
   sequence:
-    - service: script.util_fade_color
-      data:
-        light: light.light_front_left
-        h: 355
-        s: 90
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.light_front_right
-        h: 48
-        s: 12
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_l
-        h: 355
-        s: 90
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_c
-        h: 48
-        s: 12
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_r
-        h: 355
-        s: 90
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_exterior_color_show
+            state: 'on'
+        sequence:
+          - service: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
+          - service: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - service: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 5
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
 huskers_exterior_alternating_inverted_start:
   alias: "Huskers: Exterior Alternating (Inverted) \u2013 Start (2-step fade)"
   mode: single
@@ -468,3 +524,10 @@ huskers_theater_cream_fade:
         transition: 5
         predim_pct: 10
         predim_hold: 1
+huskers_exterior_alternating_stop:
+  alias: "Huskers: Exterior Alternating \u2013 Stop"
+  mode: single
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
