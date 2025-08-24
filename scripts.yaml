@@ -20,26 +20,26 @@ huskers_led_gameday_start:
       data:
         effect: LED_Huskers
 
-# Stop Huskers effect and restore snapshot (guarded).
+# Stop Huskers effect and restore snapshot (no hardcoded dynamic scene entity).
 huskers_led_stop:
   alias: Stop Effect (Restore Previous)
   mode: single
   variables:
-    snapshot_scene: scene.huskers_outdoor_pre_gameday
+    snapshot_id: huskers_outdoor_pre_gameday
   sequence:
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
               data:
-                entity_id: '{{ snapshot_scene }}'
+                entity_id: 'scene.{{ snapshot_id }}'
                 transition: 1
             - delay: 0.1
             - service: scene.delete
               data:
-                entity_id: '{{ snapshot_scene }}'
+                entity_id: 'scene.{{ snapshot_id }}'
       default:
         - service: light.turn_off
           target:
@@ -65,7 +65,7 @@ huskers_touchdown_burst:
   alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
   mode: restart
   variables:
-    snapshot_scene: scene.huskers_theater_pre_burst
+    snapshot_id: huskers_theater_pre_burst
   sequence:
     - service: scene.create
       data:
@@ -74,7 +74,7 @@ huskers_touchdown_burst:
           - light.light_theater_left
           - light.light_theater_right
 
-    # Availability guard (avoid spamming if devices are down)
+    # Availability guard
     - choose:
         - conditions:
             - condition: template
@@ -98,37 +98,58 @@ huskers_touchdown_burst:
         count: '{{ flashes }}'
         sequence:
           - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { hs_color: [355, 90], brightness: 255, transition: '{{ trans }}' }
+            target:
+              entity_id: light.light_theater_left
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: '{{ trans }}'
           - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { hs_color: [48, 12], brightness: 255, transition: '{{ trans }}' }
+            target:
+              entity_id: light.light_theater_right
+            data:
+              hs_color: [48, 12]
+              brightness: 255
+              transition: '{{ trans }}'
           - delay: '{{ on_time }}'
           - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { hs_color: [48, 12], brightness: 255, transition: '{{ trans }}' }
+            target:
+              entity_id: light.light_theater_left
+            data:
+              hs_color: [48, 12]
+              brightness: 255
+              transition: '{{ trans }}'
           - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { hs_color: [355, 90], brightness: 255, transition: '{{ trans }}' }
+            target:
+              entity_id: light.light_theater_right
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: '{{ trans }}'
           - delay: '{{ on_time }}'
 
     - delay: 0.2
+
+    # Restore and clean up snapshot if present
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              data: { entity_id: '{{ snapshot_scene }}', transition: 1.0 }
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
+                transition: 1.0
             - service: scene.delete
-              data: { entity_id: '{{ snapshot_scene }}' }
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
 
 # Alternating scarlet/cream theater show loop until stopped (snapshot/restore; guarded).
 huskers_theater_show_start:
   alias: 'Huskers: Theater Show (Start)'
   mode: restart
   variables:
-    snapshot_scene: scene.huskers_theater_show_restore
+    snapshot_id: huskers_theater_show_restore
   sequence:
     - service: scene.create
       data:
@@ -153,15 +174,22 @@ huskers_theater_show_start:
         - stop: 'Theater lights unavailable'
 
     - service: input_boolean.turn_on
-      target: { entity_id: input_boolean.huskers_color_show }
+      target:
+        entity_id: input_boolean.huskers_color_show
 
     # Seed colors
     - service: light.turn_on
-      target: { entity_id: light.light_theater_left }
-      data: { hs_color: [48, 12], brightness: 255 }
+      target:
+        entity_id: light.light_theater_left
+      data:
+        hs_color: [48, 12]
+        brightness: 255
     - service: light.turn_on
-      target: { entity_id: light.light_theater_right }
-      data: { hs_color: [355, 90], brightness: 255 }
+      target:
+        entity_id: light.light_theater_right
+      data:
+        hs_color: [355, 90]
+        brightness: 255
 
     # Alternate while the boolean remains on
     - repeat:
@@ -171,39 +199,59 @@ huskers_theater_show_start:
             state: 'on'
         sequence:
           - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { hs_color: [355, 90], brightness: 255, transition: 10 }
+            target:
+              entity_id: light.light_theater_left
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: 10
           - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { hs_color: [48, 12], brightness: 255, transition: 10 }
+            target:
+              entity_id: light.light_theater_right
+            data:
+              hs_color: [48, 12]
+              brightness: 255
+              transition: 10
           - delay: 10
           - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { hs_color: [48, 12], brightness: 255, transition: 10 }
+            target:
+              entity_id: light.light_theater_left
+            data:
+              hs_color: [48, 12]
+              brightness: 255
+              transition: 10
           - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { hs_color: [355, 90], brightness: 255, transition: 10 }
+            target:
+              entity_id: light.light_theater_right
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: 10
           - delay: 10
 
     # Restore and cleanup (guarded)
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ states(snapshot_scene) != 'unknown' }}"
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
           sequence:
             - service: scene.turn_on
-              data: { entity_id: '{{ snapshot_scene }}' }
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
             - service: scene.delete
-              data: { entity_id: '{{ snapshot_scene }}' }
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
     - service: input_boolean.turn_off
-      target: { entity_id: input_boolean.huskers_color_show }
+      target:
+        entity_id: input_boolean.huskers_color_show
 
 huskers_theater_show_stop:
   alias: 'Huskers: Theater Show (Stop)'
   mode: single
   sequence:
     - service: input_boolean.turn_off
-      target: { entity_id: input_boolean.huskers_color_show }
+      target:
+        entity_id: input_boolean.huskers_color_show
 
 # =========================================================
 # CATEGORY: HUSKERS – TEST & PLACEHOLDERS
@@ -214,103 +262,214 @@ huskers_update_last_score_test:
   mode: single
   sequence:
     - service: input_text.set_value
-      target: { entity_id: input_text.huskers_last_score }
-      data: { value: 'Test Score Update' }
+      target:
+        entity_id: input_text.huskers_last_score
+      data:
+        value: 'Test Score Update'
 
 huskers_hail_varsity_show_start:
   alias: 'Huskers: Hail Varsity Show (Start)'
   mode: restart
   sequence:
     - service: logbook.log
-      data: { name: 'Huskers – Hail Varsity', message: 'Start show: TODO implement sequence.' }
+      data:
+        name: 'Huskers – Hail Varsity'
+        message: 'Start show: TODO implement sequence.'
 
 huskers_hail_varsity_show_stop:
   alias: 'Huskers: Hail Varsity Show (Stop)'
   mode: restart
   sequence:
     - service: logbook.log
-      data: { name: 'Huskers – Hail Varsity', message: 'Stop show: TODO implement sequence.' }
+      data:
+        name: 'Huskers – Hail Varsity'
+        message: 'Stop show: TODO implement sequence.'
 
 huskers_test_our_score:
   alias: 'Huskers (Test): Our Score'
   mode: single
   sequence:
     - service: logbook.log
-      data: { name: 'Huskers – Test', message: 'Our Score: TODO implement action.' }
+      data:
+        name: 'Huskers – Test'
+        message: 'Our Score: TODO implement action.'
 
 huskers_test_opponent_score:
   alias: 'Huskers (Test): Opponent Score'
   mode: single
   sequence:
     - service: logbook.log
-      data: { name: 'Huskers – Test', message: 'Opponent Score: TODO implement action.' }
+      data:
+        name: 'Huskers – Test'
+        message: 'Opponent Score: TODO implement action.'
 
 # =========================================================
-# CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS (UPDATED)
+# UTIL – TWO-STEP FADE (for lights that ignore transition)
 # =========================================================
-# These call your exterior alternating scenes with a 5s transition.
-# IDs:
-#   - scene.huskers_alternating_exterior
-#   - scene.huskers_alternating_exterior_inverted
+# Usage:
+#   service: script.util_fade_color
+#   data:
+#     light: light.your_light_entity
+#     h: 355
+#     s: 90
+#     brightness: 255
+#     transition: 5
+#     predim_pct: 10
+#     predim_hold: 1
+util_fade_color:
+  alias: 'Util: Fade to Color (2-step)'
+  mode: parallel
+  max: 10
+  fields:
+    light:
+      description: Light entity_id
+      example: light.garage_l
+    h:
+      description: Hue (0–360)
+      example: 355
+      default: 355
+    s:
+      description: Saturation (0–100)
+      example: 90
+      default: 90
+    brightness:
+      description: Brightness (0–255)
+      example: 255
+      default: 255
+    transition:
+      description: Transition seconds
+      example: 5
+      default: 5
+    predim_pct:
+      description: Pre-dim brightness percent (0–100)
+      example: 10
+      default: 10
+    predim_hold:
+      description: Pre-dim hold in seconds
+      example: 1
+      default: 1
+  sequence:
+    # Step 1: quick pre-dim (works even if device ignores transition)
+    - service: light.turn_on
+      data:
+        entity_id: '{{ light }}'
+        brightness_pct: '{{ predim_pct | int }}'
+        transition: 0
+
+    - delay: '{{ predim_hold }}'
+
+    # Step 2: fade to requested color/brightness
+    - service: light.turn_on
+      data:
+        entity_id: '{{ light }}'
+        hs_color:
+          - '{{ h | int }}'
+          - '{{ s | int }}'
+        brightness: '{{ brightness | int }}'
+        transition: '{{ transition | int }}'
+
+# =========================================================
+# CATEGORY: HUSKERS – EXTERIOR SCENES HELPERS (2-STEP FADE)
+# =========================================================
+
+# These call the helper for each light to guarantee a visible fade.
 
 huskers_exterior_alternating_start:
-  alias: 'Huskers: Exterior Alternating – Start'
+  alias: 'Huskers: Exterior Alternating – Start (2-step fade)'
   mode: single
-  variables:
-    scene_id: scene.huskers_alternating_exterior
   sequence:
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: "{{ states(scene_id) != 'unknown' }}"
-          sequence:
-            - service: scene.turn_on
-              data:
-                entity_id: '{{ scene_id }}'
-                transition: 5
-      default:
-        - service: logbook.log
-          data:
-            name: 'Huskers – Exterior Scenes'
-            message: 'Scene not found: {{ scene_id }} (did you reload Scenes?)'
+    - service: script.util_fade_color
+      data:
+        light: light.light_front_left
+        h: 355
+        s: 90
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.light_front_right
+        h: 48
+        s: 12
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_l
+        h: 355
+        s: 90
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_c
+        h: 48
+        s: 12
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_r
+        h: 355
+        s: 90
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
 
 huskers_exterior_alternating_inverted_start:
-  alias: 'Huskers: Exterior Alternating (Inverted) – Start'
-  mode: single
-  variables:
-    scene_id: scene.huskers_alternating_exterior_inverted
-  sequence:
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: "{{ states(scene_id) != 'unknown' }}"
-          sequence:
-            - service: scene.turn_on
-              data:
-                entity_id: '{{ scene_id }}'
-                transition: 5
-      default:
-        - service: logbook.log
-          data:
-            name: 'Huskers – Exterior Scenes'
-            message: 'Scene not found: {{ scene_id }} (did you reload Scenes?)'
-
-# Toggle between normal and inverted exterior scenes.
-huskers_exterior_alternating_toggle:
-  alias: 'Huskers: Exterior Alternating – Toggle'
+  alias: 'Huskers: Exterior Alternating (Inverted) – Start (2-step fade)'
   mode: single
   sequence:
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: "{{ states('scene.huskers_alternating_exterior') != 'unknown' }}"
-          sequence:
-            - service: scene.turn_on
-              data:
-                entity_id: scene.huskers_alternating_exterior_inverted
-                transition: 5
-      default:
-        - service: scene.turn_on
-          data:
-            entity_id: scene.huskers_alternating_exterior
-            transition: 5
+    - service: script.util_fade_color
+      data:
+        light: light.light_front_left
+        h: 48
+        s: 12
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.light_front_right
+        h: 355
+        s: 90
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_l
+        h: 48
+        s: 12
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_c
+        h: 355
+        s: 90
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
+    - service: script.util_fade_color
+      data:
+        light: light.garage_r
+        h: 48
+        s: 12
+        brightness: 255
+        transition: 5
+        predim_pct: 10
+        predim_hold: 1
