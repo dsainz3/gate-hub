@@ -1,7 +1,7 @@
 ---
 - id: humidor_plug_temp_control
-  alias: "Humidor Plug – Temperature Control"
-  description: "Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F."
+  alias: 'Humidor Plug – Temperature Control'
+  description: 'Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F.'
   trigger:
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
@@ -19,7 +19,7 @@
           sequence:
             - condition: state
               entity_id: switch.plug_humidor
-              state: "off"
+              state: 'off'
             - service: switch.turn_on
               target:
                 entity_id: switch.plug_humidor
@@ -30,14 +30,14 @@
           sequence:
             - condition: state
               entity_id: switch.plug_humidor
-              state: "on"
+              state: 'on'
             - service: switch.turn_off
               target:
                 entity_id: switch.plug_humidor
   mode: single
 
 - id: outdoor_lights_control
-  alias: "Outdoor Lights Control - Sunrise/Sunset"
+  alias: 'Outdoor Lights Control - Sunrise/Sunset'
   trigger:
     - platform: sun
       event: sunrise
@@ -81,10 +81,10 @@
   mode: single
 
 - id: early_morning_lights
-  alias: "3:30 AM Light Activation"
+  alias: '3:30 AM Light Activation'
   trigger:
     - platform: time
-      at: "03:30:00"
+      at: '03:30:00'
   condition: []
   action:
     - parallel:
@@ -114,13 +114,13 @@
   mode: single
 
 - id: exterior_led_monthly_effect
-  alias: "Exterior LED - Monthly Effect"
+  alias: 'Exterior LED - Monthly Effect'
   mode: single
   trigger:
     - platform: time
-      at: "00:00:00"
+      at: '00:00:00'
   variables:
-    current_month: "{{ now().month }}"
+    current_month: '{{ now().month }}'
     monthly_effects:
       1: LED-January
       2: LED-February
@@ -137,7 +137,7 @@
   condition: []
   action:
     - variables:
-        target_effect: "{{ monthly_effects[current_month] }}"
+        target_effect: '{{ monthly_effects[current_month] }}'
     - condition: template
       value_template: >-
         {{ target_effect in (state_attr('light.permanent_outdoor_lights', 'effect_list') or []) }}
@@ -145,14 +145,14 @@
       target:
         entity_id: light.permanent_outdoor_lights
       data:
-        effect: "{{ target_effect }}"
+        effect: '{{ target_effect }}'
 
 - id: interior_lights_sunrise_off
-  alias: "Interior Lights Off - 15 Minutes After Sunrise"
+  alias: 'Interior Lights Off - 15 Minutes After Sunrise'
   trigger:
     - platform: sun
       event: sunrise
-      offset: "00:15:00"
+      offset: '00:15:00'
   condition: []
   action:
     - service: light.turn_off
@@ -164,11 +164,11 @@
   mode: single
 
 - id: lights_off_except_porch_garage_attic_2330
-  alias: "Lights Off Except Porch/Garage/Attic @ 23:30"
-  description: "At 11:30 PM, turn OFF all lights except the front porch, garage, and attic."
+  alias: 'Lights Off Except Porch/Garage/Attic @ 23:30'
+  description: 'At 11:30 PM, turn OFF all lights except the front porch, garage, and attic.'
   trigger:
     - platform: time
-      at: "23:30:00"
+      at: '23:30:00'
   condition: []
   action:
     - variables:
@@ -187,57 +187,56 @@
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ turn_off_list | length > 0 }}"
+              value_template: '{{ turn_off_list | length > 0 }}'
           sequence:
             - service: light.turn_off
               target:
-                entity_id: "{{ turn_off_list }}"
+                entity_id: '{{ turn_off_list }}'
   mode: single
 
-- id: "1755305405794"
-  alias: "Midnight lights"
-  description: ""
+- id: '1755305405794'
+  alias: 'Midnight lights'
+  description: ''
   trigger:
     - platform: time
-      at: "00:00:00"
+      at: '00:00:00'
   condition: []
   action:
     - service: light.turn_off
       target:
         entity_id:
           - light.front_porch_lights
-          - light.garage_center_2
-          - light.garage_left_2
-          - light.garage_right_2
+          - light.garage_c
+          - light.garage_l
+          - light.garage_r
     - type: turn_on
-      device_id: 59ce59873a8a6b7c7b48b4d311af8606
-      entity_id: 8a639fe5a1dfb86cffaafdd92550355b
+      entity_id: light.permanent_outdoor_lights
       domain: light
       brightness_pct: 20
   mode: single
 
 - id: huskers_pregame_event
-  alias: "Huskers: Pregame Event"
+  alias: 'Huskers: Pregame Event'
   mode: single
   trigger:
     - platform: state
       entity_id: binary_sensor.huskers_pregame_window
-      to: "on"
+      to: 'on'
   action:
     - service: script.huskers_led_gameday_start
 
 - id: huskers_postgame_event
-  alias: "Huskers: Postgame Event"
+  alias: 'Huskers: Postgame Event'
   mode: single
   trigger:
     - platform: state
       entity_id: binary_sensor.huskers_postgame_window
-      to: "on"
+      to: 'on'
   action:
     - service: script.huskers_led_stop
 
 - id: huskers_update_last_score_test
-  alias: "Huskers: Update Last Score (Test)"
+  alias: 'Huskers: Update Last Score (Test)'
   mode: restart
   trigger:
     - platform: state
@@ -245,7 +244,7 @@
   action: []
 
 - id: huskers_react_to_test_score
-  alias: "Huskers: React to Test Score"
+  alias: 'Huskers: React to Test Score'
   mode: single
   trigger:
     - platform: state
@@ -253,14 +252,14 @@
   action: []
 
 - id: huskers_new_item_notifier
-  alias: "Huskers: New Item Notifier"
+  alias: 'Huskers: New Item Notifier'
   mode: single
   trigger: []
   condition: []
   action: []
 
 - id: huskers_theater_show_auto_start
-  alias: "Huskers: Theater Show Auto Start"
+  alias: 'Huskers: Theater Show Auto Start'
   mode: single
   trigger:
     - platform: numeric_state
@@ -271,24 +270,24 @@
     - service: script.huskers_theater_show_start
 
 - id: huskers_theater_show_auto_stop
-  alias: "Huskers: Theater Show Auto Stop"
+  alias: 'Huskers: Theater Show Auto Stop'
   mode: single
   trigger:
     - platform: state
       entity_id: binary_sensor.huskers_postgame_window
-      from: "on"
-      to: "off"
+      from: 'on'
+      to: 'off'
   action:
     - service: script.huskers_theater_show_stop
 
 - id: huskers_touchdown_boost
-  alias: "Huskers: Touchdown Boost"
+  alias: 'Huskers: Touchdown Boost'
   mode: single
   trigger:
     - platform: state
       entity_id: sensor.huskers_our_score
   condition:
     - condition: template
-      value_template: "{{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}"
+      value_template: '{{ (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}'
   action:
     - service: script.huskers_touchdown_burst

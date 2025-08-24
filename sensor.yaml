@@ -31,7 +31,7 @@
 - platform: template
   sensors:
     kneplatt72_pressure_trend:
-      friendly_name: "KNEPLATT72 Pressure Trend"
+      friendly_name: 'KNEPLATT72 Pressure Trend'
       value_template: >-
         {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
         {% set d = states('sensor.kneplatt72_pressure_24h_change')|float(0) %}
@@ -56,13 +56,13 @@
               if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') in ['hPa','mbar'])
               else states('sensor.kneplatt72_pressure_24h_change')|float(0)
           ) | round(3) }}
-        threshold_hpa: "3.0"
+        threshold_hpa: '3.0'
 
 # ---- Storm Watch if Pressure Drop > ~3 hPa in 24h ----
 - platform: template
   sensors:
     kneplatt72_storm_watch:
-      friendly_name: "KNEPLATT72 Storm Watch"
+      friendly_name: 'KNEPLATT72 Storm Watch'
       value_template: >-
         {% set u = state_attr('sensor.kneplatt72_pressure','unit_of_measurement') or '' %}
         {% set d = states('sensor.kneplatt72_pressure_24h_change')|float(0) %}
@@ -77,26 +77,26 @@
               states('sensor.kneplatt72_pressure_24h_change')|float(0) *
               (33.8638866667 if (state_attr('sensor.kneplatt72_pressure','unit_of_measurement') not in ['hPa','mbar']) else 1)
           ) | round(2) }}
-        threshold_hpa: "3.0"
+        threshold_hpa: '3.0'
 
 # ---- Huskers Score and Game Info ----
 - platform: template
   sensors:
     huskers_our_score:
-      friendly_name: "Nebraska Score"
+      friendly_name: 'Nebraska Score'
       value_template: "{{ states('input_number.huskers_our_score') | int(0) }}"
     huskers_opponent_score:
-      friendly_name: "Opponent Score"
+      friendly_name: 'Opponent Score'
       value_template: "{{ states('input_number.huskers_opponent_score') | int(0) }}"
     huskers_opponent_name:
-      friendly_name: "Opponent Name"
+      friendly_name: 'Opponent Name'
       value_template: "{{ states('input_text.huskers_opponent_name') }}"
     huskers_quarter:
-      friendly_name: "Quarter"
+      friendly_name: 'Quarter'
       value_template: "{{ states('input_text.huskers_quarter') }}"
     huskers_game_clock:
-      friendly_name: "Game Clock"
+      friendly_name: 'Game Clock'
       value_template: "{{ states('input_text.huskers_game_clock') }}"
     huskers_game_status:
-      friendly_name: "Game Status"
+      friendly_name: 'Game Status'
       value_template: "{{ states('input_text.huskers_game_status') }}"

@@ -1,7 +1,7 @@
 ---
-name: "Automation spec"
+name: 'Automation spec'
 description: Specify an automation in detail
-labels: ["automation"]
+labels: ['automation']
 body:
   - type: textarea
     id: context

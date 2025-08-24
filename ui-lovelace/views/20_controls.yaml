@@ -62,7 +62,7 @@ cards:
             state_not: unavailable
         card:
           type: button
-          name: "Scene: Scarlet Theater"
+          name: 'Scene: Scarlet Theater'
           icon: mdi:palette
           tap_action:
             action: call-service
@@ -76,7 +76,7 @@ cards:
             state_not: unavailable
         card:
           type: button
-          name: "Scene: Cream Theater"
+          name: 'Scene: Cream Theater'
           icon: mdi:palette-swatch
           tap_action:
             action: call-service

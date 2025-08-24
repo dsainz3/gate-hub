@@ -1,7 +1,7 @@
 ---
-name: "Decision record (ADR)"
+name: 'Decision record (ADR)'
 description: Record a key architecture decision
-labels: ["adr"]
+labels: ['adr']
 body:
   - type: input
     id: title
