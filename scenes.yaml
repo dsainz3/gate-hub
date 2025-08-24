@@ -44,15 +44,18 @@
 # PURPOSE: Alternating scarlet/cream starting with scarlet.
 # PATTERN: Scarlet (front left), Cream (front right), Scarlet (garage L),
 #          Cream (garage C), Scarlet (garage R).
+# PURPOSE: Alternating scarlet/cream starting with scarlet on FRONT LEFT.
+# PATTERN: Scarlet (front left), Cream (front right), Scarlet (garage L),
+#          Cream (garage C), Scarlet (garage R).
 - name: Huskers Alternating (Exterior)
   id: scene_huskers_alternating_exterior
   icon: mdi:palette
   entities:
-    light.front_left:
+    light.light_front_left:
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
-    light.front_right:
+    light.light_front_right:
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
@@ -69,18 +72,18 @@
       brightness: 255
       hs_color: [355, 90] # Scarlet
 
-# PURPOSE: Alternating scarlet/cream starting with cream (inverse of above).
+# PURPOSE: Inverted pattern (start with CREAM on FRONT LEFT).
 # PATTERN: Cream (front left), Scarlet (front right), Cream (garage L),
 #          Scarlet (garage C), Cream (garage R).
 - name: Huskers Alternating Inverted (Exterior)
   id: scene_huskers_alternating_exterior_inverted
   icon: mdi:palette
   entities:
-    light.front_left:
+    light.light_front_left:
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
-    light.front_right:
+    light.light_front_right:
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
