@@ -226,13 +226,11 @@
 # PURPOSE: Midnight adjustments — turn off porch/garage lights and set permanent LEDs to 20%.
 # TRIGGERS: Midnight daily.
 - id: '1755305405794'
-  alias: 'Midnight lights'
-  description: ''
+  alias: Midnight lights
   mode: single
   trigger:
     - platform: time
       at: '00:00:00'
-  condition: []
   action:
     - service: light.turn_off
       target:
@@ -241,10 +239,11 @@
           - light.garage_c
           - light.garage_l
           - light.garage_r
-    - type: turn_on
-      domain: light
-      entity_id: light.permanent_outdoor_lights
-      brightness_pct: 20
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        brightness_pct: 20
 
 # =========================================================
 # CATEGORY: HUSKERS
