@@ -14,6 +14,7 @@
             ^homeassistant/packages/[^/]+\.ya?ml$|
             ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
+            ^lovelace/.*\.ya?ml$|              # exclude HA Lovelace YAML using custom tags
             ^blueprints/.*\.ya?ml$|
             ^custom_components/.*\.ya?ml$|
             ^zigbee2mqtt/.*\.ya?ml$|
@@ -29,13 +30,16 @@
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-yaml
-        args: [--allow-multiple-documents]
+        # NOTE: this hook doesn't support --allow-custom-tags in your env
+        # Use -m for multi-document YAML and exclude HA custom-tag files
+        args: ['-m']
         exclude: |
           (?x)(
             ^configuration\.ya?ml$|
             ^homeassistant/packages/.*\.ya?ml$|
             ^ui-lovelace/[^/]+\.ya?ml$|
             ^ui-lovelace/resources\.ya?ml$|
+            ^lovelace/.*\.ya?ml$|              # exclude HA Lovelace YAML using custom tags
             ^blueprints/.*\.ya?ml$|
             ^custom_components/.*/services\.ya?ml$|
             ^zigbee2mqtt/.*\.ya?ml$
@@ -67,6 +71,7 @@
         additional_dependencies:
           - flake8-bugbear==24.4.26
           - flake8-builtins==2.5.0
+
   - repo: local
     hooks:
       - id: hass-config-check
