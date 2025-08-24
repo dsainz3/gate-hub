@@ -764,3 +764,18 @@ huskers_exterior_touchdown_burst:
             - action: scene.delete
               data:
                 entity_id: scene.{{ snapshot_id }}
+huskers_test_score_update:
+  alias: 'Huskers: Test Score Update'
+  mode: single
+  sequence:
+    - action: input_text.set_value
+      target:
+        entity_id: input_text.huskers_last_score
+      data:
+        value: Huskers 35 - Opponent 24 (Test)
+    - action: logbook.log
+      data:
+        name: "Huskers \u2013 Test"
+        message: Manual score update triggered
+    - action: script.huskers_touchdown_burst
+    - action: script.huskers_exterior_touchdown_burst
