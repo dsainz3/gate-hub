@@ -260,24 +260,3 @@
         | int(0)) }}'
   action:
     - service: script.huskers_touchdown_burst
-- id: huskers_exterior_alternating_loop
-  alias: 'Huskers: Exterior Alternating Loop (Start)'
-  mode: restart
-  trigger:
-    - platform: state
-      entity_id: input_boolean.huskers_exterior_color_show
-      to: 'on'
-  variables:
-    delay_seconds: 20
-  condition: []
-  action:
-    - repeat:
-        while:
-          - condition: state
-            entity_id: input_boolean.huskers_exterior_color_show
-            state: 'on'
-        sequence:
-          - service: script.huskers_exterior_alternating_start
-          - delay: '{{ delay_seconds }}'
-          - service: script.huskers_exterior_alternating_inverted_start
-          - delay: '{{ delay_seconds }}'

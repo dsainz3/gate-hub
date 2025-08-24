@@ -431,55 +431,9 @@ huskers_exterior_alternating_start:
               predim_pct: 10
               predim_hold: 1
           - delay: 5
-huskers_exterior_alternating_inverted_start:
-  alias: "Huskers: Exterior Alternating (Inverted) \u2013 Start (2-step fade)"
-  mode: single
-  sequence:
-    - service: script.util_fade_color
-      data:
-        light: light.light_front_left
-        h: 48
-        s: 12
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.light_front_right
-        h: 355
-        s: 90
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_l
-        h: 48
-        s: 12
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_c
-        h: 355
-        s: 90
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
-    - service: script.util_fade_color
-      data:
-        light: light.garage_r
-        h: 48
-        s: 12
-        brightness: 255
-        transition: 5
-        predim_pct: 10
-        predim_hold: 1
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
 huskers_theater_scarlet_fade:
   alias: 'Huskers: Theater Scarlet Fade'
   mode: single
