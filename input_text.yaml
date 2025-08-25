@@ -1,10 +1,3 @@
-huskers_opponent_name:
-  name: Opponent Name
-huskers_quarter:
-  name: Quarter
-huskers_game_clock:
-  name: Game Clock
-huskers_game_status:
-  name: Game Status
-huskers_last_score:
-  name: Last Score (Test)
+huskers_theater_prev_scripts:
+  name: Huskers Theater Prev Scripts
+  max: 255
