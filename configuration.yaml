@@ -3,11 +3,11 @@ default_config:
 
 homeassistant:
   name: Our Home
-  latitude: 41.046709
+  latitude: 41.046709s
   longitude: -95.9718365
   elevation: 1116
   time_zone: America/Chicago
-  packages: !include_dir_merge_named packages
+
 # 👇 Use merge_named so each theme file can define its own theme name
 frontend:
   themes: !include_dir_merge_named themes
