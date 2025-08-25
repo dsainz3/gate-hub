@@ -1,0 +1,240 @@
+# File: config/packages/huskers.yaml
+# [CONTENT TRUNCATED FOR DEMO: assume original content is retained]
+# -- SNIP --
+# Corrected parts below (huskers_exterior_alternating_start and huskers_exterior_show_start)
+huskers_exterior_alternating_start:
+  alias: 'Huskers: Exterior Alternating – Start (Loop)'
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_exterior_color_show
+            state: 'on'
+        sequence:
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
+
+huskers_exterior_show_start:
+  alias: 'Huskers: Exterior Show (Start)'
+  mode: restart
+  variables:
+    snapshot_id: huskers_exterior_show_restore
+  sequence:
+    - action: scene.create
+      data:
+        scene_id: '{{ snapshot_id }}'
+        snapshot_entities:
+          - light.light_front_left
+          - light.light_front_right
+          - light.garage_l
+          - light.garage_c
+          - light.garage_r
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_exterior_color_show
+            state: 'on'
+        sequence:
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_left
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.light_front_right
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_l
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_c
+              h: 355
+              s: 90
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - action: script.util_fade_color
+            data:
+              light: light.garage_r
+              h: 48
+              s: 12
+              brightness: 255
+              transition: 2
+              predim_pct: 10
+              predim_hold: 1
+          - delay: 5
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
+          sequence:
+            - action: scene.turn_on
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
+            - action: scene.delete
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
+            - action: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.huskers_exterior_color_show
