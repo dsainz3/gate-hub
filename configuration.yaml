@@ -20,3 +20,29 @@ input_boolean: !include input_boolean.yaml
 input_number: !include input_number.yaml
 input_text: !include input_text.yaml
 script: !include scripts.yaml
+
+# needed for the Logbook card + custom log entries
+logbook:
+
+# keep DB sane; only store what we care about
+recorder:
+  include:
+    domains: [script, scene, light, input_boolean]
+    entities:
+      - input_text.huskers_last_score
+      - sensor.huskers_kickoff_in
+      - binary_sensor.huskers_postgame_window
+      - light.light_theater_left
+      - light.light_theater_right
+      - light.light_front_left
+      - light.light_front_right
+      - light.garage_l
+      - light.garage_c
+      - light.garage_r
+      - light.permanent_outdoor_lights
+
+# HA core logger (optional, but helpful while iterating)
+logger:
+  default: info
+  logs:
+    homeassistant.components.logbook: debug
