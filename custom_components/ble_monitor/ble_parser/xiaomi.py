@@ -4,12 +4,37 @@ import logging
 import math
 import struct
 
-from Cryptodome.Cipher import AES
-from homeassistant.util import datetime
+try:
+    from Cryptodome.Cipher import AES
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AES = None
+try:
+    from cryptography.hazmat.primitives.ciphers.aead import AESCCM
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AESCCM = None
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from datetime import datetime
 
 from .helpers import to_mac, to_unformatted_mac
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _ccm_decrypt_no_auth(key: bytes, nonce: bytes, data: bytes) -> bytes:
+    """Decrypt CCM encrypted data without validating authentication tag."""
+    # Build keystream using AES-CTR mode with counter starting at 1
+    q = 2  # number of bytes for the length field (L=2)
+    flags = 0x01  # L-1 with all other flags cleared
+    result = bytearray()
+    encryptor = Cipher(algorithms.AES(key), modes.ECB()).encryptor()
+    counter = 1
+    for block_start in range(0, len(data), 16):
+        counter_block = bytes([flags]) + nonce + counter.to_bytes(q, "big")
+        keystream = encryptor.update(counter_block)
+        block = data[block_start:block_start + 16]
+        result.extend(x ^ y for x, y in zip(block, keystream[: len(block)]))
+        counter += 1
+    return bytes(result)
 
 # Device type dictionary
 # {device type code: device name}
@@ -1675,16 +1700,32 @@ def decrypt_mibeacon_v4_v5(self, data, i, mac):
     aad = b"\x11"
     token = data[-4:]
     cipherpayload = data[i:-7]
-    cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
-    cipher.update(aad)
-
-    try:
-        decrypted_payload = cipher.decrypt_and_verify(cipherpayload, token)
-    except ValueError as error:
-        _LOGGER.warning("Decryption failed: %s", error)
-        _LOGGER.debug("token: %s", token.hex())
-        _LOGGER.debug("nonce: %s", nonce.hex())
-        _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+    if AES is not None:
+        cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
+        cipher.update(aad)
+        try:
+            decrypted_payload = cipher.decrypt_and_verify(cipherpayload, token)
+        except ValueError as error:
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("token: %s", token.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+            return None
+    elif AESCCM is not None:
+        try:
+            decrypted_payload = AESCCM(key, tag_length=4).decrypt(
+                nonce, cipherpayload + token, aad
+            )
+        except Exception as error:  # pragma: no cover - optional dependency
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("token: %s", token.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+            return None
+    else:  # pragma: no cover - optional dependency
+        _LOGGER.error(
+            "Cryptodome or cryptography library is required for Xiaomi encryption"
+        )
         return None
     if decrypted_payload is None:
         _LOGGER.error(
@@ -1721,15 +1762,34 @@ def decrypt_mibeacon_legacy(self, data, i, mac):
     nonce = b"".join([data[4:9], data[-4:-1], mac[::-1][:-1]])
     aad = b"\x11"
     cipherpayload = data[i:-4]
-    cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
-    cipher.update(aad)
-
-    try:
-        decrypted_payload = cipher.decrypt(cipherpayload)
-    except ValueError as error:
-        _LOGGER.warning("Decryption failed: %s", error)
-        _LOGGER.debug("nonce: %s", nonce.hex())
-        _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+    mic = data[-4:]
+    if AES is not None:
+        cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
+        cipher.update(aad)
+        try:
+            decrypted_payload = cipher.decrypt_and_verify(cipherpayload, mic)
+        except ValueError as error:
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+            return None
+    elif AESCCM is not None:
+        try:
+            decrypted_payload = AESCCM(key, tag_length=4).decrypt(
+                nonce, cipherpayload + mic, aad
+            )
+        except Exception as error:  # pragma: no cover - optional dependency
+            try:
+                decrypted_payload = _ccm_decrypt_no_auth(key, nonce, cipherpayload)
+            except Exception:
+                _LOGGER.warning("Decryption failed: %s", error)
+                _LOGGER.debug("nonce: %s", nonce.hex())
+                _LOGGER.debug("cipherpayload: %s", cipherpayload.hex())
+                return None
+    else:  # pragma: no cover - optional dependency
+        _LOGGER.error(
+            "Cryptodome or cryptography library is required for Xiaomi encryption"
+        )
         return None
     if decrypted_payload is None:
         _LOGGER.warning(

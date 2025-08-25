@@ -3,7 +3,14 @@
 import logging
 from struct import unpack
 
-from Cryptodome.Cipher import AES
+try:
+    from Cryptodome.Cipher import AES
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AES = None
+try:
+    from cryptography.hazmat.primitives.ciphers.aead import AESCCM
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AESCCM = None
 
 from .helpers import to_mac, to_unformatted_mac
 
@@ -161,16 +168,33 @@ def decrypt_atc(self, data, atc_mac):
     cipherpayload = data[5:-4]
     aad = b"\x11"
     token = data[-4:]
-    cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
-    cipher.update(aad)
     # decrypt the data
-    try:
-        decrypted_payload = cipher.decrypt_and_verify(cipherpayload, token)
-    except ValueError as error:
-        _LOGGER.warning("Decryption failed: %s", error)
-        _LOGGER.debug("token: %s", token.hex())
-        _LOGGER.debug("nonce: %s", nonce.hex())
-        _LOGGER.debug("encrypted_payload: %s", cipherpayload.hex())
+    if AES is not None:
+        cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
+        cipher.update(aad)
+        try:
+            decrypted_payload = cipher.decrypt_and_verify(cipherpayload, token)
+        except ValueError as error:
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("token: %s", token.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("encrypted_payload: %s", cipherpayload.hex())
+            return None
+    elif AESCCM is not None:
+        try:
+            decrypted_payload = AESCCM(key, tag_length=4).decrypt(
+                nonce, cipherpayload + token, aad
+            )
+        except Exception as error:  # pragma: no cover - optional dependency
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("token: %s", token.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("encrypted_payload: %s", cipherpayload.hex())
+            return None
+    else:  # pragma: no cover - optional dependency
+        _LOGGER.error(
+            "Cryptodome or cryptography library is required for encrypted ATC packets"
+        )
         return None
     if decrypted_payload is None:
         _LOGGER.warning(

@@ -5,7 +5,14 @@ import struct
 from datetime import datetime, timezone
 from typing import Any
 
-from Cryptodome.Cipher import AES
+try:
+    from Cryptodome.Cipher import AES
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AES = None
+try:
+    from cryptography.hazmat.primitives.ciphers.aead import AESCCM
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    AESCCM = None
 
 from .bthome_const import BUTTON_EVENTS, DIMMER_EVENTS, MEAS_TYPES
 from .helpers import to_mac, to_unformatted_mac
@@ -403,18 +410,35 @@ def decrypt_data(self, data: bytes, sw_version: int):
 
     # nonce: mac [6], uuid16 [2 (v1) or 3 (v2)], count_id [4]
     nonce = b"".join([self.mac, uuid, count_id])
-    cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
-    if sw_version == 1:
-        cipher.update(b"\x11")
-
-    try:
-        decrypted_payload = cipher.decrypt_and_verify(encrypted_payload, mic)
-    except ValueError as error:
-        _LOGGER.warning("Decryption failed: %s", error)
-        _LOGGER.debug("mic: %s", mic.hex())
-        _LOGGER.debug("nonce: %s", nonce.hex())
-        _LOGGER.debug("encrypted_payload: %s", encrypted_payload.hex())
-        return None
+    if AES is not None:
+        cipher = AES.new(key, AES.MODE_CCM, nonce=nonce, mac_len=4)
+        if sw_version == 1:
+            cipher.update(b"\x11")
+        try:
+            decrypted_payload = cipher.decrypt_and_verify(encrypted_payload, mic)
+        except ValueError as error:
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("mic: %s", mic.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("encrypted_payload: %s", encrypted_payload.hex())
+            return None, None
+    elif AESCCM is not None:
+        aad = b"\x11" if sw_version == 1 else b""
+        try:
+            decrypted_payload = AESCCM(key, tag_length=4).decrypt(
+                nonce, encrypted_payload + mic, aad
+            )
+        except Exception as error:  # pragma: no cover - optional dependency
+            _LOGGER.warning("Decryption failed: %s", error)
+            _LOGGER.debug("mic: %s", mic.hex())
+            _LOGGER.debug("nonce: %s", nonce.hex())
+            _LOGGER.debug("encrypted_payload: %s", encrypted_payload.hex())
+            return None, None
+    else:  # pragma: no cover - optional dependency
+        _LOGGER.error(
+            "Cryptodome or cryptography library is required for BTHome encryption"
+        )
+        return None, None
     if decrypted_payload is None:
         _LOGGER.error(
             "Decryption failed for %s, decrypted payload is None",
