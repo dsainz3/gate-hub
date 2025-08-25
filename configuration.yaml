@@ -3,7 +3,7 @@ default_config:
 
 homeassistant:
   name: Our Home
-  latitude: 41.046709s
+  latitude: 41.046709
   longitude: -95.9718365
   elevation: 1116
   time_zone: America/Chicago
