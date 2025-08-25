@@ -1,6 +1,109 @@
-# Example only; the full content from your message should be placed here.
+# =========================
+# HUSKERS SCRIPTS (drop-in)
+# =========================
+# Expectation:
+# configuration.yaml -> script: !include scripts.yaml
+#
+# Notes:
+# - Uses scenes you defined: huskers_scarlet_theater, huskers_cream_theater,
+#   huskers_alternating_exterior, huskers_alternating_inverted_exterior
+# - Adjust entity_ids if your lights differ.
+
+# --- Theater Show (Start): set Scarlet theater scene
+huskers_theater_show_start:
+  alias: 'Huskers: Theater Show (Start)'
+  mode: single
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_scarlet_theater
+      data:
+        transition: 2
+
+# --- Theater Show (Stop): turn off the two theater lights
+huskers_theater_show_stop:
+  alias: 'Huskers: Theater Show (Stop)'
+  mode: single
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+
+# --- Exterior Show (Start): apply alternating exterior scene
+huskers_exterior_show_start:
+  alias: 'Huskers: Exterior Show (Start)'
+  mode: single
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_alternating_exterior
+      data:
+        transition: 2
+
+# --- Exterior Show (Stop): turn off front + garage lights
+huskers_exterior_show_stop:
+  alias: 'Huskers: Exterior Show (Stop)'
+  mode: single
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.light_front_left
+          - light.light_front_right
+          - light.garage_l
+          - light.garage_c
+          - light.garage_r
+
+# --- Theater Touchdown Burst: quick flash on theater lights
+huskers_touchdown_burst:
+  alias: 'Huskers: Theater Touchdown Burst'
+  mode: restart
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+      data:
+        flash: short
+
+# --- Exterior Touchdown Burst: quick flash on exterior lights
+huskers_exterior_touchdown_burst:
+  alias: 'Huskers: Exterior Touchdown Burst'
+  mode: restart
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.light_front_left
+          - light.light_front_right
+          - light.garage_l
+          - light.garage_c
+          - light.garage_r
+      data:
+        flash: short
+
+# --- Test helper: set the score text then trigger both bursts
+huskers_test_score_update:
+  alias: 'Huskers: 🧪 Simulate Score + Burst'
+  mode: single
+  sequence:
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.huskers_last_score
+      data:
+        value: 'NU TD (test)'
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_touchdown_burst
+          - script.huskers_exterior_touchdown_burst
+
+# --- Game-day LED effect on exterior (with snapshot/restore)
 huskers_led_gameday_start:
-  alias: Start Game-Day Effect
+  alias: 'Huskers: Game-Day LED (Start)'
   mode: single
   sequence:
     - service: scene.create
@@ -13,4 +116,25 @@ huskers_led_gameday_start:
         entity_id: light.permanent_outdoor_lights
       data:
         effect: LED_Huskers
-# ... include the rest of your scripts here identically formatted
+
+huskers_led_stop:
+  alias: 'Huskers: Stop LED Effect (Restore Previous)'
+  mode: single
+  variables:
+    snapshot_id: huskers_outdoor_pre_gameday
+  sequence:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: 'scene.{{ snapshot_id }}'
+              data:
+                transition: 1
+            - delay: '00:00:01'
+            - service: scene.delete
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
+      default: []
