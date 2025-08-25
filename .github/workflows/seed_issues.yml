@@ -1,6 +1,6 @@
 name: Seed HA Optimization Issues
 
-on:
+'on':
   workflow_dispatch:
     inputs:
       plan_path:
@@ -16,18 +16,17 @@ on:
         required: false
         default: 'false'
       base_branch:
-        description: 'Base branch for new branches (ignored if not creating branches)'
+        description: 'Base branch for new branches'
         required: false
         default: 'main'
       dry_run:
-        description: 'Only parse & log; do not write changes'
+        description: 'Only parse; no writes'
         required: false
         default: 'false'
 
 permissions:
-  contents: write # for creating branches
-  issues: write # for creating/updating issues
-  projects: write # for linking to Project v2
+  contents: write
+  issues: write
 
 jobs:
   seed:
@@ -38,6 +37,8 @@ jobs:
       - name: Seed issues from plan
         uses: actions/github-script@v7
         with:
+          # PAT secret with scopes: repo, project, read:org
+          github-token: ${{ secrets.ISSUES_TOKEN }}
           script: |
             const fs = require('fs');
             const core = require('@actions/core');
@@ -47,210 +48,136 @@ jobs:
             const CREATE_BRANCHES = (core.getInput('create_branches') || 'false').toLowerCase() === 'true';
             const BASE_BRANCH = core.getInput('base_branch') || 'main';
             const DRY_RUN = (core.getInput('dry_run') || 'false').toLowerCase() === 'true';
+            const { owner, repo } = context.repo;
 
-            const {owner, repo} = context.repo;
-            core.info(`Repo: ${owner}/${repo}`);
-            core.info(`Plan: ${planPath}`);
-            core.info(`Project ID: ${PROJECT_ID || '(none)'}`);
-            core.info(`Create branches: ${CREATE_BRANCHES}, base: ${BASE_BRANCH}`);
-            core.info(`Dry run: ${DRY_RUN}`);
-
+            if (!fs.existsSync(planPath)) {
+              core.setFailed(`Plan not found: ${planPath}`);
+              process.exit(1);
+            }
             const md = fs.readFileSync(planPath, 'utf8');
 
-            // --- Parse the markdown into issue objects ---
-            // Split on "## Issue: <title>"
-            const blocks = md.split(/\n##\s+Issue:\s+/).slice(1); // drop preface
-            const issues = blocks.map(block => {
-              // Title is up to first line break
+            const blocks = md.split(/\n##\s+Issue:\s+/).slice(1);
+            if (!blocks.length) {
+              core.setFailed('No "## Issue:" blocks found in the plan.');
+              process.exit(1);
+            }
+
+            const parseIssues = () => blocks.map(block => {
               const [titleLine, ...restLines] = block.split('\n');
               const title = titleLine.trim();
-
               const rest = restLines.join('\n');
-
               const field = (name) => {
                 const m = rest.match(new RegExp(`\\*\\*${name}:\\*\\*\\s*(.+)`));
                 return m ? m[1].trim() : '';
               };
-
-              // Extract fields
-              // Branch: `code` or plain
               let branch = field('Branch').replace(/`/g,'').trim();
-              // Labels: backticked or comma-separated text
               let labelsLine = field('Labels');
               let labels = [];
               if (labelsLine) {
-                const backticked = [...labelsLine.matchAll(/`([^`]+)`/g)].map(m=>m[1]);
-                if (backticked.length) {
-                  labels = backticked.map(s=>s.trim());
-                } else {
-                  labels = labelsLine.split(',').map(s=>s.trim()).filter(Boolean);
-                }
+                const bt = [...labelsLine.matchAll(/`([^`]+)`/g)].map(m=>m[1]);
+                labels = (bt.length ? bt : labelsLine.split(',')).map(s=>s.trim()).filter(Boolean);
               }
               const milestoneTitle = field('Milestone');
 
-              // Sections
-              const grabSection = (name) => {
+              const section = (name) => {
                 const re = new RegExp(`\\n###\\s+${name}\\s*\\n([\\s\\S]*?)(?:\\n###\\s+|\\n---|\\n##\\s+Issue:|$)`);
                 const m = rest.match(re);
                 return m ? m[1].trim() : '';
               };
-              const summary = grabSection('Summary');
+              const checklist = (txt) => !txt ? [] :
+                txt.split('\n').map(l=>l.trim()).filter(l=>/^-\s*\[[ xX]\]\s+/.test(l))
+                  .map(l=>l.replace(/^\-\s*\[[ xX]\]\s*/,'').trim());
 
-              const parseChecklist = (txt) => {
-                if (!txt) return [];
-                return txt.split('\n')
-                  .map(l => l.trim())
-                  .filter(l => /^-\s*\[[ xX]\]\s+/.test(l))  // keep checkboxes
-                  .map(l => l.replace(/^\-\s*\[[ xX]\]\s*/,'').trim());
+              return {
+                title,
+                branch,
+                labels,
+                milestoneTitle,
+                summary: section('Summary'),
+                tasks: checklist(section('Tasks')),
+                acceptance: checklist(section('Acceptance Criteria')),
               };
-              const tasks = parseChecklist(grabSection('Tasks'));
-              const acceptance = parseChecklist(grabSection('Acceptance Criteria'));
-
-              return { title, branch, labels, milestoneTitle, summary, tasks, acceptance };
             });
 
-            if (!issues.length) {
-              core.setFailed('No issues parsed from plan. Check your "## Issue:" headings.');
-              return;
-            }
+            const issues = parseIssues();
+            core.startGroup('Parsed issues'); issues.forEach(i => core.info(JSON.stringify(i,null,2))); core.endGroup();
 
-            core.startGroup('Parsed issues');
-            for (const it of issues) {
-              core.info(JSON.stringify(it, null, 2));
-            }
-            core.endGroup();
-
-            // --- Helpers ---
             async function ensureLabel(name) {
-              try {
-                await github.rest.issues.getLabel({owner, repo, name});
-                return;
-              } catch {}
-              if (DRY_RUN) { core.info(`[dry-run] create label: ${name}`); return; }
-              // default neutral color
-              const color = 'ededed';
-              await github.rest.issues.createLabel({owner, repo, name, color});
+              try { await github.rest.issues.getLabel({ owner, repo, name }); return; } catch {}
+              if (DRY_RUN) return core.info(`[dry-run] create label: ${name}`);
+              await github.rest.issues.createLabel({ owner, repo, name, color: 'ededed' });
               core.info(`Created label: ${name}`);
             }
 
             async function ensureMilestone(title) {
               if (!title) return null;
-              const { data: milestones } = await github.rest.issues.listMilestones({
-                owner, repo, state: 'open', per_page: 100
-              });
-              let found = milestones.find(m => m.title === title);
+              const { data: list } = await github.rest.issues.listMilestones({ owner, repo, state: 'open', per_page: 100 });
+              const found = list.find(m => m.title === title);
               if (found) return found.number;
-
-              if (DRY_RUN) { core.info(`[dry-run] create milestone: ${title}`); return null; }
-              const { data: created } = await github.rest.issues.createMilestone({owner, repo, title});
+              if (DRY_RUN) return core.info(`[dry-run] create milestone: ${title}`), null;
+              const { data: created } = await github.rest.issues.createMilestone({ owner, repo, title });
               core.info(`Created milestone: ${title} (#${created.number})`);
               return created.number;
             }
 
-            async function findExistingIssueByExactTitle(title) {
-              // Use search API for speed; exact match by title
+            async function findByExactTitle(title) {
               const q = `repo:${owner}/${repo} is:issue in:title "${title.replace(/"/g,'\\"')}"`;
-              const search = await github.rest.search.issuesAndPullRequests({ q, per_page: 10 });
-              return search.data.items.find(i => i.title === title) || null;
-            }
-
-            async function createOrUpdateIssue(def) {
-              // Ensure labels exist
-              for (const lb of def.labels || []) {
-                await ensureLabel(lb);
-              }
-              // Ensure milestone exists
-              const milestone = await ensureMilestone(def.milestoneTitle);
-
-              // Compose body
-              const body =
-                (def.branch ? `**Branch:** \`${def.branch}\`\n\n` : '') +
-                (def.summary ? `### Summary\n${def.summary}\n\n` : '') +
-                (def.tasks?.length ? `### Tasks\n${def.tasks.map(t=>`- [ ] ${t}`).join('\n')}\n\n` : '') +
-                (def.acceptance?.length ? `### Acceptance Criteria\n${def.acceptance.map(a=>`- [ ] ${a}`).join('\n')}\n` : '');
-
-              // Find existing by exact title
-              let issue = await findExistingIssueByExactTitle(def.title);
-
-              if (!issue) {
-                if (DRY_RUN) { core.info(`[dry-run] create issue: ${def.title}`); return null; }
-                const created = await github.rest.issues.create({
-                  owner, repo,
-                  title: def.title,
-                  body,
-                  labels: def.labels,
-                  milestone
-                });
-                core.info(`Created: ${created.data.html_url}`);
-                return created.data;
-              } else {
-                // Update labels/milestone if needed; don't remove existing labels
-                if (DRY_RUN) { core.info(`[dry-run] update issue: ${issue.html_url}`); return issue; }
-
-                // Merge labels
-                const existingLabels = issue.labels.map(l => typeof l === 'string' ? l : l.name);
-                const mergedLabels = Array.from(new Set([...existingLabels, ...(def.labels || [])]));
-
-                await github.rest.issues.update({
-                  owner, repo,
-                  issue_number: issue.number,
-                  body, // keep body in sync with plan
-                  labels: mergedLabels,
-                  milestone
-                });
-                core.info(`Updated: ${issue.html_url}`);
-                return issue;
-              }
-            }
-
-            async function linkToProjectV2(issueNodeId) {
-              if (!PROJECT_ID) return;
-              if (DRY_RUN) { core.info(`[dry-run] link to project: ${PROJECT_ID}`); return; }
-              try {
-                await github.graphql(
-                  `mutation($projectId:ID!,$contentId:ID!){
-                    addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}){
-                      item { id }
-                    }
-                  }`,
-                  { projectId: PROJECT_ID, contentId: issueNodeId }
-                );
-                core.info(`Linked to Project ${PROJECT_ID}`);
-              } catch (e) {
-                core.warning(`Project link failed (possibly already linked): ${e.message}`);
-              }
+              const res = await github.rest.search.issuesAndPullRequests({ q, per_page: 10 });
+              return res.data.items.find(i => i.title === title) || null;
             }
 
             async function ensureBranch(name, base) {
-              // create branch if missing, from base ref
-              try {
-                await github.rest.git.getRef({ owner, repo, ref: `heads/${name}` });
-                core.info(`Branch exists: ${name}`);
-                return;
-              } catch {}
+              try { await github.rest.git.getRef({ owner, repo, ref: `heads/${name}` }); return core.info(`Branch exists: ${name}`); }
+              catch {}
               const baseRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${base}` });
-              if (DRY_RUN) { core.info(`[dry-run] create branch: ${name} from ${base}@${baseRef.data.object.sha}`); return; }
-              await github.rest.git.createRef({
-                owner, repo,
-                ref: `refs/heads/${name}`,
-                sha: baseRef.data.object.sha
-              });
+              if (DRY_RUN) return core.info(`[dry-run] create branch: ${name} from ${base}@${baseRef.data.object.sha}`);
+              await github.rest.git.createRef({ owner, repo, ref: `refs/heads/${name}`, sha: baseRef.data.object.sha });
               core.info(`Created branch: ${name}`);
             }
 
-            // --- Execute ---
+            async function linkProject(nodeId) {
+              if (!PROJECT_ID) return;
+              if (DRY_RUN) return core.info(`[dry-run] link to project ${PROJECT_ID}`);
+              await github.graphql(
+                `mutation($projectId:ID!,$contentId:ID!){
+                  addProjectV2ItemById(input:{projectId:$projectId, contentId:$contentId}){ item { id } }
+                }`,
+                { projectId: PROJECT_ID, contentId: nodeId }
+              );
+              core.info(`Linked to Project ${PROJECT_ID}`);
+            }
+
             for (const def of issues) {
               core.startGroup(def.title);
 
-              if (CREATE_BRANCHES && def.branch) {
-                await ensureBranch(def.branch, BASE_BRANCH);
+              if (CREATE_BRANCHES && def.branch) await ensureBranch(def.branch, BASE_BRANCH);
+              for (const lb of def.labels) await ensureLabel(lb);
+              const milestone = await ensureMilestone(def.milestoneTitle);
+
+              const body =
+                (def.branch ? `**Branch:** \`${def.branch}\`\n\n` : '') +
+                (def.summary ? `### Summary\n${def.summary}\n\n` : '') +
+                (def.tasks.length ? `### Tasks\n${def.tasks.map(t=>`- [ ] ${t}`).join('\n')}\n\n` : '') +
+                (def.acceptance.length ? `### Acceptance Criteria\n${def.acceptance.map(a=>`- [ ] ${a}`).join('\n')}\n` : '');
+
+              let issue = await findByExactTitle(def.title);
+
+              if (!issue) {
+                if (DRY_RUN) { core.info(`[dry-run] create issue: ${def.title}`); core.endGroup(); continue; }
+                const { data } = await github.rest.issues.create({ owner, repo, title: def.title, body, labels: def.labels, milestone });
+                issue = data;
+                core.info(`Created: ${issue.html_url}`);
+              } else {
+                if (DRY_RUN) { core.info(`[dry-run] update issue: ${issue.html_url}`); core.endGroup(); continue; }
+                const existing = issue.labels.map(l => typeof l === 'string' ? l : l.name);
+                const merged = Array.from(new Set([...existing, ...def.labels]));
+                await github.rest.issues.update({ owner, repo, issue_number: issue.number, body, labels: merged, milestone });
+                core.info(`Updated: ${issue.html_url}`);
               }
 
-              const data = await createOrUpdateIssue(def);
-
-              // Optional project link
-              if (PROJECT_ID && data && data.node_id) {
-                await linkToProjectV2(data.node_id);
+              if (issue?.node_id) {
+                try { await linkProject(issue.node_id); }
+                catch (e) { core.warning(`Project link failed: ${e.message}`); }
               }
 
               core.endGroup();
