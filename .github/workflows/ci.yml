@@ -1,43 +1,29 @@
 name: CI
 
-on:
-  pull_request:
-    branches: [main]
-    paths:
-      - '**/*.yaml'
-      - '**/*.yml'
-      - '.pre-commit-config.yaml'
-      - 'pyproject.toml'
-      - 'poetry.lock'
+'on':
   push:
-    branches: [main]
+  pull_request:
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Configure Poetry
-        run: poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-      - name: Run pre-commit
-        run: poetry run pre-commit run --all-files
+          python-version: '3.12'
 
-  ha-config-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create secrets stub
-        run: cp secrets.example.yaml secrets.yaml || true
-      - name: YAML lint
-        run: poetry run yamllint -s .
-      - name: HA config check
-        run: |
-          docker run --rm -v "$PWD":/config ghcr.io/home-assistant/home-assistant:stable \
-            python -m homeassistant --script check_config --config /config
+      # Optional cache to speed up pre-commit envs
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      # This runs ALL hooks you configured (prettier, yamllint, HA check, etc.)
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
