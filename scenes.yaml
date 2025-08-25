@@ -54,23 +54,24 @@
     light.light_front_left:
       state: 'on'
       brightness: 255
-      hs_color: [355, 90] # Scarlet
+
+      hs_color: [355, 90]  # Scarlet
     light.light_front_right:
       state: 'on'
       brightness: 255
-      hs_color: [48, 12] # Cream
+      hs_color: [48, 12]  # Cream
     light.garage_l:
       state: 'on'
       brightness: 255
-      hs_color: [355, 90] # Scarlet
+      hs_color: [355, 90]  # Scarlet
     light.garage_c:
       state: 'on'
       brightness: 255
-      hs_color: [48, 12] # Cream
+      hs_color: [48, 12]  # Cream
     light.garage_r:
       state: 'on'
       brightness: 255
-      hs_color: [355, 90] # Scarlet
+      hs_color: [355, 90]  # Scarlet
 
 # PURPOSE: Inverted pattern (start with CREAM on FRONT LEFT).
 # PATTERN: Cream (front left), Scarlet (front right), Cream (garage L),
@@ -82,20 +83,20 @@
     light.light_front_left:
       state: 'on'
       brightness: 255
-      hs_color: [48, 12] # Cream
+      hs_color: [48, 12]  # Cream
     light.light_front_right:
       state: 'on'
       brightness: 255
-      hs_color: [355, 90] # Scarlet
+      hs_color: [355, 90]  # Scarlet
     light.garage_l:
       state: 'on'
       brightness: 255
-      hs_color: [48, 12] # Cream
+      hs_color: [48, 12]  # Cream
     light.garage_c:
       state: 'on'
       brightness: 255
-      hs_color: [355, 90] # Scarlet
+      hs_color: [355, 90]  # Scarlet
     light.garage_r:
       state: 'on'
       brightness: 255
-      hs_color: [48, 12] # Cream
+      hs_color: [48, 12]  # Cream
