@@ -314,3 +314,17 @@
   condition: []
   action:
     - action: script.huskers_exterior_show_start
+
+- id: huskers_exterior_show_activator
+  alias: 'Huskers Exterior Light Show - Start'
+  description: 'Triggers the Husker exterior light show manually or via schedule'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: input_boolean.huskers_exterior_color_show
+      to: 'on'
+    - platform: time
+      at: '18:00:00'
+  condition: []
+  action:
+    - action: script.huskers_exterior_show_start
