@@ -1,142 +1,140 @@
 #!/usr/bin/env python3
-"""Generate Home Assistant YAML via LLM (OpenAI or Ollama)."""
-
-from __future__ import annotations
-
 import argparse
 import os
 import re
 import sys
-from pathlib import Path
-from textwrap import dedent
-from typing import Optional
-
-import requests
+import time
+import pathlib
 import yaml
+from textwrap import dedent
 
-SYSTEM = (
-    "You write Home Assistant YAML (automations or blueprints) ONLY.\n"
-    "- Output valid YAML only, no markdown fences or prose.\n"
-    "- Prefer blueprints with !input selectors when possible.\n"
-    "- No secrets; use placeholders/!input for entity_ids.\n"
-)
-
-USE_OLLAMA = os.getenv("USE_OLLAMA", "true").lower() == "true"
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-
-def _strip_fences(txt: str) -> str:
-    t = txt.strip()
-    # remove ```lang ... ``` if present
-    fence = re.compile(r"^```[a-zA-Z0-9_-]*\n|\n```$", re.MULTILINE)
-    return fence.sub("", t).strip()
-
-
-def _validate_yaml(txt: str) -> None:
-    data = yaml.safe_load(txt)
-    if not isinstance(data, (dict, list)):
-        raise ValueError("YAML must be a mapping or a list at top level")
-
-
-def _ollama_generate(prompt: str, model: str = "llama3.1") -> str:
-    host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-    resp = requests.post(
-        f"{host}/api/generate",
-        json={
-            "model": model,
-            "prompt": f"{SYSTEM}\n\n{prompt}",
-            "stream": False,
-            "options": {"temperature": 0},
-        },
-        timeout=600,
+try:
+    from openai import OpenAI
+except ImportError:
+    print(
+        "Missing openai package; install with `pip install openai`",
+        file=sys.stderr,
     )
-    resp.raise_for_status()
-    return resp.json().get("response", "").strip()
+    sys.exit(2)
+
+SYSTEM_PROMPT = dedent(
+    """
+    You generate Home Assistant *package* YAML files.
+    Output must be **pure YAML only**, no code fences.
+
+    Rules:
+    - Top-level must be a HA package mapping (e.g., may include: `automation:`, `script:`, `input_*:` etc.)
+    - Prefer a single `automation:` list item unless more are clearly needed.
+    - Use existing entities by name (do not invent), or write generic placeholders with clear TODO comments like
+      `# TODO: replace with your sensor entity_id`.
+    - Be conservative with services; common ones: light.turn_on/off, notify.*, switch.turn_on/off, scene.turn_on, script.turn_on.
+    - Use `mode: single` (or `queued` if you must) and add `alias:` for readability.
+    - Triggers/conditions/actions must be valid HA schema.
+    - Do **not** include secrets or shell_command calling external URLs.
+    - Keep it minimal and readable.
+
+    Return only the YAML document.
+    """
+).strip()
+
+USER_WRAPPER = """Goal: {prompt}
+
+Constraints:
+- This will be saved under a Home Assistant *packages* directory (merged into configuration).
+- Prefer a single automation unless multiple are obviously required.
+- If you use placeholders, mark them with `# TODO`.
+
+Produce a single valid YAML document for a package.
+"""
 
 
-def _openai_generate(prompt: str, model: str = "gpt-4o-mini") -> str:
-    if not OPENAI_API_KEY:
-        raise RuntimeError("OPENAI_API_KEY not set (and USE_OLLAMA=false)")
-    # Import locally so flake8 doesn't flag it if unused
-    from openai import OpenAI  # type: ignore
+def slugify(s: str) -> str:
+    s = s.strip().lower()
+    s = re.sub(r"[^a-z0-9\-_.]+", "-", s)
+    s = re.sub(r"-{2,}", "-", s)
+    return s.strip("-") or "automation"
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+
+def strip_fences(s: str) -> str:
+    s = re.sub(r"^```[a-zA-Z]*\s*", "", s.strip())
+    s = re.sub(r"\s*```$", "", s.strip())
+    return s.strip()
+
+
+def ensure_package_mapping(data):
+    """Accepts a dict/list; returns a dict package.
+
+    - If dict has 'automation' key, assume it's a package.
+    - If list looks like a list of automations, wrap under 'automation'.
+    - If dict looks like a single automation (has 'alias' and 'trigger'), wrap into a list under 'automation'.
+    """
+    if isinstance(data, dict):
+        if "automation" in data:
+            return data
+        if ("alias" in data) and ("trigger" in data) and ("action" in data):
+            return {"automation": [data]}
+        return data
+    if isinstance(data, list):
+        return {"automation": data}
+    raise ValueError("YAML did not parse into a dict or list.")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--prompt", required=True)
+    ap.add_argument("--outdir", default="packages/ai")
+    ap.add_argument("--slug", default="ai_automation")
+    ap.add_argument("--model", default="gpt-4o-mini")
+    ap.add_argument("--dry-run", action="store_true")
+    args = ap.parse_args()
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        print("ERROR: OPENAI_API_KEY is not set", file=sys.stderr)
+        sys.exit(1)
+
+    client = OpenAI(api_key=api_key)
+    user_msg = USER_WRAPPER.format(prompt=args.prompt)
+
     resp = client.chat.completions.create(
-        model=model,
+        model=args.model,
+        temperature=0.2,
         messages=[
-            {"role": "system", "content": SYSTEM},
-            {"role": "user", "content": prompt},
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_msg},
         ],
-        temperature=0,
     )
-    return (resp.choices[0].message.content or "").strip()
 
-
-def generate_yaml(
-    prompt: str,
-    use_ollama: bool = USE_OLLAMA,
-    model: Optional[str] = None,
-) -> str:
-    if use_ollama:
-        return _ollama_generate(prompt, model or "llama3.1")
-    return _openai_generate(prompt, model or "gpt-4o-mini")
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        prog="ai-yaml-generate",
-        description="Generate Home Assistant YAML from a natural language prompt.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=dedent(
-            """\
-            Examples:
-              ai-yaml-generate --prompt "turn porch lights on at sunset" -o packages/generated/porch.yaml
-              ai-yaml-generate --spec prompts/scene.txt -o packages/generated/scene.yaml
-              USE_OLLAMA=false OPENAI_API_KEY=sk-... ai-yaml-generate --prompt "..." -o out.yaml
-            """
-        ),
-    )
-    src = parser.add_mutually_exclusive_group(required=True)
-    src.add_argument("--prompt", help="Prompt text.")
-    src.add_argument("--spec", help="Path to a file that contains the prompt.")
-    parser.add_argument(
-        "-o",
-        "--output",
-        required=True,
-        help="Where to write the YAML file (will be created/overwritten).",
-    )
-    parser.add_argument(
-        "--model",
-        help="Model name (ollama: e.g. llama3.1, openai: e.g. gpt-4o-mini).",
-    )
-    parser.add_argument(
-        "--no-validate",
-        action="store_true",
-        help="Skip YAML validation (not recommended).",
-    )
-    args = parser.parse_args()
+    content = resp.choices[0].message.content or ""
+    yaml_txt = strip_fences(content)
 
     try:
-        if args.spec:
-            prompt = Path(args.spec).read_text(encoding="utf-8")
-        else:
-            prompt = args.prompt or ""
+        loaded = yaml.safe_load(yaml_txt)
+        if loaded is None:
+            raise ValueError("Empty YAML from model")
+        package = ensure_package_mapping(loaded)
+    except Exception as e:
+        print("Model output:", content, file=sys.stderr)
+        print(f"ERROR: YAML validation failed: {e}", file=sys.stderr)
+        sys.exit(3)
 
-        raw = generate_yaml(prompt, use_ollama=USE_OLLAMA, model=args.model)
-        raw = _strip_fences(raw)
+    outdir = pathlib.Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+    base = slugify(args.slug)
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    fname = f"{base}.yaml" if args.dry_run else f"{base}-{ts}.yaml"
+    outpath = outdir / fname
 
-        if not args.no_validate:
-            _validate_yaml(raw)
+    with open(outpath, "w", encoding="utf-8") as f:
+        yaml.safe_dump(package, f, sort_keys=False, allow_unicode=True)
 
-        out = Path(args.output)
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(raw.rstrip() + "\n", encoding="utf-8")
-        print(f"Wrote {out}", file=sys.stderr)
-        return 0
-    except Exception as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
-        return 1
+    print(f"Wrote: {outpath}")
+    if args.dry_run:
+        print("Dry run complete — no PR will be opened.")
+    else:
+        print("File ready for PR.")
+    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())
