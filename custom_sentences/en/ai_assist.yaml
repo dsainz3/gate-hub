@@ -1,0 +1,9 @@
+language: en
+intents:
+  CreateAutomation:
+    data:
+      - sentences:
+          - 'create automation {request}'
+          - 'make an automation to {request}'
+          - 'set up {request}'
+          - 'generate automation {request}'
