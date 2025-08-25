@@ -328,3 +328,160 @@
   condition: []
   action:
     - action: script.huskers_exterior_show_start
+
+# =========================
+# HUSKERS — DEBUG LOGGING
+# (flat config, no packages)
+# =========================
+
+# --- Script START logging ---
+- id: huskers_debug_script_start
+  alias: '[Huskers Debug] Script start'
+  mode: parallel
+  trigger:
+    - platform: state
+      entity_id:
+        - script.huskers_theater_show_start
+        - script.huskers_theater_show_stop
+        - script.huskers_exterior_show_start
+        - script.huskers_exterior_show_stop
+        - script.huskers_touchdown_burst
+        - script.huskers_exterior_touchdown_burst
+        - script.huskers_test_score_update
+      from: 'off'
+      to: 'on'
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers'
+        message: >-
+          Script started: {{ trigger.entity_id }} ({{ state_attr(trigger.entity_id,'friendly_name') or 'unknown' }})
+        entity_id: '{{ trigger.entity_id }}'
+        domain: script
+    - choose:
+        - conditions: "{{ is_state('input_boolean.huskers_debug_notifications','on') }}"
+          sequence:
+            - service: persistent_notification.create
+              data:
+                title: 'Huskers Debug'
+                message: >-
+                  ▶️ Started: {{ state_attr(trigger.entity_id,'friendly_name') or trigger.entity_id }}
+
+# --- Script STOP logging ---
+- id: huskers_debug_script_stop
+  alias: '[Huskers Debug] Script stop'
+  mode: parallel
+  trigger:
+    - platform: state
+      entity_id:
+        - script.huskers_theater_show_start
+        - script.huskers_theater_show_stop
+        - script.huskers_exterior_show_start
+        - script.huskers_exterior_show_stop
+        - script.huskers_touchdown_burst
+        - script.huskers_exterior_touchdown_burst
+        - script.huskers_test_score_update
+      to: 'off'
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers'
+        message: >-
+          Script finished: {{ trigger.entity_id }} ({{ state_attr(trigger.entity_id,'friendly_name') or 'unknown' }})
+        entity_id: '{{ trigger.entity_id }}'
+        domain: script
+    - choose:
+        - conditions: "{{ is_state('input_boolean.huskers_debug_notifications','on') }}"
+          sequence:
+            - service: persistent_notification.create
+              data:
+                title: 'Huskers Debug'
+                message: >-
+                  ⏹️ Finished: {{ state_attr(trigger.entity_id,'friendly_name') or trigger.entity_id }}
+
+# --- Scene activation logging (for the 4 Huskers scenes) ---
+- id: huskers_debug_scene_activate
+  alias: '[Huskers Debug] Scene activated'
+  mode: parallel
+  trigger:
+    - platform: event
+      event_type: call_service
+      event_data:
+        domain: scene
+        service: turn_on
+  condition:
+    - condition: template
+      value_template: >-
+        {% set tgt = (trigger.event.data.target or trigger.event.data.service_data or {}) %}
+        {% set eid = (tgt.entity_id if tgt is mapping else (tgt.entity_id | default([]))) %}
+        {% set ids = eid if eid is iterable and eid is not string else [eid] %}
+        {{ 'scene.huskers_scarlet_theater' in ids
+           or 'scene.huskers_cream_theater' in ids
+           or 'scene.huskers_alternating_exterior' in ids
+           or 'scene.huskers_alternating_inverted_exterior' in ids }}
+  action:
+    - variables:
+        ids: >-
+          {% set tgt = (trigger.event.data.target or trigger.event.data.service_data or {}) %}
+          {% set eid = (tgt.entity_id if tgt is mapping else (tgt.entity_id | default([]))) %}
+          {% set list = eid if eid is iterable and eid is not string else [eid] %}
+          {{ list }}
+    - service: logbook.log
+      data:
+        name: 'Huskers'
+        message: >-
+          Scene activated: {{ ids | join(', ') }}
+        entity_id: "{{ ids[0] if ids|length>0 else '' }}"
+        domain: scene
+
+# --- Theater color change logging (hs_color) ---
+- id: huskers_debug_theater_color_change
+  alias: '[Huskers Debug] Theater color change'
+  mode: parallel
+  trigger:
+    - platform: state
+      entity_id:
+        - light.light_theater_left
+        - light.light_theater_right
+  condition:
+    - condition: template
+      value_template: >-
+        {{ trigger.to_state is not none and trigger.from_state is not none and
+           trigger.to_state.attributes.hs_color != trigger.from_state.attributes.hs_color }}
+  action:
+    - variables:
+        left: "{{ state_attr('light.light_theater_left','hs_color') }}"
+        right: "{{ state_attr('light.light_theater_right','hs_color') }}"
+    - service: logbook.log
+      data:
+        name: 'Huskers'
+        message: >-
+          Theater colors → Left: {{ left }} | Right: {{ right }}
+        entity_id: '{{ trigger.entity_id }}'
+        domain: light
+
+# --- Exterior brightness change logging (optional sanity) ---
+- id: huskers_debug_exterior_brightness_change
+  alias: '[Huskers Debug] Exterior brightness change'
+  mode: parallel
+  trigger:
+    - platform: state
+      entity_id:
+        - light.light_front_left
+        - light.light_front_right
+        - light.garage_l
+        - light.garage_c
+        - light.garage_r
+  condition:
+    - condition: template
+      value_template: >-
+        {{ trigger.to_state is not none and trigger.from_state is not none and
+           trigger.to_state.attributes.brightness != trigger.from_state.attributes.brightness }}
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers'
+        message: >-
+          {{ state_attr(trigger.entity_id,'friendly_name') or trigger.entity_id }} brightness: {{ state_attr(trigger.entity_id,'brightness') }}
+        entity_id: '{{ trigger.entity_id }}'
+        domain: light
