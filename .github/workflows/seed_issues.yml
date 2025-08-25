@@ -24,7 +24,6 @@ on:
         required: false
         default: 'false'
 
-# permissions only affect GITHUB_TOKEN; the PAT in github-token isn't restricted by this block
 permissions:
   contents: write
   issues: write
@@ -38,12 +37,11 @@ jobs:
       - name: Seed issues from plan
         uses: actions/github-script@v7
         with:
-          # PAT secret with scopes: repo, project, read:org
-          github-token: ${{ secrets.ISSUES_TOKEN }}
+          # If you have a PAT, you can use: ${{ secrets.ISSUES_TOKEN }}
+          github-token: ${{ github.token }}
           script: |
+            // github-script exposes: core, github, context
             const fs = require('fs');
-            const core = require('@actions/core');
-            const {context, github} = require('@actions/github');
 
             const planPath = core.getInput('plan_path');
             const PROJECT_ID = core.getInput('project_id') || '';
@@ -64,8 +62,7 @@ jobs:
             }
             const md = fs.readFileSync(planPath, 'utf8');
 
-            // --- Parse the markdown into issue objects ---
-            // Split on "## Issue: <title>"
+            // Parse "## Issue:" blocks
             const blocks = md.split(/\n##\s+Issue:\s+/).slice(1);
             if (!blocks.length) {
               core.setFailed('No "## Issue:" blocks found in the plan.');
@@ -82,7 +79,20 @@ jobs:
                 return m ? m[1].trim() : '';
               };
 
+              const section = (name) => {
+                const re = new RegExp(`\\n###\\s+${name}\\s*\\n([\\s\\S]*?)(?:\\n###\\s+|\\n---|\\n##\\s+Issue:|$)`);
+                const m = rest.match(re);
+                return m ? m[1].trim() : '';
+              };
+
+              const checklist = (txt) => !txt ? [] :
+                txt.split('\n')
+                  .map(l=>l.trim())
+                  .filter(l=>/^-\s*\[[ xX]\]\s+/.test(l))
+                  .map(l=>l.replace(/^\-\s*\[[ xX]\]\s*/,'').trim());
+
               let branch = field('Branch').replace(/`/g,'').trim();
+
               const labelsLine = field('Labels');
               let labels = [];
               if (labelsLine) {
@@ -90,16 +100,8 @@ jobs:
                 labels = (backticked.length ? backticked : labelsLine.split(','))
                   .map(s=>s.trim()).filter(Boolean);
               }
-              const milestoneTitle = field('Milestone');
 
-              const section = (name) => {
-                const re = new RegExp(`\\n###\\s+${name}\\s*\\n([\\s\\S]*?)(?:\\n###\\s+|\\n---|\\n##\\s+Issue:|$)`);
-                const m = rest.match(re);
-                return m ? m[1].trim() : '';
-              };
-              const checklist = (txt) => !txt ? [] :
-                txt.split('\n').map(l=>l.trim()).filter(l=>/^-\s*\[[ xX]\]\s+/.test(l))
-                  .map(l=>l.replace(/^\-\s*\[[ xX]\]\s*/,'').trim());
+              const milestoneTitle = field('Milestone');
 
               return {
                 title,
@@ -116,12 +118,9 @@ jobs:
             for (const it of issues) core.info(JSON.stringify(it, null, 2));
             core.endGroup();
 
-            // --- Helpers ---
+            // Helpers
             async function ensureLabel(name) {
-              try {
-                await github.rest.issues.getLabel({ owner, repo, name });
-                return;
-              } catch {}
+              try { await github.rest.issues.getLabel({ owner, repo, name }); return; } catch {}
               if (DRY_RUN) { core.info(`[dry-run] create label: ${name}`); return; }
               await github.rest.issues.createLabel({ owner, repo, name, color: 'ededed' });
               core.info(`Created label: ${name}`);
@@ -170,11 +169,11 @@ jobs:
                 );
                 core.info(`Linked to Project ${PROJECT_ID}`);
               } catch (e) {
-                core.warning(`Project link failed (possibly already linked): ${e.message}`);
+                core.warning(`Project link failed (possibly already linked or token lacks access): ${e.message}`);
               }
             }
 
-            // --- Execute ---
+            // Execute
             for (const def of issues) {
               core.startGroup(def.title);
 
@@ -194,7 +193,8 @@ jobs:
                 if (DRY_RUN) { core.info(`[dry-run] create issue: ${def.title}`); core.endGroup(); continue; }
                 const { data } = await github.rest.issues.create({
                   owner, repo,
-                  title: def.title, body,
+                  title: def.title,
+                  body,
                   labels: def.labels,
                   milestone
                 });
