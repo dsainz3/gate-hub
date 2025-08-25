@@ -1,17 +1,16 @@
-script:
-  # Example only; the full content from your message should be placed here.
-  huskers_led_gameday_start:
-    alias: Start Game-Day Effect
-    mode: single
-    sequence:
-      - service: scene.create
-        data:
-          scene_id: huskers_outdoor_pre_gameday
-          snapshot_entities:
-            - light.permanent_outdoor_lights
-      - service: light.turn_on
-        target:
-          entity_id: light.permanent_outdoor_lights
-        data:
-          effect: LED_Huskers
-  # ... include the rest of your scripts here identically formatted
+# Example only; the full content from your message should be placed here.
+huskers_led_gameday_start:
+  alias: Start Game-Day Effect
+  mode: single
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: huskers_outdoor_pre_gameday
+        snapshot_entities:
+          - light.permanent_outdoor_lights
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Huskers
+# ... include the rest of your scripts here identically formatted
