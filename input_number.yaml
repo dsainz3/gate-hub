@@ -10,17 +10,12 @@ huskers_opponent_score:
   max: 100
   step: 1
   mode: box
-hail_varsity_bpm:
-  name: Hail Varsity BPM
+# Hail Varsity BPM (adjust to the tempo you prefer)
+huskers_hail_varsity_bpm:
+  name: Huskers Hail Varsity BPM
+  unit_of_measurement: bpm
   min: 60
   max: 220
   step: 1
   mode: slider
-  icon: mdi:metronome
-beats_per_color:
-  name: Beats Per Color
-  min: 1
-  max: 16
-  step: 1
-  mode: slider
-  icon: mdi:palette
+  initial: 156

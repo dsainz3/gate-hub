@@ -255,10 +255,16 @@
       entity_id: sensor.huskers_our_score
   condition:
     - condition: template
-      value_template: '{{ (trigger.to_state.state | int(0)) > (trigger.from_state.state
-        | int(0)) }}'
+      value_template: >-
+        {{ (trigger.to_state.state | int(0)) >
+           (trigger.from_state.state | int(0)) }}
   action:
-    - service: script.huskers_touchdown_burst
+    - action: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+
 - id: huskers_exterior_alternating_loop
   alias: 'Huskers: Exterior Alternating Loop (Start)'
   mode: restart
