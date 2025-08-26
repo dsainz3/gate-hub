@@ -14,7 +14,8 @@ huskers_theater_show_start:
   sequence:
     - variables:
         running_scripts: >-
-          {{ watch_scripts | select('truthy') | select('in', states | map(attribute='entity_id') | list)
+          {{ watch_scripts | select('truthy')
+             | select('in', states | map(attribute='entity_id') | list)
              | select('equalto','on', attribute='state') | list }}
     - service: input_text.set_value
       target:
@@ -28,29 +29,59 @@ huskers_theater_show_start:
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
+
+    # 1) Instant starting colors: Left=Scarlet, Right=Cream
+    - parallel:
+        - service: light.turn_on
+          target:
+            entity_id: light.light_theater_left
+          data:
+            brightness: 255
+            hs_color: [355, 90]
+            transition: 0
+        - service: light.turn_on
+          target:
+            entity_id: light.light_theater_right
+          data:
+            brightness: 255
+            hs_color: [48, 12]
+            transition: 0
+
+    # 2) Alternate every 3s with 3s fades until stopped
     - repeat:
         while: '{{ true }}'
         sequence:
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { brightness: 255, hs_color: [355, 90], transition: 3 }
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { brightness: 255, hs_color: [48, 12], transition: 3 }
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  brightness: 255
+                  hs_color: [48, 12]
+                  transition: 3
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  brightness: 255
+                  hs_color: [355, 90]
+                  transition: 3
           - delay: '00:00:03'
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { brightness: 255, hs_color: [48, 12], transition: 3 }
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { brightness: 255, hs_color: [355, 90], transition: 3 }
-          - delay: '00:00:03'
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_left }
-            data: { brightness: 255, hs_color: [355, 90], transition: 3 }
-          - service: light.turn_on
-            target: { entity_id: light.light_theater_right }
-            data: { brightness: 255, hs_color: [48, 12], transition: 3 }
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  brightness: 255
+                  hs_color: [355, 90]
+                  transition: 3
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  brightness: 255
+                  hs_color: [48, 12]
+                  transition: 3
           - delay: '00:00:03'
 
 # --- Theater Show (Stop) ---
