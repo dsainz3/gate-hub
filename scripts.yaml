@@ -126,13 +126,80 @@ huskers_theater_show_stop:
 # --- Exterior Show (Start) ---
 huskers_exterior_show_start:
   alias: 'Huskers: Exterior Show (Start)'
-  mode: single
+  mode: restart
+  variables:
+    snap_id: huskers_exterior_pre_show
   sequence:
-    - action: scene.turn_on
-      target:
-        entity_id: scene.scene_huskers_alternating_exterior
+    # 1) Snapshot current state
+    - service: scene.create
       data:
-        transition: 2
+        scene_id: '{{ snap_id }}'
+        snapshot_entities:
+          - light.light_front_left
+          - light.light_front_right
+          - light.garage_l
+          - light.garage_c
+          - light.garage_r
+
+    # 2) Instant start colors (no transition)
+    #    FL, GL, GR = scarlet ; FR, GC = cream
+    - parallel:
+        - service: light.turn_on
+          target: { entity_id: light.light_front_left }
+          data: { brightness: 255, hs_color: [355, 90] }
+        - service: light.turn_on
+          target: { entity_id: light.light_front_right }
+          data: { brightness: 255, hs_color: [48, 12] }
+        - service: light.turn_on
+          target: { entity_id: light.garage_l }
+          data: { brightness: 255, hs_color: [355, 90] }
+        - service: light.turn_on
+          target: { entity_id: light.garage_c }
+          data: { brightness: 255, hs_color: [48, 12] }
+        - service: light.turn_on
+          target: { entity_id: light.garage_r }
+          data: { brightness: 255, hs_color: [355, 90] }
+
+    # 3) Rotate every 3s until stopped
+    - repeat:
+        while: '{{ true }}'
+        sequence:
+          - delay: '00:00:03'
+          # invert: FL/GL/GR = cream ; FR/GC = scarlet
+          - parallel:
+              - service: light.turn_on
+                target: { entity_id: light.light_front_left }
+                data: { brightness: 255, hs_color: [48, 12] }
+              - service: light.turn_on
+                target: { entity_id: light.light_front_right }
+                data: { brightness: 255, hs_color: [355, 90] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_l }
+                data: { brightness: 255, hs_color: [48, 12] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_c }
+                data: { brightness: 255, hs_color: [355, 90] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_r }
+                data: { brightness: 255, hs_color: [48, 12] }
+          - delay: '00:00:03'
+          # back to original map
+          - parallel:
+              - service: light.turn_on
+                target: { entity_id: light.light_front_left }
+                data: { brightness: 255, hs_color: [355, 90] }
+              - service: light.turn_on
+                target: { entity_id: light.light_front_right }
+                data: { brightness: 255, hs_color: [48, 12] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_l }
+                data: { brightness: 255, hs_color: [355, 90] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_c }
+                data: { brightness: 255, hs_color: [48, 12] }
+              - service: light.turn_on
+                target: { entity_id: light.garage_r }
+                data: { brightness: 255, hs_color: [355, 90] }
 
 huskers_exterior_show_stop:
   alias: 'Huskers: Exterior Show (Stop)'
@@ -140,7 +207,7 @@ huskers_exterior_show_stop:
   variables:
     snap_id: huskers_exterior_pre_show
   sequence:
-    # 1) Turn off the loop toggle so the alternating automation quits
+    # 1) Turn off loop toggle so any automation quits
     - choose:
         - conditions:
             - condition: state
@@ -246,7 +313,8 @@ huskers_led_stop:
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
+              value_template: >-
+                {{ states('scene.' ~ snapshot_id) != 'unknown' }}
           sequence:
             - service: scene.turn_on
               target: { entity_id: 'scene.{{ snapshot_id }}' }
@@ -256,6 +324,7 @@ huskers_led_stop:
               data: { entity_id: 'scene.{{ snapshot_id }}' }
       default: []
 
+# --- BPM Bursts (Scarlet/Cream only) ---
 huskers_td_burst_bpm_theater:
   alias: 'Huskers: TD Burst BPM (Theater)'
   mode: restart
@@ -267,8 +336,6 @@ huskers_td_burst_bpm_theater:
     pulse_s: '{{ (beat_s * pulse_ratio) | float }}'
     rest_s: '{{ (beat_s * (1 - pulse_ratio)) | float }}'
     beats: 8
-    scar: [355, 90]
-    cream: [48, 12]
     snap_id: huskers_theater_burst_pre
   sequence:
     - service: scene.create
@@ -290,13 +357,13 @@ huskers_td_burst_bpm_theater:
                           entity_id: light.light_theater_left
                         data:
                           brightness: 255
-                          hs_color: '{{ scar }}'
+                          hs_color: [355, 90]
                       - service: light.turn_on
                         target:
                           entity_id: light.light_theater_right
                         data:
                           brightness: 255
-                          hs_color: '{{ cream }}'
+                          hs_color: [48, 12]
             default:
               - parallel:
                   - service: light.turn_on
@@ -304,13 +371,13 @@ huskers_td_burst_bpm_theater:
                       entity_id: light.light_theater_left
                     data:
                       brightness: 255
-                      hs_color: '{{ cream }}'
+                      hs_color: [48, 12]
                   - service: light.turn_on
                     target:
                       entity_id: light.light_theater_right
                     data:
                       brightness: 255
-                      hs_color: '{{ scar }}'
+                      hs_color: [355, 90]
           - delay: '{{ pulse_s }}'
           - service: scene.turn_on
             target:
@@ -334,8 +401,6 @@ huskers_td_burst_bpm_exterior:
     pulse_s: '{{ (beat_s * pulse_ratio) | float }}'
     rest_s: '{{ (beat_s * (1 - pulse_ratio)) | float }}'
     beats: 8
-    scar: [355, 90]
-    cream: [48, 12]
     snap_id: huskers_exterior_burst_pre
   sequence:
     - service: scene.create
@@ -360,31 +425,31 @@ huskers_td_burst_bpm_exterior:
                           entity_id: light.light_front_left
                         data:
                           brightness: 255
-                          hs_color: '{{ scar }}'
+                          hs_color: [355, 90]
                       - service: light.turn_on
                         target:
                           entity_id: light.light_front_right
                         data:
                           brightness: 255
-                          hs_color: '{{ cream }}'
+                          hs_color: [48, 12]
                       - service: light.turn_on
                         target:
                           entity_id: light.garage_l
                         data:
                           brightness: 255
-                          hs_color: '{{ scar }}'
+                          hs_color: [355, 90]
                       - service: light.turn_on
                         target:
                           entity_id: light.garage_c
                         data:
                           brightness: 255
-                          hs_color: '{{ cream }}'
+                          hs_color: [48, 12]
                       - service: light.turn_on
                         target:
                           entity_id: light.garage_r
                         data:
                           brightness: 255
-                          hs_color: '{{ scar }}'
+                          hs_color: [355, 90]
             default:
               - parallel:
                   - service: light.turn_on
@@ -392,31 +457,31 @@ huskers_td_burst_bpm_exterior:
                       entity_id: light.light_front_left
                     data:
                       brightness: 255
-                      hs_color: '{{ cream }}'
+                      hs_color: [48, 12]
                   - service: light.turn_on
                     target:
                       entity_id: light.light_front_right
                     data:
                       brightness: 255
-                      hs_color: '{{ scar }}'
+                      hs_color: [355, 90]
                   - service: light.turn_on
                     target:
                       entity_id: light.garage_l
                     data:
                       brightness: 255
-                      hs_color: '{{ cream }}'
+                      hs_color: [48, 12]
                   - service: light.turn_on
                     target:
                       entity_id: light.garage_c
                     data:
                       brightness: 255
-                      hs_color: '{{ scar }}'
+                      hs_color: [355, 90]
                   - service: light.turn_on
                     target:
                       entity_id: light.garage_r
                     data:
                       brightness: 255
-                      hs_color: '{{ cream }}'
+                      hs_color: [48, 12]
           - delay: '{{ pulse_s }}'
           - service: scene.turn_on
             target:
