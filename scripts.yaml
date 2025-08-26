@@ -101,9 +101,9 @@ huskers_exterior_show_start:
   alias: 'Huskers: Exterior Show (Start)'
   mode: single
   sequence:
-    - service: scene.turn_on
+    - action: scene.turn_on
       target:
-        entity_id: scene.huskers_alternating_exterior
+        entity_id: scene.scene_huskers_alternating_exterior
       data:
         transition: 2
 
