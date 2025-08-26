@@ -493,3 +493,23 @@ huskers_td_burst_bpm_exterior:
             - service: scene.delete
               data:
                 entity_id: 'scene.{{ snap_id }}'
+huskers_all_events_manual:
+  alias: 'Huskers: Run All (Manual)'
+  mode: single
+  sequence:
+    # Pregame showtime (game look + both shows)
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_led_gameday_start
+          - script.huskers_theater_show_start
+          - script.huskers_exterior_show_start
+    # Give the show a moment to come up before bursts
+    - delay: '00:00:05'
+    # Touchdown bursts: theater + exterior (BPM) + LED_Huskers overlay
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+          - script.huskers_led_td_burst
