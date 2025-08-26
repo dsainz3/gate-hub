@@ -11,3 +11,7 @@ huskers_debug_notifications:
   name: 'Huskers Debug: Persistent Notifications'
   icon: mdi:message-alert
   initial: true
+
+huskers_test_mode:
+  name: Huskers Test Mode
+  icon: mdi:test-tube
