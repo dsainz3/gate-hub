@@ -268,7 +268,6 @@
       to: 'on'
   variables:
     delay_seconds: 20
-  condition: []
   action:
     - repeat:
         while:
@@ -276,10 +275,20 @@
             entity_id: input_boolean.huskers_exterior_color_show
             state: 'on'
         sequence:
-          - service: script.huskers_exterior_alternating_start
+          - action: scene.turn_on
+            target:
+              entity_id: scene.scene_huskers_alternating_exterior
+            data:
+              transition: 3
           - delay: '{{ delay_seconds }}'
-          - service: script.huskers_exterior_alternating_inverted_start
+          - action: scene.turn_on
+            target:
+              entity_id: scene.scene_huskers_alternating_exterior_inverted
+            data:
+              transition: 3
           - delay: '{{ delay_seconds }}'
+
+# REPLACE 'huskers_exterior_show_auto_start' with this:
 - id: huskers_exterior_show_auto_start
   alias: 'Huskers: Exterior Show Auto Start'
   mode: single
@@ -289,7 +298,11 @@
       below: 21
       above: 19
   action:
-    - action: script.huskers_exterior_show_start
+    - action: script.turn_on
+      target:
+        entity_id: script.huskers_exterior_show_start
+
+# REPLACE 'huskers_exterior_show_auto_stop' with this:
 - id: huskers_exterior_show_auto_stop
   alias: 'Huskers: Exterior Show Auto Stop'
   mode: single
@@ -299,11 +312,15 @@
       from: 'on'
       to: 'off'
   action:
-    - action: script.huskers_exterior_show_stop
-
+    - action: script.turn_on
+      target:
+        entity_id: script.huskers_exterior_show_stop
+# KEEP ONLY ONE 'huskers_exterior_show_activator' (delete the duplicate).
+# REPLACE the remaining one with this:
 - id: huskers_exterior_show_activator
   alias: 'Huskers Exterior Light Show - Start'
-  description: 'Triggers the Husker exterior light show manually or via schedule'
+  description: >
+    Triggers the Husker exterior light show manually or via schedule.
   mode: single
   trigger:
     - platform: state
@@ -311,9 +328,10 @@
       to: 'on'
     - platform: time
       at: '18:00:00'
-  condition: []
   action:
-    - action: script.huskers_exterior_show_start
+    - action: script.turn_on
+      target:
+        entity_id: script.huskers_exterior_show_start
 
 - id: huskers_exterior_show_activator
   alias: 'Huskers Exterior Light Show - Start'
@@ -335,37 +353,46 @@
 # =========================
 
 # --- Script START logging ---
-- id: huskers_debug_script_start
-  alias: '[Huskers Debug] Script start'
+# REPLACE '[Huskers Debug] Scene activated' with this (entity_ids fixed):
+- id: huskers_debug_scene_activate
+  alias: '[Huskers Debug] Scene activated'
   mode: parallel
   trigger:
-    - platform: state
-      entity_id:
-        - script.huskers_theater_show_start
-        - script.huskers_theater_show_stop
-        - script.huskers_exterior_show_start
-        - script.huskers_exterior_show_stop
-        - script.huskers_touchdown_burst
-        - script.huskers_exterior_touchdown_burst
-        - script.huskers_test_score_update
-      from: 'off'
-      to: 'on'
+    - platform: event
+      event_type: call_service
+      event_data:
+        domain: scene
+        service: turn_on
+  condition:
+    - condition: template
+      value_template: >-
+        {% set tgt = (trigger.event.data.target
+           or trigger.event.data.service_data or {}) %}
+        {% set eid = tgt.entity_id if tgt is mapping
+           else (tgt.entity_id | default([])) %}
+        {% set ids = eid if eid is iterable and eid is not string
+           else [eid] %}
+        {{ 'scene.scene_huskers_scarlet_theater' in ids
+           or 'scene.scene_huskers_cream_theater' in ids
+           or 'scene.scene_huskers_alternating_exterior' in ids
+           or 'scene.scene_huskers_alternating_exterior_inverted' in ids }}
   action:
+    - variables:
+        ids: >-
+          {% set tgt = (trigger.event.data.target
+             or trigger.event.data.service_data or {}) %}
+          {% set eid = tgt.entity_id if tgt is mapping
+             else (tgt.entity_id | default([])) %}
+          {% set list = eid if eid is iterable and eid is not string
+             else [eid] %}
+          {{ list }}
     - service: logbook.log
       data:
         name: 'Huskers'
         message: >-
-          Script started: {{ trigger.entity_id }} ({{ state_attr(trigger.entity_id,'friendly_name') or 'unknown' }})
-        entity_id: '{{ trigger.entity_id }}'
-        domain: script
-    - choose:
-        - conditions: "{{ is_state('input_boolean.huskers_debug_notifications','on') }}"
-          sequence:
-            - service: persistent_notification.create
-              data:
-                title: 'Huskers Debug'
-                message: >-
-                  ▶️ Started: {{ state_attr(trigger.entity_id,'friendly_name') or trigger.entity_id }}
+          Scene activated: {{ ids | join(', ') }}
+        entity_id: "{{ ids[0] if ids|length>0 else '' }}"
+        domain: scene
 
 # --- Script STOP logging ---
 - id: huskers_debug_script_stop
