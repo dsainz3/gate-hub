@@ -123,14 +123,12 @@ huskers_theater_show_stop:
       data:
         value: ''
 
-# --- Exterior Show (Start) ---
 huskers_exterior_show_start:
   alias: 'Huskers: Exterior Show (Start)'
   mode: restart
   variables:
     snap_id: huskers_exterior_pre_show
   sequence:
-    # 1) Snapshot current state
     - service: scene.create
       data:
         scene_id: '{{ snap_id }}'
@@ -141,66 +139,316 @@ huskers_exterior_show_start:
           - light.garage_c
           - light.garage_r
 
-    # 2) Instant start colors (no transition)
-    #    FL, GL, GR = scarlet ; FR, GC = cream
+    # Instant start: FL/GL/GR=scarlet, FR/GC=cream
     - parallel:
-        - service: light.turn_on
-          target: { entity_id: light.light_front_left }
-          data: { brightness: 255, hs_color: [355, 90] }
-        - service: light.turn_on
-          target: { entity_id: light.light_front_right }
-          data: { brightness: 255, hs_color: [48, 12] }
-        - service: light.turn_on
-          target: { entity_id: light.garage_l }
-          data: { brightness: 255, hs_color: [355, 90] }
-        - service: light.turn_on
-          target: { entity_id: light.garage_c }
-          data: { brightness: 255, hs_color: [48, 12] }
-        - service: light.turn_on
-          target: { entity_id: light.garage_r }
-          data: { brightness: 255, hs_color: [355, 90] }
+        # Front Left
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >-
+                    {{ 'hs' in (state_attr('light.light_front_left',
+                    'supported_color_modes') or [])
+                       or 'xy' in (state_attr('light.light_front_left',
+                    'supported_color_modes') or [])
+                       or 'rgb' in (state_attr('light.light_front_left',
+                    'supported_color_modes') or []) }}
+              sequence:
+                - service: light.turn_on
+                  target: { entity_id: light.light_front_left }
+                  data: { brightness: 255, hs_color: [355, 90] }
+          default:
+            - service: light.turn_on
+              target: { entity_id: light.light_front_left }
+              data: { brightness: 255 }
+        # Front Right
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >-
+                    {{ 'hs' in (state_attr('light.light_front_right',
+                    'supported_color_modes') or [])
+                       or 'xy' in (state_attr('light.light_front_right',
+                    'supported_color_modes') or [])
+                       or 'rgb' in (state_attr('light.light_front_right',
+                    'supported_color_modes') or []) }}
+              sequence:
+                - service: light.turn_on
+                  target: { entity_id: light.light_front_right }
+                  data: { brightness: 255, hs_color: [48, 12] }
+          default:
+            - service: light.turn_on
+              target: { entity_id: light.light_front_right }
+              data: { brightness: 128 }
+        # Garage L
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >-
+                    {{ 'hs' in (state_attr('light.garage_l',
+                    'supported_color_modes') or [])
+                       or 'xy' in (state_attr('light.garage_l',
+                    'supported_color_modes') or [])
+                       or 'rgb' in (state_attr('light.garage_l',
+                    'supported_color_modes') or []) }}
+              sequence:
+                - service: light.turn_on
+                  target: { entity_id: light.garage_l }
+                  data: { brightness: 255, hs_color: [355, 90] }
+          default:
+            - service: light.turn_on
+              target: { entity_id: light.garage_l }
+              data: { brightness: 255 }
+        # Garage C
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >-
+                    {{ 'hs' in (state_attr('light.garage_c',
+                    'supported_color_modes') or [])
+                       or 'xy' in (state_attr('light.garage_c',
+                    'supported_color_modes') or [])
+                       or 'rgb' in (state_attr('light.garage_c',
+                    'supported_color_modes') or []) }}
+              sequence:
+                - service: light.turn_on
+                  target: { entity_id: light.garage_c }
+                  data: { brightness: 255, hs_color: [48, 12] }
+          default:
+            - service: light.turn_on
+              target: { entity_id: light.garage_c }
+              data: { brightness: 128 }
+        # Garage R
+        - choose:
+            - conditions:
+                - condition: template
+                  value_template: >-
+                    {{ 'hs' in (state_attr('light.garage_r',
+                    'supported_color_modes') or [])
+                       or 'xy' in (state_attr('light.garage_r',
+                    'supported_color_modes') or [])
+                       or 'rgb' in (state_attr('light.garage_r',
+                    'supported_color_modes') or []) }}
+              sequence:
+                - service: light.turn_on
+                  target: { entity_id: light.garage_r }
+                  data: { brightness: 255, hs_color: [355, 90] }
+          default:
+            - service: light.turn_on
+              target: { entity_id: light.garage_r }
+              data: { brightness: 255 }
 
-    # 3) Rotate every 3s until stopped
+    # Alternate every 3s until stopped
     - repeat:
         while: '{{ true }}'
         sequence:
           - delay: '00:00:03'
-          # invert: FL/GL/GR = cream ; FR/GC = scarlet
+          # Invert: FL/GL/GR=cream, FR/GC=scarlet
           - parallel:
-              - service: light.turn_on
-                target: { entity_id: light.light_front_left }
-                data: { brightness: 255, hs_color: [48, 12] }
-              - service: light.turn_on
-                target: { entity_id: light.light_front_right }
-                data: { brightness: 255, hs_color: [355, 90] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_l }
-                data: { brightness: 255, hs_color: [48, 12] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_c }
-                data: { brightness: 255, hs_color: [355, 90] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_r }
-                data: { brightness: 255, hs_color: [48, 12] }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.light_front_left }
+                        data: { brightness: 255, hs_color: [48, 12] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.light_front_left }
+                    data: { brightness: 128 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.light_front_right }
+                        data: { brightness: 255, hs_color: [355, 90] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.light_front_right }
+                    data: { brightness: 255 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_l }
+                        data: { brightness: 255, hs_color: [48, 12] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_l }
+                    data: { brightness: 128 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_c }
+                        data: { brightness: 255, hs_color: [355, 90] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_c }
+                    data: { brightness: 255 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_r }
+                        data: { brightness: 255, hs_color: [48, 12] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_r }
+                    data: { brightness: 128 }
           - delay: '00:00:03'
-          # back to original map
+          # Back to original mapping
           - parallel:
-              - service: light.turn_on
-                target: { entity_id: light.light_front_left }
-                data: { brightness: 255, hs_color: [355, 90] }
-              - service: light.turn_on
-                target: { entity_id: light.light_front_right }
-                data: { brightness: 255, hs_color: [48, 12] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_l }
-                data: { brightness: 255, hs_color: [355, 90] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_c }
-                data: { brightness: 255, hs_color: [48, 12] }
-              - service: light.turn_on
-                target: { entity_id: light.garage_r }
-                data: { brightness: 255, hs_color: [355, 90] }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.light_front_left }
+                        data: { brightness: 255, hs_color: [355, 90] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.light_front_left }
+                    data: { brightness: 255 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.light_front_right }
+                        data: { brightness: 255, hs_color: [48, 12] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.light_front_right }
+                    data: { brightness: 128 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_l }
+                        data: { brightness: 255, hs_color: [355, 90] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_l }
+                    data: { brightness: 255 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_c }
+                        data: { brightness: 255, hs_color: [48, 12] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_c }
+                    data: { brightness: 128 }
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_r }
+                        data: { brightness: 255, hs_color: [355, 90] }
+                default:
+                  - service: light.turn_on
+                    target: { entity_id: light.garage_r }
+                    data: { brightness: 255 }
 
+# --- Exterior Show (Stop) ---
 huskers_exterior_show_stop:
   alias: 'Huskers: Exterior Show (Stop)'
   mode: single
@@ -415,73 +663,116 @@ huskers_td_burst_bpm_exterior:
     - repeat:
         count: '{{ beats }}'
         sequence:
-          # Odd beat → FL/GL/GR=Scarlet, FR/GC=Cream; even → inverted
-          - choose:
-              - conditions: '{{ (repeat.index | int(1)) % 2 == 1 }}'
-                sequence:
-                  - parallel:
+          - parallel:
+              # FL
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_left',
+                          'supported_color_modes') or []) }}
+                    sequence:
                       - service: light.turn_on
                         target:
                           entity_id: light.light_front_left
-                        data:
-                          brightness: 255
-                          hs_color: [355, 90]
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.light_front_right
-                        data:
-                          brightness: 255
-                          hs_color: [48, 12]
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.garage_l
-                        data:
-                          brightness: 255
-                          hs_color: [355, 90]
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.garage_c
-                        data:
-                          brightness: 255
-                          hs_color: [48, 12]
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.garage_r
-                        data:
-                          brightness: 255
-                          hs_color: [355, 90]
-            default:
-              - parallel:
+                        data: { brightness: 255, hs_color: [0, 0] }
+                default:
                   - service: light.turn_on
                     target:
                       entity_id: light.light_front_left
-                    data:
-                      brightness: 255
-                      hs_color: [48, 12]
+                    data: { brightness: 255 }
+              # FR
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.light_front_right',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target:
+                          entity_id: light.light_front_right
+                        data: { brightness: 255, hs_color: [0, 0] }
+                default:
                   - service: light.turn_on
                     target:
                       entity_id: light.light_front_right
-                    data:
-                      brightness: 255
-                      hs_color: [355, 90]
+                    data: { brightness: 255 }
+              # GL
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_l',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_l }
+                        data: { brightness: 255, hs_color: [0, 0] }
+                default:
                   - service: light.turn_on
-                    target:
-                      entity_id: light.garage_l
-                    data:
-                      brightness: 255
-                      hs_color: [48, 12]
+                    target: { entity_id: light.garage_l }
+                    data: { brightness: 255 }
+              # GC
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_c',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_c }
+                        data: { brightness: 255, hs_color: [0, 0] }
+                default:
                   - service: light.turn_on
-                    target:
-                      entity_id: light.garage_c
-                    data:
-                      brightness: 255
-                      hs_color: [355, 90]
+                    target: { entity_id: light.garage_c }
+                    data: { brightness: 255 }
+              # GR
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ 'hs' in (state_attr('light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'xy' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or [])
+                             or 'rgb' in (state_attr(
+                          'light.garage_r',
+                          'supported_color_modes') or []) }}
+                    sequence:
+                      - service: light.turn_on
+                        target: { entity_id: light.garage_r }
+                        data: { brightness: 255, hs_color: [0, 0] }
+                default:
                   - service: light.turn_on
-                    target:
-                      entity_id: light.garage_r
-                    data:
-                      brightness: 255
-                      hs_color: [48, 12]
+                    target: { entity_id: light.garage_r }
+                    data: { brightness: 255 }
           - delay: '{{ pulse_s }}'
           - service: scene.turn_on
             target:
