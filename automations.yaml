@@ -78,3 +78,98 @@
         entity_id:
           - script.huskers_theater_show_stop
           - script.huskers_exterior_show_stop
+# =========================
+# Evening / Night / Early AM
+# =========================
+
+# Sunset → mainfloor 60%, front+garage 1%, permanent LED 50%
+- id: evening_lights_at_sunset
+  alias: 'Evening Lights at Sunset'
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunset
+  action:
+    - parallel:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+          data:
+            brightness_pct: 60
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.garage_l
+              - light.garage_c
+              - light.garage_r
+          data:
+            brightness_pct: 1
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 50
+
+# Midnight → mainfloor OFF, front+garage OFF, permanent LED 20%
+- id: night_lights_at_midnight
+  alias: 'Night Lights at Midnight'
+  mode: single
+  trigger:
+    - platform: time
+      at: '00:00:00'
+  action:
+    - parallel:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.garage_l
+              - light.garage_c
+              - light.garage_r
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 20
+
+# 3:30 AM → mainfloor 10%, front+garage 1%, permanent LED 50%
+- id: early_morning_lights_0330
+  alias: 'Early Morning Lights (03:30)'
+  mode: single
+  trigger:
+    - platform: time
+      at: '03:30:00'
+  action:
+    - parallel:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+          data:
+            brightness_pct: 10
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.garage_l
+              - light.garage_c
+              - light.garage_r
+          data:
+            brightness_pct: 1
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 50
