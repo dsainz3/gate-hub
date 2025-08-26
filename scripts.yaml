@@ -452,15 +452,51 @@ huskers_exterior_show_start:
 huskers_exterior_show_stop:
   alias: 'Huskers: Exterior Show (Stop)'
   mode: single
+  variables:
+    snap_id: huskers_exterior_pre_show
   sequence:
-    - service: light.turn_off
+    # 1) Turn off loop toggle so any automation quits
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.huskers_exterior_color_show
+              state: 'on'
+          sequence:
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.huskers_exterior_color_show
+
+    # 2) Kill the running start script (cancels the repeat loop)
+    - service: script.turn_off
       target:
-        entity_id:
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_l
-          - light.garage_c
-          - light.garage_r
+        entity_id: script.huskers_exterior_show_start
+    - delay: '00:00:01' # allow a tick for the loop to cancel
+
+    # 3) Restore snapshot if we have it; else, hard-off the five lights
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >-
+                {{ states('scene.' ~ snap_id) != 'unknown' }}
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: 'scene.{{ snap_id }}'
+              data:
+                transition: 0
+            - delay: '00:00:01'
+            - service: scene.delete
+              data:
+                entity_id: 'scene.{{ snap_id }}'
+      default:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.light_front_left
+              - light.light_front_right
+              - light.garage_l
+              - light.garage_c
+              - light.garage_r
 
 # --- Bursts ---
 huskers_touchdown_burst:
@@ -525,7 +561,8 @@ huskers_led_stop:
     - choose:
         - conditions:
             - condition: template
-              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
+              value_template: >-
+                {{ states('scene.' ~ snapshot_id) != 'unknown' }}
           sequence:
             - service: scene.turn_on
               target: { entity_id: 'scene.{{ snapshot_id }}' }
@@ -535,6 +572,7 @@ huskers_led_stop:
               data: { entity_id: 'scene.{{ snapshot_id }}' }
       default: []
 
+# --- BPM Bursts (Scarlet/Cream only) ---
 huskers_td_burst_bpm_theater:
   alias: 'Huskers: TD Burst BPM (Theater)'
   mode: restart
@@ -557,19 +595,37 @@ huskers_td_burst_bpm_theater:
     - repeat:
         count: '{{ beats }}'
         sequence:
-          - parallel:
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_left
-                data:
-                  brightness: 255
-                  hs_color: [0, 0]
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_right
-                data:
-                  brightness: 255
-                  hs_color: [0, 0]
+          # Odd beat → L=Scarlet, R=Cream; even → inverted
+          - choose:
+              - conditions: '{{ (repeat.index | int(1)) % 2 == 1 }}'
+                sequence:
+                  - parallel:
+                      - service: light.turn_on
+                        target:
+                          entity_id: light.light_theater_left
+                        data:
+                          brightness: 255
+                          hs_color: [355, 90]
+                      - service: light.turn_on
+                        target:
+                          entity_id: light.light_theater_right
+                        data:
+                          brightness: 255
+                          hs_color: [48, 12]
+            default:
+              - parallel:
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.light_theater_left
+                    data:
+                      brightness: 255
+                      hs_color: [48, 12]
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.light_theater_right
+                    data:
+                      brightness: 255
+                      hs_color: [355, 90]
           - delay: '{{ pulse_s }}'
           - service: scene.turn_on
             target:
@@ -728,3 +784,127 @@ huskers_td_burst_bpm_exterior:
             - service: scene.delete
               data:
                 entity_id: 'scene.{{ snap_id }}'
+huskers_all_events_manual:
+  alias: 'Huskers: Run All (Manual)'
+  mode: single
+  sequence:
+    # Pregame showtime (game look + both shows)
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_led_gameday_start
+          - script.huskers_theater_show_start
+          - script.huskers_exterior_show_start
+    # Give the show a moment to come up before bursts
+    - delay: '00:00:05'
+    # Touchdown bursts: theater + exterior (BPM) + LED_Huskers overlay
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+          - script.huskers_led_td_burst
+# Rehearse T-20: enable Test Mode, cross 22 → 20 to trigger showtime
+huskers_rehearse_tminus20:
+  alias: 'Huskers: Rehearse T-20'
+  mode: single
+  sequence:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_test_mode
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_kickoff_in_manual
+      data:
+        value: 22
+    - delay: '00:00:02'
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_kickoff_in_manual
+      data:
+        value: 20
+
+# Rehearse TD: bump the manual score by +1 to fire the burst
+huskers_rehearse_td:
+  alias: 'Huskers: Rehearse TD (+1)'
+  mode: single
+  sequence:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_test_mode
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_our_score_manual
+      data:
+        value: >-
+          {{ states('input_number.huskers_our_score_manual')|int(0) + 1 }}
+
+# Cleanup: stop theater/exterior shows and restore LEDs
+huskers_cleanup_all:
+  alias: 'Huskers: Cleanup (Stop All)'
+  mode: single
+  sequence:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_theater_show_stop
+          - script.huskers_exterior_show_stop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_led_stop
+# ---------------------------------------------------------
+# LED: TD Burst (snapshot → LED_Huskers → restore)
+# ---------------------------------------------------------
+huskers_led_td_burst:
+  alias: 'Huskers: LED TD Burst'
+  mode: restart
+  variables:
+    bpm: "{{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}"
+    beat_s: '{{ (60 / bpm) | float }}'
+    beats: 8
+    hold_s: '{{ (beat_s * beats) | float }}'
+    snap_id: huskers_led_td_pre
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: '{{ snap_id }}'
+        snapshot_entities:
+          - light.permanent_outdoor_lights
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Huskers
+    - delay:
+        seconds: '{{ hold_s | float(0) | round(0) }}'
+    - choose:
+        - conditions: "{{ states('scene.' ~ snap_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: 'scene.{{ snap_id }}'
+            - delay: '00:00:01'
+            - service: scene.delete
+              data:
+                entity_id: 'scene.{{ snap_id }}'
+
+# ---------------------------------------------------------
+# One-tap “Run All” for pre-game checking
+# ---------------------------------------------------------
+huskers_all_events_manual2:
+  alias: 'Huskers: Run All (Manual)'
+  mode: single
+  sequence:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_theater_show_start
+          - script.huskers_exterior_show_start
+          - script.huskers_led_gameday_start
+    - delay: '00:00:02'
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+          - script.huskers_led_td_burst
