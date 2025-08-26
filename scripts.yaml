@@ -561,3 +561,59 @@ huskers_cleanup_all:
     - service: script.turn_on
       target:
         entity_id: script.huskers_led_stop
+# ---------------------------------------------------------
+# LED: TD Burst (snapshot → LED_Huskers → restore)
+# ---------------------------------------------------------
+huskers_led_td_burst:
+  alias: 'Huskers: LED TD Burst'
+  mode: restart
+  variables:
+    bpm: "{{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}"
+    beat_s: '{{ (60 / bpm) | float }}'
+    beats: 8
+    hold_s: '{{ (beat_s * beats) | float }}'
+    snap_id: huskers_led_td_pre
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: '{{ snap_id }}'
+        snapshot_entities:
+          - light.permanent_outdoor_lights
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Huskers
+    - delay:
+        seconds: '{{ hold_s | float(0) | round(0) }}'
+    - choose:
+        - conditions: "{{ states('scene.' ~ snap_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: 'scene.{{ snap_id }}'
+            - delay: '00:00:01'
+            - service: scene.delete
+              data:
+                entity_id: 'scene.{{ snap_id }}'
+
+# ---------------------------------------------------------
+# One-tap “Run All” for pre-game checking
+# ---------------------------------------------------------
+huskers_all_events_manual2:
+  alias: 'Huskers: Run All (Manual)'
+  mode: single
+  sequence:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_theater_show_start
+          - script.huskers_exterior_show_start
+          - script.huskers_led_gameday_start
+    - delay: '00:00:02'
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+          - script.huskers_led_td_burst
