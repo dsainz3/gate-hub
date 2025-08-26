@@ -1,16 +1,12 @@
 # =========================
-# HUSKERS — GAME FLOW
+# HUSKERS — GAME FLOW (effective sensors)
 # =========================
-# NOTE:
-# - Replaces earlier auto-start/stop items like:
-#   huskers_theater_show_auto_start/_stop,
-#   huskers_exterior_show_auto_start/_stop.
-# - Uses sensor.huskers_kickoff_in_effective and
-#   sensor.huskers_our_score_effective (template proxies).
-# - Test mode: input_boolean.huskers_test_mode lets you rehearse without
-#   live sensors.
+# Uses:
+# - sensor.huskers_kickoff_in_effective
+# - sensor.huskers_our_score_effective
+# Test mode via input_boolean.huskers_test_mode.
 
-# T-20 minutes → start theater + exterior shows (+ LED game look)
+# T-20 → start theater + exterior shows + LED Gametime
 - id: huskers_pregame_tminus20_showtime
   alias: 'Huskers: Showtime at T-20'
   mode: single
@@ -20,7 +16,6 @@
       above: 19
       below: 21
   condition:
-    # Fire if real pregame is on OR you're in Test Mode
     - condition: or
       conditions:
         - condition: state
@@ -29,7 +24,7 @@
         - condition: state
           entity_id: input_boolean.huskers_test_mode
           state: 'on'
-    # Avoid needless restarts if either show isn't already running
+    # Avoid needless restarts if either show is already running
     - condition: template
       value_template: >-
         {{ is_state('script.huskers_theater_show_start','off')
@@ -42,7 +37,7 @@
           - script.huskers_exterior_show_start
           - script.huskers_led_gameday_start
 
-# Nebraska score increased → BPM scarlet/cream bursts
+# Nebraska score increased → BPM bursts + LED Huskers burst
 - id: huskers_td_burst_on_score
   alias: 'Huskers: TD Burst on Score'
   mode: single
@@ -62,6 +57,7 @@
         entity_id:
           - script.huskers_td_burst_bpm_theater
           - script.huskers_td_burst_bpm_exterior
+          - script.huskers_led_td_burst
 
 # Postgame → stop both shows and restore snapshots
 - id: huskers_postgame_cleanup
@@ -78,6 +74,7 @@
         entity_id:
           - script.huskers_theater_show_stop
           - script.huskers_exterior_show_stop
+
 # =========================
 # Evening / Night / Early AM
 # =========================
@@ -142,7 +139,7 @@
           data:
             brightness_pct: 20
 
-# 3:30 AM → mainfloor 10%, front+garage 1%, permanent LED 50%
+# 03:30 → mainfloor 10%, front+garage 1%, permanent LED 50%
 - id: early_morning_lights_0330
   alias: 'Early Morning Lights (03:30)'
   mode: single
@@ -173,3 +170,134 @@
             entity_id: light.permanent_outdoor_lights
           data:
             brightness_pct: 50
+
+# Monthly effect at midnight (kept as-is)
+- id: exterior_led_monthly_effect
+  alias: 'Exterior LED - Monthly Effect'
+  mode: single
+  trigger:
+    - platform: time
+      at: '00:00:00'
+  variables:
+    current_month: '{{ now().month }}'
+    monthly_effects:
+      1: LED-January
+      2: LED-February
+      3: LED-March
+      4: LED-April
+      5: BSMT-Patriotic
+      6: BSMT-Patriotic
+      7: BSMT-Patriotic
+      8: LED-August
+      9: LED-August
+      10: Halloween
+      11: LED-Thanksgiving
+      12: Christmas
+  action:
+    - variables:
+        target_effect: '{{ monthly_effects[current_month] }}'
+    - condition: template
+      value_template: >-
+        {{ target_effect in (state_attr('light.permanent_outdoor_lights',
+        'effect_list') or []) }}
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: '{{ target_effect }}'
+
+# Interior off 15 min after sunrise
+- id: interior_lights_sunrise_off
+  alias: 'Interior Lights Off - 15 Minutes After Sunrise'
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: '00:15:00'
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.sunroom_light
+          - light.livingroom_light
+          - light.diningroom_light
+
+# =========================
+# CORE / ENVIRONMENT
+# =========================
+
+# Humidor plug — ON >74°F, OFF <68°F (hysteresis)
+- id: humidor_plug_temp_control
+  alias: 'Humidor Plug – Temperature Control'
+  description: >-
+    Turn ON humidor plug when temp > 74°F; turn OFF when temp < 68°F.
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.hygrometer_humidor_temperature
+      above: 74
+    - platform: numeric_state
+      entity_id: sensor.hygrometer_humidor_temperature
+      below: 68
+  action:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometer_humidor_temperature
+              above: 74
+          sequence:
+            - condition: state
+              entity_id: switch.plug_humidor
+              state: 'off'
+            - service: switch.turn_on
+              target:
+                entity_id: switch.plug_humidor
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometer_humidor_temperature
+              below: 68
+          sequence:
+            - condition: state
+              entity_id: switch.plug_humidor
+              state: 'on'
+            - service: switch.turn_off
+              target:
+                entity_id: switch.plug_humidor
+
+# =========================
+# HUSKERS — DEBUG / PLACEHOLDERS
+# =========================
+
+- id: huskers_update_last_score_test
+  alias: 'Huskers: Update Last Score (Test)'
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: input_text.huskers_last_score
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – Update Last Score (Test)'
+        message: 'Placeholder: add actions here.'
+
+- id: huskers_react_to_test_score
+  alias: 'Huskers: React to Test Score'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.huskers_last_score_test
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – React to Test Score'
+        message: 'Placeholder: add actions here.'
+
+- id: huskers_new_item_notifier
+  alias: 'Huskers: New Item Notifier'
+  mode: single
+  trigger: []
+  action:
+    - service: logbook.log
+      data:
+        name: 'Huskers – New Item Notifier'
+        message: 'Placeholder: add triggers/actions.'
