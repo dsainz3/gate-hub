@@ -518,3 +518,55 @@
           {{ state_attr(trigger.entity_id,'friendly_name') or trigger.entity_id }} brightness: {{ state_attr(trigger.entity_id,'brightness') }}
         entity_id: '{{ trigger.entity_id }}'
         domain: light
+
+# =========================
+# HUSKERS — GAME FLOW
+# =========================
+
+# T-20 minutes → start theater + exterior shows (+ LED game look)
+- id: huskers_pregame_tminus20_showtime
+  alias: 'Huskers: Showtime at T-20'
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.huskers_kickoff_in
+      above: 19
+      below: 21
+  condition:
+    # Only fire during the computed pregame window
+    - condition: state
+      entity_id: binary_sensor.huskers_pregame_window
+      state: 'on'
+    # Avoid needless restarts if both show scripts already running
+    - condition: template
+      value_template: >-
+        {{ is_state('script.huskers_theater_show_start','off')
+           or is_state('script.huskers_exterior_show_start','off') }}
+  action:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_theater_show_start
+          - script.huskers_exterior_show_start
+          - script.huskers_led_gameday_start
+
+# Nebraska score increased → BPM scarlet/cream bursts
+- id: huskers_td_burst_on_score
+  alias: 'Huskers: TD Burst on Score'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.huskers_our_score
+  condition:
+    - condition: template
+      value_template: >-
+        {{ trigger.from_state is not none and
+           trigger.to_state is not none and
+           (trigger.to_state.state | int(0)) >
+           (trigger.from_state.state | int(0)) }}
+  action:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
