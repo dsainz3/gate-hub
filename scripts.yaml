@@ -513,3 +513,51 @@ huskers_all_events_manual:
           - script.huskers_td_burst_bpm_theater
           - script.huskers_td_burst_bpm_exterior
           - script.huskers_led_td_burst
+# Rehearse T-20: enable Test Mode, cross 22 → 20 to trigger showtime
+huskers_rehearse_tminus20:
+  alias: 'Huskers: Rehearse T-20'
+  mode: single
+  sequence:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_test_mode
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_kickoff_in_manual
+      data:
+        value: 22
+    - delay: '00:00:02'
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_kickoff_in_manual
+      data:
+        value: 20
+
+# Rehearse TD: bump the manual score by +1 to fire the burst
+huskers_rehearse_td:
+  alias: 'Huskers: Rehearse TD (+1)'
+  mode: single
+  sequence:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_test_mode
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.huskers_our_score_manual
+      data:
+        value: >-
+          {{ states('input_number.huskers_our_score_manual')|int(0) + 1 }}
+
+# Cleanup: stop theater/exterior shows and restore LEDs
+huskers_cleanup_all:
+  alias: 'Huskers: Cleanup (Stop All)'
+  mode: single
+  sequence:
+    - service: script.turn_on
+      target:
+        entity_id:
+          - script.huskers_theater_show_stop
+          - script.huskers_exterior_show_stop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_led_stop
