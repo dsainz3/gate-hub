@@ -46,3 +46,12 @@ logger:
   default: info
   logs:
     homeassistant.components.logbook: debug
+
+lovelace:
+  dashboards:
+    huskers-hq:
+      mode: yaml
+      title: Huskers HQ
+      icon: mdi:football-helmet
+      show_in_sidebar: true
+      filename: dashboards/huskers.yaml
