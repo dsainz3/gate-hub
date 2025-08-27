@@ -30,6 +30,9 @@ This document explains the refactor of the Huskers Lovelace dashboard to follow 
 6. **Notes:**
    - Lint errors about missing entities/scripts are warnings that those entities must exist in your Home Assistant instance for the dashboard to function fully.
    - No changes were made to the logic or appearance of the dashboard—only the structure was improved.
+7. **Added Fan Zone View:**
+   - `views/50_fan_zone.yaml` introduces a playful Huskers dashboard with score gauges and quick lighting controls.
+   - For UI-managed dashboards, copy the snippet from `../ui-lovelace/views/40_fan_zone.yaml` via the Raw configuration editor.
 
 ## Directory Structure Example
 
