@@ -173,3 +173,13 @@
           {% else %}
             manual
           {% endif %}
+- sensor:
+    - name: 'Huskers Kickoff (Central)'
+      unique_id: huskers_kickoff_central
+      state: >-
+        {% set dt = as_datetime(state_attr('sensor.husker_team', 'date')) %}
+        {% if dt %}
+          {{ as_local(dt).astimezone(strptime("America/Chicago", "%Z")) | as_timestamp | timestamp_custom("%b %d, %Y %I:%M %p %Z") }}
+        {% else %}
+          unknown
+        {% endif %}
