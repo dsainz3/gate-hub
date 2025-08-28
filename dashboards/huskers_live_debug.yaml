@@ -1,7 +1,7 @@
 title: Huskers Live & Debug
 views:
   # ======================
-  # VIEW 1 — Live Game (Huskers theme)
+  # VIEW 1 — Live Game
   # ======================
   - title: Live Game
     path: huskers-live
@@ -10,153 +10,164 @@ views:
     badges: []
     cards:
       - type: markdown
-        content: >-
+        content: >
           # 🏈 **Nebraska Huskers — Live**
-          *Live game status, kickoff, venue, and score from `sensor.husker_team`.
-          Scripts and buttons control LEDs + touchdown bursts.*
+          Real-time game status from `sensor.husker_team`. Buttons below control
+          shows, bursts, and LEDs.
 
-      # ---- Visual Scoreboard (logos + colors via custom:button-card) ----
-      # Requires HACS → Frontend → Button Card
+      # ---- Core game sensor state ----
+      - type: entities
+        title: Game — Status
+        show_header_toggle: false
+        entities:
+          - entity: sensor.husker_team
+            name: Game State (PRE/IN/POST)
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: event_name
+            name: Matchup
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: venue
+            name: Venue
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: location
+            name: Location
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: tv_network
+            name: Broadcast
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: date
+            name: Kickoff (UTC ISO)
+
+      # ---- (Optional) Central Time helpers (shown if present) ----
       - type: conditional
         conditions:
-          - entity: sensor.husker_team
-            state_not: 'unavailable'
+          - entity: sensor.huskers_kickoff_time_ct
+            state_not: unavailable
         card:
-          type: vertical-stack
-          cards:
-            - type: horizontal-stack
-              cards:
-                # --- Nebraska ---
-                - type: 'custom:button-card'
-                  entity: sensor.husker_team
-                  name: '[[[ return entity?.attributes?.team_name || "Nebraska"; ]]]'
-                  label: '[[[ return (entity?.attributes?.team_score ?? "0").toString(); ]]]'
-                  show_label: true
-                  show_state: false
-                  show_name: true
-                  show_entity_picture: true
-                  entity_picture: '[[[ return entity?.attributes?.team_logo; ]]]'
-                  styles:
-                    card:
-                      - padding: 12px
-                      - border-radius: 16px
-                      - box-shadow: var(--ha-card-box-shadow)
-                      - background: >-
-                          [[[
-                            const c = (entity?.attributes?.team_colors || ["#d00000","#ffffff"])[0];
-                            return `linear-gradient(135deg, ${c} 0%, var(--card-background-color) 120%)`;
-                          ]]]
-                    name:
-                      - font-weight: 700
-                      - font-size: 18px
-                      - color: var(--primary-text-color)
-                    label:
-                      - font-weight: 800
-                      - font-size: 28px
-                      - margin-top: 6px
-                      - color: var(--primary-text-color)
-                    entity_picture:
-                      - width: 64px
-                      - height: 64px
-                      - border-radius: 12px
+          type: entities
+          title: Time — Central (CT)
+          show_header_toggle: false
+          entities:
+            - entity: sensor.huskers_kickoff_time_ct
+              name: Kickoff (CT)
+            - entity: sensor.huskers_game_clock_ct
+              name: Clock (CT)
+            - entity: sensor.huskers_kickoff_in
+              name: Kickoff In
 
-                # --- Opponent ---
-                - type: 'custom:button-card'
-                  entity: sensor.husker_team
-                  name: '[[[ return entity?.attributes?.opponent_name || "Opponent"; ]]]'
-                  label: '[[[ return (entity?.attributes?.opponent_score ?? "0").toString(); ]]]'
-                  show_label: true
-                  show_state: false
-                  show_name: true
-                  show_entity_picture: true
-                  entity_picture: '[[[ return entity?.attributes?.opponent_logo; ]]]'
-                  styles:
-                    card:
-                      - padding: 12px
-                      - border-radius: 16px
-                      - box-shadow: var(--ha-card-box-shadow)
-                      - background: >-
-                          [[[
-                            const c = (entity?.attributes?.opponent_colors || ["#000000","#717073"])[0];
-                            return `linear-gradient(135deg, ${c} 0%, var(--card-background-color) 120%)`;
-                          ]]]
-                    name:
-                      - font-weight: 700
-                      - font-size: 18px
-                      - color: var(--primary-text-color)
-                    label:
-                      - font-weight: 800
-                      - font-size: 28px
-                      - margin-top: 6px
-                      - color: var(--primary-text-color)
-                    entity_picture:
-                      - width: 64px
-                      - height: 64px
-                      - border-radius: 12px
+      # ---- Scoreboard (attributes from sensor.husker_team) ----
+      - type: entities
+        title: Scoreboard
+        show_header_toggle: false
+        entities:
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_long_name
+            name: Nebraska
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_score
+            name: Nebraska Score
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_long_name
+            name: Opponent
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_score
+            name: Opponent Score
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: odds
+            name: Odds
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: overunder
+            name: Over/Under
 
-            # Optional compact info beneath the big scoreboard
-            - type: entities
-              title: Game Info
-              show_header_toggle: false
-              entities:
-                - entity: sensor.husker_team
-                  name: Game State
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: event_name
-                  name: Matchup
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: clock
-                  name: Kickoff / Clock
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: venue
-                  name: Venue
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: tv_network
-                  name: Broadcast
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: odds
-                  name: Odds
-                - type: attribute
-                  entity: sensor.husker_team
-                  attribute: overunder
-                  name: Over/Under
-
-      # ---- Game controls (your existing scripts) ----
+      # ---- Game controls ----
       - type: grid
         square: false
         columns: 3
         cards:
           - type: button
-            name: Start Gameday LEDs
-            icon: mdi:play-circle
+            name: Start Gameday LEDs (LED_Gametime)
+            icon: mdi:led-strip-variant
             tap_action:
               action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_led_gameday_start
+              service: script.huskers_led_gameday_start
           - type: button
-            name: Touchdown Burst
-            icon: mdi:football
+            name: TD Burst (LED 30s)
+            icon: mdi:flash
             tap_action:
               action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_touchdown_burst
+              service: script.huskers_led_td_burst
           - type: button
-            name: Stop & Restore
-            icon: mdi:stop-circle
+            name: Cleanup (Stop All)
+            icon: mdi:broom
             tap_action:
               action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_led_stop
+              service: script.huskers_cleanup_all
 
-      # ---- Quick lighting groups (context while watching) ----
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: button
+            name: Theater Start
+            icon: mdi:movie-open-star
+            tap_action:
+              action: call-service
+              service: script.huskers_theater_show_start
+          - type: button
+            name: Theater Stop
+            icon: mdi:movie-open-off
+            tap_action:
+              action: call-service
+              service: script.huskers_theater_show_stop
+          - type: button
+            name: Exterior Start
+            icon: mdi:coach-lamp
+            tap_action:
+              action: call-service
+              service: script.huskers_exterior_show_start
+          - type: button
+            name: Exterior Stop
+            icon: mdi:coach-lamp-off
+            tap_action:
+              action: call-service
+              service: script.huskers_exterior_show_stop
+          - type: button
+            name: TD Burst (Theater BPM)
+            icon: mdi:flash
+            tap_action:
+              action: call-service
+              service: script.huskers_td_burst_bpm_theater
+          - type: button
+            name: TD Burst (Exterior BPM)
+            icon: mdi:flash-outline
+            tap_action:
+              action: call-service
+              service: script.huskers_td_burst_bpm_exterior
+          - type: button
+            name: Simulate Score + Burst
+            icon: mdi:beaker
+            tap_action:
+              action: call-service
+              service: script.huskers_test_score_update
+          - type: button
+            name: Run All (Manual)
+            icon: mdi:rocket-launch
+            tap_action:
+              action: call-service
+              service: script.huskers_all_events_manual
+
+      # ---- Quick lights while watching ----
       - type: entities
         title: Lights (Context)
         show_header_toggle: false
@@ -167,7 +178,7 @@ views:
           - light.all_lights
 
   # ======================
-  # VIEW 2 — Debug (Scenes, Scripts, Automations, Logs)
+  # VIEW 2 — Debug
   # ======================
   - title: Debug
     path: huskers-debug
@@ -175,10 +186,11 @@ views:
     badges: []
     cards:
       - type: markdown
-        content: >-
+        content: >
           # 🔧 Huskers Debug
-          Manual triggers, scenes, and script runs for rehearsal/debugging.
+          Manual triggers, last-run times, and entities of interest.
 
+      # ---- Scenes (if you kept them) ----
       - type: entities
         title: Scenes
         show_header_toggle: false
@@ -186,8 +198,9 @@ views:
           - scene.huskers_scarlet_theater
           - scene.huskers_cream_theater
           - scene.huskers_alternating_exterior
-          - scene.huskers_alternating_inverted_exterior
+          - scene.huskers_alternating_exterior_inverted
 
+      # ---- Scripts (status) ----
       - type: entities
         title: Scripts — Status
         show_header_toggle: false
@@ -198,40 +211,89 @@ views:
           - script.huskers_exterior_show_stop
           - script.huskers_td_burst_bpm_theater
           - script.huskers_td_burst_bpm_exterior
-          - script.huskers_touchdown_burst
           - script.huskers_led_td_burst
           - script.huskers_led_gameday_start
           - script.huskers_led_stop
-          - script.huskers_rehearse_tminus20
-          - script.huskers_rehearse_td
           - script.huskers_test_score_update
           - script.huskers_all_events_manual
           - script.huskers_all_events_manual2
           - script.huskers_cleanup_all
 
+      # ---- Manual Trigger Panel ----
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: button
+            name: Theater Start
+            icon: mdi:movie-open-star
+            tap_action: { action: call-service, service: script.huskers_theater_show_start }
+          - type: button
+            name: Theater Stop
+            icon: mdi:movie-open-off
+            tap_action: { action: call-service, service: script.huskers_theater_show_stop }
+          - type: button
+            name: Exterior Start
+            icon: mdi:coach-lamp
+            tap_action: { action: call-service, service: script.huskers_exterior_show_start }
+          - type: button
+            name: Exterior Stop
+            icon: mdi:coach-lamp-off
+            tap_action: { action: call-service, service: script.huskers_exterior_show_stop }
+          - type: button
+            name: TD Burst (Theater BPM)
+            icon: mdi:flash
+            tap_action: { action: call-service, service: script.huskers_td_burst_bpm_theater }
+          - type: button
+            name: TD Burst (Exterior BPM)
+            icon: mdi:flash-outline
+            tap_action: { action: call-service, service: script.huskers_td_burst_bpm_exterior }
+          - type: button
+            name: LED TD Burst (30s)
+            icon: mdi:led-strip-variant
+            tap_action: { action: call-service, service: script.huskers_led_td_burst }
+          - type: button
+            name: Gameday LEDs (Gametime)
+            icon: mdi:palette
+            tap_action: { action: call-service, service: script.huskers_led_gameday_start }
+          - type: button
+            name: Cleanup All
+            icon: mdi:broom
+            tap_action: { action: call-service, service: script.huskers_cleanup_all }
+          - type: button
+            name: Run All (Manual)
+            icon: mdi:rocket-launch
+            tap_action: { action: call-service, service: script.huskers_all_events_manual }
+          - type: button
+            name: Run All (Manual 2)
+            icon: mdi:rocket
+            tap_action: { action: call-service, service: script.huskers_all_events_manual2 }
+          - type: button
+            name: Stop LED
+            icon: mdi:led-off
+            tap_action: { action: call-service, service: script.huskers_led_stop }
+
+      # ---- Last Triggered (key scripts) ----
       - type: entities
-        title: Last Triggered (key scripts)
+        title: Last Triggered
         show_header_toggle: false
         entities:
-          - type: attribute
-            entity: script.huskers_theater_show_start
-            attribute: last_triggered
+          - entity: script.huskers_theater_show_start
             name: Theater Start — last_triggered
-          - type: attribute
-            entity: script.huskers_exterior_show_start
             attribute: last_triggered
+          - entity: script.huskers_exterior_show_start
             name: Exterior Start — last_triggered
-          - type: attribute
-            entity: script.huskers_led_gameday_start
             attribute: last_triggered
-            name: LEDs Start — last_triggered
-          - type: attribute
-            entity: script.huskers_touchdown_burst
+          - entity: script.huskers_led_gameday_start
+            name: LEDs Gametime — last_triggered
             attribute: last_triggered
-            name: TD Burst — last_triggered
+          - entity: script.huskers_led_td_burst
+            name: LED TD Burst — last_triggered
+            attribute: last_triggered
 
+      # ---- Logbook for Huskers items ----
       - type: logbook
-        title: Logbook — Huskers Entities
+        title: Logbook — Huskers
         entities:
           - sensor.husker_team
           - script.huskers_theater_show_start
@@ -240,12 +302,9 @@ views:
           - script.huskers_exterior_show_stop
           - script.huskers_td_burst_bpm_theater
           - script.huskers_td_burst_bpm_exterior
-          - script.huskers_touchdown_burst
           - script.huskers_led_td_burst
           - script.huskers_led_gameday_start
           - script.huskers_led_stop
-          - script.huskers_rehearse_tminus20
-          - script.huskers_rehearse_td
           - script.huskers_test_score_update
           - script.huskers_all_events_manual
           - script.huskers_all_events_manual2
@@ -253,4 +312,4 @@ views:
           - scene.huskers_scarlet_theater
           - scene.huskers_cream_theater
           - scene.huskers_alternating_exterior
-          - scene.huskers_alternating_inverted_exterior
+          - scene.huskers_alternating_exterior_inverted
