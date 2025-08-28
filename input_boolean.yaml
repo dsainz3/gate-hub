@@ -15,3 +15,8 @@ huskers_debug_notifications:
 huskers_test_mode:
   name: Huskers Test Mode
   icon: mdi:test-tube
+
+huskers_game_mode:
+  name: Huskers Game Mode
+  icon: mdi:football-helmet
+  initial: off
