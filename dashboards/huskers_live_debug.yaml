@@ -1,0 +1,326 @@
+title: Huskers Live & Debug
+views:
+  # ======================
+  # VIEW 1 — Live Game (Huskers theme)
+  # ======================
+  - title: Live Game
+    path: huskers-live
+    icon: mdi:stadium
+    theme: default
+    badges: []
+    cards:
+      - type: markdown
+        content: >-
+          # 🏈 **Nebraska Huskers — Live**
+          *Live game status, clock, and score. If Team Tracker is installed, the
+          live sensors will populate automatically. Manual controls are provided
+          as fallback.*
+
+      # ---- Live sensors via Team Tracker (optional; shows only if present) ----
+      - type: conditional
+        conditions:
+          - entity: sensor.nebraska_cornhuskers_game_state
+            state_not: 'unavailable'
+        card:
+          type: grid
+          square: false
+          columns: 2
+          cards:
+            - type: entities
+              title: Game Info
+              show_header_toggle: false
+              entities:
+                - entity: sensor.nebraska_cornhuskers_opponent
+                  name: Opponent
+                - entity: sensor.nebraska_cornhuskers_game_state
+                  name: State
+                - entity: sensor.nebraska_cornhuskers_game_clock
+                  name: Clock
+                - entity: sensor.nebraska_cornhuskers_venue
+                  name: Venue
+                - entity: sensor.nebraska_cornhuskers_broadcast
+                  name: Broadcast
+            - type: entities
+              title: Scoreboard
+              show_header_toggle: false
+              entities:
+                - entity: sensor.nebraska_cornhuskers_score
+                  name: Nebraska
+                - entity: sensor.nebraska_cornhuskers_opponent_score
+                  name: Opponent
+
+      # ---- Manual/backup scoreboard using your existing helpers ----
+      - type: entities
+        title: Manual Scoreboard (Fallback)
+        show_header_toggle: false
+        entities:
+          - entity: input_number.huskers_our_score
+            name: Nebraska Score
+          - entity: input_number.huskers_opponent_score
+            name: Opponent Score
+          - entity: input_number.huskers_hail_varsity_bpm
+            name: Hail Varsity BPM
+          - entity: input_number.huskers_kickoff_in_manual
+            name: Kickoff In (min)
+
+      # ---- Game controls (your existing scripts) ----
+      - type: grid
+        square: false
+        columns: 3
+        cards:
+          - type: button
+            name: Start Gameday LEDs
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_gameday_start
+          - type: button
+            name: Touchdown Burst
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_touchdown_burst
+          - type: button
+            name: Stop & Restore
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_stop
+
+      # ---- Quick lighting groups (context while watching) ----
+      - type: entities
+        title: Lights (Context)
+        show_header_toggle: false
+        entities:
+          - light.theater_lights
+          - light.front_porch_lights
+          - light.all_exterior_lights
+          - light.all_lights
+
+  # ======================
+  # VIEW 2 — Debug (Scenes, Scripts, Automations, Logs)
+  # ======================
+  - title: Debug
+    path: huskers-debug
+    icon: mdi:bug
+    badges: []
+    cards:
+      - type: markdown
+        content: >-
+          # 🔧 Huskers Debug
+          Manual triggers, scene snapshots, and last-run times. Use this view
+          on rehearsal days and when diagnosing automations.
+
+      # ---- Scenes (theater + exterior) ----
+      - type: entities
+        title: Scenes
+        show_header_toggle: false
+        entities:
+          - entity: scene.huskers_scarlet_theater
+            name: Theater — Scarlet
+          - entity: scene.huskers_cream_theater
+            name: Theater — Cream
+          - entity: scene.huskers_alternating_exterior
+            name: Exterior — Alternating
+          - entity: scene.huskers_alternating_inverted_exterior
+            name: Exterior — Alternating (Inverted)
+
+      # ---- Scripts (start/stop shows, TD bursts, rehearsal, cleanup) ----
+      - type: entities
+        title: Scripts — Status
+        show_header_toggle: false
+        entities:
+          - entity: script.huskers_theater_show_start
+            name: Theater Show Start
+          - entity: script.huskers_theater_show_stop
+            name: Theater Show Stop
+          - entity: script.huskers_exterior_show_start
+            name: Exterior Show Start
+          - entity: script.huskers_exterior_show_stop
+            name: Exterior Show Stop
+          - entity: script.huskers_td_burst_bpm_theater
+            name: TD Burst (BPM, Theater)
+          - entity: script.huskers_td_burst_bpm_exterior
+            name: TD Burst (BPM, Exterior)
+          - entity: script.huskers_touchdown_burst
+            name: TD Burst (Legacy)
+          - entity: script.huskers_led_td_burst
+            name: LED TD Burst
+          - entity: script.huskers_led_gameday_start
+            name: Game-Day LEDs Start
+          - entity: script.huskers_led_stop
+            name: Stop LEDs (Restore)
+          - entity: script.huskers_rehearse_tminus20
+            name: Rehearse T-20
+          - entity: script.huskers_rehearse_td
+            name: Rehearse TD (+1)
+          - entity: script.huskers_test_score_update
+            name: 🧪 Simulate Score + Burst
+          - entity: script.huskers_all_events_manual
+            name: Run All (Manual)
+          - entity: script.huskers_all_events_manual2
+            name: Run All (Manual) v2
+          - entity: script.huskers_cleanup_all
+            name: Cleanup (Stop All)
+
+      # ---- Manual Trigger Panel ----
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: button
+            name: Theater Start
+            icon: mdi:movie-open-star
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_theater_show_start },
+              }
+          - type: button
+            name: Theater Stop
+            icon: mdi:movie-open-off
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_theater_show_stop },
+              }
+          - type: button
+            name: Exterior Start
+            icon: mdi:coach-lamp
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_exterior_show_start },
+              }
+          - type: button
+            name: Exterior Stop
+            icon: mdi:coach-lamp-off
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_exterior_show_stop },
+              }
+          - type: button
+            name: TD Burst (Theater BPM)
+            icon: mdi:flash
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_td_burst_bpm_theater },
+              }
+          - type: button
+            name: TD Burst (Exterior BPM)
+            icon: mdi:flash-outline
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_td_burst_bpm_exterior },
+              }
+          - type: button
+            name: TD Burst (Legacy)
+            icon: mdi:football-helmet
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_touchdown_burst },
+              }
+          - type: button
+            name: LED TD Burst
+            icon: mdi:led-strip-variant
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_led_td_burst },
+              }
+          - type: button
+            name: Rehearse T-20
+            icon: mdi:timer-sand
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_rehearse_tminus20 },
+              }
+          - type: button
+            name: Rehearse TD (+1)
+            icon: mdi:scoreboard
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_rehearse_td },
+              }
+          - type: button
+            name: Simulate Score + Burst
+            icon: mdi:beaker
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_test_score_update },
+              }
+          - type: button
+            name: Cleanup All
+            icon: mdi:broom
+            tap_action:
+              {
+                action: call-service,
+                service: script.turn_on,
+                target: { entity_id: script.huskers_cleanup_all },
+              }
+
+      # ---- Live attributes & logs ----
+      - type: entities
+        title: Last Triggered (key scripts)
+        show_header_toggle: false
+        entities:
+          - entity: script.huskers_theater_show_start
+            name: Theater Start — last_triggered
+            attribute: last_triggered
+          - entity: script.huskers_exterior_show_start
+            name: Exterior Start — last_triggered
+            attribute: last_triggered
+          - entity: script.huskers_led_gameday_start
+            name: LEDs Start — last_triggered
+            attribute: last_triggered
+          - entity: script.huskers_touchdown_burst
+            name: TD Burst — last_triggered
+            attribute: last_triggered
+
+      - type: logbook
+        title: Logbook — Huskers Entities
+        entities:
+          - script.huskers_theater_show_start
+          - script.huskers_theater_show_stop
+          - script.huskers_exterior_show_start
+          - script.huskers_exterior_show_stop
+          - script.huskers_td_burst_bpm_theater
+          - script.huskers_td_burst_bpm_exterior
+          - script.huskers_touchdown_burst
+          - script.huskers_led_td_burst
+          - script.huskers_led_gameday_start
+          - script.huskers_led_stop
+          - script.huskers_rehearse_tminus20
+          - script.huskers_rehearse_td
+          - script.huskers_test_score_update
+          - script.huskers_all_events_manual
+          - script.huskers_all_events_manual2
+          - script.huskers_cleanup_all
+          - scene.huskers_scarlet_theater
+          - scene.huskers_cream_theater
+          - scene.huskers_alternating_exterior
+          - scene.huskers_alternating_inverted_exterior
