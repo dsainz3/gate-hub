@@ -5,7 +5,7 @@ zigbee.db*
 /.storage/
 /.cloud/
 /secrets.yaml
-
+/out/
 node_modules/
 .venv/
 .cache/
