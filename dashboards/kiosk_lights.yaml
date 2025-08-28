@@ -4,12 +4,13 @@ views:
     path: kiosk-lights
     icon: mdi:lightbulb-group
     panel: false
+    badges: []
     cards:
       # --- Header ---
       - type: markdown
         content: >
           # 💡 Lighting & 🔌 Power — Kiosk
-          Quick control of groups, all lights, and Zigbee plugs.
+          Quick control of groups, all lights, and Zigbee plugs.  
           *No scenes or automations on this page.*
 
       # --- Group controls with sliders ---
@@ -60,11 +61,12 @@ views:
             - entity_id: light.all_exterior_lights
             - entity_id: light.permanent_outdoor_lights
 
-      # --- Smart plugs / switches (auto: any switch.plug_*) ---
+      # --- Smart plugs / switches (auto) ---
+      # Matches entity_ids like switch.plug_*; also catches names containing "Plug"
       - type: custom:auto-entities
         card:
           type: entities
-          title: Smart Plugs (auto)
+          title: Smart Plugs
           show_header_toggle: false
         sort:
           method: name
@@ -72,4 +74,6 @@ views:
         filter:
           include:
             - domain: switch
-              entity_id: switch.plug_*
+              pattern: plug_.*
+            - domain: switch
+              name: /plug/i
