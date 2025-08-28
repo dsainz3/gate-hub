@@ -4,7 +4,7 @@ homeassistant:
   longitude: -95.9718365
   elevation: 1116           # meters
   time_zone: America/Chicago
-  unit_system: imperial     # use "metric" for °C/kg
+  unit_system: us_customary     # use "metric" for °C/kg
   currency: USD             # ISO 4217 code
   country: US               # ISO 3166-1 alpha-2
 
