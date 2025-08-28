@@ -664,126 +664,56 @@ huskers_td_burst_bpm_exterior:
         count: '{{ beats }}'
         sequence:
           - parallel:
-              # FL
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_left',
-                          'supported_color_modes') or [])
-                             or 'xy' in (state_attr(
-                          'light.light_front_left',
-                          'supported_color_modes') or [])
-                             or 'rgb' in (state_attr(
-                          'light.light_front_left',
-                          'supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.light_front_left
-                        data: { brightness: 255, hs_color: [0, 0] }
-                default:
-                  - service: light.turn_on
-                    target:
-                      entity_id: light.light_front_left
-                    data: { brightness: 255 }
-              # FR
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_right',
-                          'supported_color_modes') or [])
-                             or 'xy' in (state_attr(
-                          'light.light_front_right',
-                          'supported_color_modes') or [])
-                             or 'rgb' in (state_attr(
-                          'light.light_front_right',
-                          'supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target:
-                          entity_id: light.light_front_right
-                        data: { brightness: 255, hs_color: [0, 0] }
-                default:
-                  - service: light.turn_on
-                    target:
-                      entity_id: light.light_front_right
-                    data: { brightness: 255 }
-              # GL
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_left',
-                          'supported_color_modes') or [])
-                             or 'xy' in (state_attr(
-                          'light.garage_left',
-                          'supported_color_modes') or [])
-                             or 'rgb' in (state_attr(
-                          'light.garage_left',
-                          'supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_left }
-                        data: { brightness: 255, hs_color: [0, 0] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_left }
-                    data: { brightness: 255 }
-              # GC
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_center',
-                          'supported_color_modes') or [])
-                             or 'xy' in (state_attr(
-                          'light.garage_center',
-                          'supported_color_modes') or [])
-                             or 'rgb' in (state_attr(
-                          'light.garage_center',
-                          'supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_center }
-                        data: { brightness: 255, hs_color: [0, 0] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_center }
-                    data: { brightness: 255 }
-              # GR
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_right',
-                          'supported_color_modes') or [])
-                             or 'xy' in (state_attr(
-                          'light.garage_right',
-                          'supported_color_modes') or [])
-                             or 'rgb' in (state_attr(
-                          'light.garage_right',
-                          'supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_right }
-                        data: { brightness: 255, hs_color: [0, 0] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_right }
-                    data: { brightness: 255 }
+              # Front Left
+              - service: light.turn_on
+                target: { entity_id: light.light_front_left }
+                data:
+                  brightness: 255
+                  hs_color: >-
+                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
+                    {% else %} [48, 12] {% endif %}
+              # Front Right
+              - service: light.turn_on
+                target: { entity_id: light.light_front_right }
+                data:
+                  brightness: 255
+                  hs_color: >-
+                    {% if (repeat.index | int(1)) % 2 == 1 %} [48, 12]
+                    {% else %} [355, 90] {% endif %}
+              # Garage Left
+              - service: light.turn_on
+                target: { entity_id: light.garage_left }
+                data:
+                  brightness: 255
+                  hs_color: >-
+                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
+                    {% else %} [48, 12] {% endif %}
+              # Garage Center
+              - service: light.turn_on
+                target: { entity_id: light.garage_center }
+                data:
+                  brightness: 255
+                  hs_color: >-
+                    {% if (repeat.index | int(1)) % 2 == 1 %} [48, 12]
+                    {% else %} [355, 90] {% endif %}
+              # Garage Right
+              - service: light.turn_on
+                target: { entity_id: light.garage_right }
+                data:
+                  brightness: 255
+                  hs_color: >-
+                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
+                    {% else %} [48, 12] {% endif %}
           - delay: '{{ pulse_s }}'
           - service: scene.turn_on
-            target:
-              entity_id: 'scene.{{ snap_id }}'
+            target: { entity_id: 'scene.{{ snap_id }}' }
           - delay: '{{ rest_s }}'
     - choose:
         - conditions: "{{ states('scene.' ~ snap_id) != 'unknown' }}"
           sequence:
             - service: scene.delete
-              data:
-                entity_id: 'scene.{{ snap_id }}'
+              data: { entity_id: 'scene.{{ snap_id }}' }
+
 huskers_all_events_manual:
   alias: 'Huskers: Run All (Manual)'
   mode: single
@@ -804,6 +734,7 @@ huskers_all_events_manual:
           - script.huskers_td_burst_bpm_theater
           - script.huskers_td_burst_bpm_exterior
           - script.huskers_led_td_burst
+
 # Rehearse T-20: enable Test Mode, cross 22 → 20 to trigger showtime
 huskers_rehearse_tminus20:
   alias: 'Huskers: Rehearse T-20'
@@ -852,6 +783,7 @@ huskers_cleanup_all:
     - service: script.turn_on
       target:
         entity_id: script.huskers_led_stop
+
 # ---------------------------------------------------------
 # LED: TD Burst (snapshot → LED_Huskers → restore)
 # ---------------------------------------------------------
