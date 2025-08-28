@@ -36,9 +36,9 @@ recorder:
       - light.light_theater_right
       - light.light_front_left
       - light.light_front_right
-      - light.garage_l
-      - light.garage_c
-      - light.garage_r
+      - light.garage_left
+      - light.garage_center
+      - light.garage_right
       - light.permanent_outdoor_lights
 
 # HA core logger (optional, but helpful while iterating)
@@ -47,11 +47,7 @@ logger:
   logs:
     homeassistant.components.logbook: debug
 
-lovelace:
-  dashboards:
-    huskers-hq:
-      mode: yaml
-      title: Huskers HQ
-      icon: mdi:football-helmet
-      show_in_sidebar: true
-      filename: dashboards/huskers.yaml
+team_tracker:
+  - sport: ncaa_football
+    team_id: nebraska-cornhuskers
+    name: Nebraska Cornhuskers
