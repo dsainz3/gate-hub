@@ -22,9 +22,9 @@
   name: All Exterior Lights
   unique_id: lg_all_exterior_lights
   entities:
-    - light.garage_c
-    - light.garage_l
-    - light.garage_r
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
     - light.light_front_right
     - light.light_front_left
     - light.permanent_outdoor_lights
@@ -45,17 +45,16 @@
     - light.sunroom_light
     - light.diningroom_light
     - light.permanent_outdoor_lights
-    - light.garage_c
-    - light.garage_l
-    - light.garage_r
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
 - platform: group
   name: Garage Lights
   unique_id: lg_garage_lights
   entities:
-    - light.garage_c
-    - light.garage_l
-    - light.garage_r
-    - light.permanent_outdoor_lights
+    - light.garage_center
+    - light.garage_left
+    - light.garage_right
 - platform: group
   name: Mainfloor Lights
   unique_id: lg_mainfloor_lights
