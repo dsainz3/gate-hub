@@ -104,7 +104,8 @@
               - light.garage_center
               - light.garage_right
           data:
-            brightness_pct: 1
+            kelvin: 2000
+            brightness_pct: 10
         - service: light.turn_on
           target:
             entity_id: light.permanent_outdoor_lights
@@ -126,6 +127,8 @@
               - light.sunroom_light
               - light.diningroom_light
               - light.livingroom_light
+              - light.office_light
+              - light.theater_lights
         - service: light.turn_off
           target:
             entity_id:
@@ -164,7 +167,8 @@
               - light.garage_center
               - light.garage_right
           data:
-            brightness_pct: 1
+            kelvin: 2000
+            brightness_pct: 10
         - service: light.turn_on
           target:
             entity_id: light.permanent_outdoor_lights
@@ -332,3 +336,18 @@
     - service: automation.trigger
       target:
         entity_id: automation.exterior_led_monthly_effect
+
+# Safety: Turn off burner plugs at 11:00 PM
+- id: burner_plugs_off_2300
+  alias: 'Safety: Turn Off Burner Plugs at 11:00 PM'
+  mode: single
+  trigger:
+    - platform: time
+      at: '23:00:00'
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id:
+          - Plug-basement-burner
+          - Plug-Mainfloor-burner
+          - Plug-bedroom-burner
