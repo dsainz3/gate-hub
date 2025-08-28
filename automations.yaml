@@ -301,3 +301,34 @@
       data:
         name: 'Huskers – New Item Notifier'
         message: 'Placeholder: add triggers/actions.'
+
+# =========================
+# HUSKERS — Automations
+# =========================
+
+# Set permanent LEDs to LED_Gametime on kickoff
+- id: huskers_set_led_gametime_on_kickoff
+  alias: 'Huskers: Set LED Gametime on Kickoff'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.husker_team
+      to: 'IN'
+  action:
+    - service: light.turn_on
+      target: { entity_id: light.permanent_outdoor_lights }
+      data: { effect: LED_Gametime }
+
+# After game ends (POST), wait 20 minutes then run monthly effect automation
+- id: huskers_postgame_monthly_effect_after_20m
+  alias: 'Huskers: Postgame → Monthly LED Effect (20m)'
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.husker_team
+      to: 'POST'
+  action:
+    - delay: '00:20:00'
+    - service: automation.trigger
+      target:
+        entity_id: automation.exterior_led_monthly_effect
