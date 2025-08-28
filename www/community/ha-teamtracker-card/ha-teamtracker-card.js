@@ -7,7 +7,7 @@ let $4fcaa3c95ba349ea$export$607dc1951b62972e = "https://cdn-icons-png.freepik.c
 
 
 //
-//  Define and register the UI Card Editor 
+//  Define and register the UI Card Editor
 //
 /**
  * @license
@@ -813,7 +813,7 @@ class $de5768471e29ae80$export$c622f67f045f310d extends (0, $ab210b2da7b39b9d$ex
                     Show Rank
                 </label>
             </div>
-            <div class="switch-container">    
+            <div class="switch-container">
                 <ha-switch
                     @change="${(e)=>this._valueChanged(e, "show_timeouts")}"
                     .checked="${this._config.show_timeouts !== false}"
@@ -823,7 +823,7 @@ class $de5768471e29ae80$export$c622f67f045f310d extends (0, $ab210b2da7b39b9d$ex
                     Show Timeouts
                 </label>
             </div>
-            <div class="switch-container">    
+            <div class="switch-container">
                 <ha-switch
                     @change="${(e)=>this._valueChanged(e, "outline")}"
                     .checked="${this._config.outline === true}"
@@ -871,7 +871,7 @@ class $de5768471e29ae80$export$c622f67f045f310d extends (0, $ab210b2da7b39b9d$ex
                 >
             </ha-textfield>
             <hr>
-            <div class="switch-container">    
+            <div class="switch-container">
                 <ha-switch
                     @change="${(e)=>this._valueChanged(e, "debug")}"
                     .checked="${this._config.debug === true}"
@@ -2838,7 +2838,7 @@ function $6af844b6602814f2$export$eac7a64041e7dd4f(c) {
                 onerror="this.onerror=null; this.src='${c.logoBGAlternate[team]}';" />
             <div class="card-content">
                 <div class="team">
-                    <img class="logo" src="${c.logo[team]}" 
+                    <img class="logo" src="${c.logo[team]}"
                         onerror="this.onerror=null; this.src='${c.logoAlternate[team]}'; this.onerror=function() { this.src='${c.logoError[team]}'; };" />
                     <div class="name">${c.name[team]}</div>
                 </div>
@@ -2860,7 +2860,7 @@ function $07b3e4094688f328$export$b2e19b637b85e37f() {
 }
 function $07b3e4094688f328$export$adab126bb38c4dbc(entity) {
     const htmlTemplate = (0, $f58f44579a4747ac$export$c0bb0b647f701bb5)`
-        <ha-card>Unknown entity: ${entity}</ha-card> 
+        <ha-card>Unknown entity: ${entity}</ha-card>
     `;
     // Return the HTML template
     return htmlTemplate;
@@ -2971,7 +2971,7 @@ function $654f96c20a3bcd40$export$3f4c9efb42c5bfd8(c) {
             <div class="card-content">
                 <div class="team">
                     <a class="left-clickable ${!c.url[1] ? "disabled" : ""}" href="${c.url[1] ? c.url[1] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[1]}" 
+                        <img class="logo" src="${c.logo[1]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[1]}'; this.onerror=function() { this.src='${c.logoError[1]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": `${c.rankDisplay}`
@@ -3016,7 +3016,7 @@ function $654f96c20a3bcd40$export$3f4c9efb42c5bfd8(c) {
     })}>&bull;</div>
                 <div class="team">
                     <a class="right-clickable ${!c.url[2] ? "disabled" : ""}" href="${c.url[2] ? c.url[2] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[2]}" 
+                        <img class="logo" src="${c.logo[2]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[2]}'; this.onerror=function() { this.src='${c.logoError[2]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": `${c.rankDisplay}`
@@ -3169,7 +3169,7 @@ function $ba84a5acf45954c4$export$823f4865e91cfbff(c) {
             <div class="card-content">
                 <div class="team">
                     <a class="left-clickable ${!c.url[1] ? "disabled" : ""}" href="${c.url[1] ? c.url[1] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[1]}" 
+                        <img class="logo" src="${c.logo[1]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[1]}'; this.onerror=function() { this.src='${c.logoError[1]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": c.rankDisplay
@@ -3188,7 +3188,7 @@ function $ba84a5acf45954c4$export$823f4865e91cfbff(c) {
     })}>${c.score[2]}</div>
                 <div class="team">
                     <a class="right-clickable ${!c.url[2] ? "disabled" : ""}" href="${c.url[2] ? c.url[2] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[2]}" 
+                        <img class="logo" src="${c.logo[2]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[2]}'; this.onerror=function() { this.src='${c.logoError[2]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": c.rankDisplay
@@ -3234,7 +3234,7 @@ function $32e2f72be859b718$export$d6bad15bd473a528(c) {
             <div class="card-content">
                 <div class="team">
                     <a class="left-clickable ${!c.url[1] ? "disabled" : ""}" href="${c.url[1] ? c.url[1] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[1]}" 
+                        <img class="logo" src="${c.logo[1]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[1]}'; this.onerror=function() { this.src='${c.logoError[1]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": `${c.rankDisplay}`
@@ -3249,7 +3249,7 @@ function $32e2f72be859b718$export$d6bad15bd473a528(c) {
                 </div>
                 <div class="team">
                     <a class="right-clickable ${!c.url[2] ? "disabled" : ""}" href="${c.url[2] ? c.url[2] : "#"}" target="_blank">
-                        <img class="logo" src="${c.logo[2]}" 
+                        <img class="logo" src="${c.logo[2]}"
                             onerror="this.onerror=null; this.src='${c.logoAlternate[2]}'; this.onerror=function() { this.src='${c.logoError[2]}'; };" />
                         <div class="name"><span class="rank" style=${(0, $19f464fcda7d2482$export$1e5b4ce2fa884e6a)({
         "--rank-display": `${c.rankDisplay}`
@@ -3832,7 +3832,7 @@ class $a510245ba2c1e365$export$c12aa10d47d2f051 extends (0, $ab210b2da7b39b9d$ex
         o.debug = this._config.debug;
         o.darkMode = this.hass.themes.darkMode;
         //
-        //  Set sport, team, and oppo 
+        //  Set sport, team, and oppo
         //
         var team = 1;
         var oppo = 2;

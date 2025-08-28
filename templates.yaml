@@ -7,47 +7,46 @@
 # --------------------------
 - sensor:
     # ---- Pressure trend (rising / steady / falling) ----
+
     - name: 'KNEPLATT72 Pressure Trend'
       unique_id: kneplatt72_pressure_trend
       state: >-
-        {% set u = state_attr('sensor.kneplatt72_pressure',
-        'unit_of_measurement') or '' %}
+        {% set src = 'sensor.kneplatt72_pressure' %}
+        {% set unit = state_attr(src, 'unit_of_measurement') or '' %}
         {% set raw = states('sensor.kneplatt72_pressure_24h_change') %}
         {% if raw in ['unknown','unavailable','none',''] %}
           unknown
         {% else %}
           {% set d = raw | float(0) %}
-          {% set delta_hpa = d if u in ['hPa','mbar']
-             else (d * 33.8638866667) %}
-          {% if delta_hpa > 0.7 %}rising
-          {% elif delta_hpa < -0.7 %}falling
-          {% else %}steady{% endif %}
+          {% set delta_hpa = d if unit in ['hPa','mbar'] else (d * 33.8638866667 if unit in ['inHg'] else d) %}
+          {% set delta_inhg = (d if unit in ['inHg'] else (d / 33.8638866667)) %}
+          {% set thr_inhg = 0.02 %}
+          {% set thr_hpa  = thr_inhg * 33.8638866667 %}
+          {% if delta_inhg >= thr_inhg %}rising
+          {% elif delta_inhg <= -thr_inhg %}falling
+          {% else %}steady
+          {% endif %}
         {% endif %}
-      icon: >-
-        {% set s = this.state %}
-        {% if s == 'rising' %}mdi:arrow-up-bold
-        {% elif s == 'falling' %}mdi:arrow-down-bold
-        {% else %}mdi:arrow-right-bold{% endif %}
       attributes:
         delta_hpa: >-
-          {{
-            (states('sensor.kneplatt72_pressure_24h_change') | float(0)) *
-            (33.8638866667 if (state_attr('sensor.kneplatt72_pressure',
-            'unit_of_measurement') not in ['hPa','mbar']) else 1) | round(2)
-          }}
+          {% set src = 'sensor.kneplatt72_pressure' %}
+          {% set unit = state_attr(src, 'unit_of_measurement') or '' %}
+          {% set d = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+          {{ (d if unit in ['hPa','mbar'] else (d * 33.8638866667 if unit in ['inHg'] else d)) | round(2) }}
         delta_inhg: >-
-          {% set d = states('sensor.kneplatt72_pressure_24h_change')
-             | float(0) %}
-          {% if (state_attr('sensor.kneplatt72_pressure',
-          'unit_of_measurement') in ['hPa','mbar']) %}
-            {{ (d / 33.8638866667) | round(3) }}
-          {% else %}
-            {{ d | round(3) }}
+          {% set src = 'sensor.kneplatt72_pressure' %}
+          {% set unit = state_attr(src, 'unit_of_measurement') or '' %}
+          {% set d = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+          {{ (d if unit in ['inHg'] else (d / 33.8638866667)) | round(3) }}
+        threshold_hpa: '0.68'
+        threshold_inhg: '0.02'
+        icon: >-
+          {% set s = this.state %}
+          {% if s == 'rising' %}mdi:arrow-up-bold
+          {% elif s == 'falling' %}mdi:arrow-down-bold
+          {% elif s == 'steady' %}mdi:swap-horizontal-bold
+          {% else %}mdi:help-circle-outline
           {% endif %}
-        # trend threshold (not storm threshold)
-        threshold_hpa: 0.7
-
-    # ---- Nmap metrics ----
     - name: 'Nmap Active Hosts'
       unique_id: nmap_active_hosts
       state: >-
