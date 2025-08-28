@@ -164,8 +164,6 @@ views:
             name: 🧪 Simulate Score + Burst
           - entity: script.huskers_all_events_manual
             name: Run All (Manual)
-          - entity: script.huskers_all_events_manual2
-            name: Run All (Manual) v2
           - entity: script.huskers_cleanup_all
             name: Cleanup (Stop All)
 
