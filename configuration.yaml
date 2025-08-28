@@ -51,11 +51,6 @@ logger:
   logs:
     homeassistant.components.logbook: debug
 
-team_tracker:
-  - sport: ncaa_football
-    team_id: nebraska-cornhuskers
-    name: Nebraska Cornhuskers
-
 lovelace:
   dashboards:
     huskers-live-debug:
