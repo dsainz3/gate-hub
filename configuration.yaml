@@ -8,7 +8,6 @@ homeassistant:
   currency: USD             # ISO 4217 code
   country: US               # ISO 3166-1 alpha-2
 
-
 # 👇 Use merge_named so each theme file can define its own theme name
 frontend:
   themes: !include_dir_merge_named themes
@@ -52,6 +51,9 @@ logger:
     homeassistant.components.logbook: debug
 
 lovelace:
+  resources:
+    - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
+      type: module
   dashboards:
     huskers-live-debug:
       mode: yaml
@@ -65,3 +67,9 @@ lovelace:
       icon: mdi:cogs
       show_in_sidebar: true
       filename: dashboards/automations_debug.yaml
+    kiosk-lights:
+      mode: yaml
+      title: Kiosk - Lights & Power
+      icon: mdi:lightbulb-group
+      show_in_sidebar: true
+      filename: dashboards/kiosk_lights.yaml
