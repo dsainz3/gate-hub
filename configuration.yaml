@@ -2,11 +2,11 @@ homeassistant:
   name: Our Home
   latitude: 41.046709
   longitude: -95.9718365
-  elevation: 1116           # meters
+  elevation: 1116            # meters
   time_zone: America/Chicago
-  unit_system: us_customary     # use "metric" for °C/kg
-  currency: USD             # ISO 4217 code
-  country: US               # ISO 3166-1 alpha-2
+  unit_system: us_customary  # use "metric" for °C/kg
+  currency: USD              # ISO 4217 code
+  country: US                # ISO 3166-1 alpha-2
 
 # 👇 Use merge_named so each theme file can define its own theme name
 frontend:
@@ -18,7 +18,7 @@ group: !include group.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
 template: !include templates.yaml
-binary_sensor: !include binary_sensors.yaml
+binary_sensor: !include binary_sensor.yaml
 input_boolean: !include input_boolean.yaml
 input_number: !include input_number.yaml
 input_text: !include input_text.yaml
@@ -49,27 +49,3 @@ logger:
   default: info
   logs:
     homeassistant.components.logbook: debug
-
-lovelace:
-  resources:
-    - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
-      type: module
-  dashboards:
-    huskers-live-debug:
-      mode: yaml
-      title: Huskers Live & Debug
-      icon: mdi:football-helmet
-      show_in_sidebar: true
-      filename: dashboards/huskers_live_debug.yaml
-    automations-debug:
-      mode: yaml
-      title: Automations Debug
-      icon: mdi:cogs
-      show_in_sidebar: true
-      filename: dashboards/automations_debug.yaml
-    kiosk-lights:
-      mode: yaml
-      title: Kiosk - Lights & Power
-      icon: mdi:lightbulb-group
-      show_in_sidebar: true
-      filename: dashboards/kiosk_lights.yaml
