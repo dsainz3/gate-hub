@@ -59,3 +59,9 @@ lovelace:
       icon: mdi:football-helmet
       show_in_sidebar: true
       filename: dashboards/huskers_live_debug.yaml
+    automations-debug:
+      mode: yaml
+      title: Automations Debug
+      icon: mdi:cogs
+      show_in_sidebar: true
+      filename: dashboards/automations_debug.yaml
