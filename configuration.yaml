@@ -55,3 +55,12 @@ team_tracker:
   - sport: ncaa_football
     team_id: nebraska-cornhuskers
     name: Nebraska Cornhuskers
+
+lovelace:
+  dashboards:
+    huskers-live-debug:
+      mode: yaml
+      title: Huskers Live & Debug
+      icon: mdi:football-helmet
+      show_in_sidebar: true
+      filename: dashboards/huskers_live_debug.yaml
