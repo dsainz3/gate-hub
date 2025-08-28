@@ -1,12 +1,12 @@
 title: Huskers Live & Debug
 views:
   # ======================
-  # VIEW 1 — Live Game
+  # VIEW 1 — Live Game (uses Huskers theme)
   # ======================
   - title: Live Game
     path: huskers-live
     icon: mdi:stadium
-    theme: default
+    theme: Huskers Superfan
     badges: []
     cards:
       - type: markdown
@@ -15,7 +15,13 @@ views:
           Real-time game status from `sensor.husker_team`. Buttons below control
           shows, bursts, and LEDs.
 
-      # ---- Core game sensor state ----
+      - type: markdown
+        content: >
+          # ❤️🤍 **HUSKER SUPERFAN DASHBOARD**
+          ---
+          Welcome to **Memorial Stadium South** — Control lights, effects, and
+          celebrate touchdowns in style!
+
       - type: entities
         title: Game — Status
         show_header_toggle: false
@@ -43,11 +49,12 @@ views:
             attribute: date
             name: Kickoff (UTC ISO)
 
-      # ---- (Optional) Central Time helpers (shown if present) ----
+      # Show only if CT helpers actually exist & have a value
       - type: conditional
         conditions:
-          - entity: sensor.huskers_kickoff_time_ct
-            state_not: unavailable
+          - condition: template
+            value_template: >-
+              {{ states('sensor.huskers_kickoff_time_ct') not in ['unknown','unavailable',''] }}
         card:
           type: entities
           title: Time — Central (CT)
@@ -60,7 +67,6 @@ views:
             - entity: sensor.huskers_kickoff_in
               name: Kickoff In
 
-      # ---- Scoreboard (attributes from sensor.husker_team) ----
       - type: entities
         title: Scoreboard
         show_header_toggle: false
@@ -90,7 +96,6 @@ views:
             attribute: overunder
             name: Over/Under
 
-      # ---- Game controls ----
       - type: grid
         square: false
         columns: 3
@@ -167,18 +172,8 @@ views:
               action: call-service
               service: script.huskers_all_events_manual
 
-      # ---- Quick lights while watching ----
-      - type: entities
-        title: Lights (Context)
-        show_header_toggle: false
-        entities:
-          - light.theater_lights
-          - light.front_porch_lights
-          - light.all_exterior_lights
-          - light.all_lights
-
   # ======================
-  # VIEW 2 — Debug
+  # VIEW 2 — Debug (keeps your default/global theme)
   # ======================
   - title: Debug
     path: huskers-debug
@@ -190,17 +185,19 @@ views:
           # 🔧 Huskers Debug
           Manual triggers, last-run times, and entities of interest.
 
-      # ---- Scenes (if you kept them) ----
       - type: entities
         title: Scenes
         show_header_toggle: false
         entities:
-          - scene.huskers_scarlet_theater
-          - scene.huskers_cream_theater
-          - scene.huskers_alternating_exterior
-          - scene.huskers_alternating_exterior_inverted
+          - entity: scene.huskers_scarlet_theater
+            name: Huskers Scarlet (Theater)
+          - entity: scene.huskers_cream_theater
+            name: Huskers Cream (Theater)
+          - entity: scene.huskers_alternating_exterior
+            name: Huskers Alternating (Exterior)
+          - entity: scene.huskers_alternating_exterior_inverted
+            name: Huskers Alternating (Exterior, Inverted)
 
-      # ---- Scripts (status) ----
       - type: entities
         title: Scripts — Status
         show_header_toggle: false
@@ -219,7 +216,6 @@ views:
           - script.huskers_all_events_manual2
           - script.huskers_cleanup_all
 
-      # ---- Manual Trigger Panel ----
       - type: grid
         square: false
         columns: 4
@@ -227,53 +223,76 @@ views:
           - type: button
             name: Theater Start
             icon: mdi:movie-open-star
-            tap_action: { action: call-service, service: script.huskers_theater_show_start }
+            tap_action:
+              action: call-service
+              service: script.huskers_theater_show_start
           - type: button
             name: Theater Stop
             icon: mdi:movie-open-off
-            tap_action: { action: call-service, service: script.huskers_theater_show_stop }
+            tap_action:
+              action: call-service
+              service: script.huskers_theater_show_stop
           - type: button
             name: Exterior Start
             icon: mdi:coach-lamp
-            tap_action: { action: call-service, service: script.huskers_exterior_show_start }
+            tap_action:
+              action: call-service
+              service: script.huskers_exterior_show_start
           - type: button
             name: Exterior Stop
             icon: mdi:coach-lamp-off
-            tap_action: { action: call-service, service: script.huskers_exterior_show_stop }
+            tap_action:
+              action: call-service
+              service: script.huskers_exterior_show_stop
           - type: button
             name: TD Burst (Theater BPM)
             icon: mdi:flash
-            tap_action: { action: call-service, service: script.huskers_td_burst_bpm_theater }
+            tap_action:
+              action: call-service
+              service: script.huskers_td_burst_bpm_theater
           - type: button
             name: TD Burst (Exterior BPM)
             icon: mdi:flash-outline
-            tap_action: { action: call-service, service: script.huskers_td_burst_bpm_exterior }
+            tap_action:
+              action: call-service
+              service: script.huskers_td_burst_bpm_exterior
           - type: button
             name: LED TD Burst (30s)
             icon: mdi:led-strip-variant
-            tap_action: { action: call-service, service: script.huskers_led_td_burst }
+            tap_action:
+              action: call-service
+              service: script.huskers_led_td_burst
           - type: button
             name: Gameday LEDs (Gametime)
             icon: mdi:palette
-            tap_action: { action: call-service, service: script.huskers_led_gameday_start }
+            tap_action:
+              action: call-service
+              service: script.huskers_led_gameday_start
           - type: button
             name: Cleanup All
             icon: mdi:broom
-            tap_action: { action: call-service, service: script.huskers_cleanup_all }
+            tap_action:
+              action: call-service
+              service: script.huskers_cleanup_all
           - type: button
             name: Run All (Manual)
             icon: mdi:rocket-launch
-            tap_action: { action: call-service, service: script.huskers_all_events_manual }
+            tap_action:
+              action: call-service
+              service: script.huskers_all_events_manual
           - type: button
             name: Run All (Manual 2)
             icon: mdi:rocket
-            tap_action: { action: call-service, service: script.huskers_all_events_manual2 }
+            tap_action:
+              action: call-service
+              service: script.huskers_all_events_manual2
           - type: button
             name: Stop LED
             icon: mdi:led-off
-            tap_action: { action: call-service, service: script.huskers_led_stop }
+            tap_action:
+              action: call-service
+              service: script.huskers_led_stop
 
-      # ---- Last Triggered (key scripts) ----
       - type: entities
         title: Last Triggered
         show_header_toggle: false
@@ -291,7 +310,6 @@ views:
             name: LED TD Burst — last_triggered
             attribute: last_triggered
 
-      # ---- Logbook for Huskers items ----
       - type: logbook
         title: Logbook — Huskers
         entities:

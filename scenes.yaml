@@ -8,7 +8,7 @@
 # PURPOSE: Bold scarlet scene for theater lights (Huskers primary color).
 # COLORS: HS(355°, 90%); Brightness 255 (max).
 - name: Huskers Scarlet (Theater)
-  id: scene_huskers_scarlet_theater
+  id: huskers_scarlet_theater
   icon: mdi:palette
   entities:
     light.light_theater_left:
@@ -23,7 +23,7 @@
 # PURPOSE: Cream/warm-white companion scene for theater lights.
 # COLORS: HS(48°, 12%); Brightness 255 (max).
 - name: Huskers Cream (Theater)
-  id: scene_huskers_cream_theater
+  id: huskers_cream_theater
   icon: mdi:palette
   entities:
     light.light_theater_left:
@@ -44,7 +44,7 @@
 # PATTERN: Scarlet (front left), Cream (front right), Scarlet (garage L),
 #          Cream (garage C), Scarlet (garage R).
 - name: Huskers Alternating (Exterior)
-  id: scene_huskers_alternating_exterior
+  id: huskers_alternating_exterior
   icon: mdi:palette
   entities:
     light.light_front_left:
@@ -72,7 +72,7 @@
 # PATTERN: Cream (front left), Scarlet (front right), Cream (garage L),
 #          Scarlet (garage C), Cream (garage R).
 - name: Huskers Alternating Inverted (Exterior)
-  id: scene_huskers_alternating_exterior_inverted
+  id: huskers_alternating_exterior_inverted
   icon: mdi:palette
   entities:
     light.light_front_left:
