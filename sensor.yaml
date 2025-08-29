@@ -32,3 +32,19 @@
   entity_id: sensor.kneplatt72_pressure
   state_characteristic: change
   max_age: { hours: 24 }
+
+# === KNEPLATT72 — 24h CHANGE HELPERS (additions) ===
+
+- platform: statistics
+  name: KNEPLATT72 Temperature (24h Change)
+  unique_id: kneplatt72_temperature_24h_change
+  entity_id: sensor.kneplatt72_temperature
+  state_characteristic: change
+  max_age: { hours: 24 }
+
+- platform: statistics
+  name: KNEPLATT72 Humidity (24h Change)
+  unique_id: kneplatt72_humidity_24h_change
+  entity_id: sensor.kneplatt72_relative_humidity
+  state_characteristic: change
+  max_age: { hours: 24 }
