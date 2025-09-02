@@ -33,13 +33,6 @@ huskers_constants:
         - light.garage_left
         - light.garage_center
         - light.garage_right
-  sequence:
-    # This is a constants-only script that doesn't perform actions
-    # It exists to define shared variables for other scripts
-    - service: logbook.log
-      data:
-        name: 'Huskers Constants'
-        message: 'Configuration constants loaded'
 
 # --- HELPER: Check Color Support ---
 huskers_check_color_support:
@@ -393,7 +386,7 @@ huskers_td_burst_bmp_theater:
   alias: 'Huskers: TD Burst BPM (Theater)'
   mode: restart
   sequence:
-    - service: script.huskers_td_burst_bpm
+    - service: script.huskers_td_burst_bmp
       data:
         target_type: theater
 
@@ -401,7 +394,7 @@ huskers_td_burst_bmp_exterior:
   alias: 'Huskers: TD Burst BPM (Exterior)'
   mode: restart
   sequence:
-    - service: script.huskers_td_burst_bpm
+    - service: script.huskers_td_burst_bmp
       data:
         target_type: exterior
 
@@ -454,36 +447,6 @@ huskers_all_events_manual:
         - service: script.huskers_td_burst_bmp_theater
         - service: script.huskers_td_burst_bmp_exterior
         - service: script.huskers_led_td_burst
-
-huskers_all_events_manual2:
-  alias: 'Huskers: Manual Test (All Events v2)'
-  mode: single
-  icon: mdi:play-circle
-  sequence:
-    - parallel:
-        - service: script.huskers_theater_show_start
-        - service: script.huskers_exterior_show_start
-        - service: script.huskers_led_gameday_start
-    - delay: '00:00:02'
-    - parallel:
-        - service: script.huskers_td_burst_bmp_theater
-        - service: script.huskers_td_burst_bmp_exterior
-        - service: script.huskers_led_td_burst
-
-# --- TEST HELPER ---
-huskers_test_score_update:
-  alias: 'Huskers: Test Score + Burst'
-  mode: single
-  icon: mdi:test-tube
-  sequence:
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.huskers_last_score
-      data:
-        value: 'NU TD (test)'
-    - parallel:
-        - service: script.huskers_touchdown_burst
-        - service: script.huskers_exterior_touchdown_burst
 
 # --- LEGACY SIMPLE BURSTS (MAINTAINED FOR COMPATIBILITY) ---
 huskers_touchdown_burst:
