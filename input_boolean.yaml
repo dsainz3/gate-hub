@@ -1,17 +1,3 @@
-huskers_color_show:
-  name: Huskers Color Show
-  icon: mdi:music
-
-huskers_exterior_color_show:
-  name: Huskers Exterior Show Toggle
-  initial: off
-  icon: mdi:lightbulb-multiple
-
-huskers_debug_notifications:
-  name: 'Huskers Debug: Persistent Notifications'
-  icon: mdi:message-alert
-  initial: true
-
 huskers_test_mode:
   name: Huskers Test Mode
   icon: mdi:test-tube
@@ -19,4 +5,7 @@ huskers_test_mode:
 huskers_game_mode:
   name: Huskers Game Mode
   icon: mdi:football-helmet
-  initial: off
+
+huskers_exterior_color_show:
+  name: Huskers Exterior Color Show
+  icon: mdi:lightbulb-group
