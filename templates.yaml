@@ -1,481 +1,166 @@
-# =========================================================
-# TEMPLATE SENSORS & BINARY SENSORS - REFACTORED
-# =========================================================
-# Modern Home Assistant best practices applied:
-# - Consistent availability templates
-# - Proper error handling and fallbacks
-# - DRY principles with shared logic
-# - Better naming conventions
-# - Enhanced attributes for debugging
-# - Eliminated duplicate sensor definitions
+# =========================
+# HUSKERS GAME SENSORS - FIXED
+# =========================
+- sensor:
+    # Base score sensors (missing from your config)
+    - name: 'Huskers Our Score'
+      unique_id: huskers_our_score
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'team_score') | default(0) }}"
+      icon: mdi:scoreboard
+      attributes:
+        friendly_name: 'Nebraska Score'
 
-template:
-  # =========================
-  # WEATHER & ENVIRONMENT SENSORS
-  # =========================
-  - sensor:
-      # Pressure trend with enhanced error handling
-      - name: 'KNEPLATT72 Pressure Trend'
-        unique_id: kneplatt72_pressure_trend
-        device_class: enum
-        availability: >-
-          {{ has_value('sensor.kneplatt72_pressure') and
-             has_value('sensor.kneplatt72_pressure_24h_change') }}
-        state: >-
-          {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
-          {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+    - name: 'Huskers Opponent Score'
+      unique_id: huskers_opponent_score
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'opponent_score') | default(0) }}"
+      icon: mdi:scoreboard-outline
+      attributes:
+        friendly_name: 'Opponent Score'
 
-          {# Convert to inHg for consistent threshold #}
-          {% set delta_inhg = change if unit == 'inHg'
-              else (change / 33.8638866667) if unit in ['hPa', 'mbar']
-              else change %}
+    - name: 'Huskers Opponent Name'
+      unique_id: huskers_opponent_name
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'opponent_name') | default('Unknown') }}"
+      icon: mdi:shield
+      attributes:
+        friendly_name: 'Opponent Name'
 
-          {% set threshold = 0.02 %}
-          {% if delta_inhg >= threshold %}rising
-          {% elif delta_inhg <= -threshold %}falling
-          {% else %}steady
-          {% endif %}
-        icon: >-
-          {% set trend = this.state %}
-          {% if trend == 'rising' %}mdi:arrow-up-bold
-          {% elif trend == 'falling' %}mdi:arrow-down-bold
-          {% elif trend == 'steady' %}mdi:swap-horizontal-bold
-          {% else %}mdi:help-circle-outline
-          {% endif %}
-        attributes:
-          friendly_name: 'Pressure Trend (24h)'
-          raw_change_value: "{{ states('sensor.kneplatt72_pressure_24h_change') }}"
-          current_pressure: "{{ states('sensor.kneplatt72_pressure') }}"
-          current_unit: "{{ state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') }}"
-          delta_hpa: >-
-            {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
-            {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
-            {{ (change if unit in ['hPa', 'mbar'] else (change * 33.8638866667))  | round(2) }}
-          delta_inhg: >-
-            {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
-            {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
-            {{ (change if unit == 'inHg' else (change / 33.8638866667)) | round(3) }}
-          threshold_hpa: 0.68
-          threshold_inhg: 0.02
+    - name: 'Huskers Quarter'
+      unique_id: huskers_quarter
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
+      icon: mdi:numeric
+      attributes:
+        friendly_name: 'Current Quarter'
 
-      # Temperature trend with consistent logic
-      - name: 'KNEPLATT72 Temperature Trend'
-        unique_id: kneplatt72_temperature_trend
-        device_class: enum
-        availability: "{{ has_value('sensor.kneplatt72_temperature_24h_change') }}"
-        state: >-
-          {% set change = states('sensor.kneplatt72_temperature_24h_change') | float('invalid') %}
-          {% if change != 'invalid' %}
-            {% set threshold = 2.0 %}
-            {% if change > threshold %}rising
-            {% elif change < -threshold %}falling
-            {% else %}steady
-            {% endif %}
-          {% else %}unknown
-          {% endif %}
-        icon: >-
-          {% set change = states('sensor.kneplatt72_temperature_24h_change') | float(0) %}
-          {% if change > 2.0 %}mdi:thermometer-chevron-up
-          {% elif change < -2.0 %}mdi:thermometer-chevron-down
-          {% else %}mdi:thermometer
-          {% endif %}
-        attributes:
-          friendly_name: 'Temperature Trend (24h)'
-          delta_degf: "{{ states('sensor.kneplatt72_temperature_24h_change') | float(0) | round(1) }}"
-          threshold_degf: 2.0
-          current_temperature: "{{ states('sensor.kneplatt72_temperature') }}"
+    - name: 'Huskers Game Clock'
+      unique_id: huskers_game_clock
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'clock') | default('15:00') }}"
+      icon: mdi:clock-outline
+      attributes:
+        friendly_name: 'Game Clock'
 
-      # Humidity trend with consistent logic
-      - name: 'KNEPLATT72 Humidity Trend'
-        unique_id: kneplatt72_humidity_trend
-        device_class: enum
-        availability: "{{ has_value('sensor.kneplatt72_humidity_24h_change') }}"
-        state: >-
-          {% set change = states('sensor.kneplatt72_humidity_24h_change') | float('invalid') %}
-          {% if change != 'invalid' %}
-            {% set threshold = 5.0 %}
-            {% if change > threshold %}rising
-            {% elif change < -threshold %}falling
-            {% else %}steady
-            {% endif %}
-          {% else %}unknown
-          {% endif %}
-        icon: >-
-          {% set change = states('sensor.kneplatt72_humidity_24h_change') | float(0) %}
-          {% if change > 5.0 %}mdi:water-plus
-          {% elif change < -5.0 %}mdi:water-minus
-          {% else %}mdi:water-percent
-          {% endif %}
-        attributes:
-          friendly_name: 'Humidity Trend (24h)'
-          delta_percent: "{{ states('sensor.kneplatt72_humidity_24h_change') | float(0) | round(1) }}"
-          threshold_percent: 5.0
-          current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
-
-  # =========================
-  # NETWORK & CONNECTIVITY SENSORS
-  # =========================
-  - sensor:
-      # Network device counts with better error handling
-      - name: 'Network Active Hosts (Nmap)'
-        unique_id: network_nmap_active_hosts
-        icon: mdi:lan
-        availability: "{{ integration_entities('nmap_tracker') | length > 0 }}"
-        state: >-
-          {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
-          {% set active_devices = expand(nmap_entities)
-              | selectattr('domain', 'equalto', 'device_tracker')
-              | selectattr('state', 'equalto', 'home')
-              | list %}
-          {{ active_devices | length }}
-        attributes:
-          friendly_name: 'Active Network Hosts'
-          total_tracked: >-
-            {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
-            {{ expand(nmap_entities) | selectattr('domain', 'equalto', 'device_tracker') | list | length }}
-          integration: nmap_tracker
-
-      - name: 'Network Clients Online (TP-Link)'
-        unique_id: network_tplink_clients_online
-        icon: mdi:wifi
-        availability: "{{ integration_entities('tplink_router') | length > 0 }}"
-        state: >-
-          {% set tplink_entities = integration_entities('tplink_router') | default([]) %}
-          {% set online_devices = expand(tplink_entities)
-              | selectattr('domain', 'equalto', 'device_tracker')
-              | selectattr('state', 'equalto', 'home')
-              | list %}
-          {{ online_devices | length }}
-        attributes:
-          friendly_name: 'TP-Link Clients Online'
-          integration: tplink_router
-
-      # Internet connectivity status with latency
-      - name: 'Internet Connectivity Status'
-        unique_id: internet_connectivity_status
-        availability: "{{ has_value('binary_sensor.internet_reachable') }}"
-        state: >-
-          {% if is_state('binary_sensor.internet_reachable', 'on') %}
-            {% set latency = states('sensor.internet_reachable_latency') | float(-1) %}
-            {% if latency >= 0 %}
-              Online ({{ latency | round(0) }}ms)
-            {% else %}
-              Online
-            {% endif %}
-          {% else %}
-            Offline
-          {% endif %}
-        icon: >-
-          {% if is_state('binary_sensor.internet_reachable', 'on') %}mdi:check-network
-          {% else %}mdi:close-network
-          {% endif %}
-        attributes:
-          friendly_name: 'Internet Status'
-          is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
-          latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
-
-  # =========================
-  # HUSKERS GAME SENSORS
-  # =========================
-  - sensor:
-      # Enhanced game timing sensor
-      - name: 'Huskers Kickoff In'
-        unique_id: huskers_kickoff_in
-        device_class: duration
-        unit_of_measurement: 'min'
-        availability: >-
-          {{ has_value('sensor.team_tracker') and
-             state_attr('sensor.team_tracker', 'Date') is not none }}
-        state: >-
-          {% set game_date = state_attr('sensor.team_tracker', 'Date') %}
-          {% set kickoff_dt = as_datetime(game_date) %}
-          {% if kickoff_dt %}
-            {% set minutes_until = ((kickoff_dt - now()).total_seconds() / 60) | round(0) %}
-            {{ [minutes_until, 0] | max }}
-          {% else %}
-            0
-          {% endif %}
-        icon: mdi:clock-outline
-        attributes:
-          friendly_name: 'Minutes Until Kickoff'
-          kickoff_datetime: >-
-            {% set game_date = state_attr('sensor.team_tracker', 'Date') %}
-            {{ as_datetime(game_date) | as_local if game_date else none }}
-          kickoff_formatted: >-
-            {% set game_date = state_attr('sensor.team_tracker', 'Date') %}
-            {% set dt = as_datetime(game_date) %}
-            {% if dt %}
-              {{ as_local(dt).strftime('%b %d, %Y at %I:%M %p %Z') }}
-            {% else %}
-              Unknown
-            {% endif %}
-          opponent: "{{ state_attr('sensor.team_tracker', 'opponent_name') | default('Unknown') }}"
-          location: "{{ state_attr('sensor.team_tracker', 'location') | default('Unknown') }}"
-
-      # Game status with better logic
-      - name: 'Huskers Game Status'
-        unique_id: huskers_game_status
-        device_class: enum
-        availability: "{{ has_value('sensor.huskers_kickoff_in') }}"
-        state: >-
-          {% set minutes_until = states('sensor.huskers_kickoff_in') | int(-1) %}
-          {% if minutes_until < 0 %}
-            finished
-          {% elif 0 < minutes_until <= 120 %}
-            pregame
-          {% elif minutes_until > 120 %}
-            scheduled
-          {% else %}
-            in_progress
-          {% endif %}
-        icon: >-
-          {% set status = this.state %}
-          {% if status == 'pregame' %}mdi:clock-fast
-          {% elif status == 'in_progress' %}mdi:football
-          {% elif status == 'finished' %}mdi:flag-checkered
-          {% else %}mdi:calendar-clock
-          {% endif %}
-        attributes:
-          friendly_name: 'Game Status'
-          minutes_until_kickoff: "{{ states('sensor.huskers_kickoff_in') }}"
-
-      # Next game information sensor
-      - name: 'Huskers Next Game Info'
-        unique_id: huskers_next_game_info
-        availability: "{{ has_value('sensor.nebraska_football') }}"
-        state: >-
-          {{ states('sensor.nebraska_football') }}
-        icon: mdi:football-helmet
-        attributes:
-          friendly_name: 'Next Game Information'
-          game_date: "{{ state_attr('sensor.team_tracker', 'Date') }}"
-          opponent: "{{ state_attr('sensor.team_tracker', 'opponent_name') | default('Unknown') }}"
-          location: "{{ state_attr('sensor.team_tracker', 'location') | default('Unknown') }}"
-          team_rank: "{{ state_attr('sensor.team_tracker', 'team_rank') | default('Unranked') }}"
-          opponent_rank: "{{ state_attr('sensor.team_tracker', 'opponent_rank') | default('Unranked') }}"
-
-      # Formatted kickoff time in Central timezone
-      - name: 'Huskers Kickoff (Central)'
-        unique_id: huskers_kickoff_central
-        icon: mdi:calendar-clock
-        availability: >-
-          {{ has_value('sensor.team_tracker') and
-             state_attr('sensor.team_tracker', 'Date') is not none }}
-        state: >-
-          {% set dt = as_datetime(state_attr('sensor.team_tracker', 'Date')) %}
+    # Fixed kickoff timing sensor
+    - name: 'Huskers Kickoff In'
+      unique_id: huskers_kickoff_in
+      device_class: duration
+      unit_of_measurement: 'min'
+      availability: >-
+        {{ has_value('sensor.husker_team') and
+           state_attr('sensor.husker_team', 'date') is not none }}
+      state: >-
+        {% set game_date = state_attr('sensor.husker_team', 'date') %}
+        {% set kickoff_dt = as_datetime(game_date) %}
+        {% if kickoff_dt %}
+          {% set minutes_until = ((kickoff_dt - now()).total_seconds() / 60) | round(0) %}
+          {{ [minutes_until, 0] | max }}
+        {% else %}
+          0
+        {% endif %}
+      icon: mdi:clock-outline
+      attributes:
+        friendly_name: 'Minutes Until Kickoff'
+        kickoff_datetime: >-
+          {% set game_date = state_attr('sensor.husker_team', 'date') %}
+          {{ as_datetime(game_date) | as_local if game_date else none }}
+        kickoff_formatted: >-
+          {% set game_date = state_attr('sensor.husker_team', 'date') %}
+          {% set dt = as_datetime(game_date) %}
           {% if dt %}
             {{ as_local(dt).strftime('%b %d, %Y at %I:%M %p %Z') }}
           {% else %}
             Unknown
           {% endif %}
-        attributes:
-          friendly_name: 'Kickoff Time (Local)'
-          iso_format: >-
-            {% set dt = as_datetime(state_attr('sensor.team_tracker', 'Date')) %}
-            {{ as_local(dt).isoformat() if dt else none }}
+        opponent: "{{ state_attr('sensor.husker_team', 'opponent_name') | default('Unknown') }}"
+        location: "{{ state_attr('sensor.husker_team', 'location') | default('Unknown') }}"
 
-  # =========================
-  # HUSKERS EFFECTIVE (PROXY) SENSORS
-  # =========================
-  - sensor:
-      # Effective kickoff countdown (with manual override)
-      - name: 'Huskers Kickoff In (Effective)'
-        unique_id: huskers_kickoff_in_effective
-        unit_of_measurement: 'min'
-        availability: >-
-          {{ has_value('sensor.huskers_kickoff_in') or
-             has_value('input_number.huskers_kickoff_in_manual') }}
-        state: >-
-          {% if has_value('sensor.huskers_kickoff_in') %}
-            {{ states('sensor.huskers_kickoff_in') | float(0) }}
-          {% elif has_value('input_number.huskers_kickoff_in_manual') %}
-            {{ states('input_number.huskers_kickoff_in_manual') | float(0) }}
-          {% else %}
-            0
-          {% endif %}
-        icon: mdi:timer-sand
-        attributes:
-          friendly_name: 'Effective Kickoff Countdown'
-          source: >-
-            {% if has_value('sensor.huskers_kickoff_in') %}
-              sensor
-            {% else %}
-              manual
-            {% endif %}
-          sensor_value: "{{ states('sensor.huskers_kickoff_in') }}"
-          manual_value: "{{ states('input_number.huskers_kickoff_in_manual') }}"
-          manual_override_available: "{{ has_value('input_number.huskers_kickoff_in_manual') }}"
+    # Fixed game status sensor
+    - name: 'Huskers Game Status'
+      unique_id: huskers_game_status
+      device_class: enum
+      availability: "{{ has_value('sensor.huskers_kickoff_in') }}"
+      state: >-
+        {% set minutes_until = states('sensor.huskers_kickoff_in') | int(-1) %}
+        {% if minutes_until < 0 %}
+          finished
+        {% elif 0 < minutes_until <= 120 %}
+          pregame
+        {% elif minutes_until > 120 %}
+          scheduled
+        {% else %}
+          in_progress
+        {% endif %}
+      icon: >-
+        {% set status = this.state %}
+        {% if status == 'pregame' %}mdi:clock-fast
+        {% elif status == 'in_progress' %}mdi:football
+        {% elif status == 'finished' %}mdi:flag-checkered
+        {% else %}mdi:calendar-clock
+        {% endif %}
+      attributes:
+        friendly_name: 'Game Status'
+        minutes_until_kickoff: "{{ states('sensor.huskers_kickoff_in') }}"
 
-      # Effective score (with manual override)
-      - name: 'Huskers Our Score (Effective)'
-        unique_id: huskers_our_score_effective
-        availability: >-
-          {{ has_value('sensor.huskers_our_score') or
-             has_value('input_number.huskers_our_score_manual') }}
-        state: >-
-          {% if has_value('sensor.huskers_our_score') %}
-            {{ states('sensor.huskers_our_score') | int(0) }}
-          {% elif has_value('input_number.huskers_our_score_manual') %}
-            {{ states('input_number.huskers_our_score_manual') | int(0) }}
-          {% else %}
-            0
-          {% endif %}
-        icon: mdi:scoreboard
-        attributes:
-          friendly_name: 'Nebraska Score (Effective)'
-          source: >-
-            {% if has_value('sensor.huskers_our_score') %}
-              sensor
-            {% else %}
-              manual
-            {% endif %}
-          sensor_value: "{{ states('sensor.huskers_our_score') }}"
-          manual_value: "{{ states('input_number.huskers_our_score_manual') }}"
-          manual_override_available: "{{ has_value('input_number.huskers_our_score_manual') }}"
+    # Fixed next game info
+    - name: 'Huskers Next Game Info'
+      unique_id: huskers_next_game_info
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ states('sensor.husker_team') }}"
+      icon: mdi:football-helmet
+      attributes:
+        friendly_name: 'Next Game Information'
+        game_date: "{{ state_attr('sensor.husker_team', 'date') }}"
+        opponent: "{{ state_attr('sensor.husker_team', 'opponent_name') | default('Unknown') }}"
+        location: "{{ state_attr('sensor.husker_team', 'venue') | default('Unknown') }}"
+        team_rank: "{{ state_attr('sensor.husker_team', 'team_rank') | default('Unranked') }}"
+        opponent_rank: "{{ state_attr('sensor.husker_team', 'opponent_rank') | default('Unranked') }}"
 
-  # =========================
-  # BINARY SENSORS
-  # =========================
-  - binary_sensor:
-      # Pregame window (120 minutes before kickoff)
-      - name: 'Huskers Pregame Window'
-        unique_id: huskers_pregame_window
-        device_class: running
-        availability: "{{ has_value('sensor.huskers_kickoff_in_effective') }}"
-        state: >-
-          {% set minutes_until = states('sensor.huskers_kickoff_in_effective') | int(-1) %}
-          {{ 0 < minutes_until <= 120 }}
-        icon: >-
-          {% if this.state %}mdi:clock-fast{% else %}mdi:clock-outline{% endif %}
-        attributes:
-          friendly_name: 'Pregame Window (2 hours)'
-          minutes_remaining: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
-          window_start_minutes: 120
-          window_end_minutes: 0
+    # Next game start time
+    - name: 'Huskers Next Game Start'
+      unique_id: huskers_next_game_start
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'date') }}"
+      icon: mdi:calendar-start
+      attributes:
+        friendly_name: 'Next Game Start Time'
 
-      # T-minus 20 trigger window (19-21 minutes before kickoff)
-      - name: 'Huskers T-Minus 20 Window'
-        unique_id: huskers_t_minus_20_window
-        device_class: running
-        availability: "{{ has_value('sensor.huskers_kickoff_in_effective') }}"
-        state: >-
-          {% set minutes_until = states('sensor.huskers_kickoff_in_effective') | int(-1) %}
-          {{ 19 < minutes_until < 21 }}
-        icon: >-
-          {% if this.state %}mdi:rocket-launch{% else %}mdi:rocket-launch-outline{% endif %}
-        attributes:
-          friendly_name: 'T-20 Showtime Window'
-          minutes_remaining: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
+    # Next game status
+    - name: 'Huskers Next Game Status'
+      unique_id: huskers_next_game_status
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ states('sensor.husker_team') }}"
+      icon: mdi:information
+      attributes:
+        friendly_name: 'Next Game Status'
 
-      # Game in progress detection (placeholder - needs real implementation)
-      - name: 'Huskers Game In Progress (TT)'
-        unique_id: huskers_game_in_progress_tt
-        device_class: running
-        state: >-
-          {# TODO: Implement when upstream game status is available #}
-          {% set kickoff_minutes = states('sensor.huskers_kickoff_in_effective') | int(999) %}
-          {% set game_started = kickoff_minutes <= 0 %}
-          {% set game_ended = false %}  {# TODO: Add end-of-game detection #}
-          {{ game_started and not game_ended }}
-        icon: >-
-          {% if this.state %}mdi:football{% else %}mdi:football-helmet{% endif %}
-        attributes:
-          friendly_name: 'Game In Progress'
-          implementation_status: 'placeholder - needs upstream data'
-          estimated_start: "{{ states('sensor.huskers_kickoff_in_effective') | int(999) <= 0 }}"
+    # Formatted kickoff time in Central timezone
+    - name: 'Huskers Kickoff (Central)'
+      unique_id: huskers_kickoff_central
+      icon: mdi:calendar-clock
+      availability: >-
+        {{ has_value('sensor.husker_team') and
+           state_attr('sensor.husker_team', 'date') is not none }}
+      state: >-
+        {% set dt = as_datetime(state_attr('sensor.husker_team', 'date')) %}
+        {% if dt %}
+          {{ as_local(dt).strftime('%b %d, %Y at %I:%M %p %Z') }}
+        {% else %}
+          Unknown
+        {% endif %}
+      attributes:
+        friendly_name: 'Kickoff Time (Local)'
+        iso_format: >-
+          {% set dt = as_datetime(state_attr('sensor.husker_team', 'date')) %}
+          {{ as_local(dt).isoformat() if dt else none }}
 
-      # Postgame window (placeholder - needs real implementation)
-      - name: 'Huskers Postgame Window'
-        unique_id: huskers_postgame_window
-        device_class: running
-        state: >-
-          {# TODO: Implement when end-of-game timing is available #}
-          false
-        icon: mdi:flag-checkered
-        attributes:
-          friendly_name: 'Postgame Window'
-          implementation_status: 'placeholder - needs end-of-game detection'
-
-      # Test mode active indicator
-      - name: 'Huskers Test Mode Active'
-        unique_id: huskers_test_mode_active
-        device_class: running
-        availability: "{{ has_value('input_boolean.huskers_test_mode') }}"
-        state: >-
-          {{ is_state('input_boolean.huskers_test_mode', 'on') }}
-        icon: >-
-          {% if this.state %}mdi:test-tube{% else %}mdi:test-tube-off{% endif %}
-        attributes:
-          friendly_name: 'Test Mode Active'
-
-      # Game mode active indicator
-      - name: 'Huskers Game Mode Active'
-        unique_id: huskers_game_mode_active
-        device_class: running
-        availability: "{{ has_value('input_boolean.huskers_game_mode') }}"
-        state: >-
-          {{ is_state('input_boolean.huskers_game_mode', 'on') }}
-        icon: >-
-          {% if this.state %}mdi:football-helmet{% else %}mdi:football-helmet-outline{% endif %}
-        attributes:
-          friendly_name: 'Game Mode Active'
-
-# =========================================================
-# STATISTICS SENSORS (for trend calculations)
-# =========================================================
-# These create the 24-hour change sensors used by the trend templates above
-sensor:
-  - platform: statistics
-    name: KNEPLATT72 Pressure (24h Change)
-    unique_id: kneplatt72_pressure_24h_change
-    entity_id: sensor.kneplatt72_pressure
-    state_characteristic: change
-    max_age:
-      hours: 24
-    precision: 3
-
-  - platform: statistics
-    name: KNEPLATT72 Temperature (24h Change)
-    unique_id: kneplatt72_temperature_24h_change
-    entity_id: sensor.kneplatt72_temperature
-    state_characteristic: change
-    max_age:
-      hours: 24
-    precision: 1
-
-  - platform: statistics
-    name: KNEPLATT72 Humidity (24h Change)
-    unique_id: kneplatt72_humidity_24h_change
-    entity_id: sensor.kneplatt72_relative_humidity
-    state_characteristic: change
-    max_age:
-      hours: 24
-    precision: 1
-
-  # Statistics for weather means (for completeness)
-  - platform: statistics
-    name: KNEPLATT72 Wind Speed (24h Mean)
-    unique_id: kneplatt72_wind_speed_24h_mean
-    entity_id: sensor.kneplatt72_wind_speed
-    state_characteristic: mean
-    max_age:
-      hours: 24
-    precision: 1
-
-  - platform: statistics
-    name: KNEPLATT72 Temperature (24h Mean)
-    unique_id: kneplatt72_temperature_24h_mean
-    entity_id: sensor.kneplatt72_temperature
-    state_characteristic: mean
-    max_age:
-      hours: 24
-    precision: 1
-
-  - platform: statistics
-    name: KNEPLATT72 Humidity (24h Mean)
-    unique_id: kneplatt72_humidity_24h_mean
-    entity_id: sensor.kneplatt72_relative_humidity
-    state_characteristic: mean
-    max_age:
-      hours: 24
-    precision: 1
+    # Test score sensor for manual testing
+    - name: 'Huskers Last Score (test)'
+      unique_id: huskers_last_score_test
+      availability: "{{ has_value('input_number.huskers_our_score') }}"
+      state: "{{ states('input_number.huskers_our_score') | default(0) }}"
+      icon: mdi:test-tube
+      attributes:
+        friendly_name: 'Last Test Score'

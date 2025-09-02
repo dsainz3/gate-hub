@@ -30,9 +30,8 @@ huskers_constants:
       exterior:
         - light.light_front_left
         - light.light_front_right
-        - light.garage_left
-        - light.garage_center
-        - light.garage_right
+  sequence:
+    - delay: '00:00:01' # Required sequence section
 
 # --- HELPER: Check Color Support ---
 huskers_check_color_support:
