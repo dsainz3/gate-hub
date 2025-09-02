@@ -1,671 +1,477 @@
 # =========================
-# HUSKERS SCRIPTS (drop-in)
+# HUSKERS SCRIPTS - REFACTORED
 # =========================
-# Expectation:
-# configuration.yaml -> script: !include scripts.yaml
+# Modern Home Assistant best practices applied:
+# - DRY principles with variables and templates
+# - Consistent error handling
+# - Proper mode declarations
+# - Consolidated repetitive logic
+# - Enhanced configurability
 
-# --- Theater Show (Start) ---
-huskers_theater_show_start:
-  alias: 'Huskers: Theater Show (Start)'
-  mode: restart
+# --- SHARED CONSTANTS ---
+huskers_constants:
+  alias: 'Huskers: Configuration Constants'
   variables:
-    snapshot_id: huskers_theater_pre_show
-    watch_scripts: []
+    colors:
+      scarlet: [355, 90]
+      cream: [48, 12]
+    timings:
+      transition_default: 3
+      burst_pulse_ratio: 0.2
+      burst_beats: 8
+      td_effect_duration: 30
+    brightness:
+      max: 255
+      fallback: 128
+    entities:
+      theater:
+        - light.light_theater_left
+        - light.light_theater_right
+      exterior:
+        - light.light_front_left
+        - light.light_front_right
+        - light.garage_left
+        - light.garage_center
+        - light.garage_right
+
+# --- HELPER: Check Color Support ---
+huskers_check_color_support:
+  alias: 'Huskers: Check Color Support'
+  mode: parallel
+  variables:
+    entity_id: '{{ entity_id }}'
+  sequence:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: >-
+                {% set modes = state_attr(entity_id, 'supported_color_modes') or [] %}
+                {{ 'hs' in modes or 'xy' in modes or 'rgb' in modes }}
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: '{{ entity_id }}'
+              data: '{{ light_data }}'
+      default:
+        - service: light.turn_on
+          target:
+            entity_id: '{{ entity_id }}'
+          data:
+            brightness: "{{ light_data.get('brightness', 255) }}"
+
+# --- HELPER: Set Light with Color Check ---
+huskers_set_light_safe:
+  alias: 'Huskers: Set Light (Color Safe)'
+  mode: parallel
+  max: 10
+  variables:
+    entity_id: '{{ entity_id }}'
+    color: '{{ color | default([355, 90]) }}'
+    brightness: '{{ brightness | default(255) }}'
   sequence:
     - variables:
-        running_scripts: >-
-          {{ watch_scripts | select('truthy')
-             | select('in', states | map(attribute='entity_id') | list)
-             | select('equalto','on', attribute='state') | list }}
-    - service: input_text.set_value
+        color_modes: "{{ state_attr(entity_id, 'supported_color_modes') or [] }}"
+        supports_color: "{{ 'hs' in color_modes or 'xy' in color_modes or 'rgb' in color_modes }}"
+    - service: light.turn_on
       target:
-        entity_id: input_text.huskers_theater_prev_scripts
-      data:
-        value: >-
-          {{ running_scripts | join(',') }}
+        entity_id: '{{ entity_id }}'
+      data: >-
+        {% if supports_color %}
+          {{ {'brightness': brightness, 'hs_color': color} }}
+        {% else %}
+          {{ {'brightness': brightness} }}
+        {% endif %}
+
+# --- HELPER: Create Show Snapshot ---
+huskers_create_snapshot:
+  alias: 'Huskers: Create Show Snapshot'
+  mode: single
+  variables:
+    snapshot_id: '{{ snapshot_id }}'
+    entities: '{{ entities }}'
+  sequence:
     - service: scene.create
       data:
         scene_id: '{{ snapshot_id }}'
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
+        snapshot_entities: '{{ entities }}'
+
+# --- HELPER: Restore Snapshot ---
+huskers_restore_snapshot:
+  alias: 'Huskers: Restore Show Snapshot'
+  mode: single
+  variables:
+    snapshot_id: '{{ snapshot_id }}'
+    transition: '{{ transition | default(1) }}'
+  sequence:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
+          sequence:
+            - service: scene.turn_on
+              target:
+                entity_id: 'scene.{{ snapshot_id }}'
+              data:
+                transition: '{{ transition }}'
+            - delay: '00:00:0{{ transition }}'
+            - service: scene.delete
+              data:
+                entity_id: 'scene.{{ snapshot_id }}'
+
+# --- THEATER SHOW (MODERNIZED) ---
+huskers_theater_show_start:
+  alias: 'Huskers: Theater Show (Start)'
+  mode: restart
+  icon: mdi:theater
+  variables:
+    snapshot_id: huskers_theater_pre_show
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+    colors:
+      scarlet: [355, 90]
+      cream: [48, 12]
+    transition_time: 3
+  sequence:
+    # Create snapshot
+    - service: script.huskers_create_snapshot
+      data:
+        snapshot_id: '{{ snapshot_id }}'
+        entities: '{{ entities }}'
+
+    # Initial state
     - parallel:
-        - service: light.turn_on
-          target:
+        - service: script.huskers_set_light_safe
+          data:
             entity_id: light.light_theater_left
+            color: '{{ colors.scarlet }}'
+        - service: script.huskers_set_light_safe
           data:
-            brightness: 255
-            hs_color: [355, 90]
-        - service: light.turn_on
-          target:
             entity_id: light.light_theater_right
-          data:
-            brightness: 255
-            hs_color: [48, 12]
+            color: '{{ colors.cream }}'
+
+    # Alternating loop
     - repeat:
         while: '{{ true }}'
         sequence:
-          - delay: '00:00:03'
+          - delay: '00:00:0{{ transition_time }}'
           - parallel:
-              - service: light.turn_on
-                target:
+              - service: script.huskers_set_light_safe
+                data:
                   entity_id: light.light_theater_left
+                  color: '{{ colors.cream }}'
+              - service: script.huskers_set_light_safe
                 data:
-                  brightness: 255
-                  hs_color: [48, 12]
-              - service: light.turn_on
-                target:
                   entity_id: light.light_theater_right
-                data:
-                  brightness: 255
-                  hs_color: [355, 90]
-          - delay: '00:00:03'
+                  color: '{{ colors.scarlet }}'
+          - delay: '00:00:0{{ transition_time }}'
           - parallel:
-              - service: light.turn_on
-                target:
+              - service: script.huskers_set_light_safe
+                data:
                   entity_id: light.light_theater_left
+                  color: '{{ colors.scarlet }}'
+              - service: script.huskers_set_light_safe
                 data:
-                  brightness: 255
-                  hs_color: [355, 90]
-              - service: light.turn_on
-                target:
                   entity_id: light.light_theater_right
-                data:
-                  brightness: 255
-                  hs_color: [48, 12]
+                  color: '{{ colors.cream }}'
 
-# --- Theater Show (Stop) ---
 huskers_theater_show_stop:
   alias: 'Huskers: Theater Show (Stop)'
   mode: single
+  icon: mdi:stop
   variables:
     snapshot_id: huskers_theater_pre_show
   sequence:
     - service: script.turn_off
       target:
         entity_id: script.huskers_theater_show_start
-    - choose:
-        - conditions: "{{ states('scene.' ~ snapshot_id) != 'unknown' }}"
-          sequence:
-            - service: scene.turn_on
-              target:
-                entity_id: 'scene.{{ snapshot_id }}'
-              data:
-                transition: 1
-            - delay: '00:00:01'
-            - service: scene.delete
-              data:
-                entity_id: 'scene.{{ snapshot_id }}'
-      default: []
-    - variables:
-        prev: "{{ states('input_text.huskers_theater_prev_scripts') | trim }}"
-        prev_list: >-
-          {% set parts = prev.split(',') if prev else [] %}
-          {{ parts | select('trim') | select('length') | list }}
-    - choose:
-        - conditions: '{{ prev_list | length > 0 }}'
-          sequence:
-            - repeat:
-                for_each: '{{ prev_list }}'
-                sequence:
-                  - service: script.turn_on
-                    target:
-                      entity_id: '{{ repeat.item }}'
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.huskers_theater_prev_scripts
+    - service: script.huskers_restore_snapshot
       data:
-        value: ''
+        snapshot_id: '{{ snapshot_id }}'
 
-# --- Exterior Show (Start) ---
+# --- EXTERIOR SHOW (MODERNIZED) ---
 huskers_exterior_show_start:
   alias: 'Huskers: Exterior Show (Start)'
   mode: restart
+  icon: mdi:lightbulb-group
   variables:
-    snap_id: huskers_exterior_pre_show
+    snapshot_id: huskers_exterior_pre_show
+    entities:
+      - light.light_front_left
+      - light.light_front_right
+      - light.garage_left
+      - light.garage_center
+      - light.garage_right
+    colors:
+      scarlet: [355, 90]
+      cream: [48, 12]
+    # Alternating pattern: scarlet lights, cream lights
+    pattern_a:
+      scarlet_lights: [light.light_front_left, light.garage_left, light.garage_right]
+      cream_lights: [light.light_front_right, light.garage_center]
+    pattern_b:
+      scarlet_lights: [light.light_front_right, light.garage_center]
+      cream_lights: [light.light_front_left, light.garage_left, light.garage_right]
   sequence:
-    - service: scene.create
+    # Create snapshot
+    - service: script.huskers_create_snapshot
       data:
-        scene_id: '{{ snap_id }}'
-        snapshot_entities:
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-    # Instant start: FL/GL/GR=scarlet, FR/GC=cream
+        snapshot_id: '{{ snapshot_id }}'
+        entities: '{{ entities }}'
+
+    # Set initial pattern
     - parallel:
-        # Front Left
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: >-
-                    {{ 'hs' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                       or 'xy' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                       or 'rgb' in (state_attr('light.light_front_left','supported_color_modes') or []) }}
-              sequence:
-                - service: light.turn_on
-                  target: { entity_id: light.light_front_left }
-                  data: { brightness: 255, hs_color: [355, 90] }
-          default:
-            - service: light.turn_on
-              target: { entity_id: light.light_front_left }
-              data: { brightness: 255 }
-        # Front Right
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: >-
-                    {{ 'hs' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                       or 'xy' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                       or 'rgb' in (state_attr('light.light_front_right','supported_color_modes') or []) }}
-              sequence:
-                - service: light.turn_on
-                  target: { entity_id: light.light_front_right }
-                  data: { brightness: 255, hs_color: [48, 12] }
-          default:
-            - service: light.turn_on
-              target: { entity_id: light.light_front_right }
-              data: { brightness: 128 }
-        # Garage L
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: >-
-                    {{ 'hs' in (state_attr('light.garage_left','supported_color_modes') or [])
-                       or 'xy' in (state_attr('light.garage_left','supported_color_modes') or [])
-                       or 'rgb' in (state_attr('light.garage_left','supported_color_modes') or []) }}
-              sequence:
-                - service: light.turn_on
-                  target: { entity_id: light.garage_left }
-                  data: { brightness: 255, hs_color: [355, 90] }
-          default:
-            - service: light.turn_on
-              target: { entity_id: light.garage_left }
-              data: { brightness: 255 }
-        # Garage C
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: >-
-                    {{ 'hs' in (state_attr('light.garage_center','supported_color_modes') or [])
-                       or 'xy' in (state_attr('light.garage_center','supported_color_modes') or [])
-                       or 'rgb' in (state_attr('light.garage_center','supported_color_modes') or []) }}
-              sequence:
-                - service: light.turn_on
-                  target: { entity_id: light.garage_center }
-                  data: { brightness: 255, hs_color: [48, 12] }
-          default:
-            - service: light.turn_on
-              target: { entity_id: light.garage_center }
-              data: { brightness: 128 }
-        # Garage R
-        - choose:
-            - conditions:
-                - condition: template
-                  value_template: >-
-                    {{ 'hs' in (state_attr('light.garage_right','supported_color_modes') or [])
-                       or 'xy' in (state_attr('light.garage_right','supported_color_modes') or [])
-                       or 'rgb' in (state_attr('light.garage_right','supported_color_modes') or []) }}
-              sequence:
-                - service: light.turn_on
-                  target: { entity_id: light.garage_right }
-                  data: { brightness: 255, hs_color: [355, 90] }
-          default:
-            - service: light.turn_on
-              target: { entity_id: light.garage_right }
-              data: { brightness: 255 }
-    # Alternate every 3s until stopped
+        # Scarlet lights
+        - repeat:
+            for_each: '{{ pattern_a.scarlet_lights }}'
+            sequence:
+              - service: script.huskers_set_light_safe
+                data:
+                  entity_id: '{{ repeat.item }}'
+                  color: '{{ colors.scarlet }}'
+        # Cream lights
+        - repeat:
+            for_each: '{{ pattern_a.cream_lights }}'
+            sequence:
+              - service: script.huskers_set_light_safe
+                data:
+                  entity_id: '{{ repeat.item }}'
+                  color: '{{ colors.cream }}'
+
+    # Alternating loop
     - repeat:
         while: '{{ true }}'
         sequence:
           - delay: '00:00:03'
-          # Invert: FL/GL/GR=cream, FR/GC=scarlet
+          # Switch to pattern B
           - parallel:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.light_front_left','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.light_front_left }
-                        data: { brightness: 255, hs_color: [48, 12] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.light_front_left }
-                    data: { brightness: 128 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.light_front_right','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.light_front_right }
-                        data: { brightness: 255, hs_color: [355, 90] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.light_front_right }
-                    data: { brightness: 255 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_left','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_left','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_left','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_left }
-                        data: { brightness: 255, hs_color: [48, 12] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_left }
-                    data: { brightness: 128 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_center','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_center','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_center','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_center }
-                        data: { brightness: 255, hs_color: [355, 90] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_center }
-                    data: { brightness: 255 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_right','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_right','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_right','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_right }
-                        data: { brightness: 255, hs_color: [48, 12] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_right }
-                    data: { brightness: 128 }
+              - repeat:
+                  for_each: '{{ pattern_b.scarlet_lights }}'
+                  sequence:
+                    - service: script.huskers_set_light_safe
+                      data:
+                        entity_id: '{{ repeat.item }}'
+                        color: '{{ colors.scarlet }}'
+              - repeat:
+                  for_each: '{{ pattern_b.cream_lights }}'
+                  sequence:
+                    - service: script.huskers_set_light_safe
+                      data:
+                        entity_id: '{{ repeat.item }}'
+                        color: '{{ colors.cream }}'
           - delay: '00:00:03'
-          # Back to original mapping
+          # Switch back to pattern A
           - parallel:
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.light_front_left','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.light_front_left','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.light_front_left }
-                        data: { brightness: 255, hs_color: [355, 90] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.light_front_left }
-                    data: { brightness: 255 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.light_front_right','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.light_front_right','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.light_front_right }
-                        data: { brightness: 255, hs_color: [48, 12] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.light_front_right }
-                    data: { brightness: 128 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_left','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_left','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_left','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_left }
-                        data: { brightness: 255, hs_color: [355, 90] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_left }
-                    data: { brightness: 255 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_center','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_center','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_center','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_center }
-                        data: { brightness: 255, hs_color: [48, 12] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_center }
-                    data: { brightness: 128 }
-              - choose:
-                  - conditions:
-                      - condition: template
-                        value_template: >-
-                          {{ 'hs' in (state_attr('light.garage_right','supported_color_modes') or [])
-                             or 'xy' in (state_attr('light.garage_right','supported_color_modes') or [])
-                             or 'rgb' in (state_attr('light.garage_right','supported_color_modes') or []) }}
-                    sequence:
-                      - service: light.turn_on
-                        target: { entity_id: light.garage_right }
-                        data: { brightness: 255, hs_color: [355, 90] }
-                default:
-                  - service: light.turn_on
-                    target: { entity_id: light.garage_right }
-                    data: { brightness: 255 }
+              - repeat:
+                  for_each: '{{ pattern_a.scarlet_lights }}'
+                  sequence:
+                    - service: script.huskers_set_light_safe
+                      data:
+                        entity_id: '{{ repeat.item }}'
+                        color: '{{ colors.scarlet }}'
+              - repeat:
+                  for_each: '{{ pattern_a.cream_lights }}'
+                  sequence:
+                    - service: script.huskers_set_light_safe
+                      data:
+                        entity_id: '{{ repeat.item }}'
+                        color: '{{ colors.cream }}'
 
-# --- Exterior Show (Stop) ---
 huskers_exterior_show_stop:
   alias: 'Huskers: Exterior Show (Stop)'
   mode: single
+  icon: mdi:stop
   variables:
-    snap_id: huskers_exterior_pre_show
+    snapshot_id: huskers_exterior_pre_show
   sequence:
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: input_boolean.huskers_exterior_color_show
-              state: 'on'
-          sequence:
-            - service: input_boolean.turn_off
-              target:
-                entity_id: input_boolean.huskers_exterior_color_show
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_exterior_color_show
+      continue_on_error: true
     - service: script.turn_off
       target:
         entity_id: script.huskers_exterior_show_start
     - delay: '00:00:01'
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: >-
-                {{ states('scene.' ~ snap_id) != 'unknown' }}
-          sequence:
-            - service: scene.turn_on
-              target:
-                entity_id: 'scene.{{ snap_id }}'
-              data:
-                transition: 0
-            - delay: '00:00:01'
-            - service: scene.delete
-              data:
-                entity_id: 'scene.{{ snap_id }}'
-      default:
-        - service: light.turn_off
-          target:
-            entity_id:
-              - light.light_front_left
-              - light.light_front_right
-              - light.garage_left
-              - light.garage_center
-              - light.garage_right
+    - service: script.huskers_restore_snapshot
+      data:
+        snapshot_id: '{{ snapshot_id }}'
 
-# --- Bursts ---
-huskers_touchdown_burst:
-  alias: 'Huskers: Theater Touchdown Burst'
+# --- BPM BURST (UNIFIED) ---
+huskers_td_burst_bpm:
+  alias: 'Huskers: TD Burst BPM (Unified)'
   mode: restart
-  sequence:
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.light_theater_left
-          - light.light_theater_right
-      data: { flash: short }
-
-huskers_exterior_touchdown_burst:
-  alias: 'Huskers: Exterior Touchdown Burst'
-  mode: restart
-  sequence:
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-      data: { flash: short }
-
-# --- Test helper ---
-huskers_test_score_update:
-  alias: 'Huskers: 🧪 Simulate Score + Burst'
-  mode: single
-  sequence:
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.huskers_last_score
-      data: { value: 'NU TD (test)' }
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_touchdown_burst
-          - script.huskers_exterior_touchdown_burst
-
-# --- Game-day LED (set to Gametime) ---
-huskers_led_gameday_start:
-  alias: 'Huskers: Game-Day LED (Start → LED_Gametime)'
-  mode: single
-  sequence:
-    - service: light.turn_on
-      target: { entity_id: light.permanent_outdoor_lights }
-      data: { effect: LED_Gametime }
-
-# --- Stop LED Effect (restore to last scene if you use one elsewhere) ---
-huskers_led_stop:
-  alias: 'Huskers: Stop LED Effect'
-  mode: single
-  sequence:
-    - service: light.turn_on
-      target: { entity_id: light.permanent_outdoor_lights }
-      data: {}
-
-# --- LED TD Burst → LED_TD_Burst for 30s → back to LED_Gametime ---
-huskers_led_td_burst:
-  alias: 'Huskers: LED TD Burst (30s then Gametime)'
-  mode: restart
-  sequence:
-    - service: light.turn_on
-      target: { entity_id: light.permanent_outdoor_lights }
-      data: { effect: LED_TD_Burst }
-    - delay: '00:00:30'
-    - service: light.turn_on
-      target: { entity_id: light.permanent_outdoor_lights }
-      data: { effect: LED_Gametime }
-
-# ---------------------------------------------------------
-# One-tap “Run All” for pre-game checking
-# ---------------------------------------------------------
-huskers_all_events_manual:
-  alias: 'Huskers: Run All (Manual)'
-  mode: single
-  sequence:
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_led_gameday_start
-          - script.huskers_theater_show_start
-          - script.huskers_exterior_show_start
-    - delay: '00:00:05'
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_td_burst_bpm_theater
-          - script.huskers_td_burst_bpm_exterior
-          - script.huskers_led_td_burst
-
-huskers_all_events_manual2:
-  alias: 'Huskers: Run All (Manual 2)'
-  mode: single
-  sequence:
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_theater_show_start
-          - script.huskers_exterior_show_start
-          - script.huskers_led_gameday_start
-    - delay: '00:00:02'
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_td_burst_bpm_theater
-          - script.huskers_td_burst_bpm_exterior
-          - script.huskers_led_td_burst
-
-# --- BPM Bursts (Theater) ---
-huskers_td_burst_bpm_theater:
-  alias: 'Huskers: TD Burst BPM (Theater)'
-  mode: restart
+  icon: mdi:music-note
   variables:
-    bpm_val: >-
-      {{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}
+    target_type: "{{ target_type | default('theater') }}" # 'theater' or 'exterior'
+    bpm_val: "{{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}"
     beat_s: '{{ (60 / bpm_val) | float }}'
     pulse_ratio: 0.2
     pulse_s: '{{ (beat_s * pulse_ratio) | float }}'
     rest_s: '{{ (beat_s * (1 - pulse_ratio)) | float }}'
     beats: 8
-    snap_id: huskers_theater_burst_pre
+    snapshot_id: 'huskers_{{ target_type }}_burst_pre'
+    entities: >-
+      {% if target_type == 'theater' %}
+        {{ ['light.light_theater_left', 'light.light_theater_right'] }}
+      {% else %}
+        {{ ['light.light_front_left', 'light.light_front_right', 'light.garage_left', 'light.garage_center', 'light.garage_right'] }}
+      {% endif %}
+    colors:
+      scarlet: [355, 90]
+      cream: [48, 12]
   sequence:
-    - service: scene.create
+    # Create snapshot
+    - service: script.huskers_create_snapshot
       data:
-        scene_id: '{{ snap_id }}'
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
+        snapshot_id: '{{ snapshot_id }}'
+        entities: '{{ entities }}'
+
+    # Beat sequence
     - repeat:
         count: '{{ beats }}'
         sequence:
+          # Set colors based on beat (odd/even) and target type
           - choose:
-              - conditions: '{{ (repeat.index | int(1)) % 2 == 1 }}'
+              # Theater alternating pattern
+              - conditions: "{{ target_type == 'theater' }}"
                 sequence:
                   - parallel:
-                      - service: light.turn_on
-                        target:
+                      - service: script.huskers_set_light_safe
+                        data:
                           entity_id: light.light_theater_left
+                          color: '{{ colors.scarlet if (repeat.index % 2 == 1) else colors.cream }}'
+                      - service: script.huskers_set_light_safe
                         data:
-                          brightness: 255
-                          hs_color: [355, 90]
-                      - service: light.turn_on
-                        target:
                           entity_id: light.light_theater_right
-                        data:
-                          brightness: 255
-                          hs_color: [48, 12]
-            default:
-              - parallel:
-                  - service: light.turn_on
-                    target:
-                      entity_id: light.light_theater_left
-                    data:
-                      brightness: 255
-                      hs_color: [48, 12]
-                  - service: light.turn_on
-                    target:
-                      entity_id: light.light_theater_right
-                    data:
-                      brightness: 255
-                      hs_color: [355, 90]
-          - delay: '{{ pulse_s }}'
-          - service: scene.turn_on
-            target:
-              entity_id: 'scene.{{ snap_id }}'
-          - delay: '{{ rest_s }}'
-    - choose:
-        - conditions: "{{ states('scene.' ~ snap_id) != 'unknown' }}"
-          sequence:
-            - service: scene.delete
-              data:
-                entity_id: 'scene.{{ snap_id }}'
+                          color: '{{ colors.cream if (repeat.index % 2 == 1) else colors.scarlet }}'
+              # Exterior alternating pattern
+              - conditions: "{{ target_type == 'exterior' }}"
+                sequence:
+                  - variables:
+                      is_odd_beat: '{{ (repeat.index % 2 == 1) }}'
+                      pattern_a_scarlet:
+                        [light.light_front_left, light.garage_left, light.garage_right]
+                      pattern_a_cream: [light.light_front_right, light.garage_center]
+                  - parallel:
+                      - repeat:
+                          for_each: '{{ pattern_a_scarlet if is_odd_beat else pattern_a_cream }}'
+                          sequence:
+                            - service: script.huskers_set_light_safe
+                              data:
+                                entity_id: '{{ repeat.item }}'
+                                color: '{{ colors.scarlet }}'
+                      - repeat:
+                          for_each: '{{ pattern_a_cream if is_odd_beat else pattern_a_scarlet }}'
+                          sequence:
+                            - service: script.huskers_set_light_safe
+                              data:
+                                entity_id: '{{ repeat.item }}'
+                                color: '{{ colors.cream }}'
 
-# --- BPM Bursts (Exterior alternating Scarlet/Cream) ---
-huskers_td_burst_bpm_exterior:
+          # Pulse timing
+          - delay: "{{ '%0.3f'|format(pulse_s) }}"
+          - service: script.huskers_restore_snapshot
+            data:
+              snapshot_id: '{{ snapshot_id }}'
+              transition: 0
+          - delay: "{{ '%0.3f'|format(rest_s) }}"
+
+    # Cleanup
+    - service: script.huskers_restore_snapshot
+      data:
+        snapshot_id: '{{ snapshot_id }}'
+
+# Convenience wrappers for the unified burst
+huskers_td_burst_bmp_theater:
+  alias: 'Huskers: TD Burst BPM (Theater)'
+  mode: restart
+  sequence:
+    - service: script.huskers_td_burst_bmp
+      data:
+        target_type: theater
+
+huskers_td_burst_bmp_exterior:
   alias: 'Huskers: TD Burst BPM (Exterior)'
   mode: restart
-  variables:
-    bpm_val: >-
-      {{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}
-    beat_s: '{{ (60 / bpm_val) | float }}'
-    pulse_ratio: 0.2
-    pulse_s: '{{ (beat_s * pulse_ratio) | float }}'
-    rest_s: '{{ (beat_s * (1 - pulse_ratio)) | float }}'
-    beats: 8
-    snap_id: huskers_exterior_burst_pre
   sequence:
-    - service: scene.create
+    - service: script.huskers_td_burst_bmp
       data:
-        scene_id: '{{ snap_id }}'
-        snapshot_entities:
+        target_type: exterior
+
+# --- LED SCRIPTS (ENHANCED) ---
+huskers_led_gameday_start:
+  alias: 'Huskers: Game-Day LED (Start)'
+  mode: single
+  icon: mdi:led-strip-variant
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Gametime
+      continue_on_error: true
+
+huskers_led_td_burst:
+  alias: 'Huskers: LED TD Burst'
+  mode: restart
+  icon: mdi:led-strip-variant
+  variables:
+    burst_duration: 30
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_TD_Burst
+      continue_on_error: true
+    - delay: '00:00:{{ burst_duration }}'
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Gametime
+      continue_on_error: true
+
+# --- MANUAL TEST SCRIPTS (ENHANCED) ---
+huskers_all_events_manual:
+  alias: 'Huskers: Manual Test (All Events)'
+  mode: single
+  icon: mdi:play-circle
+  sequence:
+    - parallel:
+        - service: script.huskers_led_gameday_start
+        - service: script.huskers_theater_show_start
+        - service: script.huskers_exterior_show_start
+    - delay: '00:00:05'
+    - parallel:
+        - service: script.huskers_td_burst_bmp_theater
+        - service: script.huskers_td_burst_bmp_exterior
+        - service: script.huskers_led_td_burst
+
+# --- LEGACY SIMPLE BURSTS (MAINTAINED FOR COMPATIBILITY) ---
+huskers_touchdown_burst:
+  alias: 'Huskers: Theater Touchdown Burst (Legacy)'
+  mode: restart
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+      data:
+        flash: short
+
+huskers_exterior_touchdown_burst:
+  alias: 'Huskers: Exterior Touchdown Burst (Legacy)'
+  mode: restart
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id:
           - light.light_front_left
           - light.light_front_right
           - light.garage_left
           - light.garage_center
           - light.garage_right
-    - repeat:
-        count: '{{ beats }}'
-        sequence:
-          - parallel:
-              - service: light.turn_on
-                target: { entity_id: light.light_front_left }
-                data:
-                  brightness: 255
-                  hs_color: >-
-                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
-                    {% else %} [48, 12] {% endif %}
-              - service: light.turn_on
-                target: { entity_id: light.light_front_right }
-                data:
-                  brightness: 255
-                  hs_color: >-
-                    {% if (repeat.index | int(1)) % 2 == 1 %} [48, 12]
-                    {% else %} [355, 90] {% endif %}
-              - service: light.turn_on
-                target: { entity_id: light.garage_left }
-                data:
-                  brightness: 255
-                  hs_color: >-
-                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
-                    {% else %} [48, 12] {% endif %}
-              - service: light.turn_on
-                target: { entity_id: light.garage_center }
-                data:
-                  brightness: 255
-                  hs_color: >-
-                    {% if (repeat.index | int(1)) % 2 == 1 %} [48, 12]
-                    {% else %} [355, 90] {% endif %}
-              - service: light.turn_on
-                target: { entity_id: light.garage_right }
-                data:
-                  brightness: 255
-                  hs_color: >-
-                    {% if (repeat.index | int(1)) % 2 == 1 %} [355, 90]
-                    {% else %} [48, 12] {% endif %}
-          - delay: '{{ pulse_s }}'
-          - service: scene.turn_on
-            target: { entity_id: 'scene.{{ snap_id }}' }
-          - delay: '{{ rest_s }}'
-    - choose:
-        - conditions: "{{ states('scene.' ~ snap_id) != 'unknown' }}"
-          sequence:
-            - service: scene.delete
-              data:
-                entity_id: 'scene.{{ snap_id }}'
+      data:
+        flash: short

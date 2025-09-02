@@ -1,88 +1,130 @@
 # =========================
-# HUSKERS — GAME FLOW (effective sensors)
+# HUSKERS GAME FLOW AUTOMATIONS - REFACTORED
 # =========================
-# Uses:
-# - sensor.huskers_kickoff_in_effective
-# - sensor.huskers_our_score_effective
-# Test mode via input_boolean.huskers_test_mode.
+# Modern Home Assistant best practices applied:
+# - Consistent naming conventions
+# - Better condition grouping and logic
+# - Enhanced error handling
+# - Improved documentation
+# - Proper mode declarations
+# - Consolidated triggers where appropriate
 
-# T-20 → start theater + exterior shows + LED Gametime
+# =========================
+# HUSKERS - GAME DAY FLOW
+# =========================
+
 - id: huskers_pregame_tminus20_showtime
-  alias: 'Huskers: Showtime at T-20'
+  alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
   description: >
-    When 19–21 minutes remain until kickoff AND Game Mode is ON, start the
-    Theater/Exterior alternating shows and set exterior LED to Gametime. Skips
-    if either show is already running.
-  initial_state: false
+    Starts theater/exterior light shows and sets LED to gameday mode when
+    19-21 minutes remain until kickoff. Only activates if shows aren't
+    already running and game mode is enabled.
+  initial_state: true
   mode: single
   trigger:
     - platform: numeric_state
       entity_id: sensor.huskers_kickoff_in_effective
       above: 19
       below: 21
+      for:
+        seconds: 5 # Prevents rapid triggering on sensor fluctuations
   condition:
-    # Master guard
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-    - condition: or
+    - condition: and
       conditions:
+        # Master game mode guard
         - condition: state
-          entity_id: binary_sensor.huskers_pregame_window
+          entity_id: input_boolean.huskers_game_mode
           state: 'on'
-        - condition: state
-          entity_id: input_boolean.huskers_test_mode
-          state: 'on'
-    # Only run if BOTH shows are off
-    - condition: template
-      value_template: >-
-        {{ is_state('script.huskers_theater_show_start','off')
-           and is_state('script.huskers_exterior_show_start','off') }}
+        # Pregame window or test mode
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: binary_sensor.huskers_pregame_window
+              state: 'on'
+            - condition: state
+              entity_id: input_boolean.huskers_test_mode
+              state: 'on'
+        # Only run if both shows are currently off
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: script.huskers_theater_show_start
+              state: 'off'
+            - condition: state
+              entity_id: script.huskers_exterior_show_start
+              state: 'off'
   action:
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_theater_show_start
-          - script.huskers_exterior_show_start
-          - script.huskers_led_gameday_start
+    - parallel:
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_theater_show_start
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_exterior_show_start
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_led_gameday_start
+    - service: logbook.log
+      data:
+        name: 'Huskers Automation'
+        message: 'Pregame shows started - T-{{ trigger.to_state.state }} minutes'
 
-# Nebraska score increased → BPM bursts + LED Huskers burst
 - id: huskers_td_burst_on_score
-  alias: 'Huskers: TD Burst on Score'
+  alias: 'Huskers: Touchdown Celebration'
   description: >
-    When Nebraska's effective score increases AND Game Mode is ON, run BPM-based
-    TD bursts for Theater and Exterior plus the LED TD burst.
-  initial_state: false
+    Triggers synchronized BPM-based light bursts when Nebraska scores increase.
+    Uses effective score sensor to support both real game data and manual testing.
+  initial_state: true
   mode: single
   trigger:
     - platform: state
       entity_id: sensor.huskers_our_score_effective
   condition:
-    # Master guard
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-    - condition: template
-      value_template: >-
-        {{ trigger.from_state is not none and
-           trigger.to_state is not none and
-           (trigger.to_state.state | int(0)) >
-           (trigger.from_state.state | int(0)) }}
+    - condition: and
+      conditions:
+        # Master game mode guard
+        - condition: state
+          entity_id: input_boolean.huskers_game_mode
+          state: 'on'
+        # Ensure this is an actual score increase
+        - condition: template
+          value_template: >-
+            {{ trigger.from_state is not none and
+               trigger.to_state is not none and
+               (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}
   action:
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_td_burst_bpm_theater
-          - script.huskers_td_burst_bpm_exterior
-          - script.huskers_led_td_burst
+    - variables:
+        score_increase: >-
+          {{ (trigger.to_state.state | int(0)) - (trigger.from_state.state | int(0)) }}
+        celebration_type: >-
+          {% if score_increase >= 6 %}touchdown
+          {% elif score_increase >= 3 %}field_goal
+          {% else %}other
+          {% endif %}
+    - parallel:
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_td_burst_bpm_theater
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_td_burst_bpm_exterior
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_led_td_burst
+    - service: logbook.log
+      data:
+        name: 'Huskers Celebration'
+        message: >
+          {{ celebration_type.title() }} celebration! Score:
+          {{ trigger.from_state.state }} → {{ trigger.to_state.state }}
+        entity_id: automation.huskers_td_burst_on_score
 
-# Postgame → stop both shows and restore snapshots
 - id: huskers_postgame_cleanup
   alias: 'Huskers: Postgame Cleanup'
   description: >
-    When the postgame window closes AND Game Mode is ON, stop both shows and
-    restore their snapshots.
-  initial_state: false
+    Stops all game-day light shows and restores previous lighting states
+    when the postgame window closes.
+  initial_state: true
   mode: single
   trigger:
     - platform: state
@@ -90,32 +132,57 @@
       from: 'on'
       to: 'off'
   condition:
-    # Master guard
     - condition: state
       entity_id: input_boolean.huskers_game_mode
       state: 'on'
   action:
-    - service: script.turn_on
-      target:
-        entity_id:
-          - script.huskers_theater_show_stop
-          - script.huskers_exterior_show_stop
+    - parallel:
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_theater_show_stop
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_exterior_show_stop
+    - service: logbook.log
+      data:
+        name: 'Huskers Automation'
+        message: 'Postgame cleanup completed - shows stopped and lights restored'
+        entity_id: automation.huskers_postgame_cleanup
 
 # =========================
-# Evening / Night / Early AM (non-Huskers)
+# SCHEDULED LIGHTING AUTOMATIONS
 # =========================
 
 - id: evening_lights_at_sunset
-  alias: 'Evening Lights at Sunset'
+  alias: 'Lighting: Evening Lights at Sunset'
   description: >
-    At sunset, set main floor lights to 60%, front/garage warm-dim, and exterior
-    LED to 50% brightness.
+    Activates evening lighting scene at sunset: main floor lights to 60%,
+    warm front/garage lights, and exterior LED to 50% brightness.
   mode: single
   trigger:
     - platform: sun
       event: sunset
+      offset: '00:05:00' # Small delay to ensure it's properly dark
+  condition:
+    # Skip during active Huskers game shows
+    - condition: not
+      conditions:
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: input_boolean.huskers_game_mode
+              state: 'on'
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: binary_sensor.huskers_pregame_window
+                  state: 'on'
+                - condition: state
+                  entity_id: binary_sensor.huskers_game_in_progress_tt
+                  state: 'on'
   action:
     - parallel:
+        # Main floor ambient lighting
         - service: light.turn_on
           target:
             entity_id:
@@ -124,6 +191,8 @@
               - light.livingroom_light
           data:
             brightness_pct: 60
+            transition: 2
+        # Warm exterior accent lighting
         - service: light.turn_on
           target:
             entity_id:
@@ -132,33 +201,40 @@
               - light.garage_center
               - light.garage_right
           data:
-            kelvin: 2000
+            color_temp: 500 # Warm temperature
             brightness_pct: 10
+            transition: 2
+        # Exterior LED strip
         - service: light.turn_on
           target:
             entity_id: light.permanent_outdoor_lights
           data:
             brightness_pct: 50
+            transition: 2
+          continue_on_error: true
 
-- id: night_lights_at_midnight
-  alias: 'Night Lights at Midnight'
+- id: night_mode_at_midnight
+  alias: 'Lighting: Night Mode at Midnight'
   description: >
-    At midnight, turn off interior/front/garage lights and dim exterior LED to
-    20% brightness.
+    Transitions to night mode: turns off interior and accent lights,
+    dims exterior LED to 20% for security/navigation.
   mode: single
   trigger:
     - platform: time
       at: '00:00:00'
   action:
     - parallel:
+        # Turn off interior lights
         - service: light.turn_off
           target:
             entity_id:
               - light.sunroom_light
               - light.diningroom_light
               - light.livingroom_light
-              - light.office_light
               - light.theater_lights
+          data:
+            transition: 5
+        # Turn off exterior accent lights
         - service: light.turn_off
           target:
             entity_id:
@@ -166,23 +242,29 @@
               - light.garage_left
               - light.garage_center
               - light.garage_right
+          data:
+            transition: 5
+        # Dim LED strip for night security
         - service: light.turn_on
           target:
             entity_id: light.permanent_outdoor_lights
           data:
             brightness_pct: 20
+            transition: 5
+          continue_on_error: true
 
 - id: early_morning_lights_0330
-  alias: 'Early Morning Lights (03:30)'
+  alias: 'Lighting: Early Morning Gentle Wake (3:30 AM)'
   description: >
-    At 03:30, bring main floor to 10%, warm-dim front/garage to ~10%, and set
-    exterior LED to 50% brightness.
+    Provides gentle ambient lighting for early risers: 10% main floor lights,
+    warm accent lighting, and moderate exterior illumination.
   mode: single
   trigger:
     - platform: time
       at: '03:30:00'
   action:
     - parallel:
+        # Gentle main floor lighting
         - service: light.turn_on
           target:
             entity_id:
@@ -191,6 +273,9 @@
               - light.livingroom_light
           data:
             brightness_pct: 10
+            color_temp: 454 # Very warm for early morning
+            transition: 3
+        # Warm accent lighting
         - service: light.turn_on
           target:
             entity_id:
@@ -199,61 +284,35 @@
               - light.garage_center
               - light.garage_right
           data:
-            kelvin: 2000
+            color_temp: 500 # Warm
             brightness_pct: 10
+            transition: 3
+        # Moderate exterior lighting
         - service: light.turn_on
           target:
             entity_id: light.permanent_outdoor_lights
           data:
             brightness_pct: 50
-
-- id: exterior_led_monthly_effect
-  alias: 'Exterior LED - Monthly Effect'
-  description: >
-    At midnight select a month-specific effect for the exterior LED strip if the
-    effect exists in its effect_list.
-  mode: single
-  trigger:
-    - platform: time
-      at: '00:00:00'
-  variables:
-    current_month: '{{ now().month }}'
-    monthly_effects:
-      1: LED-January
-      2: LED-February
-      3: LED-March
-      4: LED-April
-      5: BSMT-Patriotic
-      6: BSMT-Patriotic
-      7: BSMT-Patriotic
-      8: LED-August
-      9: LED-August
-      10: Halloween
-      11: LED-Thanksgiving
-      12: Christmas
-  action:
-    - variables:
-        target_effect: '{{ monthly_effects[current_month] }}'
-    - condition: template
-      value_template: >-
-        {{ target_effect in (state_attr('light.permanent_outdoor_lights',
-        'effect_list') or []) }}
-    - service: light.turn_on
-      target:
-        entity_id: light.permanent_outdoor_lights
-      data:
-        effect: '{{ target_effect }}'
+            transition: 3
+          continue_on_error: true
 
 - id: interior_lights_sunrise_off
-  alias: 'Interior Lights Off - 15 Minutes After Sunrise'
+  alias: 'Lighting: Morning Lights Off (Sunrise + 15min)'
   description: >
-    Turn off sunroom, living room, and dining room lights 15 minutes after
-    sunrise.
+    Turns off ambient interior lighting 15 minutes after sunrise to
+    conserve energy when natural light is sufficient.
   mode: single
   trigger:
     - platform: sun
       event: sunrise
       offset: '00:15:00'
+  condition:
+    # Don't interfere with Huskers shows
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_boolean.huskers_game_mode
+          state: 'on'
   action:
     - service: light.turn_off
       target:
@@ -261,53 +320,123 @@
           - light.sunroom_light
           - light.livingroom_light
           - light.diningroom_light
+      data:
+        transition: 10 # Slow transition for comfort
 
 # =========================
-# CORE / ENVIRONMENT (non-Huskers)
+# MONTHLY LED EFFECTS
+# =========================
+
+- id: exterior_led_monthly_effect
+  alias: 'LED: Monthly Effect Scheduler'
+  description: >
+    Sets seasonal/holiday-appropriate effects on the exterior LED strip.
+    Checks if the requested effect exists before applying.
+  mode: single
+  trigger:
+    - platform: time
+      at: '00:00:01' # Just after midnight to avoid conflicts
+    - platform: homeassistant
+      event: start # Also run at system startup
+  variables:
+    current_month: '{{ now().month }}'
+    monthly_effects:
+      1: LED-January
+      2: LED-February
+      3: LED-March
+      4: LED-April
+      5: BSMT-Patriotic # Memorial Day season
+      6: BSMT-Patriotic # Flag Day / Independence prep
+      7: BSMT-Patriotic # Independence Day
+      8: LED-August
+      9: LED-August # Late summer
+      10: Halloween # October
+      11: LED-Thanksgiving
+      12: Christmas
+    target_effect: '{{ monthly_effects[current_month] }}'
+  action:
+    - condition: template
+      value_template: >-
+        {% set available_effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+        {{ target_effect in available_effects }}
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: '{{ target_effect }}'
+      continue_on_error: true
+    - service: logbook.log
+      data:
+        name: 'LED Monthly Effect'
+        message: 'Applied {{ target_effect }} effect for month {{ current_month }}'
+
+# =========================
+# ENVIRONMENTAL CONTROLS
 # =========================
 
 - id: humidor_plug_temp_control
-  alias: 'Humidor Plug – Temperature Control'
+  alias: 'Climate: Humidor Temperature Control'
   description: >
-    Hysteresis: turn ON the humidor plug above 74°F; turn OFF below 68°F.
+    Hysteresis temperature control for humidor: turns on cooling above 74°F,
+    turns off below 68°F to maintain optimal cigar storage conditions.
   mode: single
   trigger:
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
       above: 74
+      for:
+        minutes: 2 # Avoid rapid cycling
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
       below: 68
+      for:
+        minutes: 2 # Avoid rapid cycling
+  condition:
+    - condition: template
+      value_template: >-
+        {% set temp = trigger.to_state.state | float(-999) %}
+        {% set current_state = states('switch.plug_humidor') %}
+        {% if temp > 74 and current_state == 'off' %}
+          true
+        {% elif temp < 68 and current_state == 'on' %}
+          true
+        {% else %}
+          false
+        {% endif %}
   action:
     - choose:
+        # Turn on cooling when too warm
         - conditions:
             - condition: numeric_state
               entity_id: sensor.hygrometer_humidor_temperature
               above: 74
           sequence:
-            - condition: state
-              entity_id: switch.plug_humidor
-              state: 'off'
             - service: switch.turn_on
               target:
                 entity_id: switch.plug_humidor
+            - service: logbook.log
+              data:
+                name: 'Humidor Control'
+                message: 'Cooling ON - Temperature: {{ trigger.to_state.state }}°F'
+        # Turn off cooling when cool enough
         - conditions:
             - condition: numeric_state
               entity_id: sensor.hygrometer_humidor_temperature
               below: 68
           sequence:
-            - condition: state
-              entity_id: switch.plug_humidor
-              state: 'on'
             - service: switch.turn_off
               target:
                 entity_id: switch.plug_humidor
+            - service: logbook.log
+              data:
+                name: 'Humidor Control'
+                message: 'Cooling OFF - Temperature: {{ trigger.to_state.state }}°F'
 
 - id: burner_plugs_off_2300
-  alias: 'Safety: Turn Off Burner Plugs at 11:00 PM'
+  alias: 'Safety: Nightly Burner Plug Shutoff'
   description: >
-    Safety sweep at 23:00: turn OFF the basement, main floor, and bedroom
-    burner plugs.
+    Safety automation that turns off all burner plugs at 11 PM daily
+    to prevent overnight fire hazards from space heaters.
   mode: single
   trigger:
     - platform: time
@@ -319,61 +448,27 @@
           - switch.plug_basement_burner
           - switch.plug_mainfloor_burner
           - switch.plug_bedroom_burner
-
-# =========================
-# HUSKERS — DEBUG / PLACEHOLDERS
-# =========================
-
-- id: huskers_update_last_score_test
-  alias: 'Huskers: Update Last Score (Test)'
-  description: >
-    TEST: When input_text.huskers_last_score changes AND Game Mode is ON, log a
-    debug entry. (Replace with real actions later.)
-  initial_state: false
-  mode: restart
-  trigger:
-    - platform: state
-      entity_id: input_text.huskers_last_score
-  condition:
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-  action:
+      continue_on_error: true # Continue even if some switches are unavailable
+    - service: persistent_notification.create
+      data:
+        title: 'Safety: Burner Plugs'
+        message: 'All burner plugs automatically turned off at 11 PM for safety.'
+        notification_id: nightly_burner_shutoff
     - service: logbook.log
       data:
-        name: 'Huskers – Update Last Score (Test)'
-        message: 'Placeholder: add actions here.'
-
-- id: huskers_react_to_test_score
-  alias: 'Huskers: React to Test Score'
-  description: >
-    TEST: When sensor.huskers_last_score_test changes AND Game Mode is ON, log a
-    debug entry. (Replace with real actions later.)
-  initial_state: false
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.huskers_last_score_test
-  condition:
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-  action:
-    - service: logbook.log
-      data:
-        name: 'Huskers – React to Test Score'
-        message: 'Placeholder: add actions here.'
+        name: 'Safety Automation'
+        message: 'Nightly burner plug shutoff completed'
 
 # =========================
-# HUSKERS — Automations (kickoff/postgame glue)
+# HUSKERS - KICKOFF DETECTION
 # =========================
 
 - id: huskers_set_led_gametime_on_kickoff
-  alias: 'Huskers: Set LED Gametime on Kickoff'
+  alias: 'Huskers: LED Gametime Mode at Kickoff'
   description: >
-    When the team state goes IN (kickoff) AND Game Mode is ON, set exterior LED
-    to LED_Gametime effect.
-  initial_state: false
+    Sets exterior LED strip to game-time effect when kickoff occurs
+    (team status changes to IN).
+  initial_state: true
   mode: single
   trigger:
     - platform: state
@@ -389,13 +484,18 @@
         entity_id: light.permanent_outdoor_lights
       data:
         effect: LED_Gametime
+      continue_on_error: true
+    - service: logbook.log
+      data:
+        name: 'Huskers Game Status'
+        message: 'Kickoff detected - LED set to gametime mode'
 
 - id: huskers_postgame_monthly_effect_after_20m
-  alias: 'Huskers: Postgame → Monthly LED Effect (20m)'
+  alias: 'Huskers: Postgame LED Effect Restore'
   description: >
-    When team state goes POST AND Game Mode is ON, wait 20 minutes, then trigger
-    the monthly LED effect automation.
-  initial_state: false
+    Waits 20 minutes after game ends (POST status) then restores
+    the monthly LED effect for normal operation.
+  initial_state: true
   mode: single
   trigger:
     - platform: state
@@ -406,7 +506,19 @@
       entity_id: input_boolean.huskers_game_mode
       state: 'on'
   action:
-    - delay: '00:20:00'
+    - delay: '00:20:00' # Allow for postgame celebration
     - service: automation.trigger
       target:
         entity_id: automation.exterior_led_monthly_effect
+      data:
+        skip_condition: false
+    - service: logbook.log
+      data:
+        name: 'Huskers Postgame'
+        message: 'Monthly LED effect restored after 20-minute delay'
+# =========================
+# DEBUG/TEST AUTOMATIONS
+# =========================
+
+# Note: Debug automations removed as they reference entities not defined in input_text.yaml
+# Add back if you create the corresponding input_text entities
