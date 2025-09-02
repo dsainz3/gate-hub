@@ -1,50 +1,59 @@
 # =========================================================
 # KNEPLATT72 — 24h STATISTICS
 # =========================================================
-# Notes:
-# - `max_age: { hours: 24 }` keeps a 24h window.
-# - `state_characteristic: mean | change` controls the computed metric.
 
+# --- Averages ---
 - platform: statistics
   name: KNEPLATT72 Wind Speed (24h Avg)
   unique_id: kneplatt72_wind_speed_24h_avg
   entity_id: sensor.kneplatt72_wind_speed
   state_characteristic: mean
-  max_age: { hours: 24 }
+  max_age:
+    hours: 24
+  precision: 1
 
 - platform: statistics
   name: KNEPLATT72 Temperature (24h Mean)
   unique_id: kneplatt72_temperature_24h_mean
   entity_id: sensor.kneplatt72_temperature
   state_characteristic: mean
-  max_age: { hours: 24 }
+  max_age:
+    hours: 24
+  precision: 1
 
 - platform: statistics
   name: KNEPLATT72 Humidity (24h Mean)
   unique_id: kneplatt72_humidity_24h_mean
   entity_id: sensor.kneplatt72_relative_humidity
   state_characteristic: mean
-  max_age: { hours: 24 }
+  max_age:
+    hours: 24
+  precision: 1
 
+# --- Changes ---
 - platform: statistics
   name: KNEPLATT72 Pressure (24h Change)
   unique_id: kneplatt72_pressure_24h_change
   entity_id: sensor.kneplatt72_pressure
   state_characteristic: change
-  max_age: { hours: 24 }
-
-# === KNEPLATT72 — 24h CHANGE HELPERS (additions) ===
+  max_age:
+    hours: 24
+  precision: 3
 
 - platform: statistics
   name: KNEPLATT72 Temperature (24h Change)
   unique_id: kneplatt72_temperature_24h_change
   entity_id: sensor.kneplatt72_temperature
   state_characteristic: change
-  max_age: { hours: 24 }
+  max_age:
+    hours: 24
+  precision: 1
 
 - platform: statistics
   name: KNEPLATT72 Humidity (24h Change)
   unique_id: kneplatt72_humidity_24h_change
   entity_id: sensor.kneplatt72_relative_humidity
   state_characteristic: change
-  max_age: { hours: 24 }
+  max_age:
+    hours: 24
+  precision: 1

@@ -381,19 +381,19 @@ huskers_td_burst_bpm:
         snapshot_id: '{{ snapshot_id }}'
 
 # Convenience wrappers for the unified burst
-huskers_td_burst_bmp_theater:
+huskers_td_burst_bpm_theater:
   alias: 'Huskers: TD Burst BPM (Theater)'
   mode: restart
   sequence:
-    - service: script.huskers_td_burst_bmp
+    - service: script.huskers_td_burst_bpm
       data:
         target_type: theater
 
-huskers_td_burst_bmp_exterior:
+huskers_td_burst_bpm_exterior:
   alias: 'Huskers: TD Burst BPM (Exterior)'
   mode: restart
   sequence:
-    - service: script.huskers_td_burst_bmp
+    - service: script.huskers_td_burst_bpm
       data:
         target_type: exterior
 
@@ -443,8 +443,8 @@ huskers_all_events_manual:
         - service: script.huskers_exterior_show_start
     - delay: '00:00:05'
     - parallel:
-        - service: script.huskers_td_burst_bmp_theater
-        - service: script.huskers_td_burst_bmp_exterior
+        - service: script.huskers_td_burst_bpm_theater
+        - service: script.huskers_td_burst_bpm_exterior
         - service: script.huskers_led_td_burst
 
 # --- LEGACY SIMPLE BURSTS (MAINTAINED FOR COMPATIBILITY) ---
