@@ -1,22 +1,36 @@
-import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
 
 
 def run(cmd):
-    return subprocess.run(cmd, check=False).returncode
+    print("[ha-check] Running:", " ".join(cmd))
+    proc = subprocess.run(cmd, check=False)
+    return proc.returncode
 
 
 def main():
-    repo = os.getcwd()
+    repo = Path.cwd()
+
+    # Ensure /config/secrets.yaml exists for the containerized check
+    secrets = repo / "secrets.yaml"
+    fakesecrets = repo / "fakesecrets.yaml"
+    if not secrets.exists() and fakesecrets.exists():
+        print(
+            "[ha-check] No secrets.yaml found; copying fakesecrets.yaml for validation…"
+        )
+        secrets.write_text(
+            fakesecrets.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+
     if shutil.which("docker"):
         cmd = [
             "docker",
             "run",
             "--rm",
             "-v",
-            f"{repo}:/config",
+            f"{str(repo)}:/config",
             "ghcr.io/home-assistant/home-assistant:stable",
             "python",
             "-m",
@@ -27,6 +41,7 @@ def main():
             "/config",
         ]
         sys.exit(run(cmd))
+
     print("hass-config-check: Docker not found; skipping locally (OK).")
     sys.exit(0)
 

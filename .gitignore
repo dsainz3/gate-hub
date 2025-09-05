@@ -58,3 +58,6 @@ node_modules/
 **/.prettier-caches/
 **/.cache/prettier/
 backup/
+backup/
+
+.HA_VERSION
