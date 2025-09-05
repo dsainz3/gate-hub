@@ -17,6 +17,7 @@ deps/
 home-assistant_v2.db
 home-assistant.log*
 /.storage/
+/backup/
 
 # General logs and databases
 *.db
@@ -56,3 +57,4 @@ zigbee2mqtt/*.lock
 node_modules/
 **/.prettier-caches/
 **/.cache/prettier/
+backup/

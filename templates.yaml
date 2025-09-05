@@ -1,8 +1,54 @@
-# /config/templates.yaml  (no top-level 'template:' key)
+# WEATHER & ENVIRONMENT SENSORS — fixed structure
+- sensor:
+    - name: 'Relative Humidity'
+      unique_id: kneplatt72_relative_humidity_fixed
+      state: "{{ states('sensor.kneplatt72_relative_humidity') }}"
+      unit_of_measurement: '%'
+      device_class: humidity
 
-# =========================
-# WEATHER & ENVIRONMENT SENSORS
-# =========================
+    - name: 'Solar Radiation'
+      unique_id: kneplatt72_solar_radiation_fixed
+      state: "{{ states('sensor.kneplatt72_solar_radiation') }}"
+      unit_of_measurement: 'W/m²'
+      device_class: irradiance
+
+    - name: 'Temperature'
+      unique_id: kneplatt72_temperature_fixed
+      state: "{{ states('sensor.kneplatt72_temperature') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: 'Heat Index'
+      unique_id: kneplatt72_heat_index_fixed
+      state: "{{ states('sensor.kneplatt72_heat_index') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: 'Wind Chill'
+      unique_id: kneplatt72_wind_chill_fixed
+      state: "{{ states('sensor.kneplatt72_wind_chill') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: 'Dew Point'
+      unique_id: kneplatt72_dewpoint_fixed
+      state: "{{ states('sensor.kneplatt72_dewpoint') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: 'Wind Speed'
+      unique_id: kneplatt72_wind_speed_fixed
+      state: "{{ states('sensor.kneplatt72_wind_speed') }}"
+      unit_of_measurement: 'mph'
+      device_class: wind_speed
+
+    - name: 'Wind Gust'
+      unique_id: kneplatt72_wind_gust_fixed
+      state: "{{ states('sensor.kneplatt72_wind_gust') }}"
+      unit_of_measurement: 'mph'
+      device_class: wind_speed
+
+# WEATHER & ENVIRONMENT SENSORS (derived)
 - sensor:
     - name: 'KNEPLATT72 Pressure Trend'
       unique_id: kneplatt72_pressure_trend
@@ -96,9 +142,7 @@
         threshold_percent: '5.0'
         current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
 
-# =========================
 # NETWORK & CONNECTIVITY SENSORS
-# =========================
 - sensor:
     - name: 'Network Active Hosts (Nmap)'
       unique_id: network_nmap_active_hosts
@@ -156,9 +200,7 @@
         is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
         latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
 
-# =========================
 # HUSKERS GAME SENSORS
-# =========================
 - sensor:
     - name: 'Huskers Our Score'
       unique_id: huskers_our_score
@@ -303,9 +345,7 @@
       attributes:
         friendly_name: 'Last Test Score'
 
-# =========================
 # HUSKERS BINARY SENSORS
-# =========================
 - binary_sensor:
     - name: 'Huskers Pregame Window'
       unique_id: huskers_pregame_window
