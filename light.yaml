@@ -62,3 +62,12 @@
     - light.sunroom_light
     - light.diningroom_light
     - light.livingroom_light
+
+# AUTO-FIX: Ensure group for Permanent Outdoor Lights
+- platform: group
+  name: Permanent Outdoor Lights
+  unique_id: permanent_outdoor_lights_group
+  entities:
+    - light.garage_left
+    - light.garage_center
+    - light.garage_right
