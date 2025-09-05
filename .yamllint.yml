@@ -3,7 +3,7 @@ rules:
   braces: disable
   document-start: disable
   comments:
-    min-spaces-from-content: 2
+    min-spaces-from-content: 1
     level: warning
   line-length:
     max: 200

@@ -323,6 +323,35 @@
       data:
         transition: 10 # Slow transition for comfort
 
+- id: exterior_lights_sunrise_off
+  alias: 'Lighting: Morning Lights Off (Sunrise)'
+  description: >
+    Turns off exterior lighting 5 minutes after sunrise to
+    conserve energy when natural light is sufficient.
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: '00:05:00'
+  condition:
+    # Don't interfere with Huskers shows
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_boolean.huskers_game_mode
+          state: 'on'
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.front_porch_lights
+          - light.garage_center
+          - light.garage_right
+          - light.garage_left
+          - light.permanent_outdoor_lights
+      data:
+        transition: 10 # Slow transition for comfort
+
 # =========================
 # MONTHLY LED EFFECTS
 # =========================
