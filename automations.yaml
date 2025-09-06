@@ -420,3 +420,128 @@
       data:
         name: Safety Automation
         message: Nightly burner plug shutoff completed
+
+# ADD these automations to your automations.yaml file
+
+- id: huskers_game_day_show_start
+  alias: 'Huskers: Game Day Show Auto Start'
+  description: >
+    Automatically starts combined light show 20 minutes before game start
+    when game mode is enabled and game is today.
+  initial_state: true
+  mode: single
+  trigger:
+    - platform: template
+      value_template: >
+        {% set game_date = state_attr('sensor.husker_team', 'date') %}
+        {% if game_date %}
+          {% set game_time = as_datetime(game_date) %}
+          {% set now_time = now() %}
+          {% set minutes_until = ((game_time - now_time).total_seconds() / 60) | round(0) %}
+          {{ minutes_until == 20 }}
+        {% else %}
+          false
+        {% endif %}
+      for:
+        seconds: 30
+  condition:
+    - condition: state
+      entity_id: input_boolean.huskers_game_mode
+      state: 'on'
+    - condition: template
+      value_template: >
+        {% set game_date = state_attr('sensor.husker_team', 'date') %}
+        {% if game_date %}
+          {% set game_time = as_datetime(game_date) %}
+          {{ game_time.date() == now().date() }}
+        {% else %}
+          false
+        {% endif %}
+    - condition: state
+      entity_id: input_boolean.huskers_show_running
+      state: 'off'
+  action:
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_combined_show_start
+    - service: logbook.log
+      data:
+        name: Huskers Game Day
+        message: 'Auto-started light show - T-20 minutes until kickoff'
+
+- id: huskers_game_day_show_stop
+  alias: 'Huskers: Game Day Show Auto Stop'
+  description: >
+    Automatically stops combined light show 20 minutes after game ends
+    based on game state changes.
+  initial_state: true
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.husker_team
+      to:
+        - 'POST'
+        - 'FINAL'
+      for:
+        minutes: 20
+  condition:
+    - condition: state
+      entity_id: input_boolean.huskers_game_mode
+      state: 'on'
+    - condition: state
+      entity_id: input_boolean.huskers_show_running
+      state: 'on'
+  action:
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_cleanup_all
+    - service: logbook.log
+      data:
+        name: Huskers Game Day
+        message: 'Auto-stopped light show - 20 minutes after game end'
+
+- id: huskers_touchdown_celebration
+  alias: 'Huskers: Touchdown Celebration'
+  description: >
+    Triggers combined touchdown burst when Nebraska scores increase,
+    detecting touchdowns, field goals, and other scoring plays.
+  initial_state: true
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: sensor.husker_team
+      attribute: team_score
+  condition:
+    - condition: state
+      entity_id: input_boolean.huskers_game_mode
+      state: 'on'
+    - condition: template
+      value_template: >
+        {% set old_score = trigger.from_state.attributes.team_score | int(0) %}
+        {% set new_score = trigger.to_state.attributes.team_score | int(0) %}
+        {{ new_score > old_score }}
+  action:
+    - variables:
+        old_score: '{{ trigger.from_state.attributes.team_score | int(0) }}'
+        new_score: '{{ trigger.to_state.attributes.team_score | int(0) }}'
+        score_increase: '{{ new_score - old_score }}'
+        celebration_type: >
+          {% if score_increase >= 6 %}touchdown
+          {% elif score_increase >= 3 %}field_goal
+          {% elif score_increase >= 2 %}safety
+          {% else %}other
+          {% endif %}
+    - parallel:
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_td_burst_combined
+        - service: script.turn_on
+          target:
+            entity_id: script.huskers_led_td_burst
+    - service: logbook.log
+      data:
+        name: Huskers Touchdown
+        message: >
+          {{ celebration_type.title() }} celebration! Nebraska scored {{ score_increase }} points
+          ({{ old_score }} → {{ new_score }})
+        entity_id: automation.huskers_touchdown_celebration
