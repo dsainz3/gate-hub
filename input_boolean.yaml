@@ -11,11 +11,7 @@ huskers_exterior_color_show:
   name: Huskers Exterior Color Show
   icon: mdi:lightbulb-group
 
-# Huskers runtime flags
-huskers_theater_show_running:
-  name: Huskers Theater Show Running
-  icon: mdi:movie-open-star
-
-huskers_exterior_show_running:
-  name: Huskers Exterior Show Running
-  icon: mdi:coach-lamp
+# Unified show control
+huskers_show_running:
+  name: Huskers Show Running
+  icon: mdi:lightbulb-group-outline

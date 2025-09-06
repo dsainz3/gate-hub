@@ -1,9 +1,9 @@
-# === AUTOMATIONS (cleaned & indentation-correct) ===
+# === AUTOMATIONS (Updated for unified system) ===
 
 - id: huskers_pregame_tminus20_showtime
   alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
   description: >
-    Starts theater/exterior light shows and sets LED to gameday mode when
+    Starts combined light shows and sets LED to gameday mode when
     19–21 minutes remain until kickoff. Only activates if shows aren't already
     running and game mode is enabled.
   initial_state: true
@@ -29,25 +29,13 @@
             - condition: state
               entity_id: input_boolean.huskers_test_mode
               state: 'on'
-        - condition: and
-          conditions:
-            - condition: state
-              entity_id: script.huskers_theater_show_start
-              state: 'off'
-            - condition: state
-              entity_id: script.huskers_exterior_show_start
-              state: 'off'
+        - condition: state
+          entity_id: script.huskers_combined_show_start
+          state: 'off'
   action:
-    - parallel:
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_theater_show_start
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_exterior_show_start
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_led_gameday_start
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_combined_show_start
     - service: logbook.log
       data:
         name: Huskers Automation
@@ -86,10 +74,7 @@
     - parallel:
         - service: script.turn_on
           target:
-            entity_id: script.huskers_td_burst_bpm_theater
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_td_burst_bpm_exterior
+            entity_id: script.huskers_td_burst_combined
         - service: script.turn_on
           target:
             entity_id: script.huskers_led_td_burst
@@ -118,13 +103,9 @@
       entity_id: input_boolean.huskers_game_mode
       state: 'on'
   action:
-    - parallel:
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_theater_show_stop
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_exterior_show_stop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_cleanup_all
     - service: logbook.log
       data:
         name: Huskers Automation
@@ -439,59 +420,3 @@
       data:
         name: Safety Automation
         message: Nightly burner plug shutoff completed
-
-# START shows at T-20 (keeps your guards)
-- id: huskers_pregame_tminus20_showtime
-  alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
-  initial_state: true
-  mode: single
-  trigger:
-    - platform: numeric_state
-      entity_id: sensor.huskers_kickoff_in_effective
-      above: 19
-      below: 21
-      for:
-        seconds: 5
-  condition:
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-    - condition: or
-      conditions:
-        - condition: state
-          entity_id: binary_sensor.huskers_pregame_window
-          state: 'on'
-        - condition: state
-          entity_id: input_boolean.huskers_test_mode
-          state: 'on'
-  action:
-    - parallel:
-        - service: script.huskers_theater_show_start
-        - service: script.huskers_exterior_show_start
-    - service: logbook.log
-      data:
-        name: Huskers Automation
-        message: 'Pregame shows STARTED - T-{{ states("sensor.huskers_kickoff_in_effective") }} min'
-
-# STOP & RESTORE 20 minutes after game ends
-- id: huskers_stop_shows_20m_after_final
-  alias: 'Huskers: Stop Shows 20m After Final'
-  initial_state: true
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-      to:
-        - POST
-        - FINAL
-  condition:
-    - condition: state
-      entity_id: input_boolean.huskers_game_mode
-      state: 'on'
-  action:
-    - delay: '00:20:00'
-    - service: script.huskers_cleanup_all
-    - service: logbook.log
-      data:
-        name: Huskers Automation
-        message: 'Postgame +20m → shows stopped and snapshots restored'
