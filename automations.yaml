@@ -41,34 +41,41 @@
         name: Huskers Automation
         message: 'Pregame shows started - T-{{ trigger.to_state.state }} minutes'
 
+# REPLACE your existing huskers_td_burst_on_score automation with this corrected version
+
 - id: huskers_td_burst_on_score
   alias: 'Huskers: Touchdown Celebration'
   description: >
-    Triggers synchronized BPM-based light bursts when Nebraska scores increase.
-    Uses effective score sensor to support both real game data and manual testing.
+    Triggers combined touchdown burst when Nebraska scores increase,
+    detecting touchdowns, field goals, and other scoring plays.
   initial_state: true
   mode: single
   trigger:
     - platform: state
-      entity_id: sensor.huskers_our_score_effective
+      entity_id: sensor.husker_team
+      attribute: team_score
   condition:
-    - condition: and
-      conditions:
-        - condition: state
-          entity_id: input_boolean.huskers_game_mode
-          state: 'on'
-        - condition: template
-          value_template: >-
-            {{ trigger.from_state is not none and
-               trigger.to_state is not none and
-               (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}
+    - condition: state
+      entity_id: input_boolean.huskers_game_mode
+      state: 'on'
+    - condition: template
+      value_template: >
+        {% if trigger.from_state is none or trigger.from_state.attributes.team_score is none %}
+          false
+        {% else %}
+          {% set old_score = trigger.from_state.attributes.team_score | int(0) %}
+          {% set new_score = trigger.to_state.attributes.team_score | int(0) %}
+          {{ new_score > old_score }}
+        {% endif %}
   action:
     - variables:
-        score_increase: >-
-          {{ (trigger.to_state.state | int(0)) - (trigger.from_state.state | int(0)) }}
-        celebration_type: >-
+        old_score: '{{ trigger.from_state.attributes.team_score | int(0) if trigger.from_state else 0 }}'
+        new_score: '{{ trigger.to_state.attributes.team_score | int(0) }}'
+        score_increase: '{{ new_score - old_score }}'
+        celebration_type: >
           {% if score_increase >= 6 %}touchdown
           {% elif score_increase >= 3 %}field_goal
+          {% elif score_increase >= 2 %}safety
           {% else %}other
           {% endif %}
     - parallel:
@@ -80,10 +87,10 @@
             entity_id: script.huskers_led_td_burst
     - service: logbook.log
       data:
-        name: Huskers Celebration
-        message: >-
-          {{ celebration_type.title() }} celebration! Score:
-          {{ trigger.from_state.state }} → {{ trigger.to_state.state }}
+        name: Huskers Touchdown
+        message: >
+          {{ celebration_type.title() }} celebration! Nebraska scored {{ score_increase }} points
+          ({{ old_score }} → {{ new_score }})
         entity_id: automation.huskers_td_burst_on_score
 
 - id: huskers_postgame_cleanup
