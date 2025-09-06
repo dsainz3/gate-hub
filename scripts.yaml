@@ -11,8 +11,8 @@ huskers_snapshot_before:
       data:
         scene_id: huskers_before
         snapshot_entities:
-          - light.theater_left
-          - light.theater_right
+          - light.light_theater_left
+          - light.light_theater_right
           - light.front_left
           - light.front_right
           - light.garage_left
@@ -61,14 +61,14 @@ huskers_theater_show_loop:
           # Left scarlet, Right cream
           - service: light.turn_on
             target:
-              entity_id: light.theater_left
+              entity_id: light.light_theater_left
             data:
               rgb_color: [204, 0, 0]
               brightness_pct: 50
               transition: 5
           - service: light.turn_on
             target:
-              entity_id: light.theater_right
+              entity_id: light.light_theater_right
             data:
               rgb_color: [255, 253, 208]
               brightness_pct: 50
@@ -78,14 +78,14 @@ huskers_theater_show_loop:
           # Left cream, Right scarlet
           - service: light.turn_on
             target:
-              entity_id: light.theater_left
+              entity_id: light.light_theater_left
             data:
               rgb_color: [255, 253, 208]
               brightness_pct: 50
               transition: 5
           - service: light.turn_on
             target:
-              entity_id: light.theater_right
+              entity_id: light.light_theater_right
             data:
               rgb_color: [204, 0, 0]
               brightness_pct: 50
@@ -236,3 +236,21 @@ huskers_theater_alt_stop:
       target:
         entity_id: input_boolean.huskers_theater_show_running
     - service: script.huskers_restore_after
+
+huskers_debug_test:
+  alias: 'Debug: Minimal Theater Test'
+  sequence:
+    - service: logbook.log
+      data:
+        name: Debug Test
+        message: 'Script started successfully'
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_left
+      data:
+        brightness: 100
+        rgb_color: [255, 0, 0]
+    - service: logbook.log
+      data:
+        name: Debug Test
+        message: 'Light command sent'
