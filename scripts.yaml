@@ -236,7 +236,6 @@ huskers_theater_alt_stop:
       target:
         entity_id: input_boolean.huskers_theater_show_running
     - service: script.huskers_restore_after
-
 huskers_debug_test:
   alias: 'Debug: Minimal Theater Test'
   sequence:
