@@ -139,11 +139,11 @@
   id: huskers_alternating_theater
   icon: mdi:palette
   entities:
-    light.light_theater_left:
+    light.theater_left:
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
-    light.light_theater_right:
+    light.theater_right:
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
@@ -154,11 +154,11 @@
   id: huskers_alternating_theater_inverted
   icon: mdi:palette
   entities:
-    light.light_theater_left:
+    light.theater_left:
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
-    light.light_theater_right:
+    light.theater_right:
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
