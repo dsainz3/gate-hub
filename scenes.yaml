@@ -95,3 +95,70 @@
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
+
+# === HUSKERS scenes ===
+- id: huskers_scarlet_theater
+  name: Huskers Scarlet Theater
+  entities:
+    light.theater_left: { state: 'on', brightness_pct: 25, rgb_color: [208, 0, 0] }
+    light.theater_right: { state: 'on', brightness_pct: 25, rgb_color: [208, 0, 0] }
+
+- id: huskers_cream_theater
+  name: Huskers Cream Theater
+  entities:
+    light.theater_left: { state: 'on', brightness_pct: 20, rgb_color: [255, 247, 229] }
+    light.theater_right: { state: 'on', brightness_pct: 20, rgb_color: [255, 247, 229] }
+
+- id: huskers_alternating_exterior
+  name: Huskers Alternating Exterior
+  entities:
+    light.front_left: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.front_right: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_left: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_center: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_right: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+
+- id: huskers_alternating_exterior_inverted
+  name: Huskers Alternating Exterior (Inverted)
+  entities:
+    light.front_left: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.front_right: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_left: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_center: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_right: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+
+# ADD these scenes to your scenes.yaml file (append to existing content)
+
+# =========================================================
+# CATEGORY: HUSKERS — THEATER ALTERNATING SCENES
+# =========================================================
+
+# PURPOSE: Alternating scarlet/cream starting with scarlet on THEATER LEFT
+# PATTERN: Scarlet (theater left), Cream (theater right)
+- name: Huskers Alternating (Theater)
+  id: huskers_alternating_theater
+  icon: mdi:palette
+  entities:
+    light.theater_left:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+    light.theater_right:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+
+# PURPOSE: Inverted pattern (start with CREAM on THEATER LEFT)
+# PATTERN: Cream (theater left), Scarlet (theater right)
+- name: Huskers Alternating Inverted (Theater)
+  id: huskers_alternating_theater_inverted
+  icon: mdi:palette
+  entities:
+    light.theater_left:
+      state: 'on'
+      brightness: 255
+      hs_color: [48, 12] # Cream
+    light.theater_right:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet

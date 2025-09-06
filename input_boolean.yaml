@@ -10,3 +10,8 @@ huskers_game_mode:
 huskers_exterior_color_show:
   name: Huskers Exterior Color Show
   icon: mdi:lightbulb-group
+
+# Unified show control
+huskers_show_running:
+  name: Huskers Show Running
+  icon: mdi:lightbulb-group-outline
