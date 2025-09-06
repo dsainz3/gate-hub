@@ -1,9 +1,188 @@
-# Huskers runtime flags (append safely)
+# scripts.yaml — rebuilt Huskers show system
 
-huskers_theater_show_running:
-  name: Huskers Theater Show Running
-  icon: mdi:movie-open-star
+# ==============
+# SNAPSHOT / RESTORE
+# ==============
 
-huskers_exterior_show_running:
-  name: Huskers Exterior Show Running
-  icon: mdi:coach-lamp
+huskers_snapshot_before:
+  alias: 'Huskers: Snapshot Current Lighting'
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: huskers_before
+        snapshot_entities:
+          - light.theater_left
+          - light.theater_right
+          - light.front_left
+          - light.front_right
+          - light.garage_left
+          - light.garage_center
+          - light.garage_right
+          - light.permanent_outdoor_lights
+    - service: logbook.log
+      data:
+        name: Huskers Snapshot
+        message: 'Saved current lighting state before gameday show'
+
+huskers_restore_after:
+  alias: 'Huskers: Restore Pre-Game Lighting'
+  sequence:
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_before
+    - service: logbook.log
+      data:
+        name: Huskers Restore
+        message: 'Restored lighting state after game'
+
+# ==============
+# THEATER SHOW
+# ==============
+
+huskers_theater_show_start:
+  alias: 'Huskers: Theater Show Start'
+  sequence:
+    - service: script.huskers_snapshot_before
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_theater_show_running
+    - service: script.huskers_theater_show_loop
+
+huskers_theater_show_loop:
+  alias: 'Huskers: Theater Alternating Loop'
+  mode: restart
+  sequence:
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_theater_show_running
+            state: 'on'
+        sequence:
+          # Left scarlet, Right cream
+          - service: light.turn_on
+            target:
+              entity_id: light.theater_left
+            data:
+              rgb_color: [204, 0, 0]
+              brightness_pct: 50
+              transition: 5
+          - service: light.turn_on
+            target:
+              entity_id: light.theater_right
+            data:
+              rgb_color: [255, 253, 208]
+              brightness_pct: 50
+              transition: 5
+          - delay: '00:00:30'
+
+          # Left cream, Right scarlet
+          - service: light.turn_on
+            target:
+              entity_id: light.theater_left
+            data:
+              rgb_color: [255, 253, 208]
+              brightness_pct: 50
+              transition: 5
+          - service: light.turn_on
+            target:
+              entity_id: light.theater_right
+            data:
+              rgb_color: [204, 0, 0]
+              brightness_pct: 50
+              transition: 5
+          - delay: '00:00:30'
+
+huskers_theater_show_stop:
+  alias: 'Huskers: Theater Show Stop'
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_theater_show_running
+    - service: script.huskers_restore_after
+
+# ==============
+# EXTERIOR SHOW
+# ==============
+
+huskers_exterior_show_start:
+  alias: 'Huskers: Exterior Show Start'
+  sequence:
+    - service: script.huskers_snapshot_before
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_exterior_show_running
+    - service: script.huskers_exterior_show_loop
+
+huskers_exterior_show_loop:
+  alias: 'Huskers: Exterior Alternating Loop'
+  mode: restart
+  sequence:
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_exterior_show_running
+            state: 'on'
+        sequence:
+          # Left side scarlet, Right side cream
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.front_left
+                - light.garage_left
+              data:
+                rgb_color: [204, 0, 0]
+                brightness_pct: 80
+                transition: 5
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.front_right
+                - light.garage_center
+              data:
+                rgb_color: [255, 253, 208]
+                brightness_pct: 80
+                transition: 5
+          - delay: '00:00:30'
+
+          # Swap sides
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.front_left
+                - light.garage_left
+              data:
+                rgb_color: [255, 253, 208]
+                brightness_pct: 80
+                transition: 5
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.front_right
+                - light.garage_center
+              data:
+                rgb_color: [204, 0, 0]
+                brightness_pct: 80
+                transition: 5
+          - delay: '00:00:30'
+
+huskers_exterior_show_stop:
+  alias: 'Huskers: Exterior Show Stop'
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_exterior_show_running
+    - service: script.huskers_restore_after
+
+# ==============
+# GLOBAL CLEANUP
+# ==============
+
+huskers_cleanup_all:
+  alias: 'Huskers: Cleanup All Shows'
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.huskers_theater_show_running
+          - input_boolean.huskers_exterior_show_running
+    - service: script.huskers_restore_after
