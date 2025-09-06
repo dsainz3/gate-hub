@@ -141,36 +141,50 @@ huskers_td_burst_combined:
     - repeat:
         count: '{{ (10 / beat_duration) | int }}'
         sequence:
-          # Beat 1: All Scarlet
+          # Beat 1: Left side Scarlet, Right side Cream
           - service: light.turn_on
             target:
               entity_id:
                 - light.light_theater_left
-                - light.light_theater_right
                 - light.light_front_left
-                - light.light_front_right
                 - light.garage_left
-                - light.garage_center
                 - light.garage_right
             data:
               rgb_color: [204, 0, 0]
               brightness: 255
               transition: '{{ half_beat }}'
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.light_theater_right
+                - light.light_front_right
+                - light.garage_center
+            data:
+              rgb_color: [255, 253, 208]
+              brightness: 255
+              transition: '{{ half_beat }}'
           - delay: '{{ half_beat }}'
 
-          # Beat 2: All Cream
+          # Beat 2: Left side Cream, Right side Scarlet
           - service: light.turn_on
             target:
               entity_id:
                 - light.light_theater_left
-                - light.light_theater_right
                 - light.light_front_left
-                - light.light_front_right
                 - light.garage_left
-                - light.garage_center
                 - light.garage_right
             data:
               rgb_color: [255, 253, 208]
+              brightness: 255
+              transition: '{{ half_beat }}'
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.light_theater_right
+                - light.light_front_right
+                - light.garage_center
+            data:
+              rgb_color: [204, 0, 0]
               brightness: 255
               transition: '{{ half_beat }}'
           - delay: '{{ half_beat }}'
