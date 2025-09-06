@@ -221,7 +221,7 @@ huskers_theater_alt_loop:
               entity_id: scene.huskers_alternating_theater
             data:
               transition: 2
-          - delay: '00:00:10'
+          - delay: '00:00:04'
 
           # Inverted pattern: Left cream, Right scarlet
           - service: scene.turn_on
@@ -229,7 +229,7 @@ huskers_theater_alt_loop:
               entity_id: scene.huskers_alternating_theater_inverted
             data:
               transition: 2
-          - delay: '00:00:10'
+          - delay: '00:00:04'
 
 huskers_theater_alt_stop:
   alias: 'Huskers: Theater Alternating Stop'
