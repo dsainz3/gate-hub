@@ -13,8 +13,8 @@ huskers_snapshot_before:
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
-          - light.front_left
-          - light.front_right
+          - light.light_front_left
+          - light.light_front_right
           - light.garage_left
           - light.garage_center
           - light.garage_right
@@ -42,11 +42,15 @@ huskers_restore_after:
 huskers_theater_show_start:
   alias: 'Huskers: Theater Show Start'
   sequence:
-    - service: script.huskers_snapshot_before
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_snapshot_before
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_theater_show_running
-    - service: script.huskers_theater_show_loop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_theater_show_loop
 
 huskers_theater_show_loop:
   alias: 'Huskers: Theater Alternating Loop'
@@ -98,7 +102,9 @@ huskers_theater_show_stop:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_theater_show_running
-    - service: script.huskers_restore_after
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_restore_after
 
 # ==============
 # EXTERIOR SHOW
@@ -107,11 +113,15 @@ huskers_theater_show_stop:
 huskers_exterior_show_start:
   alias: 'Huskers: Exterior Show Start'
   sequence:
-    - service: script.huskers_snapshot_before
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_snapshot_before
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_exterior_show_running
-    - service: script.huskers_exterior_show_loop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_exterior_show_loop
 
 huskers_exterior_show_loop:
   alias: 'Huskers: Exterior Alternating Loop'
@@ -127,42 +137,42 @@ huskers_exterior_show_loop:
           - service: light.turn_on
             target:
               entity_id:
-                - light.front_left
+                - light.light_front_left
                 - light.garage_left
-              data:
-                rgb_color: [204, 0, 0]
-                brightness_pct: 80
-                transition: 5
+            data:
+              rgb_color: [204, 0, 0]
+              brightness_pct: 80
+              transition: 5
           - service: light.turn_on
             target:
               entity_id:
-                - light.front_right
+                - light.light_front_right
                 - light.garage_center
-              data:
-                rgb_color: [255, 253, 208]
-                brightness_pct: 80
-                transition: 5
+            data:
+              rgb_color: [255, 253, 208]
+              brightness_pct: 80
+              transition: 5
           - delay: '00:00:30'
 
           # Swap sides
           - service: light.turn_on
             target:
               entity_id:
-                - light.front_left
+                - light.light_front_left
                 - light.garage_left
-              data:
-                rgb_color: [255, 253, 208]
-                brightness_pct: 80
-                transition: 5
+            data:
+              rgb_color: [255, 253, 208]
+              brightness_pct: 80
+              transition: 5
           - service: light.turn_on
             target:
               entity_id:
-                - light.front_right
+                - light.light_front_right
                 - light.garage_center
-              data:
-                rgb_color: [204, 0, 0]
-                brightness_pct: 80
-                transition: 5
+            data:
+              rgb_color: [204, 0, 0]
+              brightness_pct: 80
+              transition: 5
           - delay: '00:00:30'
 
 huskers_exterior_show_stop:
@@ -171,37 +181,27 @@ huskers_exterior_show_stop:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_exterior_show_running
-    - service: script.huskers_restore_after
-
-# ==============
-# GLOBAL CLEANUP
-# ==============
-
-huskers_cleanup_all:
-  alias: 'Huskers: Cleanup All Shows'
-  sequence:
-    - service: input_boolean.turn_off
+    - service: script.turn_on
       target:
-        entity_id:
-          - input_boolean.huskers_theater_show_running
-          - input_boolean.huskers_exterior_show_running
-    - service: script.huskers_restore_after
-
-# ADD these scripts to your scripts.yaml file (append to existing content)
+        entity_id: script.huskers_restore_after
 
 # ==============
-# THEATER ALTERNATING SCRIPTS
+# THEATER ALTERNATING SCRIPTS (10s cycles)
 # ==============
 
 huskers_theater_alt_start:
   alias: 'Huskers: Theater Alternating (10s cycles)'
   mode: restart
   sequence:
-    - service: script.huskers_snapshot_before
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_snapshot_before
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_theater_show_running
-    - service: script.huskers_theater_alt_loop
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_theater_alt_loop
 
 huskers_theater_alt_loop:
   alias: 'Huskers: Theater Alternating Loop'
@@ -235,7 +235,30 @@ huskers_theater_alt_stop:
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_theater_show_running
-    - service: script.huskers_restore_after
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_restore_after
+
+# ==============
+# GLOBAL CLEANUP
+# ==============
+
+huskers_cleanup_all:
+  alias: 'Huskers: Cleanup All Shows'
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.huskers_theater_show_running
+          - input_boolean.huskers_exterior_show_running
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_restore_after
+
+# ==============
+# DEBUG SCRIPTS
+# ==============
+
 huskers_debug_test:
   alias: 'Debug: Minimal Theater Test'
   sequence:
