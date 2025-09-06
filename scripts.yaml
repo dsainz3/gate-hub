@@ -186,3 +186,53 @@ huskers_cleanup_all:
           - input_boolean.huskers_theater_show_running
           - input_boolean.huskers_exterior_show_running
     - service: script.huskers_restore_after
+
+# ADD these scripts to your scripts.yaml file (append to existing content)
+
+# ==============
+# THEATER ALTERNATING SCRIPTS
+# ==============
+
+huskers_theater_alt_start:
+  alias: 'Huskers: Theater Alternating (10s cycles)'
+  mode: restart
+  sequence:
+    - service: script.huskers_snapshot_before
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_theater_show_running
+    - service: script.huskers_theater_alt_loop
+
+huskers_theater_alt_loop:
+  alias: 'Huskers: Theater Alternating Loop'
+  mode: restart
+  sequence:
+    - repeat:
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_theater_show_running
+            state: 'on'
+        sequence:
+          # Normal pattern: Left scarlet, Right cream
+          - service: scene.turn_on
+            target:
+              entity_id: scene.huskers_alternating_theater
+            data:
+              transition: 2
+          - delay: '00:00:10'
+
+          # Inverted pattern: Left cream, Right scarlet
+          - service: scene.turn_on
+            target:
+              entity_id: scene.huskers_alternating_theater_inverted
+            data:
+              transition: 2
+          - delay: '00:00:10'
+
+huskers_theater_alt_stop:
+  alias: 'Huskers: Theater Alternating Stop'
+  sequence:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_theater_show_running
+    - service: script.huskers_restore_after
