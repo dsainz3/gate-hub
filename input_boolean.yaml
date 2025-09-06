@@ -10,3 +10,14 @@ huskers_game_mode:
 huskers_exterior_color_show:
   name: Huskers Exterior Color Show
   icon: mdi:lightbulb-group
+
+# APPEND to input_boolean.yaml
+
+huskers_theater_show_running:
+  name: Huskers Theater Show Running
+  icon: mdi:movie-open-star
+
+huskers_exterior_show_running:
+  name: Huskers Exterior Show Running
+  icon: mdi:coach-lamp
+# Huskers runtime flags (append safely)

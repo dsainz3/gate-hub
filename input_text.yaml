@@ -1,3 +1,7 @@
 huskers_theater_prev_scripts:
   name: Huskers Theater Prev Scripts
   max: 255
+huskers_last_score:
+  name: Huskers Last Score
+  icon: mdi:counter
+  max: 4

@@ -440,169 +440,58 @@
         name: Safety Automation
         message: Nightly burner plug shutoff completed
 
-- id: huskers_set_led_gametime_on_kickoff
-  alias: 'Huskers: LED Gametime Mode at Kickoff'
-  description: >
-    Sets exterior LED strip to game-time effect when kickoff occurs
-    (team status changes to IN).
+# START shows at T-20 (keeps your guards)
+- id: huskers_pregame_tminus20_showtime
+  alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
   initial_state: true
   mode: single
   trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-      to: 'IN'
+    - platform: numeric_state
+      entity_id: sensor.huskers_kickoff_in_effective
+      above: 19
+      below: 21
+      for:
+        seconds: 5
   condition:
     - condition: state
       entity_id: input_boolean.huskers_game_mode
       state: 'on'
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.huskers_pregame_window
+          state: 'on'
+        - condition: state
+          entity_id: input_boolean.huskers_test_mode
+          state: 'on'
   action:
-    - service: light.turn_on
-      target:
-        entity_id: light.permanent_outdoor_lights
-      data:
-        effect: LED_Gametime
-      continue_on_error: true
+    - parallel:
+        - service: script.huskers_theater_show_start
+        - service: script.huskers_exterior_show_start
     - service: logbook.log
       data:
-        name: Huskers Game Status
-        message: 'Kickoff detected - LED set to gametime mode'
+        name: Huskers Automation
+        message: 'Pregame shows STARTED - T-{{ states("sensor.huskers_kickoff_in_effective") }} min'
 
-- id: huskers_postgame_monthly_effect_after_20m
-  alias: 'Huskers: Postgame LED Effect Restore'
-  description: >
-    Waits 20 minutes after game ends (POST status) then restores the monthly
-    LED effect for normal operation.
+# STOP & RESTORE 20 minutes after game ends
+- id: huskers_stop_shows_20m_after_final
+  alias: 'Huskers: Stop Shows 20m After Final'
   initial_state: true
   mode: single
   trigger:
     - platform: state
       entity_id: sensor.husker_team
-      to: 'POST'
+      to:
+        - POST
+        - FINAL
   condition:
     - condition: state
       entity_id: input_boolean.huskers_game_mode
       state: 'on'
   action:
     - delay: '00:20:00'
-    - service: automation.trigger
-      target:
-        entity_id: automation.exterior_led_monthly_effect
-      data:
-        skip_condition: false
-    - service: logbook.log
-      data:
-        name: Huskers Postgame
-        message: 'Monthly LED effect restored after 20-minute delay'
-
-- id: huskers_phase_observer
-  alias: 'Huskers: Phase Observer (Log)'
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  action:
-    - service: logbook.log
-      data:
-        name: Huskers Feed
-        message: >-
-          state={{ states('sensor.husker_team') }},
-          q={{ state_attr('sensor.husker_team','quarter') }},
-          clock={{ state_attr('sensor.husker_team','clock') }}
-        entity_id: sensor.husker_team
-
-- id: huskers_pregame_window
-  alias: 'Huskers: Pregame Window (T-20 → T0)'
-  mode: single
-  trigger:
-    - platform: numeric_state
-      entity_id: sensor.huskers_kickoff_in
-      below: 20
-      above: 0
-  condition:
-    - condition: template
-      value_template: "{{ states('sensor.husker_team') in ['PRE'] }}"
-  action:
-    - service: script.huskers_led_gameday_start
-
-- id: huskers_in_game
-  alias: 'Huskers: In-Game'
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  condition:
-    - condition: template
-      value_template: >-
-        {% set st = states('sensor.husker_team') %}
-        {% set q = state_attr('sensor.husker_team','quarter') %}
-        {{ st in ['IN'] or (q | int(0)) in [1,2,3,4] }}
-  action:
-    - service: logbook.log
-      data:
-        name: Huskers Phase
-        message: 'In-Game detected'
-
-- id: huskers_halftime
-  alias: 'Huskers: Halftime'
-  mode: restart
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  condition:
-    - condition: template
-      value_template: "{{ state_attr('sensor.husker_team','quarter') == 'HALFTIME' }}"
-  action:
-    - service: logbook.log
-      data:
-        name: Huskers Phase
-        message: 'Halftime detected'
-
-- id: huskers_td_burst
-  alias: 'Huskers: Touchdown Burst'
-  mode: restart
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  condition:
-    - condition: template
-      value_template: >-
-        {% set new = state_attr('sensor.husker_team','team_score') | int(0) %}
-        {% set old = (trigger.from_state and trigger.from_state.attributes.get('team_score') | int(0)) or 0 %}
-        {{ new > old }}
-  action:
-    - service: script.huskers_led_td_burst
-
-- id: huskers_postgame
-  alias: 'Huskers: Postgame'
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  condition:
-    - condition: template
-      value_template: "{{ states('sensor.husker_team') in ['POST','FINAL'] }}"
-  action:
-    - delay: '00:05:00'
     - service: script.huskers_cleanup_all
-
-# Halftime dim WITHOUT scenes (≤50% theater, cream)
-- id: huskers_halftime_dim
-  alias: 'Huskers: Halftime → Calm Theater'
-  mode: single
-  trigger:
-    - platform: state
-      entity_id: sensor.husker_team
-  condition:
-    - condition: template
-      value_template: "{{ state_attr('sensor.husker_team','quarter') == 'HALFTIME' }}"
-  action:
-    - service: light.turn_on
-      target:
-        entity_id: light.theater_lights
-      data:
-        brightness_pct: 30
-        rgb_color: [255, 247, 229]
     - service: logbook.log
       data:
-        name: Huskers Phase
-        message: 'Halftime → Calm theater (≤50%)'
+        name: Huskers Automation
+        message: 'Postgame +20m → shows stopped and snapshots restored'
