@@ -95,3 +95,34 @@
       state: 'on'
       brightness: 255
       hs_color: [48, 12] # Cream
+
+# === HUSKERS scenes ===
+- id: huskers_scarlet_theater
+  name: Huskers Scarlet Theater
+  entities:
+    light.theater_left: { state: 'on', brightness_pct: 25, rgb_color: [208, 0, 0] }
+    light.theater_right: { state: 'on', brightness_pct: 25, rgb_color: [208, 0, 0] }
+
+- id: huskers_cream_theater
+  name: Huskers Cream Theater
+  entities:
+    light.theater_left: { state: 'on', brightness_pct: 20, rgb_color: [255, 247, 229] }
+    light.theater_right: { state: 'on', brightness_pct: 20, rgb_color: [255, 247, 229] }
+
+- id: huskers_alternating_exterior
+  name: Huskers Alternating Exterior
+  entities:
+    light.front_left: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.front_right: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_left: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_center: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_right: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+
+- id: huskers_alternating_exterior_inverted
+  name: Huskers Alternating Exterior (Inverted)
+  entities:
+    light.front_left: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.front_right: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_left: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
+    light.garage_center: { state: 'on', brightness_pct: 10, rgb_color: [208, 0, 0] }
+    light.garage_right: { state: 'on', brightness_pct: 10, rgb_color: [255, 247, 229] }
