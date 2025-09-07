@@ -1,4 +1,4 @@
-# templates.yaml  (no top-level "template:" here)
+# templates.yaml - All Husker templates removed
 
 - sensor:
     # WEATHER & ENVIRONMENT SENSORS — fixed structure
@@ -199,68 +199,5 @@
         is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
         latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
 
-    # HUSKERS GAME SENSORS (normalized)
-    - name: huskers_team_name
-      state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
-    - name: huskers_opponent_name
-      state: "{{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}"
-    - name: huskers_team_score
-      state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
-    - name: huskers_opponent_score
-      state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
-    - name: Huskers Quarter
-      unique_id: huskers_quarter
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
-      icon: mdi:numeric
-    - name: huskers_game_clock_ct
-      state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
-    - name: huskers_kickoff_time_ct
-      state: >
-        {% set iso = state_attr('sensor.husker_team','date') %}
-        {% if iso not in [None,'','unknown','unavailable'] %}
-          {{ as_datetime(iso) | as_local | strftime('%-I:%M %p CT') }}
-        {% else %}unknown{% endif %}
-    - name: huskers_kickoff_in
-      unit_of_measurement: 'min'
-      state: >
-        {% set iso = state_attr('sensor.husker_team','date') %}
-        {% if iso in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {% set t = as_datetime(iso) %}
-          {% if t %}{{ ((t - now()).total_seconds() / 60) | round(0) }}{% else %}unknown{% endif %}
-        {% endif %}
-
-- binary_sensor:
-    - name: Huskers Pregame Window
-      unique_id: huskers_pregame_window
-      device_class: running
-      availability: "{{ has_value('sensor.huskers_kickoff_in_effective') }}"
-      state: >
-        {% set minutes_until = states('sensor.huskers_kickoff_in_effective') | int(-1) %}
-        {{ 0 < minutes_until <= 120 }}
-      icon: >
-        {% if this.state %}mdi:clock-fast{% else %}mdi:clock-outline{% endif %}
-      attributes:
-        friendly_name: Pregame Window (2 hours)
-
-    - name: Huskers Game In Progress (TT)
-      unique_id: huskers_game_in_progress_tt
-      device_class: running
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >
-        {% set game_state = states('sensor.husker_team') %}
-        {{ game_state in ['IN', 'LIVE'] }}
-      icon: >
-        {% if this.state %}mdi:football{% else %}mdi:football-helmet{% endif %}
-
-    - name: Huskers Postgame Window
-      unique_id: huskers_postgame_window
-      device_class: running
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >
-        {% set game_state = states('sensor.husker_team') %}
-        {{ game_state == 'POST' }}
-      icon: >
-        {% if this.state %}mdi:flag-checkered{% else %}mdi:flag-outline{% endif %}
+# All Husker-related binary sensors removed
+- binary_sensor: []
