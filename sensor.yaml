@@ -57,3 +57,30 @@
   max_age:
     hours: 24
   precision: 1
+
+# ===== STATISTICS SENSORS FOR TREND ANALYSIS =====
+# These provide the data for the trend calculations above
+- platform: statistics
+  name: 'Humidor Temp Change (1h)'
+  unique_id: humidor_temp_change_1h
+  entity_id: sensor.hygrometer_humidor_temperature
+  state_characteristic: change
+  max_age:
+    hours: 1
+  precision: 2
+
+- platform: statistics
+  name: 'Humidor Temp Stats (24h)'
+  unique_id: humidor_temp_stats_24h
+  entity_id: sensor.hygrometer_humidor_temperature
+  state_characteristic: mean
+  max_age:
+    hours: 24
+  precision: 1
+
+- platform: min_max
+  name: 'Humidor Temp Range Today'
+  unique_id: humidor_temp_range_today
+  type: mean
+  entity_ids:
+    - sensor.hygrometer_humidor_temperature

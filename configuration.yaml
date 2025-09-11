@@ -17,7 +17,9 @@ scene: !include scenes.yaml
 group: !include group.yaml
 light: !include light.yaml
 sensor: !include sensor.yaml
-template: !include templates.yaml
+template:
+  - !include templates.yaml
+  - !include humidor.yaml
 binary_sensor: !include binary_sensors.yaml
 input_boolean: !include input_boolean.yaml
 input_number: !include input_number.yaml
