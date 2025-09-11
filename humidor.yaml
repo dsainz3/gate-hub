@@ -1,0 +1,137 @@
+- sensor:
+    # ===== PRIMARY STATUS SENSOR =====
+    - name: 'Humidor Status'
+      unique_id: humidor_status_summary
+      device_class: enum
+      availability: >-
+        {{ has_value('sensor.hygrometer_humidor_temperature') and
+           has_value('switch.plug_humidor') and
+           has_value('automation.humidor_plug_temp_control') }}
+      state: >-
+        {%- set temp = states('sensor.hygrometer_humidor_temperature') | float(-999) -%}
+        {%- set cooling = is_state('switch.plug_humidor', 'on') -%}
+        {%- set auto_enabled = is_state('automation.humidor_plug_temp_control', 'on') -%}
+
+        {%- if temp == -999 -%}
+          sensor_error
+        {%- elif not auto_enabled -%}
+          manual_mode
+        {%- elif temp > 74 -%}
+          {%- if cooling -%}too_warm_cooling{%- else -%}too_warm_error{%- endif -%}
+        {%- elif temp < 68 -%}
+          {%- if cooling -%}cool_overcooling{%- else -%}optimal_idle{%- endif -%}
+        {%- else -%}
+          optimal_range
+        {%- endif -%}
+      icon: >-
+        {%- set temp = states('sensor.hygrometer_humidor_temperature') | float(-999) -%}
+        {%- if temp == -999 -%}mdi:alert-circle
+        {%- elif temp > 74 -%}mdi:thermometer-high
+        {%- elif temp < 68 -%}mdi:thermometer-low
+        {%- else -%}mdi:thermometer-check
+        {%- endif -%}
+      attributes:
+        temperature_f: "{{ states('sensor.hygrometer_humidor_temperature') | float(0) | round(1) }}"
+        cooling_active: "{{ is_state('switch.plug_humidor', 'on') }}"
+        automation_enabled: "{{ is_state('automation.humidor_plug_temp_control', 'on') }}"
+        last_temp_update: "{{ relative_time(states.sensor.hygrometer_humidor_temperature.last_changed) if has_value('sensor.hygrometer_humidor_temperature') else 'unknown' }}"
+        target_range: '68-74°F'
+        friendly_name: 'Humidor System Status'
+
+    # ===== TEMPERATURE TREND ANALYSIS =====
+    - name: 'Humidor Temperature Trend'
+      unique_id: humidor_temperature_trend
+      availability: "{{ has_value('sensor.hygrometer_humidor_temperature') }}"
+      state: >-
+        {%- set current = states('sensor.hygrometer_humidor_temperature') | float(-999) -%}
+        {%- if current == -999 -%}
+          unknown
+        {%- else -%}
+          {%- set change_1h = states('sensor.humidor_temp_change_1h') | float(0) -%}
+          {%- if change_1h > 1.0 -%}rising_fast
+          {%- elif change_1h > 0.3 -%}rising_slow
+          {%- elif change_1h < -1.0 -%}falling_fast
+          {%- elif change_1h < -0.3 -%}falling_slow
+          {%- else -%}stable
+          {%- endif -%}
+        {%- endif -%}
+      icon: >-
+        {%- set change_1h = states('sensor.humidor_temp_change_1h') | float(0) -%}
+        {%- if change_1h > 0.3 -%}mdi:trending-up
+        {%- elif change_1h < -0.3 -%}mdi:trending-down
+        {%- else -%}mdi:trending-neutral
+        {%- endif -%}
+      attributes:
+        current_temp: "{{ states('sensor.hygrometer_humidor_temperature') | float(0) | round(1) }}°F"
+        change_1h: "{{ states('sensor.humidor_temp_change_1h') | float(0) | round(2) }}°F"
+        change_rate: >-
+          {%- set change = states('sensor.humidor_temp_change_1h') | float(0) -%}
+          {%- if change > 0 -%}+{{ change | round(2) }}°F/hr
+          {%- else -%}{{ change | round(2) }}°F/hr
+          {%- endif -%}
+
+    # ===== COOLING SYSTEM EFFICIENCY =====
+    - name: 'Humidor Cooling Efficiency'
+      unique_id: humidor_cooling_efficiency
+      unit_of_measurement: '%'
+      availability: >-
+        {{ has_value('switch.plug_humidor') and
+           has_value('sensor.hygrometer_humidor_temperature') }}
+      state: >-
+        {%- set temp = states('sensor.hygrometer_humidor_temperature') | float(0) -%}
+        {%- set cooling = is_state('switch.plug_humidor', 'on') -%}
+        {%- set target_temp = 70 -%}
+
+        {%- if temp == 0 -%}
+          0
+        {%- else -%}
+          {%- set temp_deviation = (temp - target_temp) | abs -%}
+          {%- set max_deviation = 6 -%}
+          {%- set efficiency = (1 - (temp_deviation / max_deviation)) * 100 -%}
+          {{ [efficiency, 0] | max | round(0) }}
+        {%- endif -%}
+      icon: >-
+        {%- set efficiency = this.state | float(0) -%}
+        {%- if efficiency >= 90 -%}mdi:gauge-full
+        {%- elif efficiency >= 70 -%}mdi:gauge
+        {%- elif efficiency >= 50 -%}mdi:gauge-low
+        {%- else -%}mdi:gauge-empty
+        {%- endif -%}
+      attributes:
+        target_temperature: '70°F'
+        current_deviation: >-
+          {%- set temp = states('sensor.hygrometer_humidor_temperature') | float(0) -%}
+          {%- set deviation = (temp - 70) -%}
+          {%- if deviation > 0 -%}+{{ deviation | round(1) }}°F
+          {%- else -%}{{ deviation | round(1) }}°F
+          {%- endif -%}
+
+    # ===== SYSTEM HEALTH INDICATOR =====
+    - name: 'Humidor System Health'
+      unique_id: humidor_system_health
+      availability: >-
+        {{ has_value('sensor.hygrometer_humidor_temperature') and
+           has_value('switch.plug_humidor') }}
+      state: >-
+        {%- set temp_age = (now() - states.sensor.hygrometer_humidor_temperature.last_updated).total_seconds() -%}
+        {%- set switch_available = not is_state('switch.plug_humidor', 'unavailable') -%}
+        {%- set automation_available = not is_state('automation.humidor_plug_temp_control', 'unavailable') -%}
+
+        {%- if temp_age > 1800 -%}
+          sensor_stale
+        {%- elif not switch_available -%}
+          switch_offline
+        {%- elif not automation_available -%}
+          automation_disabled
+        {%- else -%}
+          healthy
+        {%- endif -%}
+      icon: >-
+        {%- if this.state == 'healthy' -%}mdi:check-circle
+        {%- else -%}mdi:alert-circle
+        {%- endif -%}
+      attributes:
+        sensor_age_minutes: >-
+          {{ ((now() - states.sensor.hygrometer_humidor_temperature.last_updated).total_seconds() / 60) | round(0) if has_value('sensor.hygrometer_humidor_temperature') else 'unknown' }}
+        switch_status: "{{ states('switch.plug_humidor') }}"
+        automation_status: "{{ states('automation.humidor_plug_temp_control') }}"
