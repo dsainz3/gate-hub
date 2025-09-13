@@ -1,266 +1,321 @@
-# scripts.yaml — Unified Huskers show system
+# scripts.yaml - Complete Huskers Theater & LED Control System
 
-# ==============
-# SNAPSHOT / RESTORE
-# ==============
+# =========================================================
+# CATEGORY: LED CONTROL
+# =========================================================
 
-huskers_snapshot_before:
-  alias: 'Huskers: Snapshot Current Lighting'
+huskers_led_gameday_start:
+  alias: Start Game-Day Effect
+  mode: single
   sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: LED_Huskers
+
+huskers_led_stop:
+  alias: Stop Effect (Restore Previous)
+  mode: single
+  sequence:
+    - service: light.turn_off
+      target:
+        entity_id: light.permanent_outdoor_lights
+
+huskers_led_revert_monthly:
+  alias: Revert to Monthly Effect
+  mode: single
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: Monthly
+
+# =========================================================
+# CATEGORY: TOUCHDOWN & BURST EFFECTS
+# =========================================================
+
+huskers_touchdown_burst:
+  alias: 'Huskers: Touchdown Burst (Theater Alternating, Snapshot/Restore)'
+  description: 'Fast alternating burst for touchdowns with restore'
+  mode: restart
+  sequence:
+    # Snapshot current state of both theater lights
     - service: scene.create
       data:
-        scene_id: huskers_before
+        scene_id: huskers_theater_pre_burst
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-          - light.permanent_outdoor_lights
-    - service: logbook.log
-      data:
-        name: Huskers Snapshot
-        message: 'Saved current lighting state before gameday show'
 
-huskers_restore_after:
-  alias: 'Huskers: Restore Pre-Game Lighting'
-  sequence:
+    # Burst variables
+    - variables:
+        flashes: 6 # total swaps (12 color hits)
+        on_time: 0.35 # hold time for each color
+        trans: 0.25 # smooth transition time
+
+    # Alternate Scarlet <-> Cream
+    - repeat:
+        count: '{{ flashes }}'
+        sequence:
+          # Left red, right cream
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: '{{ trans }}'
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              rgb_color: [255, 247, 229] # Nebraska Cream
+              brightness: 255
+              transition: '{{ trans }}'
+          - delay: '{{ on_time }}'
+
+          # Swap: left cream, right red
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [255, 247, 229] # Nebraska Cream
+              brightness: 255
+              transition: '{{ trans }}'
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: '{{ trans }}'
+          - delay: '{{ on_time }}'
+
+    # Settle and restore the snapshot
+    - delay: 0.2
     - service: scene.turn_on
       target:
-        entity_id: scene.huskers_before
-    - service: logbook.log
+        entity_id: scene.huskers_theater_pre_burst
       data:
-        name: Huskers Restore
-        message: 'Restored lighting state after game'
+        transition: 1.0
 
-# ==============
-# COMBINED HUSKERS SHOW (Theater + Exterior)
-# ==============
+# =========================================================
+# CATEGORY: THEATER GAME SHOW (NEW - 5s timing, 2s transitions)
+# =========================================================
 
-huskers_combined_show_start:
-  alias: 'Huskers: Combined Show Start'
+huskers_theater_game_show_start:
+  alias: 'Huskers: Theater Game Show Start'
+  description: 'Starts alternating Scarlet/Cream show for theater lights only (5s cycles, 2s transitions)'
+  mode: restart
   sequence:
-    - service: script.turn_on
-      target:
-        entity_id: script.huskers_snapshot_before
+    # Snapshot current theater state
+    - service: scene.create
+      data:
+        scene_id: huskers_theater_game_before
+        snapshot_entities:
+          - light.light_theater_left
+          - light.light_theater_right
+
+    # Set theater show running flag
     - service: input_boolean.turn_on
       target:
-        entity_id: input_boolean.huskers_show_running
+        entity_id: input_boolean.huskers_theater_show_running
+
+    # Log start of show
+    - service: logbook.log
+      data:
+        name: Huskers Theater Game Show
+        message: 'Started Huskers theater alternating show - Go Big Red!'
+
+    # Start the alternating loop
     - service: script.turn_on
       target:
-        entity_id: script.huskers_combined_show_loop
+        entity_id: script.huskers_theater_game_show_loop
 
-huskers_combined_show_loop:
-  alias: 'Huskers: Combined Alternating Loop'
+huskers_theater_game_show_loop:
+  alias: 'Huskers: Theater Game Show Loop'
+  description: 'Alternating pattern: Left (Scarlet→Cream), Right (Cream→Scarlet) - 5s cycles, 2s transitions'
   mode: restart
   sequence:
     - repeat:
         while:
           - condition: state
-            entity_id: input_boolean.huskers_show_running
+            entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Phase 1: All Scarlet
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.light_front_left
-                - light.light_front_right
-                - light.garage_left
-                - light.garage_center
-                - light.garage_right
-            data:
-              rgb_color: [204, 0, 0]
-              brightness_pct: 80
-              transition: 2
-          - delay: '00:00:04'
+          # Phase 1: Left=Scarlet, Right=Cream (5 seconds with 2s transition)
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  rgb_color: [208, 0, 0] # Nebraska Scarlet
+                  brightness: 255
+                  transition: 2
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  rgb_color: [255, 247, 229] # Nebraska Cream
+                  brightness: 255
+                  transition: 2
+          - delay: '00:00:05'
 
-          # Phase 2: All Cream
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.light_front_left
-                - light.light_front_right
-                - light.garage_left
-                - light.garage_center
-                - light.garage_right
-            data:
-              rgb_color: [255, 253, 208]
-              brightness_pct: 80
-              transition: 2
-          - delay: '00:00:04'
+          # Phase 2: Left=Cream, Right=Scarlet (5 seconds with 2s transition)
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  rgb_color: [255, 247, 229] # Nebraska Cream
+                  brightness: 255
+                  transition: 2
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  rgb_color: [208, 0, 0] # Nebraska Scarlet
+                  brightness: 255
+                  transition: 2
+          - delay: '00:00:05'
 
-huskers_combined_show_stop:
-  alias: 'Huskers: Combined Show Stop'
+huskers_theater_game_show_stop:
+  alias: 'Huskers: Theater Game Show Stop'
+  description: 'Stops theater game show and restores previous lighting'
   sequence:
+    # Stop the show
     - service: input_boolean.turn_off
       target:
-        entity_id: input_boolean.huskers_show_running
-    - service: script.turn_on
+        entity_id: input_boolean.huskers_theater_show_running
+
+    # Restore previous state
+    - service: scene.turn_on
       target:
-        entity_id: script.huskers_restore_after
+        entity_id: scene.huskers_theater_game_before
 
-# ==============
-# TOUCHDOWN BURST SCRIPTS
-# ==============
+    # Log completion
+    - service: logbook.log
+      data:
+        name: Huskers Theater Game Show
+        message: 'Stopped theater game show and restored previous lighting'
 
-huskers_td_burst_combined:
-  alias: 'Huskers: TD Burst Combined (BPM Synced)'
+# =========================================================
+# CATEGORY: LEGACY THEATER SHOW (PRESERVED - 10s timing)
+# =========================================================
+
+huskers_theater_show_start:
+  alias: 'Huskers: Theater Show (Start) - Legacy'
+  description: 'Original theater show with 10-second timing - preserved for compatibility'
   mode: restart
-  variables:
-    bpm: "{{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}"
-    beat_duration: '{{ (60 / bpm) | round(2) }}'
-    half_beat: '{{ (beat_duration / 2) | round(2) }}'
   sequence:
-    # Capture current state first
     - service: scene.create
       data:
-        scene_id: td_burst_combined_restore
+        scene_id: huskers_theater_show_restore
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-
-    # Log the celebration
-    - service: logbook.log
-      data:
-        name: Huskers TD Burst
-        message: 'Combined celebration started - {{ bpm }} BPM for 10 seconds'
-
-    # Run for 10 seconds (calculate number of beats)
-    - repeat:
-        count: '{{ (10 / beat_duration) | int }}'
-        sequence:
-          # Beat 1: Left side Scarlet, Right side Cream
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_front_left
-                - light.garage_left
-                - light.garage_right
-            data:
-              rgb_color: [204, 0, 0]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_right
-                - light.light_front_right
-                - light.garage_center
-            data:
-              rgb_color: [255, 253, 208]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - delay: '{{ half_beat }}'
-
-          # Beat 2: Left side Cream, Right side Scarlet
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_front_left
-                - light.garage_left
-                - light.garage_right
-            data:
-              rgb_color: [255, 253, 208]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_right
-                - light.light_front_right
-                - light.garage_center
-            data:
-              rgb_color: [204, 0, 0]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - delay: '{{ half_beat }}'
-
-    # Check if combined show was running before burst
-    - if:
-        - condition: state
-          entity_id: input_boolean.huskers_show_running
-          state: 'on'
-      then:
-        # Resume combined alternating show
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_combined_show_loop
-      else:
-        # Restore previous state if no show was running
-        - service: scene.turn_on
-          target:
-            entity_id: scene.td_burst_combined_restore
-
-huskers_led_td_burst:
-  alias: 'Huskers: LED Strip TD Burst'
-  mode: restart
-  sequence:
-    # Capture current LED state
-    - service: scene.create
-      data:
-        scene_id: td_burst_led_restore
-        snapshot_entities:
-          - light.permanent_outdoor_lights
-
-    # Set LED to Huskers effect or solid scarlet
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.huskers_color_show
     - service: light.turn_on
       target:
-        entity_id: light.permanent_outdoor_lights
+        entity_id: light.light_theater_left
       data:
+        rgb_color: [255, 247, 229] # Nebraska Cream
         brightness: 255
-        rgb_color: [204, 0, 0]
-        effect: LED_Huskers
-      continue_on_error: true
-
-    # If effect doesn't exist, use rapid color changes
-    - delay: 1
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_right
+      data:
+        rgb_color: [208, 0, 0] # Nebraska Scarlet
+        brightness: 255
     - repeat:
-        count: 5
+        while:
+          - condition: state
+            entity_id: input_boolean.huskers_color_show
+            state: 'on'
         sequence:
           - service: light.turn_on
             target:
-              entity_id: light.permanent_outdoor_lights
+              entity_id: light.light_theater_left
             data:
-              rgb_color: [204, 0, 0]
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
               brightness: 255
-          - delay: 1
+              transition: 10
           - service: light.turn_on
             target:
-              entity_id: light.permanent_outdoor_lights
+              entity_id: light.light_theater_right
             data:
-              rgb_color: [255, 253, 208]
+              rgb_color: [255, 247, 229] # Nebraska Cream
               brightness: 255
-          - delay: 1
-
-    # Restore previous LED state
+              transition: 10
+          - delay: 10
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [255, 247, 229] # Nebraska Cream
+              brightness: 255
+              transition: 10
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: 10
+          - delay: 10
     - service: scene.turn_on
       target:
-        entity_id: scene.td_burst_led_restore
+        entity_id: scene.huskers_theater_show_restore
+    - service: scene.delete
+      target:
+        entity_id: scene.huskers_theater_show_restore
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.huskers_color_show
 
-# ==============
-# GLOBAL CLEANUP
-# ==============
-
-huskers_cleanup_all:
-  alias: 'Huskers: Cleanup All Shows'
+huskers_theater_show_stop:
+  alias: 'Huskers: Theater Show (Stop) - Legacy'
+  description: 'Stops legacy theater show'
+  mode: single
   sequence:
     - service: input_boolean.turn_off
       target:
-        entity_id: input_boolean.huskers_show_running
-    - service: script.turn_on
+        entity_id: input_boolean.huskers_color_show
+
+# =========================================================
+# CATEGORY: TEST SCRIPTS (PRESERVED)
+# =========================================================
+
+huskers_update_last_score_test:
+  alias: Update Last Score (Test)
+  mode: single
+  sequence:
+    - service: input_text.set_value
       target:
-        entity_id: script.huskers_restore_after
+        entity_id: input_text.huskers_last_score
+      data:
+        value: 'Test Score Update'
+
+huskers_hail_varsity_show_start:
+  alias: 'Huskers: Hail Varsity Show (Start)'
+  mode: restart
+  sequence: []
+
+huskers_hail_varsity_show_stop:
+  alias: 'Huskers: Hail Varsity Show (Stop)'
+  mode: restart
+  sequence: []
+
+huskers_test_our_score:
+  alias: 'Huskers (Test): Our Score'
+  mode: single
+  sequence: []
+
+huskers_test_opponent_score:
+  alias: 'Huskers (Test): Opponent Score'
+  mode: single
+  sequence: []
