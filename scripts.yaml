@@ -101,42 +101,48 @@ huskers_touchdown_burst:
       data:
         transition: 1.0
 
-# =========================================================
-# CATEGORY: THEATER GAME SHOW (PRIMARY — 5s cycle, 2s transitions)
-# =========================================================
+# REPLACE the theater scripts in your scripts.yaml with these simplified versions
 
 huskers_theater_game_show_start:
   alias: 'Huskers: Theater Game Show (Start)'
-  description: 'Alternating Scarlet/Cream for theater lights only (5s cycles, 2s transitions)'
+  description: 'Simple alternating theater show - no transitions, 5s cycles'
   mode: restart
   sequence:
-    # Snapshot current theater state
+    # Step 1: Capture current state
     - service: scene.create
       data:
-        scene_id: huskers_theater_game_before
+        scene_id: huskers_theater_before_show
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
 
-    # Set theater show running flag
+    # Step 2: Set initial positions (Left=Scarlet, Right=Cream)
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_left
+      data:
+        rgb_color: [208, 0, 0] # Nebraska Scarlet
+        brightness: 255
+        transition: 0
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_right
+      data:
+        rgb_color: [255, 235, 205] # Nebraska Cream
+        brightness: 255
+        transition: 0
+
+    # Step 3: Set flag and start loop
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_theater_show_running
-
-    # Log start of show
-    - service: logbook.log
-      data:
-        name: Huskers Theater Game Show
-        message: 'Started Huskers theater alternating show - Go Big Red!'
-
-    # Start the alternating loop
     - service: script.turn_on
       target:
         entity_id: script.huskers_theater_game_show_loop
 
 huskers_theater_game_show_loop:
   alias: 'Huskers: Theater Game Show (Loop)'
-  description: 'Left (Scarlet→Cream), Right (Cream→Scarlet) — 5s cycles, 2s transitions'
+  description: 'Alternates every 5 seconds with no transitions'
   mode: restart
   sequence:
     - repeat:
@@ -145,62 +151,64 @@ huskers_theater_game_show_loop:
             entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Phase 1
-          - parallel:
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_left
-                data:
-                  rgb_color: [208, 0, 0] # Scarlet
-                  brightness: 255
-                  transition: 2
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_right
-                data:
-                  rgb_color: [255, 247, 229] # Cream
-                  brightness: 255
-                  transition: 2
-          - delay: '00:00:05'
-          # Phase 2
-          - parallel:
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_left
-                data:
-                  rgb_color: [255, 247, 229] # Cream
-                  brightness: 255
-                  transition: 2
-              - service: light.turn_on
-                target:
-                  entity_id: light.light_theater_right
-                data:
-                  rgb_color: [208, 0, 0] # Scarlet
-                  brightness: 255
-                  transition: 2
+          # Wait 5 seconds in current state
           - delay: '00:00:05'
 
+          # Swap colors (no transition)
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [255, 235, 205] # Nebraska Cream
+              brightness: 255
+              transition: 0
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: 0
+
+          # Wait 5 seconds in swapped state
+          - delay: '00:00:05'
+
+          # Swap back (no transition)
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: 0
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_right
+            data:
+              rgb_color: [255, 235, 205] # Nebraska Cream
+              brightness: 255
+              transition: 0
+
 huskers_theater_game_show_stop:
-  alias: 'Huskers: Theater Game Show (Stop + Restore)'
+  alias: 'Huskers: Theater Game Show (Stop)'
+  description: 'Stops show and restores previous state'
   mode: single
   sequence:
-    # Stop the show
+    # Stop the loop
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_theater_show_running
 
-    # Restore previous state (if snapshot exists)
+    # Restore previous state
     - service: scene.turn_on
       target:
-        entity_id: scene.huskers_theater_game_before
-      data:
-        transition: 1
+        entity_id: scene.huskers_theater_before_show
 
     # Log completion
     - service: logbook.log
       data:
         name: Huskers Theater Game Show
-        message: 'Stopped theater game show and restored previous lighting'
+        message: 'Theater show stopped, previous lighting restored'
 
 # =========================================================
 # CATEGORY: LEGACY THEATER SHOW (PRESERVED — unique IDs)
