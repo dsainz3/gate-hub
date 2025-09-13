@@ -1,8 +1,7 @@
 # ===============================
-# THEATER SCRIPTS (CLEANED)
-# Huskers Scarlet→Cream effects
-# Diego, this replaces any legacy
-# 'huskers_theater_game_show_*'.
+# THEATER SCRIPTS (FINAL - CLEAN)
+# Scarlet ↔ Cream only, very short transitions (0.1s)
+# Entities: light.light_theater_left, light.light_theater_right, light.spare_light, light.light_office
 # ===============================
 
 huskers_scarlet_cream_wave_15s:
@@ -21,6 +20,7 @@ huskers_scarlet_cream_wave_15s:
           - light.spare_light
           - light.light_office
 
+    # Base Scarlet (fast)
     - service: light.turn_on
       target:
         entity_id:
@@ -33,68 +33,68 @@ huskers_scarlet_cream_wave_15s:
         brightness: 255
         transition: 0.1
 
-    # Step 1 (0–3.75s): Theater Left → Cream
+    # Step 1: TL -> Cream (3.75s)
     - service: light.turn_on
       target:
         entity_id: light.light_theater_left
       data:
         hs_color: [45, 20] # Cream
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - delay:
         milliseconds: 3750
 
-    # Step 2 (3.75–7.5s): Theater Right → Cream, revert previous to Scarlet
+    # Step 2: TR -> Cream, TL back to Scarlet (3.75s)
     - service: light.turn_on
       target:
         entity_id: light.light_theater_left
       data:
         hs_color: [355, 90]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - service: light.turn_on
       target:
         entity_id: light.light_theater_right
       data:
         hs_color: [45, 20]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - delay:
         milliseconds: 3750
 
-    # Step 3 (7.5–11.25s): Spare → Cream, revert previous to Scarlet
+    # Step 3: Spare -> Cream, TR back to Scarlet (3.75s)
     - service: light.turn_on
       target:
         entity_id: light.light_theater_right
       data:
         hs_color: [355, 90]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - service: light.turn_on
       target:
         entity_id: light.spare_light
       data:
         hs_color: [45, 20]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - delay:
         milliseconds: 3750
 
-    # Step 4 (11.25–15.0s): Office → Cream, revert previous to Scarlet
+    # Step 4: Office -> Cream, Spare back to Scarlet (3.75s)
     - service: light.turn_on
       target:
         entity_id: light.spare_light
       data:
         hs_color: [355, 90]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - service: light.turn_on
       target:
         entity_id: light.light_office
       data:
         hs_color: [45, 20]
         brightness: 255
-        transition: 0.5
+        transition: 0.1
     - delay:
         milliseconds: 3750
 
@@ -124,7 +124,7 @@ huskers_chase_6s_loop:
   alias: 'Huskers: Cream Pulse Chase LOOP (6s cycle)'
   description: >
     Loops while input_boolean.huskers_theater_show_running == on. Keeps all four lights Scarlet while
-    a single Cream bulb moves in order.
+    a single Cream bulb moves in order. Transitions are 0.1s.
   mode: restart
   sequence:
     - repeat:
@@ -133,7 +133,7 @@ huskers_chase_6s_loop:
             entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Ensure base Scarlet
+          # Base Scarlet (fast)
           - service: light.turn_on
             target:
               entity_id:
@@ -144,20 +144,20 @@ huskers_chase_6s_loop:
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: 0.2
+              transition: 0.1
 
-          # Step A: Theater Left cream (1.5s)
+          # A: TL cream (1.5s)
           - service: light.turn_on
             target:
               entity_id: light.light_theater_left
             data:
               hs_color: [45, 20]
               brightness: 255
-              transition: 0.3
+              transition: 0.1
           - delay:
-              seconds: 1.5
+              milliseconds: 1500
 
-          # Step B: Theater Right cream (1.5s)
+          # B: TR cream (1.5s) — reset base Scarlet then set TR
           - service: light.turn_on
             target:
               entity_id:
@@ -168,18 +168,18 @@ huskers_chase_6s_loop:
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: 0.2
+              transition: 0.1
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
               hs_color: [45, 20]
               brightness: 255
-              transition: 0.3
+              transition: 0.1
           - delay:
-              seconds: 1.5
+              milliseconds: 1500
 
-          # Step C: Spare cream (1.5s)
+          # C: Spare cream (1.5s)
           - service: light.turn_on
             target:
               entity_id:
@@ -190,18 +190,18 @@ huskers_chase_6s_loop:
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: 0.2
+              transition: 0.1
           - service: light.turn_on
             target:
               entity_id: light.spare_light
             data:
               hs_color: [45, 20]
               brightness: 255
-              transition: 0.3
+              transition: 0.1
           - delay:
-              seconds: 1.5
+              milliseconds: 1500
 
-          # Step D: Office cream (1.5s)
+          # D: Office cream (1.5s)
           - service: light.turn_on
             target:
               entity_id:
@@ -212,16 +212,16 @@ huskers_chase_6s_loop:
             data:
               hs_color: [355, 90]
               brightness: 255
-              transition: 0.2
+              transition: 0.1
           - service: light.turn_on
             target:
               entity_id: light.light_office
             data:
               hs_color: [45, 20]
               brightness: 255
-              transition: 0.3
+              transition: 0.1
           - delay:
-              seconds: 1.5
+              milliseconds: 1500
 
 huskers_chase_stop:
   alias: 'Huskers: Stop Cream Pulse Chase (restore)'
