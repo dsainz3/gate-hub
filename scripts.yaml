@@ -1,11 +1,11 @@
-# scripts.yaml - Complete Huskers Theater & LED Control System
+# scripts.yaml — Huskers Theater & LED Control (cleaned 2025-09-13)
 
 # =========================================================
 # CATEGORY: LED CONTROL
 # =========================================================
 
 huskers_led_gameday_start:
-  alias: Start Game-Day Effect
+  alias: 'Huskers LED: Start Game-Day Effect'
   mode: single
   sequence:
     - service: light.turn_on
@@ -15,7 +15,7 @@ huskers_led_gameday_start:
         effect: LED_Huskers
 
 huskers_led_stop:
-  alias: Stop Effect (Restore Previous)
+  alias: 'Huskers LED: Stop Effect (Off)'
   mode: single
   sequence:
     - service: light.turn_off
@@ -23,7 +23,7 @@ huskers_led_stop:
         entity_id: light.permanent_outdoor_lights
 
 huskers_led_revert_monthly:
-  alias: Revert to Monthly Effect
+  alias: 'Huskers LED: Revert to Monthly Effect'
   mode: single
   sequence:
     - service: light.turn_on
@@ -94,7 +94,7 @@ huskers_touchdown_burst:
           - delay: '{{ on_time }}'
 
     # Settle and restore the snapshot
-    - delay: 0.2
+    - delay: '00:00:00.2'
     - service: scene.turn_on
       target:
         entity_id: scene.huskers_theater_pre_burst
@@ -102,12 +102,12 @@ huskers_touchdown_burst:
         transition: 1.0
 
 # =========================================================
-# CATEGORY: THEATER GAME SHOW (NEW - 5s timing, 2s transitions)
+# CATEGORY: THEATER GAME SHOW (PRIMARY — 5s cycle, 2s transitions)
 # =========================================================
 
 huskers_theater_game_show_start:
-  alias: 'Huskers: Theater Game Show Start'
-  description: 'Starts alternating Scarlet/Cream show for theater lights only (5s cycles, 2s transitions)'
+  alias: 'Huskers: Theater Game Show (Start)'
+  description: 'Alternating Scarlet/Cream for theater lights only (5s cycles, 2s transitions)'
   mode: restart
   sequence:
     # Snapshot current theater state
@@ -135,8 +135,8 @@ huskers_theater_game_show_start:
         entity_id: script.huskers_theater_game_show_loop
 
 huskers_theater_game_show_loop:
-  alias: 'Huskers: Theater Game Show Loop'
-  description: 'Alternating pattern: Left (Scarlet→Cream), Right (Cream→Scarlet) - 5s cycles, 2s transitions'
+  alias: 'Huskers: Theater Game Show (Loop)'
+  description: 'Left (Scarlet→Cream), Right (Cream→Scarlet) — 5s cycles, 2s transitions'
   mode: restart
   sequence:
     - repeat:
@@ -145,55 +145,56 @@ huskers_theater_game_show_loop:
             entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Phase 1: Left=Scarlet, Right=Cream (5 seconds with 2s transition)
+          # Phase 1
           - parallel:
               - service: light.turn_on
                 target:
                   entity_id: light.light_theater_left
                 data:
-                  rgb_color: [208, 0, 0] # Nebraska Scarlet
+                  rgb_color: [208, 0, 0] # Scarlet
                   brightness: 255
                   transition: 2
               - service: light.turn_on
                 target:
                   entity_id: light.light_theater_right
                 data:
-                  rgb_color: [255, 247, 229] # Nebraska Cream
+                  rgb_color: [255, 247, 229] # Cream
                   brightness: 255
                   transition: 2
           - delay: '00:00:05'
-
-          # Phase 2: Left=Cream, Right=Scarlet (5 seconds with 2s transition)
+          # Phase 2
           - parallel:
               - service: light.turn_on
                 target:
                   entity_id: light.light_theater_left
                 data:
-                  rgb_color: [255, 247, 229] # Nebraska Cream
+                  rgb_color: [255, 247, 229] # Cream
                   brightness: 255
                   transition: 2
               - service: light.turn_on
                 target:
                   entity_id: light.light_theater_right
                 data:
-                  rgb_color: [208, 0, 0] # Nebraska Scarlet
+                  rgb_color: [208, 0, 0] # Scarlet
                   brightness: 255
                   transition: 2
           - delay: '00:00:05'
 
 huskers_theater_game_show_stop:
-  alias: 'Huskers: Theater Game Show Stop'
-  description: 'Stops theater game show and restores previous lighting'
+  alias: 'Huskers: Theater Game Show (Stop + Restore)'
+  mode: single
   sequence:
     # Stop the show
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_theater_show_running
 
-    # Restore previous state
+    # Restore previous state (if snapshot exists)
     - service: scene.turn_on
       target:
         entity_id: scene.huskers_theater_game_before
+      data:
+        transition: 1
 
     # Log completion
     - service: logbook.log
@@ -202,84 +203,71 @@ huskers_theater_game_show_stop:
         message: 'Stopped theater game show and restored previous lighting'
 
 # =========================================================
-# CATEGORY: LEGACY THEATER SHOW (PRESERVED - 10s timing)
+# CATEGORY: LEGACY THEATER SHOW (PRESERVED — unique IDs)
 # =========================================================
+# Uses input_boolean.huskers_color_show, separate from primary flag.
 
-huskers_theater_show_start:
-  alias: 'Huskers: Theater Show (Start) - Legacy'
-  description: 'Original theater show with 10-second timing - preserved for compatibility'
+huskers_theater_game_show_start_legacy:
+  alias: 'Huskers: Theater Show (Start, Legacy)'
+  description: 'Legacy 10s-ish pacing (2s transition + ~8s hold)'
   mode: restart
   sequence:
-    - service: scene.create
-      data:
-        scene_id: huskers_theater_show_restore
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_color_show
-    - service: light.turn_on
+    - service: script.turn_on
       target:
-        entity_id: light.light_theater_left
-      data:
-        rgb_color: [255, 247, 229] # Nebraska Cream
-        brightness: 255
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_right
-      data:
-        rgb_color: [208, 0, 0] # Nebraska Scarlet
-        brightness: 255
+        entity_id: script.huskers_theater_game_show_loop_legacy
+
+huskers_theater_game_show_loop_legacy:
+  alias: 'Huskers: Theater Show (Loop, Legacy)'
+  description: 'Alternating pattern with warmer cream tone'
+  mode: restart
+  sequence:
     - repeat:
         while:
           - condition: state
             entity_id: input_boolean.huskers_color_show
             state: 'on'
         sequence:
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
-              brightness: 255
-              transition: 10
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              rgb_color: [255, 247, 229] # Nebraska Cream
-              brightness: 255
-              transition: 10
-          - delay: 10
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              rgb_color: [255, 247, 229] # Nebraska Cream
-              brightness: 255
-              transition: 10
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
-              brightness: 255
-              transition: 10
-          - delay: 10
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_theater_show_restore
-    - service: scene.delete
-      target:
-        entity_id: scene.huskers_theater_show_restore
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_color_show
+          # Phase 1
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  rgb_color: [208, 0, 0] # Scarlet
+                  brightness: 255
+                  transition: 2
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  rgb_color: [255, 235, 205] # Warmer cream
+                  brightness: 255
+                  transition: 2
+          - delay: '00:00:08' # ~10s total with transition
 
-huskers_theater_show_stop:
-  alias: 'Huskers: Theater Show (Stop) - Legacy'
-  description: 'Stops legacy theater show'
+          # Phase 2
+          - parallel:
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_left
+                data:
+                  rgb_color: [255, 235, 205] # Warmer cream
+                  brightness: 255
+                  transition: 2
+              - service: light.turn_on
+                target:
+                  entity_id: light.light_theater_right
+                data:
+                  rgb_color: [208, 0, 0] # Scarlet
+                  brightness: 255
+                  transition: 2
+          - delay: '00:00:08' # ~10s total with transition
+
+huskers_theater_show_stop_legacy:
+  alias: 'Huskers: Theater Show (Stop, Legacy)'
   mode: single
   sequence:
     - service: input_boolean.turn_off
@@ -287,11 +275,11 @@ huskers_theater_show_stop:
         entity_id: input_boolean.huskers_color_show
 
 # =========================================================
-# CATEGORY: TEST SCRIPTS (PRESERVED)
+# CATEGORY: TEST SCRIPTS
 # =========================================================
 
 huskers_update_last_score_test:
-  alias: Update Last Score (Test)
+  alias: 'Huskers Test: Update Last Score'
   mode: single
   sequence:
     - service: input_text.set_value
@@ -311,11 +299,11 @@ huskers_hail_varsity_show_stop:
   sequence: []
 
 huskers_test_our_score:
-  alias: 'Huskers (Test): Our Score'
+  alias: 'Huskers Test: Our Score'
   mode: single
   sequence: []
 
 huskers_test_opponent_score:
-  alias: 'Huskers (Test): Opponent Score'
+  alias: 'Huskers Test: Opponent Score'
   mode: single
   sequence: []
