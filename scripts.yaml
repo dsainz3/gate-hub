@@ -1,8 +1,10 @@
 # scripts.yaml - Theater Game Show Only
 
+# REPLACE the theater scripts in your scripts.yaml with these ripple versions
+
 huskers_theater_game_show_start:
   alias: 'Huskers: Theater Game Show (Start)'
-  description: 'Simple alternating theater show - no transitions, 5s cycles'
+  description: 'Ripple effect theater show - 20 second cycle'
   mode: restart
   sequence:
     # Step 1: Capture current state
@@ -12,18 +14,15 @@ huskers_theater_game_show_start:
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
+          - light.spare_light
 
-    # Step 2: Set initial positions (Left=Scarlet, Right=Cream)
+    # Step 2: Set all lights to cream initially
     - service: light.turn_on
       target:
-        entity_id: light.light_theater_left
-      data:
-        rgb_color: [208, 0, 0] # Nebraska Scarlet
-        brightness: 255
-        transition: 0
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_right
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.spare_light
       data:
         rgb_color: [255, 235, 205] # Nebraska Cream
         brightness: 255
@@ -39,7 +38,7 @@ huskers_theater_game_show_start:
 
 huskers_theater_game_show_loop:
   alias: 'Huskers: Theater Game Show (Loop)'
-  description: 'Alternates every 5 seconds with no transitions'
+  description: 'Ripple effect: Left → Right → Spare → repeat (20s cycle)'
   mode: restart
   sequence:
     - repeat:
@@ -48,19 +47,27 @@ huskers_theater_game_show_loop:
             entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Wait 5 seconds in current state
-          - delay: '00:00:05'
-
-          # Swap colors (no transition)
+          # Phase 1: Theater Left goes Scarlet (others stay cream)
           - service: light.turn_on
             target:
-              entity_id:
-                - light.light_theater_left
-                - light.spare_light
+              entity_id: light.light_theater_left
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: 0
+          - delay: '00:00:05' # Hold for 5 seconds
+
+          # Reset Left back to cream
+          - service: light.turn_on
+            target:
+              entity_id: light.light_theater_left
             data:
               rgb_color: [255, 235, 205] # Nebraska Cream
               brightness: 255
               transition: 0
+          - delay: '00:00:01' # Brief pause
+
+          # Phase 2: Theater Right goes Scarlet
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
@@ -68,20 +75,9 @@ huskers_theater_game_show_loop:
               rgb_color: [208, 0, 0] # Nebraska Scarlet
               brightness: 255
               transition: 0
+          - delay: '00:00:05' # Hold for 5 seconds
 
-          # Wait 5 seconds in swapped state
-          - delay: '00:00:05'
-
-          # Swap back (no transition)
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.spare_light
-            data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
-              brightness: 255
-              transition: 0
+          # Reset Right back to cream
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
@@ -89,10 +85,31 @@ huskers_theater_game_show_loop:
               rgb_color: [255, 235, 205] # Nebraska Cream
               brightness: 255
               transition: 0
+          - delay: '00:00:01' # Brief pause
+
+          # Phase 3: Spare Light goes Scarlet
+          - service: light.turn_on
+            target:
+              entity_id: light.spare_light
+            data:
+              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              brightness: 255
+              transition: 0
+          - delay: '00:00:05' # Hold for 5 seconds
+
+          # Reset Spare back to cream
+          - service: light.turn_on
+            target:
+              entity_id: light.spare_light
+            data:
+              rgb_color: [255, 235, 205] # Nebraska Cream
+              brightness: 255
+              transition: 0
+          - delay: '00:00:03' # Longer pause before next cycle
 
 huskers_theater_game_show_stop:
   alias: 'Huskers: Theater Game Show (Stop)'
-  description: 'Stops show and restores previous state'
+  description: 'Stops ripple show and restores previous state'
   mode: single
   sequence:
     # Stop the loop
@@ -109,4 +126,4 @@ huskers_theater_game_show_stop:
     - service: logbook.log
       data:
         name: Huskers Theater Game Show
-        message: 'Theater show stopped, previous lighting restored'
+        message: 'Theater ripple show stopped, previous lighting restored'
