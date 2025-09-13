@@ -54,7 +54,9 @@ huskers_theater_game_show_loop:
           # Swap colors (no transition)
           - service: light.turn_on
             target:
-              entity_id: light.light_theater_left
+              entity_id:
+                - light.light_theater_left
+                - light.spare_light
             data:
               rgb_color: [255, 235, 205] # Nebraska Cream
               brightness: 255
@@ -73,7 +75,9 @@ huskers_theater_game_show_loop:
           # Swap back (no transition)
           - service: light.turn_on
             target:
-              entity_id: light.light_theater_left
+              entity_id:
+                - light.light_theater_left
+                - light.spare_light
             data:
               rgb_color: [208, 0, 0] # Nebraska Scarlet
               brightness: 255
