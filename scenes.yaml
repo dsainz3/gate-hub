@@ -162,3 +162,26 @@
       state: 'on'
       brightness: 255
       hs_color: [355, 90] # Scarlet
+
+# === ADD to scenes.yaml ===
+# Base scene: set all four lights to Scarlet (Huskers) as a starting point
+- id: huskers_all_scarlet_base
+  name: Huskers All Scarlet (Base)
+  icon: mdi:palette
+  entities:
+    light.light_theater_left:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90] # Scarlet
+    light.light_theater_right:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90]
+    light.spare_light:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90]
+    light.light_office:
+      state: 'on'
+      brightness: 255
+      hs_color: [355, 90]

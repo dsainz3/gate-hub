@@ -1,42 +1,130 @@
-# REPLACE the theater scripts in your scripts.yaml with these ripple versions
+# ===============================
+# THEATER SCRIPTS (CLEANED)
+# Huskers Scarlet→Cream effects
+# Diego, this replaces any legacy
+# 'huskers_theater_game_show_*'.
+# ===============================
 
-huskers_theater_game_show_start:
-  alias: 'Huskers: Theater Game Show (Start)'
-  description: 'Ripple effect theater show - 20 second cycle'
+huskers_scarlet_cream_wave_15s:
+  alias: 'Huskers: Scarlet → Cream Wave (15s, one pass)'
+  description: >
+    One 15-second wave where a single CREAM bulb moves across the four lights
+    (others remain SCARLET). Order: Theater Left → Theater Right → Spare → Office.
   mode: restart
   sequence:
-    # Step 1: Capture current state
     - service: scene.create
       data:
-        scene_id: huskers_theater_before_show
+        scene_id: huskers_before_wave_15s
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
           - light.spare_light
+          - light.light_office
 
-    # Step 2: Set all lights to cream initially
     - service: light.turn_on
       target:
         entity_id:
           - light.light_theater_left
           - light.light_theater_right
           - light.spare_light
+          - light.light_office
       data:
-        rgb_color: [255, 235, 205] # Nebraska Cream
+        hs_color: [355, 90] # Scarlet
         brightness: 255
-        transition: 0
+        transition: 0.1
 
-    # Step 3: Set flag and start loop
+    # Step 1 (0–3.75s): Theater Left → Cream
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_left
+      data:
+        hs_color: [45, 20] # Cream
+        brightness: 255
+        transition: 0.5
+    - delay:
+        milliseconds: 3750
+
+    # Step 2 (3.75–7.5s): Theater Right → Cream, revert previous to Scarlet
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_left
+      data:
+        hs_color: [355, 90]
+        brightness: 255
+        transition: 0.5
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_right
+      data:
+        hs_color: [45, 20]
+        brightness: 255
+        transition: 0.5
+    - delay:
+        milliseconds: 3750
+
+    # Step 3 (7.5–11.25s): Spare → Cream, revert previous to Scarlet
+    - service: light.turn_on
+      target:
+        entity_id: light.light_theater_right
+      data:
+        hs_color: [355, 90]
+        brightness: 255
+        transition: 0.5
+    - service: light.turn_on
+      target:
+        entity_id: light.spare_light
+      data:
+        hs_color: [45, 20]
+        brightness: 255
+        transition: 0.5
+    - delay:
+        milliseconds: 3750
+
+    # Step 4 (11.25–15.0s): Office → Cream, revert previous to Scarlet
+    - service: light.turn_on
+      target:
+        entity_id: light.spare_light
+      data:
+        hs_color: [355, 90]
+        brightness: 255
+        transition: 0.5
+    - service: light.turn_on
+      target:
+        entity_id: light.light_office
+      data:
+        hs_color: [45, 20]
+        brightness: 255
+        transition: 0.5
+    - delay:
+        milliseconds: 3750
+
+huskers_chase_6s_start:
+  alias: 'Huskers: Start Cream Pulse Chase (6s loop)'
+  description: >
+    Turns on the Game Show boolean, snapshots current states, and starts
+    a continuous 6s cream pulse moving across Scarlet lights.
+  mode: restart
+  sequence:
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.huskers_theater_show_running
+    - service: scene.create
+      data:
+        scene_id: huskers_before_chase
+        snapshot_entities:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.spare_light
+          - light.light_office
     - service: script.turn_on
       target:
-        entity_id: script.huskers_theater_game_show_loop
+        entity_id: script.huskers_chase_6s_loop
 
-huskers_theater_game_show_loop:
-  alias: 'Huskers: Theater Game Show (Loop)'
-  description: 'Chase effect: Scarlet light chases Left → Right → Spare → Office with fade transitions (20s cycle)'
+huskers_chase_6s_loop:
+  alias: 'Huskers: Cream Pulse Chase LOOP (6s cycle)'
+  description: >
+    Loops while input_boolean.huskers_theater_show_running == on. Keeps all four lights Scarlet while
+    a single Cream bulb moves in order.
   mode: restart
   sequence:
     - repeat:
@@ -45,103 +133,107 @@ huskers_theater_game_show_loop:
             entity_id: input_boolean.huskers_theater_show_running
             state: 'on'
         sequence:
-          # Phase 1: Theater Left = Scarlet, others fade to cream
+          # Ensure base Scarlet
+          - service: light.turn_on
+            target:
+              entity_id:
+                - light.light_theater_left
+                - light.light_theater_right
+                - light.spare_light
+                - light.light_office
+            data:
+              hs_color: [355, 90]
+              brightness: 255
+              transition: 0.2
+
+          # Step A: Theater Left cream (1.5s)
           - service: light.turn_on
             target:
               entity_id: light.light_theater_left
             data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              hs_color: [45, 20]
               brightness: 255
-              transition: 2
+              transition: 0.3
+          - delay:
+              seconds: 1.5
+
+          # Step B: Theater Right cream (1.5s)
           - service: light.turn_on
             target:
               entity_id:
+                - light.light_theater_left
                 - light.light_theater_right
                 - light.spare_light
-                - light.office
+                - light.light_office
             data:
-              rgb_color: [255, 235, 205] # Nebraska Cream
+              hs_color: [355, 90]
               brightness: 255
-              transition: 2
-          - delay: '00:00:03' # Hold for 3 seconds
-
-          # Phase 2: Theater Right = Scarlet, others fade to cream
+              transition: 0.2
           - service: light.turn_on
             target:
               entity_id: light.light_theater_right
             data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              hs_color: [45, 20]
               brightness: 255
-              transition: 2
+              transition: 0.3
+          - delay:
+              seconds: 1.5
+
+          # Step C: Spare cream (1.5s)
           - service: light.turn_on
             target:
               entity_id:
                 - light.light_theater_left
+                - light.light_theater_right
                 - light.spare_light
-                - light.office
+                - light.light_office
             data:
-              rgb_color: [255, 235, 205] # Nebraska Cream
+              hs_color: [355, 90]
               brightness: 255
-              transition: 2
-          - delay: '00:00:03' # Hold for 3 seconds
-
-          # Phase 3: Spare Light = Scarlet, others fade to cream
+              transition: 0.2
           - service: light.turn_on
             target:
               entity_id: light.spare_light
             data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
+              hs_color: [45, 20]
               brightness: 255
-              transition: 2
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.office
-            data:
-              rgb_color: [255, 235, 205] # Nebraska Cream
-              brightness: 255
-              transition: 2
-          - delay: '00:00:03' # Hold for 3 seconds
+              transition: 0.3
+          - delay:
+              seconds: 1.5
 
-          # Phase 4: Office = Scarlet, others fade to cream
-          - service: light.turn_on
-            target:
-              entity_id: light.office
-            data:
-              rgb_color: [208, 0, 0] # Nebraska Scarlet
-              brightness: 255
-              transition: 2
+          # Step D: Office cream (1.5s)
           - service: light.turn_on
             target:
               entity_id:
                 - light.light_theater_left
                 - light.light_theater_right
                 - light.spare_light
+                - light.light_office
             data:
-              rgb_color: [255, 235, 205] # Nebraska Cream
+              hs_color: [355, 90]
               brightness: 255
-              transition: 2
-          - delay: '00:00:09' # Hold for 9 seconds to complete 20s cycle
+              transition: 0.2
+          - service: light.turn_on
+            target:
+              entity_id: light.light_office
+            data:
+              hs_color: [45, 20]
+              brightness: 255
+              transition: 0.3
+          - delay:
+              seconds: 1.5
 
-huskers_theater_game_show_stop:
-  alias: 'Huskers: Theater Game Show (Stop)'
-  description: 'Stops ripple show and restores previous state'
-  mode: single
+huskers_chase_stop:
+  alias: 'Huskers: Stop Cream Pulse Chase (restore)'
+  description: 'Turns OFF the boolean and restores the snapshot if available.'
+  mode: restart
   sequence:
-    # Stop the loop
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.huskers_theater_show_running
-
-    # Restore previous state
+    - delay:
+        seconds: 1
     - service: scene.turn_on
       target:
-        entity_id: scene.huskers_theater_before_show
-
-    # Log completion
-    - service: logbook.log
-      data:
-        name: Huskers Theater Game Show
-        message: 'Theater ripple show stopped, previous lighting restored'
+        entity_id: scene.huskers_before_chase
+      continue_on_error: true
