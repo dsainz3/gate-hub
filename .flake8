@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 79
+extend-ignore = E203, E501, W503, B950
+select = B,B9,C,E,F,W
+exclude =
+    .git,
+    .venv,
+    node_modules,
+    __pycache__,
+    custom_components/ble_monitor,
+    custom_components/hacs,
+    custom_components/teamtracker,
+    custom_components/wundergroundpws,
+    custom_components/tplink_router

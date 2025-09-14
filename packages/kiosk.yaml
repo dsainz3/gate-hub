@@ -1,0 +1,149 @@
+group:
+  kiosk_theater_lights:
+    name: Kiosk Theater Lights
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+  kiosk_front_lights:
+    name: Kiosk Front Lights
+    entities:
+      - light.light_front_left
+      - light.light_front_right
+  kiosk_garage_lights:
+    name: Kiosk Garage Lights
+    entities:
+      - light.light_garage_left
+      - light.lights_garage_center
+      - light.light_garage_right
+  kiosk_all_automations:
+    name: Kiosk All Automations
+    entities:
+      - automation.3_30_am_light_activation
+      - automation.bedroom_purifier_off
+      - automation.bedroom_purifier_on
+      - automation.early_morning_lights_03_30
+      - automation.evening_lights_at_sunset
+      - automation.exterior_led_monthly_effect
+      - automation.humidor_above_temp
+      - automation.humidor_below_temp
+      - automation.humidor_plug_temperature_control
+      - automation.huskers_debug_exterior_brightness_change
+      - automation.huskers_debug_scene_activated
+      - automation.huskers_debug_script_start
+      - automation.huskers_debug_script_stop
+      - automation.huskers_debug_theater_color_change
+      - automation.huskers_exterior_alternating_loop_start
+      - automation.huskers_exterior_light_show_start
+      - automation.huskers_exterior_show_auto_start
+      - automation.huskers_exterior_show_auto_stop
+      - automation.huskers_game_day_show_auto_start
+      - automation.huskers_game_day_show_auto_stop
+      - automation.huskers_halftime
+      - automation.huskers_halftime_calm_theater
+      - automation.huskers_in_game
+      - automation.huskers_kickoff_start_game_loop
+      - automation.huskers_new_item_notifier
+      - automation.huskers_new_item_notifier_2
+      - automation.huskers_phase_observer_log
+      - automation.huskers_postgame
+      - automation.huskers_postgame_cleanup
+      - automation.huskers_postgame_cleanup_20
+      - automation.huskers_postgame_event
+      - automation.huskers_postgame_monthly_led_effect_20m
+      - automation.huskers_pregame_event
+      - automation.huskers_pregame_t_20
+      - automation.huskers_pregame_theater_alternating
+      - automation.huskers_pregame_window_t_20_t0
+      - automation.huskers_react_to_test_score
+      - automation.huskers_react_to_test_score_2
+      - automation.huskers_set_led_gametime_on_kickoff
+      - automation.huskers_showtime_at_t_20
+      - automation.huskers_stop_shows_20m_after_final
+      - automation.huskers_td_burst_on_score
+      - automation.huskers_theater_show_auto_start
+      - automation.huskers_theater_show_auto_stop
+      - automation.huskers_toggle_debug_logging
+      - automation.huskers_touchdown_boost
+      - automation.huskers_touchdown_burst
+      - automation.huskers_touchdown_celebration
+      - automation.huskers_touchdown_flash_on_score_update
+      - automation.huskers_update_last_score_test
+      - automation.huskers_update_last_score_test_2
+      - automation.interior_lights_off_15_minutes_after_sunrise
+      - automation.lighting_morning_lights_off_sunrise
+      - automation.lighting_night_mode_at_midnight
+      - automation.lights_off_except_porch_garage_attic_23_30
+      - automation.midnight_lights
+      - automation.new_automation
+      - automation.night_lights_at_midnight
+      - automation.outdoor_lights_control_sunrise_sunset
+      - automation.purifier_on_bedroom
+      - automation.safety_turn_off_burner_plugs_at_11_00_pm
+      - automation.sunrise
+      - automation.weather_severe_alert_notification
+script:
+  kiosk_reload_automations:
+    alias: 'Kiosk: Reload Automations'
+    mode: single
+    sequence:
+      - service: automation.reload
+  kiosk_reload_scripts:
+    alias: 'Kiosk: Reload Scripts'
+    mode: single
+    sequence:
+      - service: script.reload
+  kiosk_reload_scenes:
+    alias: 'Kiosk: Reload Scenes'
+    mode: single
+    sequence:
+      - service: scene.reload
+  kiosk_all_plugs_off:
+    alias: 'Kiosk: All Plugs OFF (Safety)'
+    mode: single
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+            - switch.bar_light_power_switch
+            - switch.basement_power_switch
+            - switch.bedroom_purifier_power_switch
+            - switch.burners_all
+            - switch.christmas_tree_lights_power_switch
+            - switch.diningroom_light_power_switch
+            - switch.exterior_lights_power_switch
+            - switch.external_power_switch
+            - switch.garage_air_purifier_power_switch
+            - switch.guest_room_purifier_power_switch
+            - switch.light_ari_power_switch
+            - switch.light_attic_power_switch
+            - switch.light_guest_room_power_switch
+            - switch.light_parents_power_switch
+            - switch.livingroom_light_power_switch
+            - switch.main_floor_power_switch
+            - switch.main_power_switch
+            - switch.mainfloor_power_switch
+            - switch.outside_power_switch
+            - switch.permanent_outdoor_lights_power_switch
+            - switch.plug_basement_burner
+            - switch.plug_bedroom_burner
+            - switch.plug_humidor
+            - switch.plug_mainfloor_burner
+            - switch.scenic_dreamview1_power_switch
+            - switch.scenic_dreamview2_power_switch
+            - switch.scenic_dreamview_power_switch
+            - switch.sunroom_light_power_switch
+            - switch.tree_power_switch
+            - switch.tv_lights_power_switch
+      - service: logbook.log
+        data:
+          name: Kiosk Safety
+          message: All plugs OFF triggered.
+  kiosk_stop_all_huskers_shows:
+    alias: 'Kiosk: Stop All Huskers Shows'
+    mode: single
+    sequence:
+      - service: script.turn_on
+        target:
+          entity_id:
+            - script.huskers_chase30_stop
+            - script.huskers_chase_speed_stop

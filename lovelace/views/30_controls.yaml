@@ -1,0 +1,102 @@
+# Huskers – Controls
+- title: Huskers – Controls
+  path: huskers-controls
+  icon: mdi:gesture-tap-button
+  badges: []
+  cards:
+    - type: markdown
+      content: |
+        # Huskers Controls
+        Quick actions for game-day lighting and validation.
+
+    # Core actions
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: button
+          name: Start Game-Day Effect
+          icon: mdi:football
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_led_gameday_start }
+
+        - type: button
+          name: Stop Effect / Restore
+          icon: mdi:stop-circle
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_led_stop }
+
+        - type: button
+          name: Revert to Monthly
+          icon: mdi:backup-restore
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_led_revert_monthly }
+
+        - type: button
+          name: Update Last Score (Test)
+          icon: mdi:scoreboard
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_update_last_score_test }
+
+    # Exterior patterns (2-step fade scripts for real transitions)
+    - type: markdown
+      content: '## Exterior Patterns'
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: button
+          name: Alternating (Exterior)
+          icon: mdi:palette-swatch
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_exterior_alternating_start }
+
+        - type: button
+          name: Alternating Inverted (Exterior)
+          icon: mdi:palette-swatch-outline
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_exterior_alternating_inverted_start }
+
+    # Theater controls
+    - type: markdown
+      content: '## Theater'
+    - type: grid
+      columns: 3
+      square: false
+      cards:
+        - type: tile
+          entity: input_boolean.huskers_color_show
+          name: Color Show (Toggle)
+        - type: button
+          name: Theater Show – Start
+          icon: mdi:play
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_theater_show_start }
+        - type: button
+          name: Theater Show – Stop
+          icon: mdi:stop
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_theater_show_stop }
+        - type: button
+          name: Touchdown Burst
+          icon: mdi:firework
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target: { entity_id: script.huskers_touchdown_burst }

@@ -1,0 +1,63 @@
+# Home Assistant artifacts
+home-assistant.log*
+home-assistant_v2.db*
+zigbee.db*
+/.storage/
+/.cloud/
+/secrets.yaml
+/out/
+node_modules/
+.venv/
+.cache/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+deps/
+.vscode/settings.json
+home-assistant_v2.db
+home-assistant.log*
+/.storage/
+/backup/
+
+# General logs and databases
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.log.*
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Local workspace
+/external/
+
+# HACS components
+custom_components/hacs/
+
+# Zigbee config
+zigbee2mqtt/*# Zigbee2MQTT runtime state/cache files
+zigbee2mqtt/state.json
+zigbee2mqtt/log/*.log
+zigbee2mqtt/coordinator_backup.json
+# Zigbee2MQTT runtime state/cache files
+zigbee2mqtt/state.json
+zigbee2mqtt/log/*.log
+zigbee2mqtt/coordinator_backup.json
+
+# Zigbee2MQTT runtime (do not version)
+zigbee2mqtt/state.json
+zigbee2mqtt/log/
+zigbee2mqtt/database.db
+zigbee2mqtt/database.db.backup
+zigbee2mqtt/*.lock
+
+# Vendor + Prettier caches
+node_modules/
+**/.prettier-caches/
+**/.cache/prettier/
+backup/
+backup/
+
+.HA_VERSION

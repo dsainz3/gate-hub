@@ -1,0 +1,197 @@
+﻿title: Huskers – Controls
+path: huskers-controls
+icon: mdi:gesture-tap-button
+badges: []
+cards:
+  - type: markdown
+    content: |
+      # Huskers Controls
+
+      Quick actions for game-day lighting and validation.
+      Cards only appear when their entities exist.
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: conditional
+        conditions:
+          - entity: script.huskers_led_gameday_start
+            state_not: unavailable
+        card:
+          type: button
+          name: Start Game-Day Effect
+          icon: mdi:football
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_gameday_start
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_led_stop
+            state_not: unavailable
+        card:
+          type: button
+          name: Stop Effect
+          icon: mdi:stop-circle
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_stop
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_led_revert_monthly
+            state_not: unavailable
+        card:
+          type: button
+          name: Revert to Monthly
+          icon: mdi:backup-restore
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_led_revert_monthly
+
+      - type: conditional
+        conditions:
+          - entity: scene.huskers_scarlet_theater
+            state_not: unavailable
+        card:
+          type: button
+          name: 'Scene: Scarlet Theater'
+          icon: mdi:palette
+          tap_action:
+            action: call-service
+            service: scene.turn_on
+            target:
+              entity_id: scene.huskers_scarlet_theater
+
+      - type: conditional
+        conditions:
+          - entity: scene.huskers_cream_theater
+            state_not: unavailable
+        card:
+          type: button
+          name: 'Scene: Cream Theater'
+          icon: mdi:palette-swatch
+          tap_action:
+            action: call-service
+            service: scene.turn_on
+            target:
+              entity_id: scene.huskers_cream_theater
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_update_last_score_test
+            state_not: unavailable
+        card:
+          type: button
+          name: Update Last Score (Test)
+          icon: mdi:scoreboard
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_update_last_score_test
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_touchdown_burst
+            state_not: unavailable
+        card:
+          type: button
+          name: Touchdown Burst
+          icon: mdi:firework
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_touchdown_burst
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_test_our_score
+            state_not: unavailable
+        card:
+          type: button
+          name: Test Our Score
+          icon: mdi:plus-circle
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_test_our_score
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_test_opponent_score
+            state_not: unavailable
+        card:
+          type: button
+          name: Test Opponent Score
+          icon: mdi:minus-circle
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_test_opponent_score
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_hail_varsity_show_start
+            state_not: unavailable
+        card:
+          type: button
+          name: Hail Varsity Show (Start)
+          icon: mdi:music
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_hail_varsity_show_start
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_hail_varsity_show_stop
+            state_not: unavailable
+        card:
+          type: button
+          name: Hail Varsity Show (Stop)
+          icon: mdi:music-off
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_hail_varsity_show_stop
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_theater_show_start
+            state_not: unavailable
+        card:
+          type: button
+          name: Theater Show (Start)
+          icon: mdi:spotlight
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_theater_show_start
+
+      - type: conditional
+        conditions:
+          - entity: script.huskers_theater_show_stop
+            state_not: unavailable
+        card:
+          type: button
+          name: Theater Show (Stop)
+          icon: mdi:spotlight-off
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_theater_show_stop

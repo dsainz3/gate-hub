@@ -1,0 +1,266 @@
+# templates.yaml  (no top-level "template:" here)
+
+- sensor:
+    # WEATHER & ENVIRONMENT SENSORS — fixed structure
+    - name: Relative Humidity
+      unique_id: kneplatt72_relative_humidity_fixed
+      state: "{{ states('sensor.kneplatt72_relative_humidity') }}"
+      unit_of_measurement: '%'
+      device_class: humidity
+
+    - name: Solar Radiation
+      unique_id: kneplatt72_solar_radiation_fixed
+      state: "{{ states('sensor.kneplatt72_solar_radiation') }}"
+      unit_of_measurement: 'W/m²'
+      device_class: irradiance
+
+    - name: Temperature
+      unique_id: kneplatt72_temperature_fixed
+      state: "{{ states('sensor.kneplatt72_temperature') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: Heat Index
+      unique_id: kneplatt72_heat_index_fixed
+      state: "{{ states('sensor.kneplatt72_heat_index') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: Wind Chill
+      unique_id: kneplatt72_wind_chill_fixed
+      state: "{{ states('sensor.kneplatt72_wind_chill') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: Dew Point
+      unique_id: kneplatt72_dewpoint_fixed
+      state: "{{ states('sensor.kneplatt72_dewpoint') }}"
+      unit_of_measurement: '°F'
+      device_class: temperature
+
+    - name: Wind Speed
+      unique_id: kneplatt72_wind_speed_fixed
+      state: "{{ states('sensor.kneplatt72_wind_speed') }}"
+      unit_of_measurement: 'mph'
+      device_class: wind_speed
+
+    - name: Wind Gust
+      unique_id: kneplatt72_wind_gust_fixed
+      state: "{{ states('sensor.kneplatt72_wind_gust') }}"
+      unit_of_measurement: 'mph'
+      device_class: wind_speed
+
+    # WEATHER & ENVIRONMENT SENSORS (derived)
+    - name: KNEPLATT72 Pressure Trend
+      unique_id: kneplatt72_pressure_trend
+      device_class: enum
+      availability: >
+        {{ has_value('sensor.kneplatt72_pressure') and has_value('sensor.kneplatt72_pressure_24h_change') }}
+      state: >
+        {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
+        {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+        {% set delta_inhg = change if unit == 'inHg'
+            else (change / 33.8638866667) if unit in ['hPa', 'mbar']
+            else change %}
+        {% set threshold = 0.02 %}
+        {% if delta_inhg >= threshold %}rising
+        {% elif delta_inhg <= -threshold %}falling
+        {% else %}steady
+        {% endif %}
+      icon: >
+        {% set trend = this.state %}
+        {% if trend == 'rising' %}mdi:arrow-up-bold
+        {% elif trend == 'falling' %}mdi:arrow-down-bold
+        {% elif trend == 'steady' %}mdi:swap-horizontal-bold
+        {% else %}mdi:help-circle-outline
+        {% endif %}
+      attributes:
+        friendly_name: Pressure Trend (24h)
+        raw_change_value: "{{ states('sensor.kneplatt72_pressure_24h_change') }}"
+        current_pressure: "{{ states('sensor.kneplatt72_pressure') }}"
+        current_unit: "{{ state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') }}"
+        delta_hpa: >
+          {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
+          {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+          {{ (change if unit in ['hPa', 'mbar'] else (change * 33.8638866667))  | round(2) }}
+        delta_inhg: >
+          {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
+          {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+          {{ (change if unit == 'inHg' else (change / 33.8638866667)) | round(3) }}
+        threshold_hpa: '0.68'
+        threshold_inhg: '0.02'
+
+    - name: KNEPLATT72 Temperature Trend
+      unique_id: kneplatt72_temperature_trend
+      device_class: enum
+      availability: "{{ has_value('sensor.kneplatt72_temperature_24h_change') }}"
+      state: >
+        {% set change = states('sensor.kneplatt72_temperature_24h_change') | float('nan') %}
+        {% if change == change %}
+          {% set threshold = 2.0 %}
+          {% if change > threshold %}rising
+          {% elif change < -threshold %}falling
+          {% else %}steady
+          {% endif %}
+        {% else %}unknown
+        {% endif %}
+      icon: >
+        {% set change = states('sensor.kneplatt72_temperature_24h_change') | float(0) %}
+        {% if change > 2.0 %}mdi:thermometer-chevron-up
+        {% elif change < -2.0 %}mdi:thermometer-chevron-down
+        {% else %}mdi:thermometer
+        {% endif %}
+      attributes:
+        friendly_name: Temperature Trend (24h)
+        delta_degf: "{{ states('sensor.kneplatt72_temperature_24h_change') | float(0) | round(1) }}"
+        threshold_degf: '2.0'
+        current_temperature: "{{ states('sensor.kneplatt72_temperature') }}"
+
+    - name: KNEPLATT72 Humidity Trend
+      unique_id: kneplatt72_humidity_trend
+      device_class: enum
+      availability: "{{ has_value('sensor.kneplatt72_humidity_24h_change') }}"
+      state: >
+        {% set change = states('sensor.kneplatt72_humidity_24h_change') | float('nan') %}
+        {% if change == change %}
+          {% set threshold = 5.0 %}
+          {% if change > threshold %}rising
+          {% elif change < -threshold %}falling
+          {% else %}steady
+          {% endif %}
+        {% else %}unknown
+        {% endif %}
+      icon: >
+        {% set change = states('sensor.kneplatt72_humidity_24h_change') | float(0) %}
+        {% if change > 5.0 %}mdi:water-plus
+        {% elif change < -5.0 %}mdi:water-minus
+        {% else %}mdi:water-percent
+        {% endif %}
+      attributes:
+        friendly_name: Humidity Trend (24h)
+        delta_percent: "{{ states('sensor.kneplatt72_humidity_24h_change') | float(0) | round(1) }}"
+        threshold_percent: '5.0'
+        current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
+
+    # NETWORK & CONNECTIVITY SENSORS
+    - name: Network Active Hosts (Nmap)
+      unique_id: network_nmap_active_hosts
+      icon: mdi:lan
+      availability: "{{ integration_entities('nmap_tracker') | length > 0 }}"
+      state: >
+        {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
+        {% set active_devices = expand(nmap_entities)
+            | selectattr('domain', 'equalto', 'device_tracker')
+            | selectattr('state', 'equalto', 'home')
+            | list %}
+        {{ active_devices | length }}
+      attributes:
+        friendly_name: Active Network Hosts
+        total_tracked: >
+          {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
+          {{ expand(nmap_entities) | selectattr('domain', 'equalto', 'device_tracker') | list | length }}
+        integration: nmap_tracker
+
+    - name: Network Clients Online (TP-Link)
+      unique_id: network_tplink_clients_online
+      icon: mdi:wifi
+      availability: "{{ integration_entities('tplink_router') | length > 0 }}"
+      state: >
+        {% set tplink_entities = integration_entities('tplink_router') | default([]) %}
+        {% set online_devices = expand(tplink_entities)
+            | selectattr('domain', 'equalto', 'device_tracker')
+            | selectattr('state', 'equalto', 'home')
+            | list %}
+        {{ online_devices | length }}
+      attributes:
+        friendly_name: TP-Link Clients Online
+        integration: tplink_router
+
+    - name: Internet Connectivity Status
+      unique_id: internet_connectivity_status
+      availability: "{{ has_value('binary_sensor.internet_reachable') }}"
+      state: >
+        {% if is_state('binary_sensor.internet_reachable', 'on') %}
+          {% set latency = states('sensor.internet_reachable_latency') | float(-1) %}
+          {% if latency >= 0 %}
+            Online ({{ latency | round(0) }}ms)
+          {% else %}
+            Online
+          {% endif %}
+        {% else %}
+          Offline
+        {% endif %}
+      icon: >
+        {% if is_state('binary_sensor.internet_reachable', 'on') %}mdi:check-network
+        {% else %}mdi:close-network
+        {% endif %}
+      attributes:
+        friendly_name: Internet Status
+        is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
+        latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
+
+    # HUSKERS GAME SENSORS (normalized)
+    - name: huskers_team_name
+      state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
+    - name: huskers_opponent_name
+      state: "{{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}"
+    - name: huskers_team_score
+      state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
+    - name: huskers_opponent_score
+      state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
+    - name: Huskers Quarter
+      unique_id: huskers_quarter
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
+      icon: mdi:numeric
+    - name: huskers_game_clock_ct
+      state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
+    - name: huskers_kickoff_time_ct
+      state: >
+        {% set iso = state_attr('sensor.husker_team','date') %}
+        {% if iso not in [None,'','unknown','unavailable'] %}
+          {{ as_datetime(iso) | as_local | strftime('%-I:%M %p CT') }}
+        {% else %}unknown{% endif %}
+    - name: huskers_kickoff_in
+      unit_of_measurement: 'min'
+      state: >
+        {% set iso = state_attr('sensor.husker_team','date') %}
+        {% if iso in [None,'','unknown','unavailable'] %}
+          unknown
+        {% else %}
+          {% set t = as_datetime(iso) %}
+          {% if t %}{{ ((t - now()).total_seconds() / 60) | round(0) }}{% else %}unknown{% endif %}
+        {% endif %}
+
+- binary_sensor:
+    - name: Huskers Pregame Window
+      unique_id: huskers_pregame_window
+      device_class: running
+      availability: "{{ has_value('sensor.huskers_kickoff_in_effective') }}"
+      state: >
+        {% set minutes_until = states('sensor.huskers_kickoff_in_effective') | int(-1) %}
+        {{ 0 < minutes_until <= 120 }}
+      icon: >
+        {% if this.state %}mdi:clock-fast{% else %}mdi:clock-outline{% endif %}
+      attributes:
+        friendly_name: Pregame Window (2 hours)
+
+    - name: Huskers Game In Progress (TT)
+      unique_id: huskers_game_in_progress_tt
+      device_class: running
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: >
+        {% set game_state = states('sensor.husker_team') %}
+        {{ game_state in ['IN', 'LIVE'] }}
+      icon: >
+        {% if this.state %}mdi:football{% else %}mdi:football-helmet{% endif %}
+
+    - name: Huskers Postgame Window
+      unique_id: huskers_postgame_window
+      device_class: running
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: >
+        {% set game_state = states('sensor.husker_team') %}
+        {{ game_state == 'POST' }}
+      icon: >
+        {% if this.state %}mdi:flag-checkered{% else %}mdi:flag-outline{% endif %}
