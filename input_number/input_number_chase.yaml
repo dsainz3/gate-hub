@@ -1,0 +1,8 @@
+huskers_chase_cycle_seconds:
+  name: Huskers Chase Cycle
+  icon: mdi:timer-cog-outline
+  min: 7
+  max: 120
+  step: 1
+  unit_of_measurement: s
+  mode: slider

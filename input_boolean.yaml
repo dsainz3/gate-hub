@@ -1,17 +1,13 @@
-# Huskers mode toggles
-huskers_test_mode:
-  name: Huskers Test Mode
-  icon: mdi:test-tube
+# input_boolean.yaml - Theater Show Control Helpers
 
-huskers_game_mode:
-  name: Huskers Game Mode
-  icon: mdi:football-helmet
+# Legacy theater show control (10-second timing)
+huskers_color_show:
+  name: 'Huskers Color Show'
+  icon: mdi:palette
+  initial: false
 
-huskers_exterior_color_show:
-  name: Huskers Exterior Color Show
-  icon: mdi:lightbulb-group
-
-# Unified show control
-huskers_show_running:
-  name: Huskers Show Running
-  icon: mdi:lightbulb-group-outline
+# New theater game show control (5-second timing, 2-second transitions)
+huskers_theater_show_running:
+  name: 'Huskers Theater Game Show Running'
+  icon: mdi:theater
+  initial: false

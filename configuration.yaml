@@ -6,11 +6,9 @@ homeassistant:
   time_zone: !secret home_timezone
   unit_system: us_customary
   currency: USD
-  country: US              # ISO 3166-1 alpha-2
+  country: US
 
-# 👇 Use merge_named so each theme file can define its own theme name
-frontend:
-  themes: !include_dir_merge_named themes
+frontend: {}
 
 automation: !include automations.yaml
 scene: !include scenes.yaml
@@ -20,14 +18,16 @@ sensor: !include sensor.yaml
 template: !include templates.yaml
 binary_sensor: !include binary_sensors.yaml
 input_boolean: !include input_boolean.yaml
-input_number: !include input_number.yaml
+
+# Keep multiple input_number files (directory merge)
+input_number: !include_dir_merge_named input_number
+
 input_text: !include input_text.yaml
 script: !include scripts.yaml
 
-# needed for the Logbook card + custom log entries
 logbook:
+history:
 
-# keep DB sane; only store what we care about
 recorder:
   include:
     domains: [script, scene, light, input_boolean]
@@ -35,16 +35,16 @@ recorder:
       - input_text.huskers_last_score
       - sensor.huskers_kickoff_in
       - binary_sensor.huskers_postgame_window
+      - input_number.huskers_chase_cycle_seconds
       - light.light_theater_left
       - light.light_theater_right
       - light.light_front_left
       - light.light_front_right
-      - light.garage_left
-      - light.garage_center
-      - light.garage_right
+      - light.light_garage_left
+      - light.lights_garage_center
+      - light.light_garage_right
       - light.permanent_outdoor_lights
 
-# HA core logger (optional, but helpful while iterating)
 logger:
   default: info
   logs:

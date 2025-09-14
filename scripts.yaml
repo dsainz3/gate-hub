@@ -1,266 +1,202 @@
-# scripts.yaml — Unified Huskers show system
+# ===============================
+# Cream Chase Scripts (Standard 30s + Variable-Speed)
+# Order (7): light.light_theater_left, light.light_theater_right, light.light_front_left, light.light_front_right, light.light_garage_left, light.lights_garage_center, light.light_garage_right
+# Colors: Scarlet [355,90], Cream [45,20]
+# ===============================
 
-# ==============
-# SNAPSHOT / RESTORE
-# ==============
-
-huskers_snapshot_before:
-  alias: 'Huskers: Snapshot Current Lighting'
+huskers_chase30_start:
+  alias: 'Huskers: Start 30s Cream Chase'
+  description: >
+    Sets all target lights to Scarlet, snapshots state, and starts a 30-second
+    Cream chase moving through Scarlet in the specified order.
+  mode: restart
   sequence:
     - service: scene.create
       data:
-        scene_id: huskers_before
+        scene_id: huskers_before_chase30
         snapshot_entities:
           - light.light_theater_left
           - light.light_theater_right
           - light.light_front_left
           - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-          - light.permanent_outdoor_lights
-    - service: logbook.log
-      data:
-        name: Huskers Snapshot
-        message: 'Saved current lighting state before gameday show'
-
-huskers_restore_after:
-  alias: 'Huskers: Restore Pre-Game Lighting'
-  sequence:
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_before
-    - service: logbook.log
-      data:
-        name: Huskers Restore
-        message: 'Restored lighting state after game'
-
-# ==============
-# COMBINED HUSKERS SHOW (Theater + Exterior)
-# ==============
-
-huskers_combined_show_start:
-  alias: 'Huskers: Combined Show Start'
-  sequence:
-    - service: script.turn_on
-      target:
-        entity_id: script.huskers_snapshot_before
-    - service: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.huskers_show_running
-    - service: script.turn_on
-      target:
-        entity_id: script.huskers_combined_show_loop
-
-huskers_combined_show_loop:
-  alias: 'Huskers: Combined Alternating Loop'
-  mode: restart
-  sequence:
-    - repeat:
-        while:
-          - condition: state
-            entity_id: input_boolean.huskers_show_running
-            state: 'on'
-        sequence:
-          # Phase 1: All Scarlet
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.light_front_left
-                - light.light_front_right
-                - light.garage_left
-                - light.garage_center
-                - light.garage_right
-            data:
-              rgb_color: [204, 0, 0]
-              brightness_pct: 80
-              transition: 2
-          - delay: '00:00:04'
-
-          # Phase 2: All Cream
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.light_front_left
-                - light.light_front_right
-                - light.garage_left
-                - light.garage_center
-                - light.garage_right
-            data:
-              rgb_color: [255, 253, 208]
-              brightness_pct: 80
-              transition: 2
-          - delay: '00:00:04'
-
-huskers_combined_show_stop:
-  alias: 'Huskers: Combined Show Stop'
-  sequence:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_show_running
-    - service: script.turn_on
-      target:
-        entity_id: script.huskers_restore_after
-
-# ==============
-# TOUCHDOWN BURST SCRIPTS
-# ==============
-
-huskers_td_burst_combined:
-  alias: 'Huskers: TD Burst Combined (BPM Synced)'
-  mode: restart
-  variables:
-    bpm: "{{ states('input_number.huskers_hail_varsity_bpm') | int(120) }}"
-    beat_duration: '{{ (60 / bpm) | round(2) }}'
-    half_beat: '{{ (beat_duration / 2) | round(2) }}'
-  sequence:
-    # Capture current state first
-    - service: scene.create
-      data:
-        scene_id: td_burst_combined_restore
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
-          - light.light_front_left
-          - light.light_front_right
-          - light.garage_left
-          - light.garage_center
-          - light.garage_right
-
-    # Log the celebration
-    - service: logbook.log
-      data:
-        name: Huskers TD Burst
-        message: 'Combined celebration started - {{ bpm }} BPM for 10 seconds'
-
-    # Run for 10 seconds (calculate number of beats)
-    - repeat:
-        count: '{{ (10 / beat_duration) | int }}'
-        sequence:
-          # Beat 1: Left side Scarlet, Right side Cream
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_front_left
-                - light.garage_left
-                - light.garage_right
-            data:
-              rgb_color: [204, 0, 0]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_right
-                - light.light_front_right
-                - light.garage_center
-            data:
-              rgb_color: [255, 253, 208]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - delay: '{{ half_beat }}'
-
-          # Beat 2: Left side Cream, Right side Scarlet
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_front_left
-                - light.garage_left
-                - light.garage_right
-            data:
-              rgb_color: [255, 253, 208]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_right
-                - light.light_front_right
-                - light.garage_center
-            data:
-              rgb_color: [204, 0, 0]
-              brightness: 255
-              transition: '{{ half_beat }}'
-          - delay: '{{ half_beat }}'
-
-    # Check if combined show was running before burst
-    - if:
-        - condition: state
-          entity_id: input_boolean.huskers_show_running
-          state: 'on'
-      then:
-        # Resume combined alternating show
-        - service: script.turn_on
-          target:
-            entity_id: script.huskers_combined_show_loop
-      else:
-        # Restore previous state if no show was running
-        - service: scene.turn_on
-          target:
-            entity_id: scene.td_burst_combined_restore
-
-huskers_led_td_burst:
-  alias: 'Huskers: LED Strip TD Burst'
-  mode: restart
-  sequence:
-    # Capture current LED state
-    - service: scene.create
-      data:
-        scene_id: td_burst_led_restore
-        snapshot_entities:
-          - light.permanent_outdoor_lights
-
-    # Set LED to Huskers effect or solid scarlet
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
     - service: light.turn_on
       target:
-        entity_id: light.permanent_outdoor_lights
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
       data:
+        hs_color: [355, 90]
         brightness: 255
-        rgb_color: [204, 0, 0]
-        effect: LED_Huskers
-      continue_on_error: true
-
-    # If effect doesn't exist, use rapid color changes
-    - delay: 1
-    - repeat:
-        count: 5
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: light.permanent_outdoor_lights
-            data:
-              rgb_color: [204, 0, 0]
-              brightness: 255
-          - delay: 1
-          - service: light.turn_on
-            target:
-              entity_id: light.permanent_outdoor_lights
-            data:
-              rgb_color: [255, 253, 208]
-              brightness: 255
-          - delay: 1
-
-    # Restore previous LED state
-    - service: scene.turn_on
-      target:
-        entity_id: scene.td_burst_led_restore
-
-# ==============
-# GLOBAL CLEANUP
-# ==============
-
-huskers_cleanup_all:
-  alias: 'Huskers: Cleanup All Shows'
-  sequence:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_show_running
+        transition: 0.1
     - service: script.turn_on
       target:
-        entity_id: script.huskers_restore_after
+        entity_id: script.huskers_chase30_loop
+
+huskers_chase30_loop:
+  alias: 'Huskers: 30s Cream Chase LOOP'
+  description: >
+    Infinite loop: Cream moves through Scarlet across the 7 lights.
+    Each step ≈ 4286ms (transition 100ms + hold 4186ms) → total ≈ 30s.
+  mode: restart
+  sequence:
+    - variables:
+        lights:
+          [
+            'light.light_theater_left',
+            'light.light_theater_right',
+            'light.light_front_left',
+            'light.light_front_right',
+            'light.light_garage_left',
+            'light.lights_garage_center',
+            'light.light_garage_right',
+          ]
+        transition_s: 0.1
+        hold_ms: 4186
+    - repeat:
+        while:
+          - condition: template
+            value_template: '{{ true }}'
+        sequence:
+          - repeat:
+              for_each: '{{ lights }}'
+              sequence:
+                - variables:
+                    current: '{{ repeat.item }}'
+                    prev_index: '{{ (repeat.index - 2) % (lights|count) }}'
+                    previous: '{{ lights[prev_index] }}'
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ previous }}'
+                  data:
+                    hs_color: [355, 90]
+                    brightness: 255
+                    transition: '{{ transition_s }}'
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ current }}'
+                  data:
+                    hs_color: [45, 20]
+                    brightness: 255
+                    transition: '{{ transition_s }}'
+                - delay:
+                    milliseconds: '{{ hold_ms }}'
+
+huskers_chase30_stop:
+  alias: 'Huskers: Stop 30s Cream Chase (restore)'
+  mode: single
+  sequence:
+    - service: script.turn_off
+      target:
+        entity_id: script.huskers_chase30_loop
+    - delay:
+        milliseconds: 500
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_before_chase30
+      continue_on_error: true
+
+huskers_chase_speed_start:
+  alias: 'Huskers: Start Variable-Speed Cream Chase'
+  description: >
+    Sets all target lights to Scarlet, snapshots current state, and starts a variable-speed
+    Cream chase. Adjust total cycle time with input_number.huskers_chase_cycle_seconds.
+  mode: restart
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: huskers_before_chase_speed
+        snapshot_entities:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
+      data:
+        hs_color: [355, 90]
+        brightness: 255
+        transition: 0.1
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_chase_speed_loop
+
+huskers_chase_speed_loop:
+  alias: 'Huskers: Variable-Speed Cream Chase LOOP'
+  mode: restart
+  sequence:
+    - variables:
+        transition_s: 0.1
+        lights:
+          [
+            'light.light_theater_left',
+            'light.light_theater_right',
+            'light.light_front_left',
+            'light.light_front_right',
+            'light.light_garage_left',
+            'light.lights_garage_center',
+            'light.light_garage_right',
+          ]
+        cycle_s: "{{ states('input_number.huskers_chase_cycle_seconds') | float(30) }}"
+        step_ms: '{{ ((cycle_s * 1000) / (lights | count)) | round(0) | int }}'
+        hold_ms: '{{ (step_ms - (transition_s * 1000)) | round(0) | int }}'
+    - repeat:
+        while:
+          - condition: template
+            value_template: '{{ true }}'
+        sequence:
+          - repeat:
+              for_each: '{{ lights }}'
+              sequence:
+                - variables:
+                    current: '{{ repeat.item }}'
+                    prev_index: '{{ (repeat.index - 2) % (lights|count) }}'
+                    previous: '{{ lights[prev_index] }}'
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ previous }}'
+                  data:
+                    hs_color: [355, 90]
+                    brightness: 255
+                    transition: '{{ transition_s }}'
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ current }}'
+                  data:
+                    hs_color: [45, 20]
+                    brightness: 255
+                    transition: '{{ transition_s }}'
+                - delay:
+                    milliseconds: '{{ hold_ms }}'
+
+huskers_chase_speed_stop:
+  alias: 'Huskers: Stop Variable-Speed Cream Chase (restore)'
+  mode: single
+  sequence:
+    - service: script.turn_off
+      target:
+        entity_id: script.huskers_chase_speed_loop
+    - delay:
+        milliseconds: 500
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_before_chase_speed
+      continue_on_error: true
