@@ -8,10 +8,6 @@ views:
       # =========================
       # Shows
       # =========================
-      - type: entities
-        title: Shows
-        entities: []
-
       - type: grid
         columns: 3
         square: false
@@ -79,18 +75,36 @@ views:
       # =========================
       # Lights (Individual)
       # =========================
-      - type: entities
-        title: Lights (Individual)
-        entities: []
-
       - type: grid
         columns: 4
         square: false
         cards:
           - type: light
-            entity: light.light_theater_left
+            entity: light.all_exterior_lights
           - type: light
-            entity: light.light_theater_right
+            entity: light.all_lights
+          - type: light
+            entity: light.bar_light_2
+          - type: light
+            entity: light.basement
+          - type: light
+            entity: light.camera_status_leds
+          - type: light
+            entity: light.christmas_tree_lights
+          - type: light
+            entity: light.diningroom_light
+          - type: light
+            entity: light.exterior_floodlights
+          - type: light
+            entity: light.front_porch_lights
+          - type: light
+            entity: light.garage_lights
+          - type: light
+            entity: light.guest_room_purifier
+          - type: light
+            entity: light.light_ari_2
+          - type: light
+            entity: light.light_attic
           - type: light
             entity: light.light_front_left
           - type: light
@@ -98,11 +112,39 @@ views:
           - type: light
             entity: light.light_garage_left
           - type: light
-            entity: light.lights_garage_center
-          - type: light
             entity: light.light_garage_right
           - type: light
+            entity: light.light_guest_room
+          - type: light
+            entity: light.light_office
+          - type: light
+            entity: light.light_parents
+          - type: light
+            entity: light.light_theater_left
+          - type: light
+            entity: light.light_theater_right
+          - type: light
+            entity: light.lights_exterior
+          - type: light
+            entity: light.lights_garage_center
+          - type: light
+            entity: light.lights_theater
+          - type: light
+            entity: light.livingroom_light
+          - type: light
+            entity: light.mainfloor_lights
+          - type: light
+            entity: light.office_lights
+          - type: light
+            entity: light.permanent_outdoor_lights
+          - type: light
+            entity: light.permanent_outdoor_lights_2
+          - type: light
             entity: light.spare_light
+          - type: light
+            entity: light.sunroom_light
+          - type: light
+            entity: light.theater_lights
 
       # =========================
       # Groups
@@ -120,15 +162,53 @@ views:
             name: All Eight (Group)
 
       # =========================
+      # Purifiers
+      # =========================
+      - type: entities
+        title: Purifier Power Switches
+        show_header_toggle: false
+        entities:
+          - switch.bedroom_purifier_power_switch
+          - switch.garage_air_purifier_power_switch
+          - switch.guest_room_purifier_nightlight_toggle
+          - switch.guest_room_purifier_power_switch
+      # =========================
       # Plugs (Power)
       # =========================
       - type: entities
         title: Plugs (Power)
         show_header_toggle: false
         entities:
+          - switch.bar_light_power_switch
+          - switch.basement_power_switch
+          - switch.bedroom_purifier_power_switch
+          - switch.burners_all
+          - switch.christmas_tree_lights_power_switch
+          - switch.diningroom_light_power_switch
+          - switch.exterior_lights_power_switch
+          - switch.external_power_switch
+          - switch.garage_air_purifier_power_switch
+          - switch.guest_room_purifier_power_switch
+          - switch.light_ari_power_switch
+          - switch.light_attic_power_switch
+          - switch.light_guest_room_power_switch
+          - switch.light_parents_power_switch
+          - switch.livingroom_light_power_switch
+          - switch.main_floor_power_switch
+          - switch.main_power_switch
+          - switch.mainfloor_power_switch
+          - switch.outside_power_switch
+          - switch.permanent_outdoor_lights_power_switch
           - switch.plug_basement_burner
-          - switch.plug_mainfloor_burner
           - switch.plug_bedroom_burner
+          - switch.plug_humidor
+          - switch.plug_mainfloor_burner
+          - switch.scenic_dreamview1_power_switch
+          - switch.scenic_dreamview2_power_switch
+          - switch.scenic_dreamview_power_switch
+          - switch.sunroom_light_power_switch
+          - switch.tree_power_switch
+          - switch.tv_lights_power_switch
 
       - type: button
         name: All Plugs OFF (Safety)
@@ -141,12 +221,24 @@ views:
         show_state: false
 
       # =========================
-      # Maintenance
+      # Automations (All Current)
       # =========================
       - type: entities
-        title: Maintenance
-        entities: []
+        title: Automations (All Current)
+        show_header_toggle: false
+        entities:
+          - automation.lighting_evening_lights_at_sunset
+          - automation.lighting_night_mode_at_midnight
+          - automation.lighting_early_morning_gentle_wake_3_30_am
+          - automation.lighting_morning_lights_off_sunrise_15min
+          - automation.lighting_morning_lights_off_sunrise
+          - automation.led_monthly_effect_scheduler
+          - automation.climate_humidor_temperature_control
+          - automation.safety_nightly_burner_plug_shutoff
 
+      # =========================
+      # Maintenance
+      # =========================
       - type: grid
         columns: 3
         square: false
