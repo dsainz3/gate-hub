@@ -1,4 +1,4 @@
-title: Weather Dashboard
+title: Weather 222 Dashboard
 views:
   - title: Weather
     path: weather
@@ -41,13 +41,78 @@ views:
         entities:
           - entity: input_boolean.weather_notifications_enabled
             name: Weather Notifications
-          - entity: binary_sensor.pressure_rising
-            name: Pressure Rising
-          - entity: binary_sensor.pressure_falling
-            name: Pressure Falling
+          - entity: binary_sensor.wx_pressure_falling_rapid
+            name: Pressure falling rapidly
+          - entity: binary_sensor.wx_pressure_falling_very_fast
+            name: Pressure falling very fast
+          - entity: binary_sensor.wx_storm_watch_pressure
+            name: Storm Watch (pressure)
+          - entity: binary_sensor.wx_storm_warning_pressure
+            name: Storm Warning (pressure)
           - type: divider
           - entity: group.weather_dashboard_all
             name: All Weather Entities
+
+      - type: entities
+        title: Barometer & Tendency
+        show_header_toggle: false
+        entities:
+          - entity: sensor.outdoor_pressure_wx
+            name: Sea-level pressure
+          - entity: sensor.wx_pressure_tendency_3h
+            name: 3-hour tendency
+          - entity: sensor.wx_pressure_change_3h
+            name: Change (3h, inHg)
+          - entity: sensor.wx_pressure_rate_1h
+            name: Rate (1h, inHg/h)
+          - entity: sensor.wx_pressure_rate_3h
+            name: Rate (3h, inHg/h)
+
+      - type: horizontal-stack
+        cards:
+          - type: sensor
+            entity: sensor.outdoor_pressure_wx
+            name: Pressure
+            graph: line
+          - type: sensor
+            entity: sensor.wx_pressure_rate_1h
+            name: Rate 1h
+            graph: line
+          - type: sensor
+            entity: sensor.wx_pressure_change_3h
+            name: Δ 3h
+            graph: line
+
+      - type: history-graph
+        title: Pressure – Last 24 hours
+        hours_to_show: 24
+        entities:
+          - entity: sensor.outdoor_pressure_wx
+          - entity: sensor.wx_pressure_change_3h
+          - entity: sensor.wx_pressure_rate_1h
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.wx_storm_warning_pressure
+            state: 'on'
+        card:
+          type: markdown
+          content: |
+            ## ⚠️ **Storm Warning (pressure)**
+            Rapid pressure fall (≥ 0.09 inHg in the last 3 hours).
+            Check official alerts & radar.
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.wx_storm_watch_pressure
+            state: 'on'
+          - entity: binary_sensor.wx_storm_warning_pressure
+            state: 'off'
+        card:
+          type: markdown
+          content: |
+            ### ⚠️ Storm Watch (pressure)
+            Rapid pressure fall (≥ 0.06 inHg in the last 3 hours).
 
       - type: horizontal-stack
         cards:
@@ -90,16 +155,3 @@ views:
           - entity: sensor.outdoor_wind_speed_wx
           - entity: sensor.outdoor_pressure_wx
           - entity: sensor.kneplatt72_uv_index
-
-      - type: statistics-graph
-        title: 24h Trends
-        days_to_show: 1
-        stat_types:
-          - mean
-          - min
-          - max
-        chart_type: line
-        entities:
-          - entity: sensor.outdoor_temperature_wx
-          - entity: sensor.outdoor_humidity_wx
-          - entity: sensor.outdoor_wind_speed_wx

@@ -18,12 +18,19 @@ group:
       - sensor.kneplatt72_uv_index
       - sensor.uv_category_wx
       - sensor.wind_gust
-      - binary_sensor.pressure_rising
-      - binary_sensor.pressure_falling
+      - sensor.wx_pressure_rate_1h
+      - sensor.wx_pressure_rate_3h
+      - sensor.wx_pressure_change_3h
+      - sensor.wx_pressure_change_24h
+      - sensor.wx_pressure_tendency_3h
+      - binary_sensor.wx_pressure_falling_rapid
+      - binary_sensor.wx_pressure_falling_very_fast
+      - binary_sensor.wx_storm_watch_pressure
+      - binary_sensor.wx_storm_warning_pressure
 
 template:
   - sensor:
-      # Current temperature from weather entity
+      # Current temperature
       - name: 'Outdoor Temperature (wx)'
         unique_id: wx_temp_primary
         state: "{{ state_attr('weather.kneplatt72', 'temperature') }}"
@@ -50,7 +57,7 @@ template:
         state_class: measurement
         availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
 
-      # Pressure: convert hPa -> inHg (fallback to native sensor if your weather entity lacks pressure)
+      # Pressure: hPa -> inHg (fallback to any native pressure sensor if present)
       - name: 'Outdoor Pressure (wx)'
         unique_id: wx_pressure
         state: >-
@@ -64,7 +71,7 @@ template:
         icon: mdi:gauge
         state_class: measurement
 
-      # Visibility: km -> miles from weather entity
+      # Visibility: km -> mi
       - name: 'Outdoor Visibility (wx)'
         unique_id: wx_visibility
         state: >-
@@ -78,7 +85,7 @@ template:
         icon: mdi:eye
         state_class: measurement
 
-      # Dew point (approx) from current Temp/Humidity
+      # Dew point (approx) from current temp/humidity
       - name: 'Outdoor Dew Point (approx)'
         unique_id: wx_dewpoint
         unit_of_measurement: '°F'
@@ -91,7 +98,7 @@ template:
           {% set TdC = Tc - ((100 - RH) / 5) %}
           {{ (TdC * 9 / 5 + 32) | round(1) }}
 
-      # Feels like (heat index / wind chill) from current values
+      # Feels like (heat index / wind chill)
       - name: 'Outdoor Feels Like'
         unique_id: wx_feels_like
         unit_of_measurement: '°F'
@@ -120,23 +127,100 @@ template:
           {% if u <= 2 %}Low{% elif u <= 5 %}Moderate{% elif u <= 7 %}High{% elif u <= 10 %}Very High{% else %}Extreme{% endif %}
         icon: mdi:weather-sunny-alert
 
+  # Pressure tendency label + attributes
+  - sensor:
+      - name: 'WX Pressure tendency (3h)'
+        unique_id: wx_pressure_tendency_label
+        icon: mdi:gauge
+        state: >-
+          {% set d = states('sensor.wx_pressure_change_3h')|float(0) %}
+          {% if d >= 0.09 %}Rising very fast (+≥0.09 inHg / 3h)
+          {% elif d >= 0.06 %}Rising fast (+≥0.06 inHg / 3h)
+          {% elif d >= 0.02 %}Rising (+0.02–0.06 inHg / 3h)
+          {% elif d <= -0.09 %}Falling very fast (≤−0.09 inHg / 3h)
+          {% elif d <= -0.06 %}Falling fast (≤−0.06 inHg / 3h)
+          {% elif d <= -0.02 %}Falling (−0.02–−0.06 inHg / 3h)
+          {% else %}Steady (±<0.02 inHg / 3h)
+          {% endif %}
+        attributes:
+          change_3h_inHg: "{{ states('sensor.wx_pressure_change_3h') }}"
+          rate_1h_inHg_per_h: "{{ states('sensor.wx_pressure_rate_1h') }}"
+          rate_3h_inHg_per_h: "{{ states('sensor.wx_pressure_rate_3h') }}"
+
+  - binary_sensor:
+      # Watch (pressure-only heuristic): ≥0.06 inHg drop over 3h
+      - name: 'WX Storm Watch (pressure)'
+        unique_id: wx_storm_watch_pressure
+        device_class: problem
+        state: "{{ states('sensor.wx_pressure_change_3h')|float(0) <= -0.06 }}"
+
+      # Warning (pressure-only heuristic): ≥0.09 inHg drop over 3h
+      - name: 'WX Storm Warning (pressure)'
+        unique_id: wx_storm_warning_pressure
+        device_class: safety
+        state: "{{ states('sensor.wx_pressure_change_3h')|float(0) <= -0.09 }}"
+
+# Derivatives & statistics for pressure trend metrics
+sensor:
+  - platform: derivative
+    name: WX Pressure rate 1h
+    source: sensor.outdoor_pressure_wx
+    unit_time: h
+    time_window: '01:00:00'
+    round: 3
+    unit: 'inHg/h'
+
+  - platform: derivative
+    name: WX Pressure rate 3h
+    source: sensor.outdoor_pressure_wx
+    unit_time: h
+    time_window: '03:00:00'
+    round: 3
+    unit: 'inHg/h'
+
+  - platform: statistics
+    name: WX Pressure change 3h
+    entity_id: sensor.outdoor_pressure_wx
+    state_characteristic: change
+    max_age:
+      hours: 3
+    sampling_size: 360
+    precision: 3
+    unique_id: wx_pressure_change_3h
+
+  - platform: statistics
+    name: WX Pressure change 24h
+    entity_id: sensor.outdoor_pressure_wx
+    state_characteristic: change
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 3
+    unique_id: wx_pressure_change_24h
+
+# Rapid-fall detectors (inHg/s). 0.06 inHg/h ≈ -0.0000167 inHg/s; 0.09 ≈ -0.000025.
 binary_sensor:
   - platform: trend
     sensors:
-      pressure_rising:
+      wx_pressure_falling_rapid:
         entity_id: sensor.outdoor_pressure_wx
-        friendly_name: Pressure Rising
-        sample_duration: 7200 # 2 hours
-        min_gradient: 0.002 # ~0.002 inHg per second (tune as desired)
-      pressure_falling:
+        friendly_name: WX Pressure falling rapidly (≥0.06 inHg/h)
+        sample_duration: 3600
+        max_samples: 120
+        min_samples: 15
+        min_gradient: -0.0000167
+        device_class: problem
+      wx_pressure_falling_very_fast:
         entity_id: sensor.outdoor_pressure_wx
-        friendly_name: Pressure Falling
-        sample_duration: 7200
-        min_gradient: 0.002
-        invert: true
+        friendly_name: WX Pressure falling very fast (≥0.09 inHg/h)
+        sample_duration: 3600
+        max_samples: 120
+        min_samples: 15
+        min_gradient: -0.000025
+        device_class: problem
 
 automation:
-  # Replace 'sensor.nws_alerts' with your actual weather alert entity when you add one
+  # Swap 'sensor.nws_alerts' to your actual alert entity when available
   - id: weather_alert_notify
     alias: 'Weather: Severe Alert → Notification'
     mode: restart

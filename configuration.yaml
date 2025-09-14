@@ -55,6 +55,15 @@ recorder:
       - sensor.wind_gust
       - sensor.outdoor_visibility_wx
       - sensor.uv_category_wx
+      - sensor.wx_pressure_rate_1h
+      - sensor.wx_pressure_rate_3h
+      - sensor.wx_pressure_change_3h
+      - sensor.wx_pressure_change_24h
+      - sensor.wx_pressure_tendency_3h
+      - binary_sensor.wx_pressure_falling_rapid
+      - binary_sensor.wx_pressure_falling_very_fast
+      - binary_sensor.wx_storm_watch_pressure
+      - binary_sensor.wx_storm_warning_pressure
 
 
 logger:
