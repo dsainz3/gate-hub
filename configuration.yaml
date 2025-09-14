@@ -91,6 +91,6 @@ lovelace:
     kiosk-dashboard:
       mode: yaml
       filename: dashboards/kiosk-dashboard.yaml
-      title: Kiosk
+      title: Kiosk Package
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
