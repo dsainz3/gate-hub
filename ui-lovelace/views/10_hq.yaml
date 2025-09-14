@@ -1,0 +1,66 @@
+﻿title: Huskers â€“ HQ
+path: huskers-hq
+icon: mdi:football-helmet
+badges: []
+cards:
+  - type: markdown
+    content: >-
+      {% set our = states('sensor.huskers_our_score') %}
+      {% set opp = states('sensor.huskers_opponent_score') %}
+      {% set opp_name = states('sensor.huskers_opponent_name') %}
+      {% set qtr = states('sensor.huskers_quarter') %}
+      {% set clock = states('sensor.huskers_game_clock') %}
+      {% set status = states('sensor.huskers_game_status') %}
+
+      {% if our in ['unknown','unavailable','none','None',''] %}{% set our = 'â€”' %}{% endif %}
+      {% if opp in ['unknown','unavailable','none','None',''] %}{% set opp = 'â€”' %}{% endif %}
+      {% if opp_name in ['unknown','unavailable','none','None',''] %}{% set opp_name = 'Opponent' %}{% endif %}
+      {% if qtr in ['unknown','unavailable','none','None',''] %}{% set qtr = 'â€”' %}{% endif %}
+      {% if clock in ['unknown','unavailable','none','None',''] %}{% set clock = 'â€”' %}{% endif %}
+      {% if status in ['unknown','unavailable','none','None',''] %}{% set status = 'No game data' %}{% endif %}
+
+      # Huskers HQ
+
+      **Nebraska** {{ our }} vs **{{ opp_name }}** {{ opp }}
+
+      **Quarter:** {{ qtr }}
+      **Clock:** {{ clock }}
+      **Status:** {{ status }}
+
+  - type: conditional
+    conditions:
+      - entity: sensor.huskers_our_score
+        state_not: unavailable
+    card:
+      type: entities
+      title: Game Data (Raw)
+      entities:
+        - entity: sensor.huskers_our_score
+          name: Nebraska Score
+        - entity: sensor.huskers_opponent_score
+          name: Opponent Score
+        - entity: sensor.huskers_opponent_name
+          name: Opponent Name
+        - entity: sensor.huskers_quarter
+          name: Quarter
+        - entity: sensor.huskers_game_clock
+          name: Game Clock
+        - entity: sensor.huskers_game_status
+          name: Game Status
+
+  - type: conditional
+    conditions:
+      - entity: sensor.huskers_our_score
+        state_not: unavailable
+      - entity: sensor.huskers_opponent_score
+        state_not: unavailable
+    card:
+      type: history-graph
+      title: Score Timeline
+      hours_to_show: 6
+      refresh_interval: 0
+      entities:
+        - entity: sensor.huskers_our_score
+          name: Nebraska Score
+        - entity: sensor.huskers_opponent_score
+          name: Opponent Score

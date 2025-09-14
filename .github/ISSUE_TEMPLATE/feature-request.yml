@@ -1,0 +1,22 @@
+---
+name: 'Feature request'
+description: Propose a new Home Assistant feature
+labels: ['feature']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / outcome
+      description: What user outcome are we targeting?
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec (entities, services, triggers, conditions, actions)
+    validations:
+      required: true
+  - type: textarea
+    id: kpis
+    attributes:
+      label: KPIs / acceptance criteria

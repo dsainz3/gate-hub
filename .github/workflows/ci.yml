@@ -1,0 +1,68 @@
+name: CI
+
+'on':
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ruff:
+    name: Ruff (lint + format check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
+
+      - name: Cache Ruff cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ruff
+          key: ruff-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ruff-${{ runner.os }}-
+
+      - run: pip install ruff
+
+      - name: ruff check
+        run: ruff check . --output-format=github --force-exclude
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+  precommit:
+    name: pre-commit (YAML & HA tools)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: |
+            pyproject.toml
+            .pre-commit-config.yaml
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      - run: pip install pre-commit
+
+      # Skip Python linters here; Ruff is its own job
+      - name: pre-commit run (non-Python hooks)
+        env:
+          SKIP: ruff,ruff-format
+        run: pre-commit run --all-files

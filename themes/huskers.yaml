@@ -1,0 +1,26 @@
+Huskers Superfan:
+  # Base
+  primary-color: "#d00000"     # Scarlet
+  accent-color: "#fdf5e6"      # Cream
+  light-primary-color: "#ffcccc"
+  primary-background-color: "#111111"
+  secondary-background-color: "#1a1a1a"
+  divider-color: "rgba(255, 255, 255, 0.2)"
+
+  # Text
+  primary-text-color: "#fdf5e6"
+  secondary-text-color: "#dddddd"
+
+  # Cards
+  card-background-color: "#222222"
+  paper-card-background-color: "#222222"
+  ha-card-border-radius: "16px"
+  ha-card-box-shadow: "0px 0px 15px rgba(208,0,0,0.6)"
+
+  # Buttons
+  paper-item-icon-color: "#fdf5e6"
+  paper-item-icon-active-color: "#d00000"
+
+  # Custom Extras
+  mdc-theme-primary: "#d00000"
+  mdc-theme-secondary: "#fdf5e6"

@@ -1,0 +1,24 @@
+services:
+  automation-builder:
+    build:
+      context: ./tools/automation-builder
+    container_name: automation-builder
+    environment:
+      - USE_OLLAMA=true
+      - GITHUB_TOKEN=\
+    ports:
+      - '8000:8000'
+    command: uvicorn automation_builder.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama:/root/.ollama
+
+volumes:
+  ollama:
