@@ -1,4 +1,5 @@
 homeassistant:
+  packages: !include_dir_named packages
   name: Our Home
   latitude: !secret home_latitude
   longitude: !secret home_longitude
@@ -45,7 +46,25 @@ recorder:
       - light.light_garage_right
       - light.permanent_outdoor_lights
 
+      # 👇 Add these to record the weather sensors used by the dashboard
+      - sensor.outdoor_temperature_wx
+      - sensor.outdoor_humidity_wx
+      - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_dew_point_approx
+      - sensor.outdoor_feels_like
+      # (Optional) record the weather entity state too:
+      # - weather.kneplatt72
+
 logger:
   default: info
   logs:
     homeassistant.components.logbook: debug
+
+lovelace:
+  dashboards:
+    weather_dashboard:
+      mode: yaml
+      filename: dashboards/weather_dashboard.yaml
+      title: Weather
+      icon: mdi:weather-partly-cloudy
+      show_in_sidebar: true

@@ -1,0 +1,108 @@
+title: Weather Dashboard
+views:
+  - title: Weather
+    path: weather
+    icon: mdi:weather-partly-cloudy
+    badges: []
+
+    cards:
+      - type: markdown
+        content: |
+          # Weather
+          Live conditions & forecast
+
+      # Forecast from your provider
+      - type: weather-forecast
+        entity: weather.kneplatt72
+
+      # Quick at-a-glance now values
+      - type: glance
+        title: Now
+        show_name: true
+        show_state: true
+        entities:
+          - entity: sensor.outdoor_temperature_wx
+            name: Temp
+          - entity: sensor.outdoor_feels_like
+            name: Feels Like
+          - entity: sensor.outdoor_dew_point_approx
+            name: Dew Point
+          - entity: sensor.outdoor_humidity_wx
+            name: Humidity
+          - entity: sensor.outdoor_wind_speed_wx
+            name: Wind
+          - entity: sensor.wind_gust
+            name: Gust
+          - entity: sensor.kneplatt72_uv_index
+            name: UV Index
+          - entity: sensor.kneplatt72_pressure_24h_change
+            name: Pressure Δ24h
+
+      # Handy toggles / all-entities list
+      - type: entities
+        title: Details
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.weather_notifications_enabled
+            name: Weather Notifications
+          - entity: group.weather_dashboard_all
+            name: All Weather Entities
+
+      # Mini line charts (built-in 'sensor' card)
+      - type: horizontal-stack
+        cards:
+          - type: sensor
+            entity: sensor.outdoor_temperature_wx
+            name: Temperature
+            graph: line
+          - type: sensor
+            entity: sensor.outdoor_humidity_wx
+            name: Humidity
+            graph: line
+          - type: sensor
+            entity: sensor.outdoor_wind_speed_wx
+            name: Wind Speed
+            graph: line
+
+      # Gauges for quick read
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.outdoor_temperature_wx
+            name: Temp
+            min: -20
+            max: 120
+          - type: gauge
+            entity: sensor.outdoor_humidity_wx
+            name: Humidity
+            min: 0
+            max: 100
+          - type: gauge
+            entity: sensor.kneplatt72_uv_index
+            name: UV
+            min: 0
+            max: 11
+
+      # 24h history (requires history/recorder)
+      - type: history-graph
+        title: Last 24 hours
+        hours_to_show: 24
+        entities:
+          - entity: sensor.outdoor_temperature_wx
+          - entity: sensor.outdoor_humidity_wx
+          - entity: sensor.outdoor_wind_speed_wx
+          - entity: sensor.kneplatt72_uv_index
+
+      # Statistics graph (mean/min/max)
+      - type: statistics-graph
+        title: 24h Trends
+        days_to_show: 1
+        stat_types:
+          - mean
+          - min
+          - max
+        chart_type: line
+        entities:
+          - entity: sensor.outdoor_temperature_wx
+          - entity: sensor.outdoor_humidity_wx
+          - entity: sensor.outdoor_wind_speed_wx

@@ -1,0 +1,76 @@
+input_boolean:
+  weather_notifications_enabled:
+    name: Weather Notifications Enabled
+    icon: mdi:bell-alert
+
+group:
+  weather_dashboard_all:
+    name: Weather Dashboard – All
+    entities:
+      - sensor.bedroom_purifier_airquality
+      - sensor.kneplatt72_humidity_24h_change
+      - sensor.kneplatt72_pressure_24h_change
+      - sensor.kneplatt72_temperature_24h_mean
+      - sensor.kneplatt72_uv_index
+      - sensor.kneplatt72_wind_speed_24h_avg
+      - sensor.wind_gust
+      - weather.kneplatt72
+
+template:
+  - sensor:
+      - name: 'Outdoor Temperature (wx)'
+        unique_id: wx_temp_primary
+        state: "{{ states('sensor.kneplatt72_temperature_24h_mean') }}"
+        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_temperature_24h_mean','unit_of_measurement') or '°F' }}"
+        device_class: temperature
+        state_class: measurement
+        availability: "{{ not is_state('sensor.kneplatt72_temperature_24h_mean','unavailable') }}"
+
+      - name: 'Outdoor Humidity (wx)'
+        unique_id: wx_humidity_primary
+        state: "{{ states('sensor.kneplatt72_humidity_24h_change') }}"
+        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_humidity_24h_change','unit_of_measurement') or '%' }}"
+        device_class: humidity
+        state_class: measurement
+        availability: "{{ not is_state('sensor.kneplatt72_humidity_24h_change','unavailable') }}"
+
+      - name: 'Outdoor Wind Speed (wx)'
+        unique_id: wx_wind_primary
+        state: "{{ states('sensor.kneplatt72_wind_speed_24h_avg') }}"
+        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_wind_speed_24h_avg','unit_of_measurement') or 'mph' }}"
+        icon: mdi:weather-windy
+        state_class: measurement
+
+      - name: 'Outdoor Dew Point (approx)'
+        unique_id: wx_dewpoint
+        unit_of_measurement: '°F'
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set T = states('sensor.kneplatt72_temperature_24h_mean')|float(0) %}
+          {% set RH = states('sensor.kneplatt72_humidity_24h_change')|float(0) %}
+          {% set Tc = (T - 32) * 5 / 9 %}
+          {% set TdC = Tc - ((100 - RH) / 5) %}
+          {{ (TdC * 9 / 5 + 32) | round(1) }}
+
+      - name: 'Outdoor Feels Like'
+        unique_id: wx_feels_like
+        unit_of_measurement: '°F'
+        device_class: temperature
+        state_class: measurement
+        icon: mdi:thermometer-auto
+        state: >-
+          {% set T = states('sensor.kneplatt72_temperature_24h_mean')|float(0) %}
+          {% set RH = states('sensor.kneplatt72_humidity_24h_change')|float(0) %}
+          {% set V = states('sensor.kneplatt72_wind_speed_24h_avg')|float(0) %}
+          {% if T >= 80 and RH >= 40 %}
+            {% set HI = -42.379 + 2.04901523*T + 10.14333127*RH - 0.22475541*T*RH - 0.00683783*T*T - 0.05481717*RH*RH + 0.00122874*T*T*RH + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH %}
+            {{ HI | round(1) }}
+          {% elif T <= 50 and V >= 3 %}
+            {% set WC = 35.74 + 0.6215*T - 35.75*(V ** 0.16) + 0.4275*T*(V ** 0.16) %}
+            {{ WC | round(1) }}
+          {% else %}
+            {{ T | round(1) }}
+          {% endif %}
+
+automation: []
