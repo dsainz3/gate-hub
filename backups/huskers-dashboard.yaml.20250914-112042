@@ -168,7 +168,7 @@ views:
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_pregame
-            state: 'on'
+            state: "on"
         card:
           type: vertical-stack
           cards:
@@ -241,7 +241,7 @@ views:
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_live
-            state: 'on'
+            state: "on"
         card:
           type: vertical-stack
           cards:
@@ -330,7 +330,7 @@ views:
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_postgame
-            state: 'on'
+            state: "on"
         card:
           type: vertical-stack
           cards:
