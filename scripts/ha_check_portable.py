@@ -1,7 +1,7 @@
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 def run(cmd):
@@ -30,7 +30,7 @@ def main():
             "run",
             "--rm",
             "-v",
-            f"{str(repo)}:/config",
+            f"{repo!s}:/config",
             "ghcr.io/home-assistant/home-assistant:stable",
             "python",
             "-m",
