@@ -7,23 +7,21 @@ views:
     cards:
       # Quick Refresh Controls
       - type: entities
-        title: 🔄 Data Refresh Controls
+        title: '🔄 Data Refresh Controls'
         show_header_toggle: false
         entities:
-          - type: button
+          - type: call-service
             name: Refresh All Data
             icon: mdi:refresh-circle
             action_name: Update All
-            tap_action:
-              action: call-service
-              service: homeassistant.update_entity
-              data: {}
-              target:
-                entity_id:
-                  - sensor.huskers_team_name
-                  - sensor.huskers_opponent_name_2
-                  - sensor.huskers_team_score
-                  - sensor.huskers_opponent_score_2
+            service: homeassistant.update_entity
+            data: {}
+            target:
+              entity_id:
+                - sensor.huskers_team_name
+                - sensor.huskers_opponent_name_2
+                - sensor.huskers_team_score
+                - sensor.huskers_opponent_score_2
 
       # ===============================
       # PREGAME VIEW
@@ -42,7 +40,7 @@ views:
 
             # Game Info Card
             - type: entities
-              title: 🎯 Next Game Information
+              title: '🎯 Next Game Information'
               show_header_toggle: false
               entities:
                 - entity: sensor.huskers_opponent_name_2
@@ -100,7 +98,7 @@ views:
 
             # Live Scoreboard
             - type: entities
-              title: 🏆 Live Scoreboard
+              title: '🏆 Live Scoreboard'
               show_header_toggle: false
               entities:
                 - entity: sensor.huskers_game_clock_ct_2
@@ -126,7 +124,7 @@ views:
             - type: horizontal-stack
               cards:
                 - type: button
-                  name: 🎉 TOUCHDOWN!
+                  name: '🎉 TOUCHDOWN!'
                   icon: mdi:football
                   tap_action:
                     action: call-service
@@ -152,7 +150,7 @@ views:
 
             # Light Activity Graph
             - type: history-graph
-              title: 🎨 Light Show Activity
+              title: '🎨 Light Show Activity'
               hours_to_show: 2
               entities:
                 - entity: light.theater_lights
@@ -176,7 +174,7 @@ views:
 
             # Final Score
             - type: entities
-              title: 🏁 Game Result
+              title: '🏁 Game Result'
               show_header_toggle: false
               entities:
                 - entity: sensor.huskers_team_name
@@ -192,7 +190,7 @@ views:
 
             # Post-game celebration button
             - type: button
-              name: 🎊 Victory Celebration
+              name: '🎊 Victory Celebration'
               icon: mdi:trophy
               tap_action:
                 action: call-service
@@ -203,16 +201,13 @@ views:
       # ===============================
       # ALWAYS VISIBLE SECTIONS
       # ===============================
-
-      # Current Game Status (always visible)
       - type: vertical-stack
         cards:
           - type: markdown
             content: |
               ## 🏈 Current Game Status
-
           - type: entities
-            title: 📊 Live Game Info
+            title: '📊 Live Game Info'
             show_header_toggle: false
             entities:
               - entity: sensor.huskers_team_name
@@ -234,15 +229,35 @@ views:
                 name: Game Clock
                 icon: mdi:timer
 
-      # Schedule Information
+      # Schedule Information (kept inside this view)
       - type: markdown
-        title: 📅 Schedule Information
+        title: '📅 Complete Schedule'
         content: |
-          {{ states('sensor.huskers_schedule_markdown') }}
+          {{ states('sensor.huskers_schedule_combined') }}
+
+      # ESPN Live Game Data (if available)
+      - type: conditional
+        conditions:
+          - condition: template
+            value_template: "{{ states('sensor.huskers_game_status_espn') != 'No game today' }}"
+        card:
+          type: entities
+          title: '🏈 ESPN Live Game Data'
+          entities:
+            - entity: sensor.huskers_game_status_espn
+              name: Game Status
+            - entity: sensor.huskers_game_status_espn
+              type: attribute
+              attribute: home_team
+              name: Home Team
+            - entity: sensor.huskers_game_status_espn
+              type: attribute
+              attribute: away_team
+              name: Away Team
 
       # Manual Score Controls
       - type: entities
-        title: 🎮 Manual Score Control (Testing)
+        title: '🎮 Manual Score Control (Testing)'
         show_header_toggle: false
         entities:
           - entity: input_number.huskers_our_score
@@ -254,7 +269,7 @@ views:
 
       # Light Show Controls
       - type: entities
-        title: 💡 Light Show Controls
+        title: '💡 Light Show Controls'
         show_header_toggle: false
         entities:
           - entity: input_boolean.huskers_automations_enabled
@@ -272,54 +287,44 @@ views:
 
       # Manual Light Controls
       - type: entities
-        title: 🎭 Manual Light Controls
+        title: '🎭 Manual Light Controls'
         show_header_toggle: false
         entities:
-          - type: button
+          - type: call-service
             name: Start 30s Chase
             icon: mdi:play-speed
             action_name: Start
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase30_start
+          - type: call-service
             name: Start Variable Chase
             icon: mdi:play-circle
             action_name: Start
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_start
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase_speed_start
+          - type: call-service
             name: Hail Varsity Burst
             icon: mdi:music-note
             action_name: Play
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_hail_burst_8s
+          - type: call-service
             name: All Scarlet Scene
             icon: mdi:palette
             action_name: Activate
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet_base
-          - type: button
+            service: scene.turn_on
+            target:
+              entity_id: scene.huskers_seven_all_scarlet_base
+          - type: call-service
             name: Stop All Shows
             icon: mdi:stop-circle
             action_name: Stop
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.kiosk_stop_all_huskers_shows
+            service: script.turn_on
+            target:
+              entity_id: script.kiosk_stop_all_huskers_shows
 
       # Light Status Grid
       - type: grid
@@ -347,7 +352,7 @@ views:
 
       # Game Phase Status
       - type: entities
-        title: 🔧 Game Phase & Status
+        title: '🔧 Game Phase & Status'
         show_header_toggle: false
         entities:
           - entity: binary_sensor.huskers_pregame_window
@@ -372,7 +377,7 @@ views:
 
       # Automation Status
       - type: entities
-        title: 🤖 Automation Status
+        title: '🤖 Automation Status'
         show_header_toggle: false
         entities:
           - entity: input_boolean.huskers_automations_enabled
@@ -387,7 +392,7 @@ views:
 
       # Light Effect Settings
       - type: entities
-        title: ⚙️ Light Configuration
+        title: '⚙️ Light Configuration'
         show_header_toggle: false
         entities:
           - entity: input_number.huskers_hail_varsity_bpm
@@ -399,72 +404,58 @@ views:
 
       # Available Script Controls
       - type: entities
-        title: 🎮 Available Script Controls
+        title: '🎮 Available Script Controls'
         show_header_toggle: false
         entities:
-          - type: button
+          - type: call-service
             name: Start 30s Chase
             icon: mdi:play-speed
             action_name: Start
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase30_start
+          - type: call-service
             name: Stop 30s Chase
             icon: mdi:stop
             action_name: Stop
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_stop
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase30_stop
+          - type: call-service
             name: Start Variable Chase
             icon: mdi:play-circle
             action_name: Start
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_start
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase_speed_start
+          - type: call-service
             name: Stop Variable Chase
             icon: mdi:stop-circle
             action_name: Stop
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_stop
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase_speed_stop
+          - type: call-service
             name: Hail Varsity Burst
             icon: mdi:music-note
             action_name: Play
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
-          - type: button
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_hail_burst_8s
+          - type: call-service
             name: All Scarlet Scene
             icon: mdi:palette
             action_name: Activate
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet_base
-          - type: button
+            service: scene.turn_on
+            target:
+              entity_id: scene.huskers_seven_all_scarlet_base
+          - type: call-service
             name: Stop All Shows
             icon: mdi:stop-circle-outline
             action_name: Stop All
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.kiosk_stop_all_huskers_shows
+            service: script.turn_on
+            target:
+              entity_id: script.kiosk_stop_all_huskers_shows
 
       # Light Controls
       - type: grid
@@ -492,7 +483,7 @@ views:
 
       # Script Status
       - type: entities
-        title: 📊 Script Status
+        title: '📊 Script Status'
         show_header_toggle: false
         entities:
           - entity: script.huskers_chase30_start
@@ -513,7 +504,7 @@ views:
 
       # Group Status
       - type: entities
-        title: 🔗 Light Groups
+        title: '🔗 Light Groups'
         show_header_toggle: false
         entities:
           - entity: group.huskers_eight_lights
@@ -532,7 +523,7 @@ views:
 
       # Game Data Status
       - type: entities
-        title: 📡 Game Data Status
+        title: '📡 Game Data Status'
         show_header_toggle: false
         entities:
           - entity: sensor.huskers_team_name
@@ -556,7 +547,7 @@ views:
 
       # Game Phase Detection
       - type: entities
-        title: 🏈 Game Phase Detection
+        title: '🏈 Game Phase Detection'
         show_header_toggle: false
         entities:
           - entity: binary_sensor.huskers_pregame_window
@@ -571,7 +562,7 @@ views:
 
       # Manual Controls & Testing
       - type: entities
-        title: 🎮 Manual Controls & Testing
+        title: '🎮 Manual Controls & Testing'
         show_header_toggle: false
         entities:
           - entity: input_number.huskers_our_score
@@ -585,7 +576,7 @@ views:
 
       # Automation Status
       - type: entities
-        title: 🤖 Active Automations
+        title: '🤖 Active Automations'
         show_header_toggle: false
         entities:
           - entity: automation.huskers_showtime_at_t_20
@@ -614,7 +605,7 @@ views:
           ❌ Rankings data unavailable
 
           **Recommendations**:
-          🔧 Check ESP API configuration
+          🔧 Check ESPN API configuration
           🔧 Verify internet connectivity for external APIs
           🔧 Review template sensor configurations
           🔧 Consider using manual score inputs for testing

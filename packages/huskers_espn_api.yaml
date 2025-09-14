@@ -1,0 +1,239 @@
+# packages/huskers_espn_api.yaml
+# ESPN API to supplement existing CFBD data
+rest:
+  # ESPN College Football Scoreboard (live scores)
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'
+    method: GET
+    scan_interval: 300
+    timeout: 30
+    sensor:
+      - name: espn_cfb_scoreboard
+        unique_id: espn_cfb_scoreboard
+        value_template: >-
+          {{ (value_json.events | length) if (value_json is defined and value_json.events is defined) else 0 }}
+        json_attributes:
+          - events
+          - week
+          - season
+        availability: >-
+          {{ value_json is defined }}
+  # Nebraska Team Information from ESPN
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158'
+    method: GET
+    scan_interval: 3600
+    timeout: 30
+    sensor:
+      - name: espn_nebraska_team_info
+        unique_id: espn_nebraska_team_info
+        value_template: >-
+          {{ value_json.team.displayName if (value_json is defined and value_json.team is defined) else "Nebraska" }}
+        json_attributes:
+          - team
+        availability: >-
+          {{ value_json is defined }}
+  # Nebraska Schedule from ESPN
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158/schedule'
+    method: GET
+    scan_interval: 1800
+    timeout: 30
+    sensor:
+      - name: espn_nebraska_schedule
+        unique_id: espn_nebraska_schedule
+        value_template: >-
+          {{ (value_json.events | length) if (value_json is defined and value_json.events is defined) else 0 }}
+        json_attributes:
+          - events
+          - team
+          - requestedSeason
+        availability: >-
+          {{ value_json is defined }}
+  # College Football Rankings from ESPN
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings'
+    method: GET
+    scan_interval: 3600
+    timeout: 30
+    sensor:
+      - name: espn_cfb_rankings
+        unique_id: espn_cfb_rankings
+        value_template: >-
+          {{ (value_json.rankings | length) if (value_json is defined and value_json.rankings is defined) else 0 }}
+        json_attributes:
+          - rankings
+        availability: >-
+          {{ value_json is defined }}
+  # Big Ten Conference Teams
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?group=4'
+    method: GET
+    scan_interval: 1800
+    timeout: 30
+    sensor:
+      - name: espn_big_ten_teams
+        unique_id: espn_big_ten_teams
+        value_template: >-
+          {% if value_json is defined and value_json.sports is defined and value_json.sports|length > 0
+                and value_json.sports[0].leagues is defined and value_json.sports[0].leagues|length > 0
+                and value_json.sports[0].leagues[0].teams is defined %}
+            {{ value_json.sports[0].leagues[0].teams | length }}
+          {% else %}0{% endif %}
+        json_attributes:
+          - sports
+        availability: >-
+          {{ value_json is defined }}
+template:
+  - sensor:
+      # Combined Schedule (ESPN + existing data)
+      - name: huskers_schedule_combined
+        unique_id: huskers_schedule_combined
+        state: >-
+          {% set espn_events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+          {% set existing_schedule = states('sensor.huskers_schedule_markdown') %}
+          {% if espn_events and espn_events|length > 0 %}
+            ## Nebraska Schedule (2025) - ESPN Data
+            {% for game in espn_events %}
+              {% set comp = (game.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
+              {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
+              {% set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+              {% set loc = 'vs' if us_home else 'at' %}
+              {% set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if done %}
+                {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+                {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h.score if h and h.score is defined else '?' }}-{{ a.score if a and a.score is defined else '?' }}  # yamllint disable-line rule:line-length
+              {% else %}
+            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
+              {% endif %}
+            {% endfor %}
+          {% elif existing_schedule != "**Schedule unavailable.**" %}
+            {{ existing_schedule }}
+          {% else %}
+            **Schedule data unavailable from both sources.**
+          {% endif %}
+      # Current Game Status from ESPN
+      - name: huskers_game_status_espn
+        unique_id: huskers_game_status_espn
+        state: >-
+          {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+          {% set game = namespace(ev=None) %}
+          {% for e in events %}
+            {% set comp = (e.competitions | default([])) | first %}
+            {% if comp and comp.competitors is defined %}
+              {% set has_huskers = comp.competitors | selectattr('team.id', 'equalto', '158') | list | count > 0 %}
+              {% if has_huskers %}
+                {% set game.ev = e %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if game.ev %}
+            {{ game.ev.status.type.description if (game.ev.status is defined and game.ev.status.type is defined) else 'Scheduled' }}
+          {% else %}No game today{% endif %}
+        attributes:
+          home_team: >-
+            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {{ home.team.displayName if home and home.team is defined else '' }}
+            {% endif %}
+          away_team: >-
+            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+              {{ away.team.displayName if away and away.team is defined else '' }}
+            {% endif %}
+          home_score: >-
+            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {{ (home.score | int(0)) if home is defined and home.score is defined else 0 }}
+            {% else %}0{% endif %}
+          away_score: >-
+            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+              {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
+            {% else %}0{% endif %}
+      # Nebraska Current Rankings
+      - name: huskers_ap_ranking_espn
+        unique_id: huskers_ap_ranking_espn
+        state: >-
+          {% set rankings = state_attr('sensor.espn_cfb_rankings', 'rankings') or [] %}
+          {% set rank = 'Unranked' %}
+          {% for poll in rankings %}
+            {% if poll.name == 'AP Top 25' and poll.ranks is defined %}
+              {% for team in poll.ranks %}
+                {% if team.team is defined and team.team.id == '158' %}
+                  {% set rank = '#' ~ team.current %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+          {{ rank }}
+      # Big Ten Standings from ESPN
+      - name: big_ten_standings_espn
+        unique_id: big_ten_standings_espn
+        state: >-
+          {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
+          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0
+                and data[0].leagues[0].teams is defined %}
+            {% set teams = data[0].leagues[0].teams %}
+            ## Big Ten Standings (2025) - ESPN Data
+            | Rank | Team | Record |
+            |------|------|--------|
+            {%- for t in teams | sort(attribute='team.standingSummary', reverse=true) -%}
+            | {{ loop.index }} | {{ t.team.displayName }} | {{ t.team.standingSummary or 'N/A' }} |
+            {%- endfor -%}
+          {% else %}
+            Big Ten standings unavailable from ESPN
+          {% endif %}
+  - binary_sensor:
+      # ESPN-based game phase detection
+      - name: huskers_is_pregame_espn
+        unique_id: huskers_is_pregame_espn
+        state: >-
+          {% set status = states('sensor.huskers_game_status_espn') %}
+          {{ status in ['Scheduled', 'Pre-Game', 'Postponed', 'Delayed'] }}
+      - name: huskers_is_live_espn
+        unique_id: huskers_is_live_espn
+        state: >-
+          {% set status = states('sensor.huskers_game_status_espn') %}
+          {{ status in ['In Progress', 'Halftime', '1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter', 'Overtime', 'End Period'] }}
+      - name: huskers_is_postgame_espn
+        unique_id: huskers_is_postgame_espn
+        state: >-
+          {% set status = states('sensor.huskers_game_status_espn') %}
+          {{ status in ['Final', 'Final/OT'] }}

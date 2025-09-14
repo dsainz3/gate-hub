@@ -198,7 +198,7 @@ template:
               {% if done %}
                 {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
                 {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h.score if h and h.score is defined else '?' }}-{{ a.score if a and a.score is defined else '?' }}
+            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h.score if h and h.score is defined else '?' }}-{{ a.score if a and a.score is defined else '?' }}  # yamllint disable-line rule:line-length
               {% else %}
             - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
               {% endif %}
@@ -372,7 +372,7 @@ template:
             {% if next.g %}
               {% set comp = next.g.competitions | first %}
               {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
-              {% set opponent = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+              {% set opponent = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}  # yamllint disable-line rule:line-length
               {{ opponent }}
             {% else %}''{% endif %}
           kickoff_time: >-
