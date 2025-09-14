@@ -61,3 +61,6 @@ backup/
 backup/
 
 .HA_VERSION
+
+# Govee integration
+govee_learning.yaml
