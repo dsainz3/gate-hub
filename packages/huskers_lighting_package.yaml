@@ -1,6 +1,7 @@
 # ===============================
 # HUSKERS LIGHTING — PACKAGE
 # Eight-light Scarlet↔Cream chase (30s + variable speed) + Hail burst
+# + Brightness, Master toggle, Reverse direction, Step-once
 # ===============================
 
 # Helpers
@@ -15,7 +16,7 @@ input_number:
     unit_of_measurement: s
     initial: 30
 
-  # New: BPM control for Hail Varsity burst (optional; script defaults to 137 BPM)
+  # BPM control for Hail Varsity burst (script defaults to 137 if unused)
   huskers_hail_bpm:
     name: 'Hail Varsity BPM'
     icon: mdi:metronome
@@ -25,6 +26,30 @@ input_number:
     mode: slider
     unit_of_measurement: bpm
     initial: 137
+
+  # NEW: Global brightness used by all effects
+  huskers_global_brightness:
+    name: 'Huskers Brightness'
+    icon: mdi:brightness-6
+    min: 10
+    max: 255
+    step: 5
+    unit_of_measurement: ''
+    mode: slider
+    initial: 255
+
+input_boolean:
+  # NEW: Master enable/disable for all effects (loops/bursts)
+  huskers_effects_enabled:
+    name: Huskers Effects Enabled
+    icon: mdi:power
+    initial: on
+
+  # NEW: Reverse the chase direction (right→left)
+  huskers_reverse_direction:
+    name: Reverse Chase Direction
+    icon: mdi:swap-horizontal-bold
+    initial: off
 
 # Light group (for convenience)
 group:
@@ -48,35 +73,35 @@ scene:
       light.light_theater_left:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.light_theater_right:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.light_front_left:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.light_front_right:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.light_garage_left:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.lights_garage_center:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.light_garage_right:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
       light.spare_light:
         state: 'on'
         hs_color: [355, 90]
-        brightness: 255
+        brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
 
 script:
   # ===========================
@@ -86,6 +111,10 @@ script:
     alias: 'Huskers: Start 30s Cream Chase'
     mode: restart
     sequence:
+      - condition: state
+        entity_id: input_boolean.huskers_effects_enabled
+        state: 'on'
+
       - service: script.turn_off
         target: { entity_id: script.huskers_chase_speed_loop }
         continue_on_error: true
@@ -116,7 +145,7 @@ script:
             - light.spare_light
         data:
           hs_color: [355, 90]
-          brightness: 255
+          brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
           transition: 0.1
 
       - service: script.turn_on
@@ -128,7 +157,7 @@ script:
     mode: restart
     sequence:
       - variables:
-          lights:
+          lights_base:
             [
               'light.light_theater_left',
               'light.light_theater_right',
@@ -139,13 +168,17 @@ script:
               'light.light_garage_right',
               'light.spare_light',
             ]
+      - variables:
+          lights: >-
+            {% set base = lights_base %}
+            {{ base | reverse if is_state('input_boolean.huskers_reverse_direction','on') else base }}
           step_ms: 3750 # 30s / 8 = 3.75s per step
           xfade_ms: 300 # crossfade time counted inside step
           hold_ms: '{{ (step_ms - xfade_ms) | int }}'
       - repeat:
           while:
             - condition: template
-              value_template: '{{ true }}'
+              value_template: "{{ is_state('input_boolean.huskers_effects_enabled','on') }}"
           sequence:
             - repeat:
                 for_each: '{{ lights }}'
@@ -158,13 +191,13 @@ script:
                     target: { entity_id: '{{ previous }}' }
                     data:
                       hs_color: [355, 90]
-                      brightness: 255
+                      brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                       transition: 0.3
                   - service: light.turn_on
                     target: { entity_id: '{{ current }}' }
                     data:
                       hs_color: [45, 20]
-                      brightness: 255
+                      brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                       transition: 0.3
                   - delay:
                       milliseconds: '{{ hold_ms | int }}'
@@ -188,6 +221,10 @@ script:
     alias: 'Huskers: Start Cream Chase (Variable-Speed)'
     mode: restart
     sequence:
+      - condition: state
+        entity_id: input_boolean.huskers_effects_enabled
+        state: 'on'
+
       - service: script.turn_off
         target: { entity_id: script.huskers_chase30_loop }
         continue_on_error: true
@@ -218,7 +255,7 @@ script:
             - light.spare_light
         data:
           hs_color: [355, 90]
-          brightness: 255
+          brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
           transition: 0.1
 
       - service: script.turn_on
@@ -230,7 +267,7 @@ script:
     mode: restart
     sequence:
       - variables:
-          lights:
+          lights_base:
             [
               'light.light_theater_left',
               'light.light_theater_right',
@@ -244,9 +281,12 @@ script:
       - repeat:
           while:
             - condition: template
-              value_template: '{{ true }}'
+              value_template: "{{ is_state('input_boolean.huskers_effects_enabled','on') }}"
           sequence:
             - variables:
+                lights: >-
+                  {% set base = lights_base %}
+                  {{ base | reverse if is_state('input_boolean.huskers_reverse_direction','on') else base }}
                 cycle_secs: "{{ states('input_number.huskers_chase_cycle_seconds') | float(30) }}"
                 step_ms: '{{ (cycle_secs * 1000 / (lights | count)) | int }}'
                 xfade_ms: 300
@@ -262,13 +302,13 @@ script:
                     target: { entity_id: '{{ previous }}' }
                     data:
                       hs_color: [355, 90]
-                      brightness: 255
+                      brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                       transition: 0.3
                   - service: light.turn_on
                     target: { entity_id: '{{ current }}' }
                     data:
                       hs_color: [45, 20]
-                      brightness: 255
+                      brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                       transition: 0.3
                   - delay:
                       milliseconds: '{{ hold_ms | int }}'
@@ -286,17 +326,20 @@ script:
         continue_on_error: true
 
   # ===========================
-  # NEW — Hail Varsity BPM-synced burst (8s)
+  # Hail Varsity BPM-synced burst (8s)
   # ===========================
   huskers_hail_burst_8s:
     alias: 'Huskers: Hail Varsity Burst (8s, BPM-synced)'
     mode: restart
     fields:
       bpm:
-        description: 'Optional BPM override (defaults to input_number.huskers_hail_bpm or 137).'
+        description: 'Optional BPM override (defaults to helper or 137).'
         example: 137
     sequence:
-      # Stop chases so they don’t fight the burst
+      - condition: state
+        entity_id: input_boolean.huskers_effects_enabled
+        state: 'on'
+
       - service: script.turn_off
         target:
           entity_id:
@@ -304,7 +347,6 @@ script:
             - script.huskers_chase_speed_loop
         continue_on_error: true
 
-      # Snapshot everything for clean restore
       - service: scene.create
         data:
           scene_id: huskers_before_hail_burst
@@ -318,7 +360,6 @@ script:
             - light.light_garage_right
             - light.spare_light
 
-      # Base Scarlet (fast)
       - service: light.turn_on
         target:
           entity_id:
@@ -331,11 +372,10 @@ script:
             - light.light_garage_right
             - light.spare_light
         data:
-          hs_color: [355, 90] # Scarlet
-          brightness: 255
+          hs_color: [355, 90]
+          brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
           transition: 0.05
 
-      # Beat math + burst loop (8 seconds)
       - variables:
           lights:
             [
@@ -358,7 +398,6 @@ script:
       - repeat:
           count: '{{ beats_total }}'
           sequence:
-            # Choose 2 (sometimes 3) unique lights to pop Cream on this beat
             - variables:
                 a: '{{ lights | random }}'
                 remaining1: "{{ (lights | reject('equalto', a) | list) }}"
@@ -371,32 +410,72 @@ script:
                   {% if c is not none %}{% set out = out + [c] %}{% endif %}
                   {{ out }}
 
-            # On-beat: Cream burst
             - service: light.turn_on
               target:
                 entity_id: '{{ burst_targets }}'
               data:
-                hs_color: [45, 20] # Cream
-                brightness: 255
+                hs_color: [45, 20]
+                brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                 transition: 0.05
 
-            # Hold half-beat, then fall back to Scarlet
             - delay:
                 milliseconds: '{{ half_ms }}'
             - service: light.turn_on
               target:
                 entity_id: '{{ burst_targets }}'
               data:
-                hs_color: [355, 90] # Scarlet
-                brightness: 255
+                hs_color: [355, 90]
+                brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
                 transition: 0.08
-
-            # Finish the beat
             - delay:
                 milliseconds: '{{ half_ms }}'
 
-      # Restore whatever was active before the burst
       - service: scene.turn_on
         target:
           entity_id: scene.huskers_before_hail_burst
         continue_on_error: true
+
+  # ===========================
+  # NEW — One-shot step (debug/testing)
+  # ===========================
+  huskers_chase_step_once:
+    alias: 'Huskers: Step Once'
+    mode: restart
+    sequence:
+      - condition: state
+        entity_id: input_boolean.huskers_effects_enabled
+        state: 'on'
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+      - service: light.turn_on
+        target: { entity_id: '{{ lights | random }}' }
+        data:
+          hs_color: [45, 20]
+          brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
+          transition: 0.05
+      - delay: '00:00:00.25'
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+        data:
+          hs_color: [355, 90]
+          brightness: "{{ states('input_number.huskers_global_brightness')|int(255) }}"
+          transition: 0.08

@@ -84,6 +84,6 @@ lovelace:
     huskers-dashboard:              # example: your Theater dashboard
       mode: yaml
       filename: dashboards/huskers-dashboard.yaml
-      title: Theater
-      icon: mdi:theater
+      title: Huskers Package
+      icon: mdi:football
       show_in_sidebar: true
