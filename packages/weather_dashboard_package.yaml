@@ -58,22 +58,20 @@ template:
         state_class: measurement
         availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
 
-      # Pressure: hPa -> inHg (improved conversion and error handling)
+      # Pressure: Already in inHg from weather.kneplatt72 - NO CONVERSION NEEDED
       - name: 'Outdoor Pressure (wx)'
         unique_id: wx_pressure
         state: >-
           {% set p = state_attr('weather.kneplatt72', 'pressure') %}
-          {% if p is not none and p | float(0) > 0 %}
-            {{ (p | float * 0.0295299830714) | round(2) }}
+          {% if p is not none %}
+            {{ p | float | round(2) }}
           {% else %}
             unavailable
           {% endif %}
         unit_of_measurement: 'inHg'
         icon: mdi:gauge
         state_class: measurement
-        availability: >-
-          {{ state_attr('weather.kneplatt72', 'pressure') is not none and
-             state_attr('weather.kneplatt72', 'pressure') | float(0) > 0 }}
+        availability: "{{ state_attr('weather.kneplatt72', 'pressure') is not none }}"
 
       # Visibility: km -> mi
       - name: 'Outdoor Visibility (wx)'
