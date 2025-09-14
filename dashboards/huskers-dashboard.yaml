@@ -1,218 +1,377 @@
-- title: Super Fan
-  path: superfan
-  icon: mdi:football-helmet
-  badges: []
-  cards:
-    # Always-on header + quick controls
-    - type: markdown
-      content: |
-        # Huskers Super Fan
-        _Always-on controls + live game panels_
+title: Theater Control Dashboard
+views:
+  - title: Theater
+    path: theater
+    icon: mdi:theater
+    badges: []
+    cards:
+      - type: markdown
+        content: |-
+          # Theater Control Dashboard
+          **Cream Chase – 30s & Variable Speed + Hail Burst (8s)**
 
-    - type: horizontal-stack
-      cards:
-        - type: button
-          name: START 30s Chase
-          icon: mdi:play-speed
-          tap_action:
-            action: call-service
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase30_start
-        - type: button
-          name: START (Variable)
-          icon: mdi:play-circle
-          tap_action:
-            action: call-service
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase_speed_start
-        - type: button
-          name: Hail Burst (8s)
-          icon: mdi:music-note
-          tap_action:
-            action: call-service
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_hail_burst_8s
-        - type: button
-          name: STOP & Restore
-          icon: mdi:stop-circle
-          tap_action:
-            action: call-service
-            service: script.turn_on
-            target:
-              entity_id:
-                - script.huskers_chase30_stop
-                - script.huskers_chase_speed_stop
-        - type: button
-          name: All-Scarlet Scene
-          icon: mdi:palette
-          tap_action:
-            action: call-service
-            service: scene.turn_on
-            target:
-              entity_id: scene.huskers_seven_all_scarlet
-
-    - type: entities
-      title: Game Status & Toggles
-      show_header_toggle: false
-      entities:
-        - entity: input_boolean.huskers_game_mode
-          name: Game Mode (enable automations)
-        - entity: input_boolean.huskers_automations_enabled
-          name: Automations Enabled
-        - entity: binary_sensor.huskers_is_pregame
-          name: Pregame?
-        - entity: binary_sensor.huskers_is_live
-          name: Live?
-        - entity: binary_sensor.huskers_is_postgame
-          name: Postgame?
-        - entity: sensor.huskers_opponent
-          name: Opponent
-        - entity: sensor.huskers_kickoff_local
-          name: Kickoff (Local)
-        - entity: sensor.huskers_kickoff_in_effective
-          name: Kickoff In (min)
-
-    # =========================
-    # PREGAME
-    # =========================
-    - type: conditional
-      conditions:
-        - entity: binary_sensor.huskers_is_pregame
-          state: 'on'
-      card:
-        type: vertical-stack
+      # Quick actions
+      - type: horizontal-stack
         cards:
-          - type: markdown
-            content: |
-              # Pregame
-              **Opponent, kickoff (America/Chicago), venue, TV/Radio, and line**
-          - type: entities
-            title: Game Info
-            show_header_toggle: false
-            entities:
-              - entity: sensor.huskers_opponent
-                name: Opponent
-              - entity: sensor.huskers_kickoff_local
-                name: Kickoff (Local)
-              - entity: sensor.huskers_venue
-                name: Venue
-              - entity: sensor.huskers_tv_radio
-                name: TV/Radio
-              - entity: sensor.huskers_line
-                name: Odds / Line
+          - type: button
+            name: START 30s Chase
+            icon: mdi:play-speed
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_start
+          - type: button
+            name: START (Variable-Speed)
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_start
+          - type: button
+            name: Hail Burst (8s)
+            icon: mdi:music-note
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_hail_burst_8s
+          - type: button
+            name: Step Once
+            icon: mdi:arrow-right-bold
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_step_once
+          - type: button
+            name: STOP & Restore
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id:
+                  - script.huskers_chase30_stop
+                  - script.huskers_chase_speed_stop
+          - type: button
+            name: All-Scarlet Scene
+            icon: mdi:palette
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              target:
+                entity_id: scene.huskers_seven_all_scarlet
 
-    # =========================
-    # LIVE GAME
-    # =========================
-    - type: conditional
-      conditions:
-        - entity: binary_sensor.huskers_is_live
-          state: 'on'
-      card:
-        type: vertical-stack
-        cards:
-          - type: markdown
-            content: |
-              # Live Game
-              **Score, quarter/clock, possession, down & distance**
-          - type: entities
-            title: Scoreboard
-            show_header_toggle: false
-            entities:
-              - entity: sensor.huskers_score_home
-                name: Nebraska (Home)
-              - entity: sensor.huskers_score_away
-                name: Opponent (Away)
-              - entity: sensor.huskers_quarter
-                name: Quarter
-              - entity: sensor.huskers_clock
-                name: Clock
-              - entity: sensor.huskers_possession
-                name: Possession
-              - entity: sensor.huskers_down_distance
-                name: Down & Distance
-              - entity: sensor.huskers_last_scoring_play
-                name: Last Scoring Play
-          - type: history-graph
-            title: Light Activity (Last 2 Hours)
-            hours_to_show: 2
-            entities:
-              - entity: light.light_theater_left
-              - entity: light.light_theater_right
-              - entity: light.light_front_left
-              - entity: light.light_front_right
-              - entity: light.light_garage_left
-              - entity: light.lights_garage_center
-              - entity: light.light_garage_right
-              - entity: light.spare_light
+      # Controls
+      - type: entities
+        title: Chase & Burst Controls
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.huskers_effects_enabled
+            name: Effects Enabled
+          - entity: input_boolean.huskers_reverse_direction
+            name: Reverse Direction
+          - entity: input_number.huskers_global_brightness
+            name: Brightness
+          - entity: input_number.huskers_chase_cycle_seconds
+            name: Chase Cycle Length (s)
+          - entity: input_number.huskers_hail_bpm
+            name: Hail Varsity Tempo (BPM)
 
-    # =========================
-    # POSTGAME
-    # =========================
-    - type: conditional
-      conditions:
-        - entity: binary_sensor.huskers_is_postgame
-          state: 'on'
-      card:
-        type: vertical-stack
+      # Lights overview
+      - type: grid
+        square: false
+        columns: 4
         cards:
-          - type: markdown
-            content: |
-              # Final
-              **Scoreline and summary**
-          - type: entities
-            title: Result
-            show_header_toggle: false
-            entities:
-              - entity: sensor.huskers_final_scoreline
-                name: Final Score
-              - entity: sensor.huskers_last_scoring_play
-                name: Last Scoring Play
-          - type: history-graph
-            title: Light Activity (Last 2 Hours)
-            hours_to_show: 2
-            entities:
-              - entity: light.light_theater_left
-              - entity: light.light_theater_right
-              - entity: light.light_front_left
-              - entity: light.light_front_right
-              - entity: light.light_garage_left
-              - entity: light.lights_garage_center
-              - entity: light.light_garage_right
-              - entity: light.spare_light
+          - type: light
+            entity: light.light_theater_left
+            name: Theater Left
+          - type: light
+            entity: light.light_theater_right
+            name: Theater Right
+          - type: light
+            entity: light.light_front_left
+            name: Front Left
+          - type: light
+            entity: light.light_front_right
+            name: Front Right
+          - type: light
+            entity: light.light_garage_left
+            name: Garage Left
+          - type: light
+            entity: light.lights_garage_center
+            name: Garage Center
+          - type: light
+            entity: light.light_garage_right
+            name: Garage Right
+          - type: light
+            entity: light.spare_light
+            name: Spare Light
 
-    # =========================
-    # FALLBACK: no game active
-    # =========================
-    - type: conditional
-      conditions:
-        - entity: binary_sensor.huskers_is_pregame
-          state: 'off'
-        - entity: binary_sensor.huskers_is_live
-          state: 'off'
-        - entity: binary_sensor.huskers_is_postgame
-          state: 'off'
-      card:
-        type: vertical-stack
+      # Script status
+      - type: entities
+        title: Script Status & Debug
+        show_header_toggle: false
+        entities:
+          - entity: script.huskers_chase30_start
+            name: Start (30s)
+            secondary_info: last-changed
+          - entity: script.huskers_chase30_loop
+            name: Loop 30s (internal)
+            secondary_info: last-changed
+          - entity: script.huskers_chase30_stop
+            name: Stop 30s & Restore
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_start
+            name: Start (variable-speed)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_loop
+            name: Loop variable (internal)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_stop
+            name: Stop variable & Restore
+            secondary_info: last-changed
+          - entity: script.huskers_hail_burst_8s
+            name: Hail Burst (8s)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_step_once
+            name: Step Once
+            secondary_info: last-changed
+          - entity: scene.huskers_seven_all_scarlet
+            name: All-Scarlet Scene
+            secondary_info: last-changed
+
+      # Activity
+      - type: history-graph
+        title: Light Activity (Last 2 Hours)
+        hours_to_show: 2
+        entities:
+          - entity: light.light_theater_left
+          - entity: light.light_theater_right
+          - entity: light.light_front_left
+          - entity: light.light_front_right
+          - entity: light.light_garage_left
+          - entity: light.lights_garage_center
+          - entity: light.light_garage_right
+          - entity: light.spare_light
+
+  - title: Super Fan
+    path: superfan
+    icon: mdi:football-helmet
+    badges: []
+    cards:
+      # Always-on header + quick controls
+      - type: markdown
+        content: |
+          # Huskers Super Fan
+          _Always-on controls + live game panels_
+
+      - type: horizontal-stack
         cards:
-          - type: markdown
-            content: |
-              ## No game active
-              When Team Tracker updates to a scheduled/live game, the sections above will populate.
-          - type: entities
-            title: Next Game (if available)
-            show_header_toggle: false
-            entities:
-              - entity: sensor.huskers_opponent
-                name: Opponent
-              - entity: sensor.huskers_kickoff_local
-                name: Kickoff (Local)
-              - entity: sensor.huskers_venue
-                name: Venue
-              - entity: sensor.huskers_tv_radio
-                name: TV/Radio
-              - entity: sensor.huskers_line
-                name: Odds / Line
+          - type: button
+            name: START 30s Chase
+            icon: mdi:play-speed
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_start
+          - type: button
+            name: START (Variable)
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_start
+          - type: button
+            name: Hail Burst (8s)
+            icon: mdi:music-note
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_hail_burst_8s
+          - type: button
+            name: STOP & Restore
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id:
+                  - script.huskers_chase30_stop
+                  - script.huskers_chase_speed_stop
+          - type: button
+            name: All-Scarlet Scene
+            icon: mdi:palette
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              target:
+                entity_id: scene.huskers_seven_all_scarlet
+
+      - type: entities
+        title: Game Status & Toggles
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.huskers_game_mode
+            name: Game Mode (enable automations)
+          - entity: input_boolean.huskers_automations_enabled
+            name: Automations Enabled
+          - entity: binary_sensor.huskers_is_pregame
+            name: Pregame?
+          - entity: binary_sensor.huskers_is_live
+            name: Live?
+          - entity: binary_sensor.huskers_is_postgame
+            name: Postgame?
+          - entity: sensor.huskers_opponent
+            name: Opponent
+          - entity: sensor.huskers_kickoff_local
+            name: Kickoff (Local)
+          - entity: sensor.huskers_kickoff_in_effective
+            name: Kickoff In (min)
+
+      # =========================
+      # PREGAME
+      # =========================
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.huskers_is_pregame
+            state: 'on'
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                # Pregame
+                **Opponent, kickoff (America/Chicago), venue, TV/Radio, and line**
+            - type: entities
+              title: Game Info
+              show_header_toggle: false
+              entities:
+                - entity: sensor.huskers_opponent
+                  name: Opponent
+                - entity: sensor.huskers_kickoff_local
+                  name: Kickoff (Local)
+                - entity: sensor.huskers_venue
+                  name: Venue
+                - entity: sensor.huskers_tv_radio
+                  name: TV/Radio
+                - entity: sensor.huskers_line
+                  name: Odds / Line
+
+      # =========================
+      # LIVE GAME
+      # =========================
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.huskers_is_live
+            state: 'on'
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                # Live Game
+                **Score, quarter/clock, possession, down & distance**
+            - type: entities
+              title: Scoreboard
+              show_header_toggle: false
+              entities:
+                - entity: sensor.huskers_score_home
+                  name: Nebraska (Home)
+                - entity: sensor.huskers_score_away
+                  name: Opponent (Away)
+                - entity: sensor.huskers_quarter
+                  name: Quarter
+                - entity: sensor.huskers_clock
+                  name: Clock
+                - entity: sensor.huskers_possession
+                  name: Possession
+                - entity: sensor.huskers_down_distance
+                  name: Down & Distance
+                - entity: sensor.huskers_last_scoring_play
+                  name: Last Scoring Play
+            - type: history-graph
+              title: Light Activity (Last 2 Hours)
+              hours_to_show: 2
+              entities:
+                - entity: light.light_theater_left
+                - entity: light.light_theater_right
+                - entity: light.light_front_left
+                - entity: light.light_front_right
+                - entity: light.light_garage_left
+                - entity: light.lights_garage_center
+                - entity: light.light_garage_right
+                - entity: light.spare_light
+
+      # =========================
+      # POSTGAME
+      # =========================
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.huskers_is_postgame
+            state: 'on'
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                # Final
+                **Scoreline and summary**
+            - type: entities
+              title: Result
+              show_header_toggle: false
+              entities:
+                - entity: sensor.huskers_final_scoreline
+                  name: Final Score
+                - entity: sensor.huskers_last_scoring_play
+                  name: Last Scoring Play
+            - type: history-graph
+              title: Light Activity (Last 2 Hours)
+              hours_to_show: 2
+              entities:
+                - entity: light.light_theater_left
+                - entity: light.light_theater_right
+                - entity: light.light_front_left
+                - entity: light.light_front_right
+                - entity: light.light_garage_left
+                - entity: light.lights_garage_center
+                - entity: light.light_garage_right
+                - entity: light.spare_light
+
+      # =========================
+      # FALLBACK: no game active
+      # =========================
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.huskers_is_pregame
+            state: 'off'
+          - entity: binary_sensor.huskers_is_live
+            state: 'off'
+          - entity: binary_sensor.huskers_is_postgame
+            state: 'off'
+        card:
+          type: vertical-stack
+          cards:
+            - type: markdown
+              content: |
+                ## No game active
+                When Team Tracker updates to a scheduled/live game, the sections above will populate.
+            - type: entities
+              title: Next Game (if available)
+              show_header_toggle: false
+              entities:
+                - entity: sensor.huskers_opponent
+                  name: Opponent
+                - entity: sensor.huskers_kickoff_local
+                  name: Kickoff (Local)
+                - entity: sensor.huskers_venue
+                  name: Venue
+                - entity: sensor.huskers_tv_radio
+                  name: TV/Radio
+                - entity: sensor.huskers_line
+                  name: Odds / Line
