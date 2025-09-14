@@ -3,6 +3,7 @@ views:
   - title: Theater
     path: theater
     icon: mdi:theater
+    badges: []
     cards:
       - type: markdown
         content: |-
@@ -37,13 +38,20 @@ views:
               target:
                 entity_id: script.huskers_hail_burst_8s
           - type: button
+            name: Step Once
+            icon: mdi:arrow-right-bold
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_step_once
+          - type: button
             name: STOP & Restore
             icon: mdi:stop-circle
             tap_action:
               action: call-service
               service: script.turn_on
               target:
-                # Stop BOTH loops to guarantee a clean stop
                 entity_id:
                   - script.huskers_chase30_stop
                   - script.huskers_chase_speed_stop
@@ -61,8 +69,14 @@ views:
         title: Chase & Burst Controls
         show_header_toggle: false
         entities:
+          - entity: input_boolean.huskers_effects_enabled
+            name: Effects Enabled
+          - entity: input_boolean.huskers_reverse_direction
+            name: Reverse Direction
+          - entity: input_number.huskers_global_brightness
+            name: Brightness
           - entity: input_number.huskers_chase_cycle_seconds
-            name: Chase Cycle Length (seconds)
+            name: Chase Cycle Length (s)
           - entity: input_number.huskers_hail_bpm
             name: Hail Varsity Tempo (BPM)
 
@@ -122,14 +136,11 @@ views:
           - entity: script.huskers_hail_burst_8s
             name: Hail Burst (8s)
             secondary_info: last-changed
+          - entity: script.huskers_chase_step_once
+            name: Step Once
+            secondary_info: last-changed
           - entity: scene.huskers_seven_all_scarlet
             name: All-Scarlet Scene
-            secondary_info: last-changed
-          - entity: input_number.huskers_chase_cycle_seconds
-            name: Cycle Length (s)
-            secondary_info: last-changed
-          - entity: input_number.huskers_hail_bpm
-            name: Hail BPM
             secondary_info: last-changed
 
       # Activity
