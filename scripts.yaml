@@ -237,3 +237,113 @@ huskers_chase_stop:
       target:
         entity_id: scene.huskers_before_chase
       continue_on_error: true
+
+# ===============================
+# 30-second Cream Chase (no carry-over)
+# Order: light.light_theater_left, light.light_theater_right, light.light_front_left, light.light_front_right, light.light_garage_left, light.lights_garage_center, light.light_garage_right
+# Colors: Scarlet hs_color [355,90], Cream hs_color [45,20]
+# ===============================
+
+huskers_chase30_start:
+  alias: 'Huskers: Start 30s Cream Chase'
+  description: >
+    Sets all target lights to Scarlet, snapshots state, and starts a 30-second
+    Cream chase moving through Scarlet in the specified order.
+  mode: restart
+  sequence:
+    - service: scene.create
+      data:
+        scene_id: huskers_before_chase30
+        snapshot_entities:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
+
+    # Base Scarlet first
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.lights_garage_center
+          - light.light_garage_right
+      data:
+        hs_color: [355, 90]
+        brightness: 255
+        transition: 0.2
+
+    # Launch the loop (runs until stopped)
+    - service: script.turn_on
+      target:
+        entity_id: script.huskers_chase30_loop
+
+huskers_chase30_loop:
+  alias: 'Huskers: 30s Cream Chase LOOP'
+  description: >
+    Infinite loop: Cream moves through Scarlet across the 7 lights.
+    Each step target ≈ 4286ms; this includes ~300ms crossfade + ~3986ms hold.
+    Stop by calling script.huskers_chase30_stop or by turning off this script.
+  mode: restart
+  sequence:
+    - variables:
+        lights:
+          [
+            'light.light_theater_left',
+            'light.light_theater_right',
+            'light.light_front_left',
+            'light.light_front_right',
+            'light.light_garage_left',
+            'light.lights_garage_center',
+            'light.light_garage_right',
+          ]
+    - repeat:
+        while:
+          - condition: template
+            value_template: '{{ true }}'
+        sequence:
+          - repeat:
+              for_each: '{{ lights }}'
+              sequence:
+                - variables:
+                    current: '{{ repeat.item }}'
+                    prev_index: '{{ (repeat.index - 2) % (lights|count) }}'
+                    previous: '{{ lights[prev_index] }}'
+                # Fade previous to Scarlet, current to Cream (smooth crossfade)
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ previous }}'
+                  data:
+                    hs_color: [355, 90]
+                    brightness: 255
+                    transition: 0.3
+                - service: light.turn_on
+                  target:
+                    entity_id: '{{ current }}'
+                  data:
+                    hs_color: [45, 20]
+                    brightness: 255
+                    transition: 0.3
+                - delay:
+                    milliseconds: 3986
+
+huskers_chase30_stop:
+  alias: 'Huskers: Stop 30s Cream Chase (restore)'
+  description: 'Stops the running chase loop and restores the snapshot, if present.'
+  mode: single
+  sequence:
+    - service: script.turn_off
+      target:
+        entity_id: script.huskers_chase30_loop
+    - delay:
+        milliseconds: 500
+    - service: scene.turn_on
+      target:
+        entity_id: scene.huskers_before_chase30
+      continue_on_error: true

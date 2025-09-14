@@ -206,3 +206,14 @@
       state: 'on'
       brightness: 255
       hs_color: [355, 90]
+- id: huskers_seven_all_scarlet
+  name: Huskers Seven All Scarlet (Base)
+  icon: mdi:palette
+  entities:
+    light.light_theater_left: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.light_theater_right: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.light_front_left: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.light_front_right: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.light_garage_left: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.lights_garage_center: { state: 'on', brightness: 255, hs_color: [355, 90] }
+    light.light_garage_right: { state: 'on', brightness: 255, hs_color: [355, 90] }
