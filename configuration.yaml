@@ -1,4 +1,5 @@
 homeassistant:
+  packages: !include_dir_named packages
   name: Our Home
   latitude: !secret home_latitude
   longitude: !secret home_longitude
@@ -44,8 +45,38 @@ recorder:
       - light.lights_garage_center
       - light.light_garage_right
       - light.permanent_outdoor_lights
+      - sensor.outdoor_temperature_wx
+      - sensor.outdoor_humidity_wx
+      - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_pressure_wx
+      - sensor.outdoor_dew_point_approx
+      - sensor.outdoor_feels_like
+      - sensor.kneplatt72_uv_index
+      - sensor.wind_gust
+      - sensor.outdoor_visibility_wx
+      - sensor.uv_category_wx
+      - sensor.wx_pressure_rate_1h
+      - sensor.wx_pressure_rate_3h
+      - sensor.wx_pressure_change_3h
+      - sensor.wx_pressure_change_24h
+      - sensor.wx_pressure_tendency_3h
+      - binary_sensor.wx_pressure_falling_rapid
+      - binary_sensor.wx_pressure_falling_very_fast
+      - binary_sensor.wx_storm_watch_pressure
+      - binary_sensor.wx_storm_warning_pressure
+
 
 logger:
   default: info
   logs:
     homeassistant.components.logbook: debug
+
+lovelace:
+  dashboards:
+    weather-dashboard:        # <-- must contain a hyphen
+      mode: yaml
+      filename: dashboards/weather-dashboard.yaml
+      title: Weather Package
+      icon: mdi:weather-partly-cloudy
+      show_in_sidebar: true
+      # require_admin: false   # optional
