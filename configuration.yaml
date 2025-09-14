@@ -62,9 +62,10 @@ logger:
 
 lovelace:
   dashboards:
-    weather_dashboard:
+    weather-dashboard:        # <-- must contain a hyphen
       mode: yaml
-      filename: dashboards/weather_dashboard.yaml
+      filename: dashboards/weather-dashboard.yaml
       title: Weather
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
+      # require_admin: false   # optional
