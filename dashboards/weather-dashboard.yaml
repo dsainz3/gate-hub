@@ -1,10 +1,12 @@
-title: Weather 222 Dashboard
+title: Weather Dashboard
 views:
-  - title: Weather
-    path: weather
+  # =======================
+  # 1) OVERVIEW (everyday)
+  # =======================
+  - title: Overview
+    path: weather-overview
     icon: mdi:weather-partly-cloudy
     badges: []
-
     cards:
       - type: weather-forecast
         entity: weather.kneplatt72
@@ -36,23 +38,54 @@ views:
             name: Visibility
 
       - type: entities
-        title: Controls & All Entities
+        title: Controls
         show_header_toggle: false
         entities:
           - entity: input_boolean.weather_notifications_enabled
             name: Weather Notifications
-          - entity: binary_sensor.wx_pressure_falling_rapid
-            name: Pressure falling rapidly
-          - entity: binary_sensor.wx_pressure_falling_very_fast
-            name: Pressure falling very fast
-          - entity: binary_sensor.wx_storm_watch_pressure
-            name: Storm Watch (pressure)
-          - entity: binary_sensor.wx_storm_warning_pressure
-            name: Storm Warning (pressure)
-          - type: divider
           - entity: group.weather_dashboard_all
             name: All Weather Entities
 
+      - type: horizontal-stack
+        cards:
+          - type: sensor
+            entity: sensor.outdoor_temperature_wx
+            name: Temperature
+            graph: line
+          - type: sensor
+            entity: sensor.outdoor_humidity_wx
+            name: Humidity
+            graph: line
+          - type: sensor
+            entity: sensor.outdoor_wind_speed_wx
+            name: Wind
+
+      - type: horizontal-stack
+        cards:
+          - type: gauge
+            entity: sensor.outdoor_temperature_wx
+            name: Temp
+            min: -20
+            max: 120
+          - type: gauge
+            entity: sensor.outdoor_humidity_wx
+            name: Humidity
+            min: 0
+            max: 100
+          - type: gauge
+            entity: sensor.kneplatt72_uv_index
+            name: UV
+            min: 0
+            max: 11
+
+  # ============================
+  # 2) BAROMETER & STORM SIGNALS
+  # ============================
+  - title: Barometer & Storms
+    path: barometer
+    icon: mdi:gauge
+    badges: []
+    cards:
       - type: entities
         title: Barometer & Tendency
         show_header_toggle: false
@@ -91,6 +124,19 @@ views:
           - entity: sensor.wx_pressure_change_3h
           - entity: sensor.wx_pressure_rate_1h
 
+      - type: entities
+        title: Storm Heuristics (pressure-only)
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.wx_pressure_falling_rapid
+            name: Falling rapidly (≥0.06 inHg/h)
+          - entity: binary_sensor.wx_pressure_falling_very_fast
+            name: Falling very fast (≥0.09 inHg/h)
+          - entity: binary_sensor.wx_storm_watch_pressure
+            name: Storm Watch (≥0.06 inHg/3h)
+          - entity: binary_sensor.wx_storm_warning_pressure
+            name: Storm Warning (≥0.09 inHg/3h)
+
       - type: conditional
         conditions:
           - entity: binary_sensor.wx_storm_warning_pressure
@@ -114,40 +160,16 @@ views:
             ### ⚠️ Storm Watch (pressure)
             Rapid pressure fall (≥ 0.06 inHg in the last 3 hours).
 
-      - type: horizontal-stack
-        cards:
-          - type: sensor
-            entity: sensor.outdoor_temperature_wx
-            name: Temperature
-            graph: line
-          - type: sensor
-            entity: sensor.outdoor_humidity_wx
-            name: Humidity
-            graph: line
-          - type: sensor
-            entity: sensor.outdoor_wind_speed_wx
-            name: Wind
-
-      - type: horizontal-stack
-        cards:
-          - type: gauge
-            entity: sensor.outdoor_temperature_wx
-            name: Temp
-            min: -20
-            max: 120
-          - type: gauge
-            entity: sensor.outdoor_humidity_wx
-            name: Humidity
-            min: 0
-            max: 100
-          - type: gauge
-            entity: sensor.kneplatt72_uv_index
-            name: UV
-            min: 0
-            max: 11
-
+  # =====================
+  # 3) DETAILS & HISTORY
+  # =====================
+  - title: Details & History
+    path: weather-details
+    icon: mdi:chart-line
+    badges: []
+    cards:
       - type: history-graph
-        title: Last 24 hours
+        title: Last 24 hours (core)
         hours_to_show: 24
         entities:
           - entity: sensor.outdoor_temperature_wx
@@ -155,3 +177,23 @@ views:
           - entity: sensor.outdoor_wind_speed_wx
           - entity: sensor.outdoor_pressure_wx
           - entity: sensor.kneplatt72_uv_index
+
+      - type: statistics-graph
+        title: 24h Trends (mean/min/max)
+        days_to_show: 1
+        stat_types:
+          - mean
+          - min
+          - max
+        chart_type: line
+        entities:
+          - entity: sensor.outdoor_temperature_wx
+          - entity: sensor.outdoor_humidity_wx
+          - entity: sensor.outdoor_wind_speed_wx
+
+      - type: entities
+        title: All Weather Entities
+        show_header_toggle: false
+        entities:
+          - entity: group.weather_dashboard_all
+            name: Open group
