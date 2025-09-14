@@ -171,7 +171,7 @@ sensor:
     source: sensor.outdoor_pressure_wx
     unit_time: h
     time_window: '01:00:00'
-    round: 3
+    round: 4
     unit: 'inHg/h'
 
   - platform: derivative
@@ -179,7 +179,7 @@ sensor:
     source: sensor.outdoor_pressure_wx
     unit_time: h
     time_window: '03:00:00'
-    round: 3
+    round: 4
     unit: 'inHg/h'
 
   - platform: statistics
@@ -188,8 +188,8 @@ sensor:
     state_characteristic: change
     max_age:
       hours: 3
-    sampling_size: 360
-    precision: 3
+    sampling_size: 180 # Reduced for faster convergence
+    precision: 4
     unique_id: wx_pressure_change_3h
 
   - platform: statistics
@@ -198,8 +198,8 @@ sensor:
     state_characteristic: change
     max_age:
       hours: 24
-    sampling_size: 1440
-    precision: 3
+    sampling_size: 720 # Reduced for faster convergence
+    precision: 4
     unique_id: wx_pressure_change_24h
 
 # Rapid-fall detectors (inHg/s). 0.06 inHg/h ≈ -0.0000167 inHg/s; 0.09 ≈ -0.000025.
