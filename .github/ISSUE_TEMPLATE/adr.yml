@@ -1,0 +1,21 @@
+---
+name: 'Decision record (ADR)'
+description: Record a key architecture decision
+labels: ['adr']
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences

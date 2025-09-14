@@ -1,0 +1,8 @@
+# Prettier config (applies to YAML too)
+printWidth = 100        # YAML wraps nicely around 100; adjust to taste
+proseWrap = "preserve"  # don't reflow long markdown paragraphs
+endOfLine = "lf"
+
+# JS/TS-only options (ignored for YAML, but safe to keep)
+singleQuote = true
+semi = false

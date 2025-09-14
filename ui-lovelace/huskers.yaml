@@ -1,0 +1,5 @@
+﻿title: Huskers
+icon: mdi:football-helmet
+path: huskers
+# optional: theme: Mushroom
+views: !include_dir_list ui-lovelace/views
