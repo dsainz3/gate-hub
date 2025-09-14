@@ -392,3 +392,306 @@ automation:
           name: Huskers Automation
           message: 'Postgame cleanup completed (loops stopped, state restored)'
           entity_id: automation.huskers_postgame_cleanup
+# =========================
+# HUSKERS: MINIMAL TEMPLATE SENSORS + GAME PHASE
+# =========================
+# These sensors alias your Team Tracker data into stable names this dashboard uses.
+# If a candidate entity doesn't exist, the template falls back to 'unknown' safely.
+
+template:
+  - sensor:
+      # ---- Pregame metadata
+      - name: Huskers Opponent
+        unique_id: huskers_opponent
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_opponent',
+            'sensor.team_tracker_nebraska_opponent',
+            'sensor.nebraska_opponent'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Kickoff (America/Chicago)
+        unique_id: huskers_kickoff_local
+        state: >-
+          {# Expect ISO or epoch timestamp from your TT sensor; adjust candidates as needed #}
+          {% set cands = [
+            'sensor.team_tracker_huskers_kickoff',
+            'sensor.team_tracker_nebraska_kickoff',
+            'sensor.nebraska_kickoff'
+          ] %}
+          {% set raw = namespace(ts='') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and raw.ts == '' %}
+              {% set raw.ts = s %}
+            {% endif %}
+          {% endfor %}
+          {% if raw.ts == '' %}
+            unknown
+          {% else %}
+            {% set dt = as_datetime(raw.ts) %}
+            {% if dt is not none %}
+              {{ as_local(dt).strftime('%a %b %-d, %-I:%M %p %Z') }}
+            {% else %}
+              unknown
+            {% endif %}
+          {% endif %}
+
+      - name: Huskers Venue
+        unique_id: huskers_venue
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_venue',
+            'sensor.team_tracker_nebraska_venue',
+            'sensor.nebraska_venue'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers TV/Radio
+        unique_id: huskers_tv_radio
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_tv',
+            'sensor.team_tracker_nebraska_tv',
+            'sensor.nebraska_tv'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Odds/Line
+        unique_id: huskers_line
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_line',
+            'sensor.team_tracker_nebraska_line',
+            'sensor.nebraska_line'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      # ---- Live game
+      - name: Huskers Score (Home)
+        unique_id: huskers_score_home
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_score_home',
+            'sensor.team_tracker_nebraska_score_home',
+            'sensor.nebraska_score_home'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Score (Away)
+        unique_id: huskers_score_away
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_score_away',
+            'sensor.team_tracker_nebraska_score_away',
+            'sensor.nebraska_score_away'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Quarter
+        unique_id: huskers_quarter
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_quarter',
+            'sensor.team_tracker_nebraska_quarter',
+            'sensor.nebraska_quarter'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Game Clock
+        unique_id: huskers_clock
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_clock',
+            'sensor.team_tracker_nebraska_clock',
+            'sensor.nebraska_clock'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Possession
+        unique_id: huskers_possession
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_possession',
+            'sensor.team_tracker_nebraska_possession',
+            'sensor.nebraska_possession'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Down & Distance
+        unique_id: huskers_down_distance
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_down_distance',
+            'sensor.team_tracker_nebraska_down_distance',
+            'sensor.nebraska_down_distance'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      - name: Huskers Last Scoring Play
+        unique_id: huskers_last_scoring_play
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_last_score',
+            'sensor.team_tracker_nebraska_last_score',
+            'sensor.nebraska_last_score'
+          ] %}
+          {% set v = namespace(val='unknown') %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] and v.val == 'unknown' %}
+              {% set v.val = s %}
+            {% endif %}
+          {% endfor %}
+          {{ v.val }}
+
+      # ---- Postgame
+      - name: Huskers Final Scoreline
+        unique_id: huskers_final_scoreline
+        state: >-
+          {% set home = states('sensor.huskers_score_home') %}
+          {% set away = states('sensor.huskers_score_away') %}
+          {% set opp  = states('sensor.huskers_opponent') %}
+          {% if home in ['unknown','unavailable',''] or away in ['unknown','unavailable',''] or opp in ['unknown','unavailable',''] %}
+            unknown
+          {% else %}
+            Nebraska {{ home }} – {{ opp }} {{ away }}
+          {% endif %}
+
+  - binary_sensor:
+      - name: Huskers Is Pregame
+        unique_id: huskers_is_pregame
+        state: >-
+          {# Prefer a TT game status if you have one; otherwise fall back to kickoff vs now #}
+          {% set status_cands = [
+            'sensor.team_tracker_huskers_status',
+            'sensor.team_tracker_nebraska_status',
+            'sensor.nebraska_status'
+          ] %}
+          {% set status = namespace(val='') %}
+          {% for e in status_cands %}
+            {% set s = states(e) | lower %}
+            {% if s not in ['unknown','unavailable',''] and status.val == '' %}
+              {% set status.val = s %}
+            {% endif %}
+          {% endfor %}
+          {% if status.val in ['pre','pregame','scheduled'] %}
+            true
+          {% elif status.val in ['in','in progress','live','halftime','1st','2nd','3rd','4th','ot','overtime'] %}
+            false
+          {% elif status.val in ['final','post','postgame'] %}
+            false
+          {% else %}
+            {# use kickoff fallback #}
+            {% set ko = states('sensor.huskers_kickoff_local') %}
+            {% if ko not in ['unknown','unavailable',''] %}
+              {{ as_timestamp(ko) > now().timestamp() }}
+            {% else %}
+              false
+            {% endif %}
+          {% endif %}
+
+      - name: Huskers Is Live
+        unique_id: huskers_is_live
+        state: >-
+          {% set status_cands = [
+            'sensor.team_tracker_huskers_status',
+            'sensor.team_tracker_nebraska_status',
+            'sensor.nebraska_status'
+          ] %}
+          {% set s = namespace(val='') %}
+          {% for e in status_cands %}
+            {% set v = states(e) | lower %}
+            {% if v not in ['unknown','unavailable',''] and s.val == '' %}
+              {% set s.val = v %}
+            {% endif %}
+          {% endfor %}
+          {{ s.val in ['in','in progress','live','halftime','1st','2nd','3rd','4th','ot','overtime'] }}
+
+      - name: Huskers Is Postgame
+        unique_id: huskers_is_postgame
+        state: >-
+          {% set status_cands = [
+            'sensor.team_tracker_huskers_status',
+            'sensor.team_tracker_nebraska_status',
+            'sensor.nebraska_status'
+          ] %}
+          {% set s = namespace(val='') %}
+          {% for e in status_cands %}
+            {% set v = states(e) | lower %}
+            {% if v not in ['unknown','unavailable',''] and s.val == '' %}
+              {% set s.val = v %}
+            {% endif %}
+          {% endfor %}
+          {{ s.val in ['final','post','postgame'] }}
