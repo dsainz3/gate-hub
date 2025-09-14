@@ -1,247 +1,8 @@
 # ===============================
-# THEATER SCRIPTS (FINAL - CLEAN)
-# Scarlet ↔ Cream only, very short transitions (0.1s)
-# Entities: light.light_theater_left, light.light_theater_right, light.spare_light, light.light_office
-# ===============================
-
-huskers_scarlet_cream_wave_15s:
-  alias: 'Huskers: Scarlet → Cream Wave (15s, one pass)'
-  description: >
-    One 15-second wave where a single CREAM bulb moves across the four lights
-    (others remain SCARLET). Order: Theater Left → Theater Right → Spare → Office.
-  mode: restart
-  sequence:
-    - service: scene.create
-      data:
-        scene_id: huskers_before_wave_15s
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
-          - light.spare_light
-          - light.light_office
-
-    # Base Scarlet (fast)
-    - service: light.turn_on
-      target:
-        entity_id:
-          - light.light_theater_left
-          - light.light_theater_right
-          - light.spare_light
-          - light.light_office
-      data:
-        hs_color: [355, 90] # Scarlet
-        brightness: 255
-        transition: 0.1
-
-    # Step 1: TL -> Cream (3.75s)
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_left
-      data:
-        hs_color: [45, 20] # Cream
-        brightness: 255
-        transition: 0.1
-    - delay:
-        milliseconds: 3750
-
-    # Step 2: TR -> Cream, TL back to Scarlet (3.75s)
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_left
-      data:
-        hs_color: [355, 90]
-        brightness: 255
-        transition: 0.1
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_right
-      data:
-        hs_color: [45, 20]
-        brightness: 255
-        transition: 0.1
-    - delay:
-        milliseconds: 3750
-
-    # Step 3: Spare -> Cream, TR back to Scarlet (3.75s)
-    - service: light.turn_on
-      target:
-        entity_id: light.light_theater_right
-      data:
-        hs_color: [355, 90]
-        brightness: 255
-        transition: 0.1
-    - service: light.turn_on
-      target:
-        entity_id: light.spare_light
-      data:
-        hs_color: [45, 20]
-        brightness: 255
-        transition: 0.1
-    - delay:
-        milliseconds: 3750
-
-    # Step 4: Office -> Cream, Spare back to Scarlet (3.75s)
-    - service: light.turn_on
-      target:
-        entity_id: light.spare_light
-      data:
-        hs_color: [355, 90]
-        brightness: 255
-        transition: 0.1
-    - service: light.turn_on
-      target:
-        entity_id: light.light_office
-      data:
-        hs_color: [45, 20]
-        brightness: 255
-        transition: 0.1
-    - delay:
-        milliseconds: 3750
-
-huskers_chase_6s_start:
-  alias: 'Huskers: Start Cream Pulse Chase (6s loop)'
-  description: >
-    Turns on the Game Show boolean, snapshots current states, and starts
-    a continuous 6s cream pulse moving across Scarlet lights.
-  mode: restart
-  sequence:
-    - service: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.huskers_theater_show_running
-    - service: scene.create
-      data:
-        scene_id: huskers_before_chase
-        snapshot_entities:
-          - light.light_theater_left
-          - light.light_theater_right
-          - light.spare_light
-          - light.light_office
-    - service: script.turn_on
-      target:
-        entity_id: script.huskers_chase_6s_loop
-
-huskers_chase_6s_loop:
-  alias: 'Huskers: Cream Pulse Chase LOOP (6s cycle)'
-  description: >
-    Loops while input_boolean.huskers_theater_show_running == on. Keeps all four lights Scarlet while
-    a single Cream bulb moves in order. Transitions are 0.1s.
-  mode: restart
-  sequence:
-    - repeat:
-        while:
-          - condition: state
-            entity_id: input_boolean.huskers_theater_show_running
-            state: 'on'
-        sequence:
-          # Base Scarlet (fast)
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.spare_light
-                - light.light_office
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 0.1
-
-          # A: TL cream (1.5s)
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_left
-            data:
-              hs_color: [45, 20]
-              brightness: 255
-              transition: 0.1
-          - delay:
-              milliseconds: 1500
-
-          # B: TR cream (1.5s) — reset base Scarlet then set TR
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.spare_light
-                - light.light_office
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 0.1
-          - service: light.turn_on
-            target:
-              entity_id: light.light_theater_right
-            data:
-              hs_color: [45, 20]
-              brightness: 255
-              transition: 0.1
-          - delay:
-              milliseconds: 1500
-
-          # C: Spare cream (1.5s)
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.spare_light
-                - light.light_office
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 0.1
-          - service: light.turn_on
-            target:
-              entity_id: light.spare_light
-            data:
-              hs_color: [45, 20]
-              brightness: 255
-              transition: 0.1
-          - delay:
-              milliseconds: 1500
-
-          # D: Office cream (1.5s)
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.light_theater_left
-                - light.light_theater_right
-                - light.spare_light
-                - light.light_office
-            data:
-              hs_color: [355, 90]
-              brightness: 255
-              transition: 0.1
-          - service: light.turn_on
-            target:
-              entity_id: light.light_office
-            data:
-              hs_color: [45, 20]
-              brightness: 255
-              transition: 0.1
-          - delay:
-              milliseconds: 1500
-
-huskers_chase_stop:
-  alias: 'Huskers: Stop Cream Pulse Chase (restore)'
-  description: 'Turns OFF the boolean and restores the snapshot if available.'
-  mode: restart
-  sequence:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.huskers_theater_show_running
-    - delay:
-        seconds: 1
-    - service: scene.turn_on
-      target:
-        entity_id: scene.huskers_before_chase
-      continue_on_error: true
-
-# ===============================
-# 30-second Cream Chase (no carry-over)
+# ONLY: 30-second Cream Chase (Scarlet ⇄ Cream)
 # Order: light.light_theater_left, light.light_theater_right, light.light_front_left, light.light_front_right, light.light_garage_left, light.lights_garage_center, light.light_garage_right
-# Colors: Scarlet hs_color [355,90], Cream hs_color [45,20]
+# Colors: Scarlet [355,90], Cream [45,20]
+# Transitions: 0.1s, Step ≈ 4286ms (hold 4186ms)
 # ===============================
 
 huskers_chase30_start:
@@ -262,8 +23,6 @@ huskers_chase30_start:
           - light.light_garage_left
           - light.lights_garage_center
           - light.light_garage_right
-          - light.spare_light
-
     # Base Scarlet first
     - service: light.turn_on
       target:
@@ -275,11 +34,10 @@ huskers_chase30_start:
           - light.light_garage_left
           - light.lights_garage_center
           - light.light_garage_right
-          - light.spare_light
       data:
         hs_color: [355, 90]
         brightness: 255
-        transition: 0.2
+        transition: 0.1
 
     # Launch the loop (runs until stopped)
     - service: script.turn_on
@@ -290,7 +48,7 @@ huskers_chase30_loop:
   alias: 'Huskers: 30s Cream Chase LOOP'
   description: >
     Infinite loop: Cream moves through Scarlet across the 7 lights.
-    Each step target ≈ 4286ms; this includes ~300ms crossfade + ~3986ms hold.
+    Each step target ≈ 4286ms; this includes ~100ms crossfade + ~4186ms hold.
     Stop by calling script.huskers_chase30_stop or by turning off this script.
   mode: restart
   sequence:
@@ -304,7 +62,6 @@ huskers_chase30_loop:
             'light.light_garage_left',
             'light.lights_garage_center',
             'light.light_garage_right',
-            'light.spare_light',
           ]
     - repeat:
         while:
@@ -318,23 +75,23 @@ huskers_chase30_loop:
                     current: '{{ repeat.item }}'
                     prev_index: '{{ (repeat.index - 2) % (lights|count) }}'
                     previous: '{{ lights[prev_index] }}'
-                # Fade previous to Scarlet, current to Cream (smooth crossfade)
+                # Crossfade: previous -> Scarlet, current -> Cream
                 - service: light.turn_on
                   target:
                     entity_id: '{{ previous }}'
                   data:
                     hs_color: [355, 90]
                     brightness: 255
-                    transition: 0.3
+                    transition: 0.1
                 - service: light.turn_on
                   target:
                     entity_id: '{{ current }}'
                   data:
                     hs_color: [45, 20]
                     brightness: 255
-                    transition: 0.3
+                    transition: 0.1
                 - delay:
-                    milliseconds: 3986
+                    milliseconds: 4186
 
 huskers_chase30_stop:
   alias: 'Huskers: Stop 30s Cream Chase (restore)'
