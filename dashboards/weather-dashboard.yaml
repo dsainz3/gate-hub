@@ -1,3 +1,4 @@
+---
 title: Weather Dashboard
 views:
   # =======================
@@ -117,7 +118,7 @@ views:
             graph: line
 
       - type: history-graph
-        title: Pressure – Last 24 hours
+        title: Pressure - Last 24 hours
         hours_to_show: 24
         entities:
           - entity: sensor.outdoor_pressure_wx

@@ -1,3 +1,4 @@
+---
 input_boolean:
   weather_notifications_enabled:
     name: Weather Notifications Enabled
@@ -5,7 +6,7 @@ input_boolean:
 
 group:
   weather_dashboard_all:
-    name: Weather Dashboard – All
+    name: Weather Dashboard - All
     entities:
       - weather.kneplatt72
       - sensor.outdoor_temperature_wx
@@ -57,19 +58,20 @@ template:
         state_class: measurement
         availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
 
-      # Pressure: hPa -> inHg (fallback to any native pressure sensor if present)
+      # Pressure: Already in inHg from weather.kneplatt72 - NO CONVERSION NEEDED
       - name: 'Outdoor Pressure (wx)'
         unique_id: wx_pressure
         state: >-
-          {% set p = state_attr('weather.kneplatt72', 'pressure') | float(0) %}
-          {% if p > 0 %}
-            {{ (p * 0.02953) | round(2) }}
+          {% set p = state_attr('weather.kneplatt72', 'pressure') %}
+          {% if p is not none %}
+            {{ p | float | round(2) }}
           {% else %}
-            {{ states('sensor.kneplatt72_pressure_24h_change') }}
+            unavailable
           {% endif %}
         unit_of_measurement: 'inHg'
         icon: mdi:gauge
         state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72', 'pressure') is not none }}"
 
       # Visibility: km -> mi
       - name: 'Outdoor Visibility (wx)'
@@ -136,10 +138,10 @@ template:
           {% set d = states('sensor.wx_pressure_change_3h')|float(0) %}
           {% if d >= 0.09 %}Rising very fast (+≥0.09 inHg / 3h)
           {% elif d >= 0.06 %}Rising fast (+≥0.06 inHg / 3h)
-          {% elif d >= 0.02 %}Rising (+0.02–0.06 inHg / 3h)
+          {% elif d >= 0.02 %}Rising (+0.02-0.06 inHg / 3h)
           {% elif d <= -0.09 %}Falling very fast (≤−0.09 inHg / 3h)
           {% elif d <= -0.06 %}Falling fast (≤−0.06 inHg / 3h)
-          {% elif d <= -0.02 %}Falling (−0.02–−0.06 inHg / 3h)
+          {% elif d <= -0.02 %}Falling (−0.02-−0.06 inHg / 3h)
           {% else %}Steady (±<0.02 inHg / 3h)
           {% endif %}
         attributes:
@@ -167,7 +169,7 @@ sensor:
     source: sensor.outdoor_pressure_wx
     unit_time: h
     time_window: '01:00:00'
-    round: 3
+    round: 4
     unit: 'inHg/h'
 
   - platform: derivative
@@ -175,7 +177,7 @@ sensor:
     source: sensor.outdoor_pressure_wx
     unit_time: h
     time_window: '03:00:00'
-    round: 3
+    round: 4
     unit: 'inHg/h'
 
   - platform: statistics
@@ -184,8 +186,8 @@ sensor:
     state_characteristic: change
     max_age:
       hours: 3
-    sampling_size: 360
-    precision: 3
+    sampling_size: 180 # Reduced for faster convergence
+    precision: 4
     unique_id: wx_pressure_change_3h
 
   - platform: statistics
@@ -194,8 +196,8 @@ sensor:
     state_characteristic: change
     max_age:
       hours: 24
-    sampling_size: 1440
-    precision: 3
+    sampling_size: 720 # Reduced for faster convergence
+    precision: 4
     unique_id: wx_pressure_change_24h
 
 # Rapid-fall detectors (inHg/s). 0.06 inHg/h ≈ -0.0000167 inHg/s; 0.09 ≈ -0.000025.
