@@ -94,3 +94,10 @@ lovelace:
       title: Kiosk Package
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
+
+    huskers-auto-dashboard:
+      mode: yaml
+      filename: dashboards/huskers-auto.yaml
+      title: Huskers Auto
+      icon: mdi:monitor-dashboard
+      show_in_sidebar: true

@@ -1,0 +1,60 @@
+title: Huskers
+views:
+  - title: Super Fan
+    path: huskers
+    icon: mdi:football
+    cards:
+      # Quick Refresh Row (forces immediate fetch)
+      - type: entities
+        title: Data Refresh
+        show_header_toggle: false
+        entities:
+          - type: button
+            name: Refresh Record
+            icon: mdi:refresh
+            action_name: Update
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              data: {}
+              target:
+                entity_id: sensor.huskers_records_raw
+          - type: button
+            name: Refresh Standings
+            icon: mdi:refresh
+            action_name: Update
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              data: {}
+              target:
+                entity_id: sensor.b1g_standings_raw
+          - type: button
+            name: Refresh Schedule
+            icon: mdi:refresh
+            action_name: Update
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              data: {}
+              target:
+                entity_id: sensor.huskers_schedule_raw
+
+      # 1) Current Nebraska win–loss record
+      - type: markdown
+        title: Nebraska Record
+        content: |
+          # Record: {{ states('sensor.huskers_record_overall') }}
+          **Conference:** {{ states('sensor.huskers_record_conference') }}
+
+      # 2) Big Ten rankings/standings (markdown)
+      - type: markdown
+        title: Big Ten Standings
+        content: |
+          {{ states('sensor.b1g_standings_md') }}
+
+      # 3) Nebraska schedule (markdown)
+      - type: markdown
+        title: Nebraska Schedule
+        content: |
+          {{ states('sensor.huskers_schedule_md') }}
