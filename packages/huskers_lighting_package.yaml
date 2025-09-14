@@ -1,10 +1,9 @@
 # ===============================
 # HUSKERS LIGHTING — PACKAGE
-# Eight-light Scarlet↔Cream chase (30s + variable speed)
+# Eight-light Scarlet↔Cream chase (30s + variable speed) + Hail burst
 # ===============================
 
-# Helper (speed control). If you already define this elsewhere,
-# remove the other copy to avoid duplication.
+# Helpers
 input_number:
   huskers_chase_cycle_seconds:
     name: 'Chase Cycle Length'
@@ -15,6 +14,17 @@ input_number:
     mode: slider
     unit_of_measurement: s
     initial: 30
+
+  # New: BPM control for Hail Varsity burst (optional; script defaults to 137 BPM)
+  huskers_hail_bpm:
+    name: 'Hail Varsity BPM'
+    icon: mdi:metronome
+    min: 60
+    max: 200
+    step: 1
+    mode: slider
+    unit_of_measurement: bpm
+    initial: 137
 
 # Light group (for convenience)
 group:
@@ -76,12 +86,10 @@ script:
     alias: 'Huskers: Start 30s Cream Chase'
     mode: restart
     sequence:
-      # stop other loop if running
       - service: script.turn_off
         target: { entity_id: script.huskers_chase_speed_loop }
         continue_on_error: true
 
-      # snapshot current states for restore
       - service: scene.create
         data:
           scene_id: huskers_before_chase
@@ -95,7 +103,6 @@ script:
             - light.light_garage_right
             - light.spare_light
 
-      # base Scarlet first (quick)
       - service: light.turn_on
         target:
           entity_id:
@@ -112,7 +119,6 @@ script:
           brightness: 255
           transition: 0.1
 
-      # launch the loop
       - service: script.turn_on
         target:
           entity_id: script.huskers_chase30_loop
@@ -148,7 +154,6 @@ script:
                       current: '{{ repeat.item }}'
                       prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
                       previous: '{{ lights[prev_index|int] }}'
-                  # crossfade: previous back to Scarlet, current to Cream
                   - service: light.turn_on
                     target: { entity_id: '{{ previous }}' }
                     data:
@@ -183,12 +188,10 @@ script:
     alias: 'Huskers: Start Cream Chase (Variable-Speed)'
     mode: restart
     sequence:
-      # stop fixed loop if running
       - service: script.turn_off
         target: { entity_id: script.huskers_chase30_loop }
         continue_on_error: true
 
-      # snapshot current states
       - service: scene.create
         data:
           scene_id: huskers_before_chase
@@ -202,7 +205,6 @@ script:
             - light.light_garage_right
             - light.spare_light
 
-      # base Scarlet
       - service: light.turn_on
         target:
           entity_id:
@@ -219,7 +221,6 @@ script:
           brightness: 255
           transition: 0.1
 
-      # start loop
       - service: script.turn_on
         target:
           entity_id: script.huskers_chase_speed_loop
@@ -249,7 +250,6 @@ script:
                 cycle_secs: "{{ states('input_number.huskers_chase_cycle_seconds') | float(30) }}"
                 step_ms: '{{ (cycle_secs * 1000 / (lights | count)) | int }}'
                 xfade_ms: 300
-                # keep at least 250ms hold so very short cycles don't thrash
                 hold_ms: '{{ [ (step_ms - xfade_ms) | int, 250 ] | max }}'
             - repeat:
                 for_each: '{{ lights }}'
@@ -283,4 +283,120 @@ script:
       - service: scene.turn_on
         target:
           entity_id: scene.huskers_before_chase
+        continue_on_error: true
+
+  # ===========================
+  # NEW — Hail Varsity BPM-synced burst (8s)
+  # ===========================
+  huskers_hail_burst_8s:
+    alias: 'Huskers: Hail Varsity Burst (8s, BPM-synced)'
+    mode: restart
+    fields:
+      bpm:
+        description: 'Optional BPM override (defaults to input_number.huskers_hail_bpm or 137).'
+        example: 137
+    sequence:
+      # Stop chases so they don’t fight the burst
+      - service: script.turn_off
+        target:
+          entity_id:
+            - script.huskers_chase30_loop
+            - script.huskers_chase_speed_loop
+        continue_on_error: true
+
+      # Snapshot everything for clean restore
+      - service: scene.create
+        data:
+          scene_id: huskers_before_hail_burst
+          snapshot_entities:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+
+      # Base Scarlet (fast)
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+        data:
+          hs_color: [355, 90] # Scarlet
+          brightness: 255
+          transition: 0.05
+
+      # Beat math + burst loop (8 seconds)
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+          bpm_val: >-
+            {{ bpm if bpm is defined and bpm|float(0) > 0
+               else states('input_number.huskers_hail_bpm')|float(137) }}
+          beat_ms: '{{ (60000 / bpm_val) | int }}'
+          half_ms: '{{ (beat_ms / 2) | int }}'
+          beats_total: '{{ [ (8000 / beat_ms) | int, 1 ] | max }}'
+
+      - repeat:
+          count: '{{ beats_total }}'
+          sequence:
+            # Choose 2 (sometimes 3) unique lights to pop Cream on this beat
+            - variables:
+                a: '{{ lights | random }}'
+                remaining1: "{{ (lights | reject('equalto', a) | list) }}"
+                b: '{{ remaining1 | random }}'
+                include_c: '{{ [true, false] | random }}'
+                remaining2: "{{ (remaining1 | reject('equalto', b) | list) }}"
+                c: '{{ remaining2 | random if include_c else none }}'
+                burst_targets: >-
+                  {% set out = [a, b] %}
+                  {% if c is not none %}{% set out = out + [c] %}{% endif %}
+                  {{ out }}
+
+            # On-beat: Cream burst
+            - service: light.turn_on
+              target:
+                entity_id: '{{ burst_targets }}'
+              data:
+                hs_color: [45, 20] # Cream
+                brightness: 255
+                transition: 0.05
+
+            # Hold half-beat, then fall back to Scarlet
+            - delay:
+                milliseconds: '{{ half_ms }}'
+            - service: light.turn_on
+              target:
+                entity_id: '{{ burst_targets }}'
+              data:
+                hs_color: [355, 90] # Scarlet
+                brightness: 255
+                transition: 0.08
+
+            # Finish the beat
+            - delay:
+                milliseconds: '{{ half_ms }}'
+
+      # Restore whatever was active before the burst
+      - service: scene.turn_on
+        target:
+          entity_id: scene.huskers_before_hail_burst
         continue_on_error: true
