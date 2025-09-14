@@ -12,14 +12,18 @@ group:
       - sensor.outdoor_humidity_wx
       - sensor.outdoor_wind_speed_wx
       - sensor.outdoor_pressure_wx
+      - sensor.outdoor_visibility_wx
       - sensor.outdoor_dew_point_approx
       - sensor.outdoor_feels_like
       - sensor.kneplatt72_uv_index
+      - sensor.uv_category_wx
       - sensor.wind_gust
+      - binary_sensor.pressure_rising
+      - binary_sensor.pressure_falling
 
 template:
   - sensor:
-      # Current temp from weather.kneplatt72
+      # Current temperature from weather entity
       - name: 'Outdoor Temperature (wx)'
         unique_id: wx_temp_primary
         state: "{{ state_attr('weather.kneplatt72', 'temperature') }}"
@@ -46,7 +50,7 @@ template:
         state_class: measurement
         availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
 
-      # Pressure from weather entity → convert hPa to inHg (fallback to native sensor if available)
+      # Pressure: convert hPa -> inHg (fallback to native sensor if your weather entity lacks pressure)
       - name: 'Outdoor Pressure (wx)'
         unique_id: wx_pressure
         state: >-
@@ -60,7 +64,21 @@ template:
         icon: mdi:gauge
         state_class: measurement
 
-      # Dew point (approx.) from current Temp/Humidity
+      # Visibility: km -> miles from weather entity
+      - name: 'Outdoor Visibility (wx)'
+        unique_id: wx_visibility
+        state: >-
+          {% set v = state_attr('weather.kneplatt72','visibility')|float(0) %}
+          {% if v > 0 %}
+            {{ (v * 0.621371) | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+        unit_of_measurement: 'mi'
+        icon: mdi:eye
+        state_class: measurement
+
+      # Dew point (approx) from current Temp/Humidity
       - name: 'Outdoor Dew Point (approx)'
         unique_id: wx_dewpoint
         unit_of_measurement: '°F'
@@ -73,7 +91,7 @@ template:
           {% set TdC = Tc - ((100 - RH) / 5) %}
           {{ (TdC * 9 / 5 + 32) | round(1) }}
 
-      # Feels like (heat index / wind chill)
+      # Feels like (heat index / wind chill) from current values
       - name: 'Outdoor Feels Like'
         unique_id: wx_feels_like
         unit_of_measurement: '°F'
@@ -94,4 +112,44 @@ template:
             {{ T | round(1) }}
           {% endif %}
 
-automation: []
+      # UV category label from your UV sensor
+      - name: 'UV Category (wx)'
+        unique_id: wx_uv_category
+        state: >-
+          {% set u = states('sensor.kneplatt72_uv_index')|int(0) %}
+          {% if u <= 2 %}Low{% elif u <= 5 %}Moderate{% elif u <= 7 %}High{% elif u <= 10 %}Very High{% else %}Extreme{% endif %}
+        icon: mdi:weather-sunny-alert
+
+binary_sensor:
+  - platform: trend
+    sensors:
+      pressure_rising:
+        entity_id: sensor.outdoor_pressure_wx
+        friendly_name: Pressure Rising
+        sample_duration: 7200 # 2 hours
+        min_gradient: 0.002 # ~0.002 inHg per second (tune as desired)
+      pressure_falling:
+        entity_id: sensor.outdoor_pressure_wx
+        friendly_name: Pressure Falling
+        sample_duration: 7200
+        min_gradient: 0.002
+        invert: true
+
+automation:
+  # Replace 'sensor.nws_alerts' with your actual weather alert entity when you add one
+  - id: weather_alert_notify
+    alias: 'Weather: Severe Alert → Notification'
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.nws_alerts
+    condition:
+      - condition: state
+        entity_id: input_boolean.weather_notifications_enabled
+        state: 'on'
+    action:
+      - service: persistent_notification.create
+        data:
+          title: 'Weather Alert'
+          message: 'Update from {{ trigger.entity_id }}: {{ states(trigger.entity_id) }}'

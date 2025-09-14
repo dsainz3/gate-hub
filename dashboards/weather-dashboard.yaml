@@ -6,11 +6,9 @@ views:
     badges: []
 
     cards:
-      # Forecast from your provider
       - type: weather-forecast
         entity: weather.kneplatt72
 
-      # Clean "Now" panel with live values
       - type: glance
         title: Now
         show_name: true
@@ -30,20 +28,27 @@ views:
             name: Gust
           - entity: sensor.kneplatt72_uv_index
             name: UV
+          - entity: sensor.uv_category_wx
+            name: UV Cat
           - entity: sensor.outdoor_pressure_wx
             name: Pressure
+          - entity: sensor.outdoor_visibility_wx
+            name: Visibility
 
-      # Controls and a single place to open all weather entities
       - type: entities
         title: Controls & All Entities
         show_header_toggle: false
         entities:
           - entity: input_boolean.weather_notifications_enabled
             name: Weather Notifications
+          - entity: binary_sensor.pressure_rising
+            name: Pressure Rising
+          - entity: binary_sensor.pressure_falling
+            name: Pressure Falling
+          - type: divider
           - entity: group.weather_dashboard_all
             name: All Weather Entities
 
-      # Compact mini line charts (built-in "sensor" card)
       - type: horizontal-stack
         cards:
           - type: sensor
@@ -58,7 +63,6 @@ views:
             entity: sensor.outdoor_wind_speed_wx
             name: Wind
 
-      # Quick gauges
       - type: horizontal-stack
         cards:
           - type: gauge
@@ -77,7 +81,6 @@ views:
             min: 0
             max: 11
 
-      # 24h history (requires history/recorder)
       - type: history-graph
         title: Last 24 hours
         hours_to_show: 24
@@ -88,7 +91,6 @@ views:
           - entity: sensor.outdoor_pressure_wx
           - entity: sensor.kneplatt72_uv_index
 
-      # Optional trends (mean/min/max)
       - type: statistics-graph
         title: 24h Trends
         days_to_show: 1

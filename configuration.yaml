@@ -53,6 +53,8 @@ recorder:
       - sensor.outdoor_feels_like
       - sensor.kneplatt72_uv_index
       - sensor.wind_gust
+      - sensor.outdoor_visibility_wx
+      - sensor.uv_category_wx
 
 
 logger:
