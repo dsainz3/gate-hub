@@ -1,0 +1,394 @@
+# ===============================
+# HUSKERS — PACKAGE
+# Eight-light Scarlet↔Cream chase (30s + variable) + Hail burst + Automations
+# ===============================
+
+# -------------------------------
+# Helpers
+# -------------------------------
+input_number:
+  huskers_chase_cycle_seconds:
+    name: 'Chase Cycle Length'
+    icon: mdi:speedometer
+    min: 8
+    max: 120
+    step: 1
+    mode: slider
+    unit_of_measurement: s
+    initial: 30
+
+  huskers_hail_bpm:
+    name: 'Hail Varsity BPM'
+    icon: mdi:metronome
+    min: 80
+    max: 180
+    step: 1
+    mode: slider
+    unit_of_measurement: bpm
+    initial: 132
+
+input_boolean:
+  huskers_automations_enabled:
+    name: Huskers Automations Enabled
+    icon: mdi:flag-checkered
+    initial: true
+
+# -------------------------------
+# Group (all 8 lights)
+# -------------------------------
+group:
+  huskers_eight_lights:
+    name: Huskers – All Eight Lights
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+      - light.light_front_left
+      - light.light_front_right
+      - light.light_garage_left
+      - light.lights_garage_center
+      - light.light_garage_right
+      - light.spare_light
+
+# -------------------------------
+# Scenes
+# -------------------------------
+scene:
+  - id: huskers_seven_all_scarlet
+    name: Huskers – All Scarlet (8)
+    entities:
+      light.light_theater_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_theater_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_front_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_front_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_garage_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.lights_garage_center:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_garage_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.spare_light:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+
+# -------------------------------
+# Scripts — 30s chase / variable chase / hail burst
+# -------------------------------
+script:
+  huskers_chase30_start:
+    alias: 'Huskers: Start 30s Cream Chase'
+    mode: restart
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase_speed_loop }
+        continue_on_error: true
+      - service: scene.create
+        data:
+          scene_id: huskers_before_chase
+          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+      - service: light.turn_on
+        target: { entity_id: group.huskers_eight_lights }
+        data: { hs_color: [355, 90], brightness: 255, transition: 0.1 }
+      - service: script.turn_on
+        target: { entity_id: script.huskers_chase30_loop }
+
+  huskers_chase30_loop:
+    alias: 'Huskers: 30s Cream Chase LOOP'
+    mode: restart
+    sequence:
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+          step_ms: 3750
+          xfade_ms: 300
+          hold_ms: '{{ (step_ms - xfade_ms) | int }}'
+      - repeat:
+          while:
+            - condition: template
+              value_template: '{{ true }}'
+          sequence:
+            - repeat:
+                for_each: '{{ lights }}'
+                sequence:
+                  - variables:
+                      current: '{{ repeat.item }}'
+                      prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
+                      previous: '{{ lights[prev_index|int] }}'
+                  - service: light.turn_on
+                    target: { entity_id: '{{ previous }}' }
+                    data: { hs_color: [355, 90], brightness: 255, transition: 0.3 }
+                  - service: light.turn_on
+                    target: { entity_id: '{{ current }}' }
+                    data: { hs_color: [45, 20], brightness: 255, transition: 0.3 }
+                  - delay: { milliseconds: '{{ hold_ms | int }}' }
+
+  huskers_chase30_stop:
+    alias: 'Huskers: Stop 30s Chase (restore)'
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase30_loop }
+      - delay: '00:00:00.5'
+      - service: scene.turn_on
+        target: { entity_id: scene.huskers_before_chase }
+        continue_on_error: true
+
+  huskers_chase_speed_start:
+    alias: 'Huskers: Start Cream Chase (Variable-Speed)'
+    mode: restart
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase30_loop }
+        continue_on_error: true
+      - service: scene.create
+        data:
+          scene_id: huskers_before_chase
+          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+      - service: light.turn_on
+        target: { entity_id: group.huskers_eight_lights }
+        data: { hs_color: [355, 90], brightness: 255, transition: 0.1 }
+      - service: script.turn_on
+        target: { entity_id: script.huskers_chase_speed_loop }
+
+  huskers_chase_speed_loop:
+    alias: 'Huskers: Cream Chase LOOP (Variable-Speed)'
+    mode: restart
+    sequence:
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+      - repeat:
+          while:
+            - condition: template
+              value_template: '{{ true }}'
+          sequence:
+            - variables:
+                cycle_secs: "{{ states('input_number.huskers_chase_cycle_seconds') | float(30) }}"
+                step_ms: '{{ (cycle_secs * 1000 / (lights | count)) | int }}'
+                xfade_ms: 300
+                hold_ms: '{{ [ (step_ms - xfade_ms) | int, 250 ] | max }}'
+            - repeat:
+                for_each: '{{ lights }}'
+                sequence:
+                  - variables:
+                      current: '{{ repeat.item }}'
+                      prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
+                      previous: '{{ lights[prev_index|int] }}'
+                  - service: light.turn_on
+                    target: { entity_id: '{{ previous }}' }
+                    data: { hs_color: [355, 90], brightness: 255, transition: 0.3 }
+                  - service: light.turn_on
+                    target: { entity_id: '{{ current }}' }
+                    data: { hs_color: [45, 20], brightness: 255, transition: 0.3 }
+                  - delay: { milliseconds: '{{ hold_ms | int }}' }
+
+  huskers_chase_speed_stop:
+    alias: 'Huskers: Stop Cream Chase (Variable-Speed, restore)'
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase_speed_loop }
+      - delay: '00:00:00.5'
+      - service: scene.turn_on
+        target: { entity_id: scene.huskers_before_chase }
+        continue_on_error: true
+
+  huskers_hail_burst_8s:
+    alias: 'Huskers: Hail Varsity Burst (8s BPM)'
+    mode: restart
+    sequence:
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+          bpm: "{{ states('input_number.huskers_hail_bpm') | float(132) }}"
+          beat_ms: '{{ (60000 / bpm) | int }}'
+          total_ms: 8000
+          beats: '{{ (total_ms / beat_ms) | round(0) | int }}'
+          # Patterns reformatted as nested lists for yamllint-friendliness
+          patterns:
+            - - light.light_theater_left
+              - light.light_front_right
+            - - light.light_theater_right
+              - light.light_front_left
+            - - light.light_garage_left
+              - light.spare_light
+            - - light.lights_garage_center
+              - light.light_garage_right
+            - - light.light_theater_left
+              - light.light_garage_left
+              - light.spare_light
+            - - light.light_theater_right
+              - light.light_garage_right
+              - light.light_front_right
+      - service: scene.create
+        data:
+          scene_id: huskers_before_burst
+          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+      - service: light.turn_on
+        target: { entity_id: group.huskers_eight_lights }
+        data: { hs_color: [355, 90], brightness: 255, transition: 0.05 }
+      - repeat:
+          count: '{{ [beats, 1] | max }}'
+          sequence:
+            - variables:
+                cream_set: '{{ patterns | random }}'
+            - service: light.turn_on
+              target: { entity_id: group.huskers_eight_lights }
+              data: { hs_color: [355, 90], brightness: 255, transition: 0 }
+            - service: light.turn_on
+              target:
+                entity_id: '{{ cream_set }}'
+              data: { hs_color: [45, 20], brightness: 255, transition: 0.05 }
+            - delay:
+                milliseconds: '{{ (beat_ms * 0.80) | int }}'
+      - service: scene.turn_on
+        target: { entity_id: scene.huskers_before_burst }
+        continue_on_error: true
+
+# -------------------------------
+# Automations (Huskers-only)
+# -------------------------------
+automation:
+  - id: huskers_pregame_tminus20_showtime
+    alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
+    description: 'Starts the 30s cream chase ~20 minutes before kickoff.'
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.huskers_kickoff_in_effective
+        above: 19
+        below: 21
+        for: { seconds: 5 }
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_automations_enabled
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.huskers_game_mode
+        state: 'on'
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.huskers_pregame_window
+            state: 'on'
+          - condition: state
+            entity_id: input_boolean.huskers_test_mode
+            state: 'on'
+      - condition: state
+        entity_id: script.huskers_chase30_loop
+        state: 'off'
+      - condition: state
+        entity_id: script.huskers_chase_speed_loop
+        state: 'off'
+    action:
+      - service: script.turn_on
+        target: { entity_id: script.huskers_chase30_start }
+      - service: logbook.log
+        data:
+          name: Huskers Automation
+          message: 'Pregame show started (T-{{ states("sensor.huskers_kickoff_in_effective") }} min)'
+
+  - id: huskers_td_burst_on_score
+    alias: 'Huskers: Touchdown Celebration'
+    description: 'Fires Hail Varsity BPM burst when Nebraska score increases.'
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.huskers_our_score_effective
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_automations_enabled
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.huskers_game_mode
+        state: 'on'
+      - condition: template
+        value_template: >-
+          {{ trigger.from_state is not none and
+             trigger.to_state is not none and
+             (trigger.to_state.state | int(0)) > (trigger.from_state.state | int(0)) }}
+    action:
+      - service: script.turn_on
+        target: { entity_id: script.huskers_hail_burst_8s }
+      - service: logbook.log
+        data:
+          name: Huskers Celebration
+          message: >-
+            Score: {{ trigger.from_state.state }} → {{ trigger.to_state.state }} (Hail burst)
+          entity_id: automation.huskers_td_burst_on_score
+
+  - id: huskers_postgame_cleanup
+    alias: 'Huskers: Postgame Cleanup'
+    description: 'Stops chase loops and restores lights when postgame window closes.'
+    initial_state: true
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.huskers_postgame_window
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_automations_enabled
+        state: 'on'
+      - condition: state
+        entity_id: input_boolean.huskers_game_mode
+        state: 'on'
+    action:
+      - parallel:
+          - service: script.turn_on
+            target: { entity_id: script.huskers_chase30_stop }
+          - service: script.turn_on
+            target: { entity_id: script.huskers_chase_speed_stop }
+      - service: logbook.log
+        data:
+          name: Huskers Automation
+          message: 'Postgame cleanup completed (loops stopped, state restored)'
+          entity_id: automation.huskers_postgame_cleanup
