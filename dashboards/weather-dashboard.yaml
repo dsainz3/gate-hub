@@ -1,4 +1,4 @@
-title: Weather 22 Dashboard
+title: Weather Dashboard
 views:
   - title: Weather
     path: weather
@@ -6,16 +6,11 @@ views:
     badges: []
 
     cards:
-      - type: markdown
-        content: |
-          # Weather
-          Live conditions & forecast
-
       # Forecast from your provider
       - type: weather-forecast
         entity: weather.kneplatt72
 
-      # Quick at-a-glance now values
+      # Clean "Now" panel with live values
       - type: glance
         title: Now
         show_name: true
@@ -34,13 +29,13 @@ views:
           - entity: sensor.wind_gust
             name: Gust
           - entity: sensor.kneplatt72_uv_index
-            name: UV Index
-          - entity: sensor.kneplatt72_pressure_24h_change
-            name: Pressure Δ24h
+            name: UV
+          - entity: sensor.outdoor_pressure_wx
+            name: Pressure
 
-      # Handy toggles / all-entities list
+      # Controls and a single place to open all weather entities
       - type: entities
-        title: Details
+        title: Controls & All Entities
         show_header_toggle: false
         entities:
           - entity: input_boolean.weather_notifications_enabled
@@ -48,7 +43,7 @@ views:
           - entity: group.weather_dashboard_all
             name: All Weather Entities
 
-      # Mini line charts (built-in 'sensor' card)
+      # Compact mini line charts (built-in "sensor" card)
       - type: horizontal-stack
         cards:
           - type: sensor
@@ -61,10 +56,9 @@ views:
             graph: line
           - type: sensor
             entity: sensor.outdoor_wind_speed_wx
-            name: Wind Speed
-            graph: line
+            name: Wind
 
-      # Gauges for quick read
+      # Quick gauges
       - type: horizontal-stack
         cards:
           - type: gauge
@@ -91,9 +85,10 @@ views:
           - entity: sensor.outdoor_temperature_wx
           - entity: sensor.outdoor_humidity_wx
           - entity: sensor.outdoor_wind_speed_wx
+          - entity: sensor.outdoor_pressure_wx
           - entity: sensor.kneplatt72_uv_index
 
-      # Statistics graph (mean/min/max)
+      # Optional trends (mean/min/max)
       - type: statistics-graph
         title: 24h Trends
         days_to_show: 1

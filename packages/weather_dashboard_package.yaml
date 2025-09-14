@@ -7,52 +7,73 @@ group:
   weather_dashboard_all:
     name: Weather Dashboard – All
     entities:
-      - sensor.bedroom_purifier_airquality
-      - sensor.kneplatt72_humidity_24h_change
-      - sensor.kneplatt72_pressure_24h_change
-      - sensor.kneplatt72_temperature_24h_mean
-      - sensor.kneplatt72_uv_index
-      - sensor.kneplatt72_wind_speed_24h_avg
-      - sensor.wind_gust
       - weather.kneplatt72
+      - sensor.outdoor_temperature_wx
+      - sensor.outdoor_humidity_wx
+      - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_pressure_wx
+      - sensor.outdoor_dew_point_approx
+      - sensor.outdoor_feels_like
+      - sensor.kneplatt72_uv_index
+      - sensor.wind_gust
 
 template:
   - sensor:
+      # Current temp from weather.kneplatt72
       - name: 'Outdoor Temperature (wx)'
         unique_id: wx_temp_primary
-        state: "{{ states('sensor.kneplatt72_temperature_24h_mean') }}"
-        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_temperature_24h_mean','unit_of_measurement') or '°F' }}"
+        state: "{{ state_attr('weather.kneplatt72', 'temperature') }}"
+        unit_of_measurement: '°F'
         device_class: temperature
         state_class: measurement
-        availability: "{{ not is_state('sensor.kneplatt72_temperature_24h_mean','unavailable') }}"
+        availability: "{{ state_attr('weather.kneplatt72','temperature') is not none }}"
 
+      # Current humidity
       - name: 'Outdoor Humidity (wx)'
         unique_id: wx_humidity_primary
-        state: "{{ states('sensor.kneplatt72_humidity_24h_change') }}"
-        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_humidity_24h_change','unit_of_measurement') or '%' }}"
+        state: "{{ state_attr('weather.kneplatt72', 'humidity') }}"
+        unit_of_measurement: '%'
         device_class: humidity
         state_class: measurement
-        availability: "{{ not is_state('sensor.kneplatt72_humidity_24h_change','unavailable') }}"
+        availability: "{{ state_attr('weather.kneplatt72','humidity') is not none }}"
 
+      # Current wind speed
       - name: 'Outdoor Wind Speed (wx)'
         unique_id: wx_wind_primary
-        state: "{{ states('sensor.kneplatt72_wind_speed_24h_avg') }}"
-        unit_of_measurement: "{{ state_attr('sensor.kneplatt72_wind_speed_24h_avg','unit_of_measurement') or 'mph' }}"
+        state: "{{ state_attr('weather.kneplatt72', 'wind_speed') }}"
+        unit_of_measurement: 'mph'
         icon: mdi:weather-windy
         state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
 
+      # Pressure from weather entity → convert hPa to inHg (fallback to native sensor if available)
+      - name: 'Outdoor Pressure (wx)'
+        unique_id: wx_pressure
+        state: >-
+          {% set p = state_attr('weather.kneplatt72', 'pressure') | float(0) %}
+          {% if p > 0 %}
+            {{ (p * 0.02953) | round(2) }}
+          {% else %}
+            {{ states('sensor.kneplatt72_pressure_24h_change') }}
+          {% endif %}
+        unit_of_measurement: 'inHg'
+        icon: mdi:gauge
+        state_class: measurement
+
+      # Dew point (approx.) from current Temp/Humidity
       - name: 'Outdoor Dew Point (approx)'
         unique_id: wx_dewpoint
         unit_of_measurement: '°F'
         device_class: temperature
         state_class: measurement
         state: >-
-          {% set T = states('sensor.kneplatt72_temperature_24h_mean')|float(0) %}
-          {% set RH = states('sensor.kneplatt72_humidity_24h_change')|float(0) %}
+          {% set T = state_attr('weather.kneplatt72','temperature')|float(0) %}
+          {% set RH = state_attr('weather.kneplatt72','humidity')|float(0) %}
           {% set Tc = (T - 32) * 5 / 9 %}
           {% set TdC = Tc - ((100 - RH) / 5) %}
           {{ (TdC * 9 / 5 + 32) | round(1) }}
 
+      # Feels like (heat index / wind chill)
       - name: 'Outdoor Feels Like'
         unique_id: wx_feels_like
         unit_of_measurement: '°F'
@@ -60,9 +81,9 @@ template:
         state_class: measurement
         icon: mdi:thermometer-auto
         state: >-
-          {% set T = states('sensor.kneplatt72_temperature_24h_mean')|float(0) %}
-          {% set RH = states('sensor.kneplatt72_humidity_24h_change')|float(0) %}
-          {% set V = states('sensor.kneplatt72_wind_speed_24h_avg')|float(0) %}
+          {% set T = state_attr('weather.kneplatt72','temperature')|float(0) %}
+          {% set RH = state_attr('weather.kneplatt72','humidity')|float(0) %}
+          {% set V  = state_attr('weather.kneplatt72','wind_speed')|float(0) %}
           {% if T >= 80 and RH >= 40 %}
             {% set HI = -42.379 + 2.04901523*T + 10.14333127*RH - 0.22475541*T*RH - 0.00683783*T*T - 0.05481717*RH*RH + 0.00122874*T*T*RH + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH %}
             {{ HI | round(1) }}

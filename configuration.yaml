@@ -45,15 +45,15 @@ recorder:
       - light.lights_garage_center
       - light.light_garage_right
       - light.permanent_outdoor_lights
-
-      # 👇 Add these to record the weather sensors used by the dashboard
       - sensor.outdoor_temperature_wx
       - sensor.outdoor_humidity_wx
       - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_pressure_wx
       - sensor.outdoor_dew_point_approx
       - sensor.outdoor_feels_like
-      # (Optional) record the weather entity state too:
-      # - weather.kneplatt72
+      - sensor.kneplatt72_uv_index
+      - sensor.wind_gust
+
 
 logger:
   default: info
@@ -65,7 +65,7 @@ lovelace:
     weather-dashboard:        # <-- must contain a hyphen
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
-      title: Weather 111
+      title: Weather Package
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
       # require_admin: false   # optional
