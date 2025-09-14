@@ -1,0 +1,286 @@
+# ===============================
+# HUSKERS LIGHTING — PACKAGE
+# Eight-light Scarlet↔Cream chase (30s + variable speed)
+# ===============================
+
+# Helper (speed control). If you already define this elsewhere,
+# remove the other copy to avoid duplication.
+input_number:
+  huskers_chase_cycle_seconds:
+    name: 'Chase Cycle Length'
+    icon: mdi:speedometer
+    min: 8
+    max: 120
+    step: 1
+    mode: slider
+    unit_of_measurement: s
+    initial: 30
+
+# Light group (for convenience)
+group:
+  huskers_eight_lights:
+    name: Huskers – All Eight Lights
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+      - light.light_front_left
+      - light.light_front_right
+      - light.light_garage_left
+      - light.lights_garage_center
+      - light.light_garage_right
+      - light.spare_light
+
+# All-scarlet scene (scarlet = hs[355,90], cream = hs[45,20])
+scene:
+  - id: huskers_seven_all_scarlet
+    name: Huskers – All Scarlet (8)
+    entities:
+      light.light_theater_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_theater_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_front_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_front_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_garage_left:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.lights_garage_center:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.light_garage_right:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+      light.spare_light:
+        state: 'on'
+        hs_color: [355, 90]
+        brightness: 255
+
+script:
+  # ===========================
+  # Fixed 30-second chase
+  # ===========================
+  huskers_chase30_start:
+    alias: 'Huskers: Start 30s Cream Chase'
+    mode: restart
+    sequence:
+      # stop other loop if running
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase_speed_loop }
+        continue_on_error: true
+
+      # snapshot current states for restore
+      - service: scene.create
+        data:
+          scene_id: huskers_before_chase
+          snapshot_entities:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+
+      # base Scarlet first (quick)
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+        data:
+          hs_color: [355, 90]
+          brightness: 255
+          transition: 0.1
+
+      # launch the loop
+      - service: script.turn_on
+        target:
+          entity_id: script.huskers_chase30_loop
+
+  huskers_chase30_loop:
+    alias: 'Huskers: 30s Cream Chase LOOP'
+    mode: restart
+    sequence:
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+          step_ms: 3750 # 30s / 8 = 3.75s per step
+          xfade_ms: 300 # crossfade time counted inside step
+          hold_ms: '{{ (step_ms - xfade_ms) | int }}'
+      - repeat:
+          while:
+            - condition: template
+              value_template: '{{ true }}'
+          sequence:
+            - repeat:
+                for_each: '{{ lights }}'
+                sequence:
+                  - variables:
+                      current: '{{ repeat.item }}'
+                      prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
+                      previous: '{{ lights[prev_index|int] }}'
+                  # crossfade: previous back to Scarlet, current to Cream
+                  - service: light.turn_on
+                    target: { entity_id: '{{ previous }}' }
+                    data:
+                      hs_color: [355, 90]
+                      brightness: 255
+                      transition: 0.3
+                  - service: light.turn_on
+                    target: { entity_id: '{{ current }}' }
+                    data:
+                      hs_color: [45, 20]
+                      brightness: 255
+                      transition: 0.3
+                  - delay:
+                      milliseconds: '{{ hold_ms | int }}'
+
+  huskers_chase30_stop:
+    alias: 'Huskers: Stop 30s Chase (restore)'
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase30_loop }
+      - delay: '00:00:00.5'
+      - service: scene.turn_on
+        target:
+          entity_id: scene.huskers_before_chase
+        continue_on_error: true
+
+  # ===========================
+  # Variable-speed chase
+  # ===========================
+  huskers_chase_speed_start:
+    alias: 'Huskers: Start Cream Chase (Variable-Speed)'
+    mode: restart
+    sequence:
+      # stop fixed loop if running
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase30_loop }
+        continue_on_error: true
+
+      # snapshot current states
+      - service: scene.create
+        data:
+          scene_id: huskers_before_chase
+          snapshot_entities:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+
+      # base Scarlet
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.light_theater_left
+            - light.light_theater_right
+            - light.light_front_left
+            - light.light_front_right
+            - light.light_garage_left
+            - light.lights_garage_center
+            - light.light_garage_right
+            - light.spare_light
+        data:
+          hs_color: [355, 90]
+          brightness: 255
+          transition: 0.1
+
+      # start loop
+      - service: script.turn_on
+        target:
+          entity_id: script.huskers_chase_speed_loop
+
+  huskers_chase_speed_loop:
+    alias: 'Huskers: Cream Chase LOOP (Variable-Speed)'
+    mode: restart
+    sequence:
+      - variables:
+          lights:
+            [
+              'light.light_theater_left',
+              'light.light_theater_right',
+              'light.light_front_left',
+              'light.light_front_right',
+              'light.light_garage_left',
+              'light.lights_garage_center',
+              'light.light_garage_right',
+              'light.spare_light',
+            ]
+      - repeat:
+          while:
+            - condition: template
+              value_template: '{{ true }}'
+          sequence:
+            - variables:
+                cycle_secs: "{{ states('input_number.huskers_chase_cycle_seconds') | float(30) }}"
+                step_ms: '{{ (cycle_secs * 1000 / (lights | count)) | int }}'
+                xfade_ms: 300
+                # keep at least 250ms hold so very short cycles don't thrash
+                hold_ms: '{{ [ (step_ms - xfade_ms) | int, 250 ] | max }}'
+            - repeat:
+                for_each: '{{ lights }}'
+                sequence:
+                  - variables:
+                      current: '{{ repeat.item }}'
+                      prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
+                      previous: '{{ lights[prev_index|int] }}'
+                  - service: light.turn_on
+                    target: { entity_id: '{{ previous }}' }
+                    data:
+                      hs_color: [355, 90]
+                      brightness: 255
+                      transition: 0.3
+                  - service: light.turn_on
+                    target: { entity_id: '{{ current }}' }
+                    data:
+                      hs_color: [45, 20]
+                      brightness: 255
+                      transition: 0.3
+                  - delay:
+                      milliseconds: '{{ hold_ms | int }}'
+
+  huskers_chase_speed_stop:
+    alias: 'Huskers: Stop Cream Chase (Variable-Speed, restore)'
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target: { entity_id: script.huskers_chase_speed_loop }
+      - delay: '00:00:00.5'
+      - service: scene.turn_on
+        target:
+          entity_id: scene.huskers_before_chase
+        continue_on_error: true

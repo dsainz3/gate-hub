@@ -1,0 +1,124 @@
+title: Theater Control Dashboard
+views:
+  - title: Theater
+    path: theater
+    icon: mdi:theater
+    badges: []
+    cards:
+      - type: markdown
+        content: |
+          # Theater Control Dashboard
+          **Cream Chase – 30s & Variable Speed**
+
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: START 30s Chase
+            icon: mdi:play-speed
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_start
+          - type: button
+            name: START (Variable-Speed)
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_start
+          - type: button
+            name: STOP & Restore
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_stop
+          - type: button
+            name: All-Scarlet Scene
+            icon: mdi:palette
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              target:
+                entity_id: scene.huskers_seven_all_scarlet
+
+      - type: entities
+        title: Chase Speed
+        show_header_toggle: false
+        entities:
+          - entity: input_number.huskers_chase_cycle_seconds
+            name: Cycle Length (seconds)
+
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: light
+            entity: light.light_theater_left
+            name: Theater Left
+          - type: light
+            entity: light.light_theater_right
+            name: Theater Right
+          - type: light
+            entity: light.light_front_left
+            name: Front Left
+          - type: light
+            entity: light.light_front_right
+            name: Front Right
+          - type: light
+            entity: light.light_garage_left
+            name: Garage Left
+          - type: light
+            entity: light.lights_garage_center
+            name: Garage Center
+          - type: light
+            entity: light.light_garage_right
+            name: Garage Right
+          - type: light
+            entity: light.spare_light
+            name: Spare Light
+
+      - type: entities
+        title: Script Status & Debug
+        show_header_toggle: false
+        entities:
+          - entity: script.huskers_chase30_start
+            name: Start (30s)
+            secondary_info: last-changed
+          - entity: script.huskers_chase30_loop
+            name: Loop 30s (internal)
+            secondary_info: last-changed
+          - entity: script.huskers_chase30_stop
+            name: Stop & Restore
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_start
+            name: Start (variable-speed)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_loop
+            name: Loop variable (internal)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_stop
+            name: Stop variable (restore)
+            secondary_info: last-changed
+          - entity: scene.huskers_seven_all_scarlet
+            name: All-Scarlet Scene
+            secondary_info: last-changed
+          - entity: input_number.huskers_chase_cycle_seconds
+            name: Cycle Length (s)
+            secondary_info: last-changed
+
+      - type: history-graph
+        title: Light Activity (Last 2 Hours)
+        hours_to_show: 2
+        entities:
+          - entity: light.light_theater_left
+          - entity: light.light_theater_right
+          - entity: light.light_front_left
+          - entity: light.light_front_right
+          - entity: light.light_garage_left
+          - entity: light.lights_garage_center
+          - entity: light.light_garage_right
+          - entity: light.spare_light

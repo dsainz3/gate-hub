@@ -73,10 +73,17 @@ logger:
 
 lovelace:
   dashboards:
-    weather-dashboard:        # <-- must contain a hyphen
+    weather-dashboard:              # must contain a hyphen
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
       title: Weather Package
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
-      # require_admin: false   # optional
+      # require_admin: false
+
+    huskers-dashboard:              # example: your Theater dashboard
+      mode: yaml
+      filename: dashboards/huskers-dashboard.yaml
+      title: Theater
+      icon: mdi:theater
+      show_in_sidebar: true
