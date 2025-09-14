@@ -1,8 +1,8 @@
-# dashboards/huskers-enhanced.yaml
-title: Huskers Command Center
+# dashboards/huskers-free.yaml
+title: Memorial Stadium Command Center
 views:
   - title: Super Fan Dashboard
-    path: huskers-enhanced
+    path: huskers-main
     icon: mdi:football-helmet
     cards:
       # Quick Refresh Controls
@@ -20,19 +20,18 @@ views:
               data: {}
               target:
                 entity_id:
-                  - sensor.huskers_records_raw
-                  - sensor.b1g_standings_raw
-                  - sensor.huskers_schedule_raw
-                  - sensor.cfb_scoreboard_raw
-                  - sensor.huskers_season_stats_raw
-                  - sensor.cfb_rankings_raw
+                  - sensor.cfb_scoreboard_espn
+                  - sensor.nebraska_schedule_espn
+                  - sensor.nebraska_team_info_espn
+                  - sensor.big_ten_teams_espn
+                  - sensor.cfb_rankings_espn
 
       # ===============================
       # PREGAME VIEW
       # ===============================
       - type: conditional
         conditions:
-          - entity: binary_sensor.huskers_is_pregame
+          - entity: binary_sensor.huskers_is_pregame_free
             state: 'on'
         card:
           type: vertical-stack
@@ -46,15 +45,15 @@ views:
               title: 🎯 Next Game Information
               show_header_toggle: false
               entities:
-                - entity: sensor.huskers_next_game
+                - entity: sensor.huskers_next_game_free
                   name: Matchup
                   icon: mdi:football
-                - entity: sensor.huskers_next_game
+                - entity: sensor.huskers_next_game_free
                   type: attribute
                   attribute: kickoff_time
                   name: Kickoff Time
                   icon: mdi:clock-outline
-                - entity: sensor.huskers_next_game
+                - entity: sensor.huskers_next_game_free
                   type: attribute
                   attribute: home_away
                   name: Home/Away
@@ -64,74 +63,13 @@ views:
             - type: horizontal-stack
               cards:
                 - type: entity
-                  entity: sensor.huskers_record_overall
+                  entity: sensor.huskers_record_free
                   name: Overall Record
                   icon: mdi:trophy
                 - type: entity
-                  entity: sensor.huskers_record_conference
-                  name: Big Ten Record
-                  icon: mdi:football
-                - type: entity
-                  entity: sensor.huskers_current_rankings
-                  name: Rankings
+                  entity: sensor.huskers_rankings_free
+                  name: AP Ranking
                   icon: mdi:podium-gold
-
-            # Team Ratings
-            - type: entities
-              title: 📊 Team Ratings & Analytics
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_ratings_summary
-                  name: SP+ Rating
-                  icon: mdi:chart-line
-                - entity: sensor.huskers_ratings_summary
-                  type: attribute
-                  attribute: elo_rating
-                  name: ELO Rating
-                  icon: mdi:trending-up
-                - entity: sensor.huskers_ratings_summary
-                  type: attribute
-                  attribute: fpi_rating
-                  name: FPI Rating
-                  icon: mdi:calculator-variant
-                - entity: sensor.huskers_ratings_summary
-                  type: attribute
-                  attribute: talent_rating
-                  name: Talent Rating
-                  icon: mdi:account-star
-
-            # Season Stats Preview
-            - type: horizontal-stack
-              cards:
-                - type: entity
-                  entity: sensor.huskers_offense_stats
-                  name: Offense
-                  icon: mdi:run-fast
-                - type: entity
-                  entity: sensor.huskers_defense_stats
-                  name: Defense
-                  icon: mdi:shield
-
-            # Key Players
-            - type: entities
-              title: ⭐ Key Players
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_key_players
-                  type: attribute
-                  attribute: leading_passer
-                  name: Leading Passer
-                  icon: mdi:football-american
-                - entity: sensor.huskers_key_players
-                  type: attribute
-                  attribute: leading_rusher
-                  name: Leading Rusher
-                  icon: mdi:run
-                - entity: sensor.huskers_key_players
-                  type: attribute
-                  attribute: leading_receiver
-                  name: Leading Receiver
-                  icon: mdi:hand-front-right
 
             # Light Controls
             - type: horizontal-stack
@@ -166,7 +104,7 @@ views:
       # ===============================
       - type: conditional
         conditions:
-          - entity: binary_sensor.huskers_is_live
+          - entity: binary_sensor.huskers_is_live_free
             state: 'on'
         card:
           type: vertical-stack
@@ -180,29 +118,39 @@ views:
               title: 🏆 Live Scoreboard
               show_header_toggle: false
               entities:
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   name: Game Status
                   icon: mdi:football
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: home_team
                   name: Home Team
                   icon: mdi:home
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: home_score
                   name: Home Score
                   icon: mdi:scoreboard
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: away_team
                   name: Away Team
                   icon: mdi:airplane-takeoff
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: away_score
                   name: Away Score
                   icon: mdi:scoreboard-outline
+                - entity: sensor.huskers_game_status_free
+                  type: attribute
+                  attribute: quarter
+                  name: Quarter
+                  icon: mdi:clock
+                - entity: sensor.huskers_game_status_free
+                  type: attribute
+                  attribute: clock
+                  name: Game Clock
+                  icon: mdi:timer
 
             # Celebration Controls
             - type: horizontal-stack
@@ -249,7 +197,7 @@ views:
       # ===============================
       - type: conditional
         conditions:
-          - entity: binary_sensor.huskers_is_postgame
+          - entity: binary_sensor.huskers_is_postgame_free
             state: 'on'
         card:
           type: vertical-stack
@@ -263,19 +211,19 @@ views:
               title: 🏁 Game Result
               show_header_toggle: false
               entities:
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: home_team
                   name: Home Team
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: home_score
                   name: Home Score
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: away_team
                   name: Away Team
-                - entity: sensor.huskers_live_game_status
+                - entity: sensor.huskers_game_status_free
                   type: attribute
                   attribute: away_score
                   name: Away Score
@@ -304,64 +252,52 @@ views:
           - type: horizontal-stack
             cards:
               - type: gauge
-                entity: sensor.huskers_record_overall
+                entity: sensor.huskers_record_free
                 name: Win Percentage
                 needle: true
                 min: 0
                 max: 1
                 attribute: percentage
               - type: entity
-                entity: sensor.huskers_recruiting_class
-                name: Recruiting Rank
-                icon: mdi:school
+                entity: sensor.huskers_rankings_free
+                name: AP Ranking
+                icon: mdi:podium-gold
 
-          # Detailed Stats
+          # Record Details
           - type: entities
-            title: 📊 Season Statistics
+            title: 📊 Season Record
             show_header_toggle: false
             entities:
-              - entity: sensor.huskers_offense_stats
+              - entity: sensor.huskers_record_free
+                name: Overall Record
+                icon: mdi:trophy
+              - entity: sensor.huskers_record_free
                 type: attribute
-                attribute: total_yards_per_game
-                name: Total Offense (yds/game)
-                icon: mdi:chart-line
-              - entity: sensor.huskers_offense_stats
+                attribute: wins
+                name: Wins
+                icon: mdi:check-circle
+              - entity: sensor.huskers_record_free
                 type: attribute
-                attribute: passing_yards_per_game
-                name: Passing Offense
-                icon: mdi:football-american
-              - entity: sensor.huskers_offense_stats
+                attribute: losses
+                name: Losses
+                icon: mdi:close-circle
+              - entity: sensor.huskers_record_free
                 type: attribute
-                attribute: rushing_yards_per_game
-                name: Rushing Offense
-                icon: mdi:run
-              - entity: sensor.huskers_offense_stats
-                type: attribute
-                attribute: points_per_game
-                name: Points Per Game
-                icon: mdi:scoreboard
-              - entity: sensor.huskers_defense_stats
-                type: attribute
-                attribute: yards_allowed_per_game
-                name: Total Defense (allowed)
-                icon: mdi:shield
-              - entity: sensor.huskers_defense_stats
-                type: attribute
-                attribute: points_allowed_per_game
-                name: Points Allowed
-                icon: mdi:shield-outline
+                attribute: percentage
+                name: Win Percentage
+                icon: mdi:percent
 
       # Big Ten Standings
       - type: markdown
         title: 🏆 Big Ten Standings
         content: |
-          {{ states('sensor.b1g_standings_detailed') }}
+          {{ states('sensor.big_ten_standings_free') }}
 
       # Complete Schedule
       - type: markdown
         title: 📅 Complete Schedule
         content: |
-          {{ states('sensor.huskers_schedule_enhanced') }}
+          {{ states('sensor.huskers_schedule_free') }}
 
       # Light Controls (always available)
       - type: entities
@@ -414,290 +350,87 @@ views:
         title: 🔧 Debug & Status
         show_header_toggle: false
         entities:
-          - entity: sensor.huskers_records_raw
-            name: Records Data Status
-            icon: mdi:database-check
-          - entity: sensor.cfb_scoreboard_raw
+          - entity: sensor.cfb_scoreboard_espn
             name: Scoreboard Data Status
             icon: mdi:scoreboard
-          - entity: sensor.huskers_season_stats_raw
-            name: Season Stats Status
-            icon: mdi:chart-bar
-          - entity: sensor.cfb_rankings_raw
+          - entity: sensor.nebraska_schedule_espn
+            name: Schedule Data Status
+            icon: mdi:calendar
+          - entity: sensor.nebraska_team_info_espn
+            name: Team Info Status
+            icon: mdi:information
+          - entity: sensor.cfb_rankings_espn
             name: Rankings Data Status
             icon: mdi:podium-gold
-          - entity: binary_sensor.huskers_is_pregame
+          - entity: binary_sensor.huskers_is_pregame_free
             name: Is Pregame
-          - entity: binary_sensor.huskers_is_live
+          - entity: binary_sensor.huskers_is_live_free
             name: Is Live Game
-          - entity: binary_sensor.huskers_is_postgame
+          - entity: binary_sensor.huskers_is_postgame_free
             name: Is Postgame
 
   # ===============================
-  # ANALYTICS & DEEP DIVE VIEW
+  # SCHEDULE & STANDINGS VIEW
   # ===============================
-  - title: Analytics Deep Dive
-    path: huskers-analytics
-    icon: mdi:chart-multiple
+  - title: Schedule & Standings
+    path: huskers-schedule
+    icon: mdi:calendar-month
     cards:
-      # Team Performance Analytics
       - type: markdown
         content: |
-          # 📊 Advanced Analytics Dashboard
+          # 📅 Schedule & Conference Standings
 
-      # Performance Metrics Grid
+      # Current Season Record
       - type: horizontal-stack
         cards:
           - type: entity
-            entity: sensor.huskers_ratings_summary
-            name: SP+ Rating
-            icon: mdi:trending-up
+            entity: sensor.huskers_record_free
+            name: Season Record
+            icon: mdi:trophy
           - type: entity
-            entity: sensor.huskers_ratings_summary
-            attribute: elo_rating
-            name: ELO Rating
-            icon: mdi:chart-line
-          - type: entity
-            entity: sensor.huskers_ratings_summary
-            attribute: fpi_rating
-            name: FPI Rating
-            icon: mdi:calculator-variant
-          - type: entity
-            entity: sensor.huskers_ratings_summary
-            attribute: talent_rating
-            name: Talent Rating
-            icon: mdi:account-star
-
-      # Offensive Analytics
-      - type: entities
-        title: ⚡ Offensive Performance
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_offense_stats
-            type: attribute
-            attribute: total_yards_per_game
-            name: Total Yards/Game
-            icon: mdi:speedometer
-          - entity: sensor.huskers_offense_stats
-            type: attribute
-            attribute: passing_yards_per_game
-            name: Passing Yards/Game
-            icon: mdi:football-american
-          - entity: sensor.huskers_offense_stats
-            type: attribute
-            attribute: rushing_yards_per_game
-            name: Rushing Yards/Game
-            icon: mdi:run-fast
-          - entity: sensor.huskers_offense_stats
-            type: attribute
-            attribute: points_per_game
-            name: Points/Game
-            icon: mdi:target
-
-      # Defensive Analytics
-      - type: entities
-        title: 🛡️ Defensive Performance
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_defense_stats
-            type: attribute
-            attribute: yards_allowed_per_game
-            name: Yards Allowed/Game
-            icon: mdi:shield-alert
-          - entity: sensor.huskers_defense_stats
-            type: attribute
-            attribute: points_allowed_per_game
-            name: Points Allowed/Game
-            icon: mdi:shield-cross
-
-      # Team Comparison Charts (placeholder for future enhancement)
-      - type: markdown
-        content: |
-          ## 📈 Performance Trends
-          *Enhanced charts and comparisons will be added here*
-
-          ### Key Metrics vs Conference Average
-          - **Offense**: {{ states.sensor.huskers_offense_stats.attributes.total_yards_per_game | round(1) }} yds/game
-          - **Defense**: {{ states.sensor.huskers_defense_stats.attributes.yards_allowed_per_game | round(1) }} yds allowed/game
-          - **Recruiting**: Ranked #{{ states.sensor.huskers_recruiting_class.attributes.national_rank }} nationally
-
-      # Recruiting Information
-      - type: entities
-        title: 🎓 Recruiting & Development
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_recruiting_class
-            name: Class Ranking
-            icon: mdi:school
-          - entity: sensor.huskers_recruiting_class
-            type: attribute
-            attribute: points
-            name: Recruiting Points
-            icon: mdi:star-four-points
-
-      # Historical Performance (placeholder)
-      - type: markdown
-        content: |
-          ## 📚 Season Progression
-          *Track improvement over the season*
-
-          **Current Record**: {{ states('sensor.huskers_record_overall') }}
-          **Conference Record**: {{ states('sensor.huskers_record_conference') }}
-          **Win Percentage**: {{ (states.sensor.huskers_record_overall.attributes.percentage | float * 100) | round(1) }}%
-
-  # ===============================
-  # ROSTER & PLAYERS VIEW
-  # ===============================
-  - title: Roster & Players
-    path: huskers-roster
-    icon: mdi:account-group
-    cards:
-      - type: markdown
-        content: |
-          # 👥 Team Roster & Player Stats
-
-      # Key Players Overview
-      - type: entities
-        title: ⭐ Statistical Leaders
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_key_players
-            type: attribute
-            attribute: leading_passer
-            name: Leading Passer
-            icon: mdi:football-american
-          - entity: sensor.huskers_key_players
-            type: attribute
-            attribute: leading_rusher
-            name: Leading Rusher
-            icon: mdi:run
-          - entity: sensor.huskers_key_players
-            type: attribute
-            attribute: leading_receiver
-            name: Leading Receiver
-            icon: mdi:hand-front-right
-
-      # Roster Information (placeholder for future roster breakdown)
-      - type: markdown
-        content: |
-          ## 📋 Full Roster
-          *Detailed roster information will be displayed here when roster data is processed*
-
-          ### Position Groups
-          - **Quarterbacks**: *Processing...*
-          - **Running Backs**: *Processing...*
-          - **Wide Receivers**: *Processing...*
-          - **Offensive Line**: *Processing...*
-          - **Defensive Line**: *Processing...*
-          - **Linebackers**: *Processing...*
-          - **Defensive Backs**: *Processing...*
-          - **Special Teams**: *Processing...*
-
-      # Player Development Tracking
-      - type: markdown
-        content: |
-          ## 📈 Player Development
-          *Track individual player progress throughout the season*
-
-          ### Recruiting Pipeline
-          **Current Class Rank**: #{{ states.sensor.huskers_recruiting_class.attributes.national_rank }}
-          **Recruiting Points**: {{ states.sensor.huskers_recruiting_class.attributes.points }}
-
-  # ===============================
-  # CONFERENCE & NATIONAL VIEW
-  # ===============================
-  - title: Conference & National
-    path: huskers-conference
-    icon: mdi:trophy-variant
-    cards:
-      - type: markdown
-        content: |
-          # 🏆 Big Ten & National Picture
-
-      # Rankings Overview
-      - type: horizontal-stack
-        cards:
-          - type: entity
-            entity: sensor.huskers_current_rankings
-            name: Current Ranking
+            entity: sensor.huskers_rankings_free
+            name: AP Ranking
             icon: mdi:podium-gold
-          - type: entity
-            entity: sensor.huskers_ratings_summary
-            name: SP+ Rating
-            icon: mdi:chart-line-variant
 
-      # Conference Standings (detailed)
+      # Next Game Highlight
+      - type: entities
+        title: 🎯 Next Game
+        show_header_toggle: false
+        entities:
+          - entity: sensor.huskers_next_game_free
+            name: Next Matchup
+            icon: mdi:football
+          - entity: sensor.huskers_next_game_free
+            type: attribute
+            attribute: opponent
+            name: Opponent
+            icon: mdi:account-group
+          - entity: sensor.huskers_next_game_free
+            type: attribute
+            attribute: kickoff_time
+            name: Kickoff Time
+            icon: mdi:clock-outline
+          - entity: sensor.huskers_next_game_free
+            type: attribute
+            attribute: home_away
+            name: Location
+            icon: mdi:map-marker
+
+      # Full Schedule
       - type: markdown
-        title: 🏈 Big Ten Conference Standings
+        title: 📋 Complete 2025 Schedule
         content: |
-          {{ states('sensor.b1g_standings_detailed') }}
+          {{ states('sensor.huskers_schedule_free') }}
 
-      # National Context
+      # Conference Standings
       - type: markdown
+        title: 🏆 Big Ten Conference
         content: |
-          ## 🌟 National Rankings Context
+          {{ states('sensor.big_ten_standings_free') }}
 
-          ### Computer Polls & Metrics
-          - **SP+ Ranking**: #{{ states.sensor.huskers_ratings_summary.attributes.sp_ranking }}
-          - **ELO Rating**: {{ states.sensor.huskers_ratings_summary.attributes.elo_rating | round(1) }}
-          - **FPI Rating**: {{ states.sensor.huskers_ratings_summary.attributes.fpi_rating | round(2) }}
-
-          ### Talent & Recruiting
-          - **Talent Rating**: {{ states.sensor.huskers_ratings_summary.attributes.talent_rating | round(2) }}
-          - **Recruiting Class**: #{{ states.sensor.huskers_recruiting_class.attributes.national_rank }}
-
-      # Upcoming Games Context
-      - type: entities
-        title: 🗓️ Schedule Context
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_next_game
-            name: Next Game
-            icon: mdi:calendar-clock
-
-  # ===============================
-  # SETTINGS & AUTOMATION
-  # ===============================
-  - title: Settings & Control
-    path: huskers-settings
-    icon: mdi:cog
-    cards:
-      - type: markdown
-        content: |
-          # ⚙️ System Settings & Controls
-
-      # Automation Controls
-      - type: entities
-        title: 🤖 Automation Settings
-        show_header_toggle: false
-        entities:
-          - entity: input_boolean.huskers_automations_enabled
-            name: Enable Automations
-            icon: mdi:auto-fix
-          - entity: input_boolean.huskers_effects_enabled
-            name: Enable Light Effects
-            icon: mdi:lightbulb-group
-          - entity: input_boolean.huskers_reverse_direction
-            name: Reverse Light Direction
-            icon: mdi:swap-horizontal
-
-      # Light Effect Settings
-      - type: entities
-        title: 💡 Light Effect Configuration
-        show_header_toggle: false
-        entities:
-          - entity: input_number.huskers_global_brightness
-            name: Global Brightness
-          - entity: input_number.huskers_chase_cycle_seconds
-            name: Chase Cycle Duration
-          - entity: input_number.huskers_hail_bpm
-            name: Hail Varsity BPM
-
-      # Data Refresh Controls
-      - type: entities
-        title: 🔄 Data Management
-        show_header_toggle: false
-        entities:
+      # Quick Actions
+      - type: horizontal-stack
+        cards:
           - type: button
             name: Refresh Schedule
             icon: mdi:calendar-refresh
@@ -705,7 +438,7 @@ views:
               action: call-service
               service: homeassistant.update_entity
               target:
-                entity_id: sensor.huskers_schedule_raw
+                entity_id: sensor.nebraska_schedule_espn
           - type: button
             name: Refresh Standings
             icon: mdi:trophy-award
@@ -713,15 +446,7 @@ views:
               action: call-service
               service: homeassistant.update_entity
               target:
-                entity_id: sensor.b1g_standings_raw
-          - type: button
-            name: Refresh Statistics
-            icon: mdi:chart-bar
-            tap_action:
-              action: call-service
-              service: homeassistant.update_entity
-              target:
-                entity_id: sensor.huskers_season_stats_raw
+                entity_id: sensor.big_ten_teams_espn
           - type: button
             name: Refresh Rankings
             icon: mdi:podium
@@ -729,56 +454,108 @@ views:
               action: call-service
               service: homeassistant.update_entity
               target:
-                entity_id: sensor.cfb_rankings_raw
+                entity_id: sensor.cfb_rankings_espn
 
-      # System Status
+  # ===============================
+  # LIGHT SHOW CONTROL
+  # ===============================
+  - title: Light Show Control
+    path: huskers-lights
+    icon: mdi:lightbulb-group
+    cards:
+      - type: markdown
+        content: |
+          # 💡 Huskers Light Show Control
+
+      # Automation Status
       - type: entities
-        title: 📊 System Status
+        title: 🤖 Automation Status
         show_header_toggle: false
         entities:
-          - entity: sensor.huskers_records_raw
-            name: Records API Status
-            icon: mdi:api
-          - entity: sensor.cfb_scoreboard_raw
-            name: Scoreboard API Status
-            icon: mdi:scoreboard
-          - entity: sensor.huskers_season_stats_raw
-            name: Statistics API Status
-            icon: mdi:chart-line
-          - entity: sensor.cfb_rankings_raw
-            name: Rankings API Status
-            icon: mdi:trending-up
+          - entity: input_boolean.huskers_automations_enabled
+            name: Automations Enabled
+            icon: mdi:auto-fix
+          - entity: input_boolean.huskers_effects_enabled
+            name: Effects Enabled
+            icon: mdi:lightbulb-group
+          - entity: input_boolean.huskers_game_mode
+            name: Game Mode Active
+            icon: mdi:football
+          - entity: input_boolean.huskers_test_mode
+            name: Test Mode
+            icon: mdi:test-tube
 
-      # Manual Light Controls
-      - type: horizontal-stack
-        cards:
+      # Light Effect Settings
+      - type: entities
+        title: ⚙️ Light Configuration
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.huskers_reverse_direction
+            name: Reverse Direction
+            icon: mdi:swap-horizontal
+          - entity: input_number.huskers_global_brightness
+            name: Global Brightness
+          - entity: input_number.huskers_chase_cycle_seconds
+            name: Chase Cycle Duration
+          - entity: input_number.huskers_hail_bpm
+            name: Hail Varsity BPM
+          - entity: input_number.huskers_celebration_intensity
+            name: Celebration Intensity
+
+      # Manual Controls
+      - type: entities
+        title: 🎮 Manual Controls
+        show_header_toggle: false
+        entities:
           - type: button
-            name: Test Chase
-            icon: mdi:play-circle-outline
+            name: Start 30s Chase
+            icon: mdi:play-speed
+            action_name: Start
             tap_action:
               action: call-service
               service: script.turn_on
               target:
                 entity_id: script.huskers_chase30_start
           - type: button
-            name: Test Hail Burst
-            icon: mdi:music-note-outline
+            name: Start Variable Chase
+            icon: mdi:play-circle
+            action_name: Start
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_start
+          - type: button
+            name: Hail Varsity Burst
+            icon: mdi:music-note
+            action_name: Play
             tap_action:
               action: call-service
               service: script.turn_on
               target:
                 entity_id: script.huskers_hail_burst_8s
           - type: button
-            name: All Scarlet
+            name: Step Once
+            icon: mdi:skip-forward
+            action_name: Step
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_step_once
+          - type: button
+            name: All Scarlet Scene
             icon: mdi:palette
+            action_name: Activate
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
                 entity_id: scene.huskers_seven_all_scarlet
           - type: button
-            name: Stop All
+            name: Stop All & Restore
             icon: mdi:stop-circle
+            action_name: Stop
             tap_action:
               action: call-service
               service: script.turn_on
@@ -786,3 +563,201 @@ views:
                 entity_id:
                   - script.huskers_chase30_stop
                   - script.huskers_chase_speed_stop
+
+      # Individual Light Controls
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: light
+            entity: light.light_theater_left
+            name: Theater Left
+          - type: light
+            entity: light.light_theater_right
+            name: Theater Right
+          - type: light
+            entity: light.light_front_left
+            name: Front Left
+          - type: light
+            entity: light.light_front_right
+            name: Front Right
+          - type: light
+            entity: light.light_garage_left
+            name: Garage Left
+          - type: light
+            entity: light.lights_garage_center
+            name: Garage Center
+          - type: light
+            entity: light.light_garage_right
+            name: Garage Right
+          - type: light
+            entity: light.spare_light
+            name: Spare Light
+
+      # Script Status
+      - type: entities
+        title: 📊 Script Status
+        show_header_toggle: false
+        entities:
+          - entity: script.huskers_chase30_start
+            name: 30s Chase (Start)
+            secondary_info: last-changed
+          - entity: script.huskers_chase30_loop
+            name: 30s Chase (Loop)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_start
+            name: Variable Chase (Start)
+            secondary_info: last-changed
+          - entity: script.huskers_chase_speed_loop
+            name: Variable Chase (Loop)
+            secondary_info: last-changed
+          - entity: script.huskers_hail_burst_8s
+            name: Hail Burst
+            secondary_info: last-changed
+          - entity: scene.huskers_seven_all_scarlet
+            name: All Scarlet Scene
+            secondary_info: last-changed
+
+      # Light Activity History
+      - type: history-graph
+        title: 💡 Light Activity (Last 4 Hours)
+        hours_to_show: 4
+        entities:
+          - entity: light.light_theater_left
+          - entity: light.light_theater_right
+          - entity: light.light_front_left
+          - entity: light.light_front_right
+          - entity: light.light_garage_left
+          - entity: light.lights_garage_center
+          - entity: light.light_garage_right
+          - entity: light.spare_light
+
+  # ===============================
+  # SYSTEM STATUS
+  # ===============================
+  - title: System Status
+    path: huskers-system
+    icon: mdi:cog
+    cards:
+      - type: markdown
+        content: |
+          # 🔧 System Status & Configuration
+
+      # API Status
+      - type: entities
+        title: 📡 Data Source Status
+        show_header_toggle: false
+        entities:
+          - entity: sensor.cfb_scoreboard_espn
+            name: ESPN Scoreboard API
+            icon: mdi:scoreboard
+          - entity: sensor.nebraska_schedule_espn
+            name: Nebraska Schedule API
+            icon: mdi:calendar
+          - entity: sensor.nebraska_team_info_espn
+            name: Team Information API
+            icon: mdi:information
+          - entity: sensor.big_ten_teams_espn
+            name: Big Ten Teams API
+            icon: mdi:account-group
+          - entity: sensor.cfb_rankings_espn
+            name: College Football Rankings API
+            icon: mdi:podium-gold
+
+      # Game Phase Status
+      - type: entities
+        title: 🏈 Game Phase Detection
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.huskers_is_pregame_free
+            name: Is Pregame
+            icon: mdi:clock-start
+          - entity: binary_sensor.huskers_is_live_free
+            name: Is Live Game
+            icon: mdi:play-circle
+          - entity: binary_sensor.huskers_is_postgame_free
+            name: Is Postgame
+            icon: mdi:clock-end
+
+      # Data Refresh Controls
+      - type: entities
+        title: 🔄 Manual Data Refresh
+        show_header_toggle: false
+        entities:
+          - type: button
+            name: Refresh Live Scores
+            icon: mdi:scoreboard-outline
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id: sensor.cfb_scoreboard_espn
+          - type: button
+            name: Refresh Schedule
+            icon: mdi:calendar-refresh
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id: sensor.nebraska_schedule_espn
+          - type: button
+            name: Refresh Team Info
+            icon: mdi:information-outline
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id: sensor.nebraska_team_info_espn
+          - type: button
+            name: Refresh Big Ten Data
+            icon: mdi:account-group-outline
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id: sensor.big_ten_teams_espn
+          - type: button
+            name: Refresh Rankings
+            icon: mdi:podium-outline
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id: sensor.cfb_rankings_espn
+          - type: button
+            name: Refresh All Data
+            icon: mdi:refresh
+            tap_action:
+              action: call-service
+              service: homeassistant.update_entity
+              target:
+                entity_id:
+                  - sensor.cfb_scoreboard_espn
+                  - sensor.nebraska_schedule_espn
+                  - sensor.nebraska_team_info_espn
+                  - sensor.big_ten_teams_espn
+                  - sensor.cfb_rankings_espn
+
+      # System Information
+      - type: markdown
+        content: |
+          ## 📋 System Information
+
+          **Data Source**: ESPN Hidden API (Free)
+          **Update Frequency**:
+          - Live Scores: Every 5 minutes during games
+          - Schedule: Every 30 minutes
+          - Rankings: Every 60 minutes
+          - Team Info: Every 60 minutes
+
+          **Features Available**:
+          ✅ Live game scores and status
+          ✅ Complete Nebraska schedule
+          ✅ Season record tracking
+          ✅ AP Poll rankings
+          ✅ Big Ten standings
+          ✅ Game phase detection
+          ✅ Automated light shows
+
+          **ESPN Team ID**: 158 (Nebraska Cornhuskers)
+          **Big Ten Conference ID**: 4

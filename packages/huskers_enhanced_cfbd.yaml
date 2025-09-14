@@ -1,729 +1,430 @@
-# packages/huskers_enhanced_cfbd.yaml
-# Comprehensive Nebraska football data from CollegeFootballData API (CFBD)
+# packages/huskers_free_api.yaml
+# Free Nebraska football data using ESPN's public endpoints
 
 rest:
-  # ===== EXISTING ENDPOINTS (enhanced) =====
+  # ===== FREE ESPN API ENDPOINTS =====
 
-  # Nebraska record (overall + conference)
-  - resource_template: 'https://api.collegefootballdata.com/records?year={{ now().year }}&team=Nebraska'
+  # College Football Scoreboard (live scores, current day)
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'
     method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 600 # 10 min
+    scan_interval: 300
     sensor:
-      - name: huskers_records_raw
-        unique_id: huskers_records_raw
-        value_template: "{{ value | default('', true) }}"
+      - name: cfb_scoreboard_espn
+        unique_id: cfb_scoreboard_espn
+        value_template: >-
+          {{ (value_json.events | length) if (value_json is defined and value_json.events is defined) else 0 }}
+        json_attributes:
+          - events
+          - week
+          - season
 
-  # Big Ten conference standings
-  - resource_template: 'https://api.collegefootballdata.com/standings?year={{ now().year }}&conference=Big%20Ten'
+  # Nebraska Team Information
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158'
     method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 900 # 15 min
+    scan_interval: 3600
     sensor:
-      - name: b1g_standings_raw
-        unique_id: b1g_standings_raw
-        value_template: "{{ value | default('', true) }}"
+      - name: nebraska_team_info_espn
+        unique_id: nebraska_team_info_espn
+        value_template: >-
+          {{ value_json.team.displayName if (value_json is defined and value_json.team is defined) else "Nebraska" }}
+        json_attributes:
+          - team
 
-  # Nebraska schedule (entire year)
-  - resource_template: 'https://api.collegefootballdata.com/games?year={{ now().year }}&team=Nebraska'
+  # Big Ten Conference Teams
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?group=4'
     method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 1800 # 30 min
+    scan_interval: 1800
     sensor:
-      - name: huskers_schedule_raw
-        unique_id: huskers_schedule_raw
-        value_template: "{{ value | default('', true) }}"
+      - name: big_ten_teams_espn
+        unique_id: big_ten_teams_espn
+        value_template: >-
+          {% if value_json is defined and value_json.sports is defined and value_json.sports|length > 0
+                and value_json.sports[0].leagues is defined and value_json.sports[0].leagues|length > 0
+                and value_json.sports[0].leagues[0].teams is defined %}
+            {{ value_json.sports[0].leagues[0].teams | length }}
+          {% else %}0{% endif %}
+        json_attributes:
+          - sports
 
-  # ===== NEW COMPREHENSIVE DATA ENDPOINTS =====
-
-  # Current week games (for live scoring)
-  # NOTE: Week calc is approximate; adjust if needed for week-0/bye logic.
-  - resource_template: 'https://api.collegefootballdata.com/scoreboard?classification=fbs&week={{ ((now().timetuple().tm_yday - 244) // 7) + 1 }}&year={{ now().year }}'
+  # Nebraska Schedule (current season)
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158/schedule'
     method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 300 # 5 min during season
+    scan_interval: 1800
     sensor:
-      - name: cfb_scoreboard_raw
-        unique_id: cfb_scoreboard_raw
-        value_template: "{{ value | default('', true) }}"
+      - name: nebraska_schedule_espn
+        unique_id: nebraska_schedule_espn
+        value_template: >-
+          {{ (value_json.events | length) if (value_json is defined and value_json.events is defined) else 0 }}
+        json_attributes:
+          - events
+          - team
+          - requestedSeason
 
-  # Nebraska team stats (season)
-  - resource_template: 'https://api.collegefootballdata.com/stats/season?year={{ now().year }}&team=Nebraska'
+  # College Football Rankings
+  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings'
     method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 3600 # 60 min
+    scan_interval: 3600
     sensor:
-      - name: huskers_season_stats_raw
-        unique_id: huskers_season_stats_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Nebraska advanced stats
-  - resource_template: 'https://api.collegefootballdata.com/stats/season/advanced?year={{ now().year }}&team=Nebraska'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 3600 # 60 min
-    sensor:
-      - name: huskers_advanced_stats_raw
-        unique_id: huskers_advanced_stats_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Nebraska roster
-  - resource_template: 'https://api.collegefootballdata.com/roster?team=Nebraska&year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: huskers_roster_raw
-        unique_id: huskers_roster_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Nebraska recruiting rankings
-  - resource_template: 'https://api.collegefootballdata.com/recruiting/teams?team=Nebraska&year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: huskers_recruiting_raw
-        unique_id: huskers_recruiting_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Team rankings (polls)
-  - resource_template: 'https://api.collegefootballdata.com/rankings?year={{ now().year }}&week={{ ((now().timetuple().tm_yday - 244) // 7) + 1 }}&seasonType=regular'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 3600 # 60 min
-    sensor:
-      - name: cfb_rankings_raw
-        unique_id: cfb_rankings_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Betting lines for Nebraska games
-  - resource_template: 'https://api.collegefootballdata.com/lines?year={{ now().year }}&team=Nebraska'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 1800 # 30 min
-    sensor:
-      - name: huskers_betting_lines_raw
-        unique_id: huskers_betting_lines_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Team talent ratings
-  - resource_template: 'https://api.collegefootballdata.com/talent?year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: cfb_talent_raw
-        unique_id: cfb_talent_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # SP+ ratings
-  - resource_template: 'https://api.collegefootballdata.com/ratings/sp?year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: cfb_sp_ratings_raw
-        unique_id: cfb_sp_ratings_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # ELO ratings
-  - resource_template: 'https://api.collegefootballdata.com/ratings/elo?year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: cfb_elo_ratings_raw
-        unique_id: cfb_elo_ratings_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # FPI ratings
-  - resource_template: 'https://api.collegefootballdata.com/ratings/fpi?year={{ now().year }}'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 86400 # Daily
-    sensor:
-      - name: cfb_fpi_ratings_raw
-        unique_id: cfb_fpi_ratings_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Game media info (TV/Radio)
-  - resource_template: 'https://api.collegefootballdata.com/games/media?year={{ now().year }}&team=Nebraska'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 3600 # 60 min
-    sensor:
-      - name: huskers_media_raw
-        unique_id: huskers_media_raw
-        value_template: "{{ value | default('', true) }}"
-
-  # Nebraska player stats (key players)
-  - resource_template: 'https://api.collegefootballdata.com/stats/player/season?year={{ now().year }}&team=Nebraska'
-    method: GET
-    headers:
-      Authorization: !secret cfbd_bearer
-      Accept: application/json
-    scan_interval: 3600 # 60 min
-    sensor:
-      - name: huskers_player_stats_raw
-        unique_id: huskers_player_stats_raw
-        value_template: "{{ value | default('', true) }}"
+      - name: cfb_rankings_espn
+        unique_id: cfb_rankings_espn
+        value_template: >-
+          {{ (value_json.rankings | length) if (value_json is defined and value_json.rankings is defined) else 0 }}
+        json_attributes:
+          - rankings
 
 template:
   - sensor:
-      # ===== ENHANCED EXISTING SENSORS =====
+      # ===== PROCESSED NEBRASKA DATA =====
 
-      # Record (overall) - enhanced
-      - name: huskers_record_overall
-        unique_id: huskers_record_overall
+      # Nebraska Current Game Status (from scoreboard, today only)
+      - name: huskers_game_status_free
+        unique_id: huskers_game_status_free
         state: >-
-          {% set raw = states('sensor.huskers_records_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set rec = (data[0].get('total', {}) if data else {}) %}
-          {% set w = rec.get('wins') %}
-          {% set l = rec.get('losses') %}
-          {% set t = rec.get('ties', 0) %}
-          {% if w is not none and l is not none %}
-            {{ w }}-{{ l }}{{ '-' ~ t if t|int > 0 else '' }}
-          {% else %}unknown{% endif %}
-        attributes:
-          wins: >-
-            {% set raw = states('sensor.huskers_records_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {{ data[0].get('total', {}).get('wins', 0) if data else 0 }}
-          losses: >-
-            {% set raw = states('sensor.huskers_records_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {{ data[0].get('total', {}).get('losses', 0) if data else 0 }}
-          percentage: >-
-            {% set raw = states('sensor.huskers_records_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set rec = (data[0].get('total', {}) if data else {}) %}
-            {% set w = rec.get('wins', 0) | float %}
-            {% set l = rec.get('losses', 0) | float %}
-            {% if (w + l) > 0 %}
-              {{ "%.3f" | format(w / (w + l)) }}
-            {% else %}0.000{% endif %}
-
-      # Record (conference) - enhanced
-      - name: huskers_record_conference
-        unique_id: huskers_record_conference
-        state: >-
-          {% set raw = states('sensor.huskers_records_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set crecs = (data[0].get('conferenceRecords', []) if data else []) %}
-          {% set b1g = (crecs | selectattr('conference', 'eq', 'Big Ten') | list | first) %}
-          {% if b1g %}
-            {{ b1g.get('wins', 0) }}-{{ b1g.get('losses', 0) }}{{ '-' ~ b1g.get('ties', 0) if b1g.get('ties', 0)|int > 0 else '' }}
-          {% else %}unknown{% endif %}
-        attributes:
-          conf_wins: >-
-            {% set raw = states('sensor.huskers_records_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set crecs = (data[0].get('conferenceRecords', []) if data else []) %}
-            {% set b1g = (crecs | selectattr('conference', 'eq', 'Big Ten') | list | first) %}
-            {{ b1g.get('wins', 0) if b1g else 0 }}
-          conf_losses: >-
-            {% set raw = states('sensor.huskers_records_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set crecs = (data[0].get('conferenceRecords', []) if data else []) %}
-            {% set b1g = (crecs | selectattr('conference', 'eq', 'Big Ten') | list | first) %}
-            {{ b1g.get('losses', 0) if b1g else 0 }}
-
-      # ===== NEW COMPREHENSIVE SENSORS =====
-
-      # Current Rankings
-      - name: huskers_current_rankings
-        unique_id: huskers_current_rankings
-        state: >-
-          {% set raw = states('sensor.cfb_rankings_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set polls = {} %}
-          {% for week in data %}
-            {% for poll in week.get('polls', []) %}
-              {% for rank in poll.get('ranks', []) %}
-                {% if rank.get('school') == 'Nebraska' %}
-                  {% set _ = polls.update({poll.get('poll'): rank.get('rank')}) %}
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          {% endfor %}
-          {% if 'AP Top 25' in polls %}AP: #{{ polls['AP Top 25'] }}{% elif 'Coaches Poll' in polls %}Coaches: #{{ polls['Coaches Poll'] }}{% else %}Unranked{% endif %}
-        attributes:
-          ap_rank: >-
-            {% set raw = states('sensor.cfb_rankings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for week in data %}
-              {% for poll in week.get('polls', []) %}
-                {% if poll.get('poll') == 'AP Top 25' %}
-                  {% for rank in poll.get('ranks', []) %}
-                    {% if rank.get('school') == 'Nebraska' %}
-                      {{ rank.get('rank') }}
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          coaches_rank: >-
-            {% set raw = states('sensor.cfb_rankings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for week in data %}
-              {% for poll in week.get('polls', []) %}
-                {% if poll.get('poll') == 'Coaches Poll' %}
-                  {% for rank in poll.get('ranks', []) %}
-                    {% if rank.get('school') == 'Nebraska' %}
-                      {{ rank.get('rank') }}
-                    {% endif %}
-                  {% endfor %}
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-
-      # Team Ratings Summary
-      - name: huskers_ratings_summary
-        unique_id: huskers_ratings_summary
-        state: >-
-          {% set sp_raw = states('sensor.cfb_sp_ratings_raw') %}
-          {% set sp_data = sp_raw | from_json if sp_raw | length > 2 and sp_raw.startswith('[') else [] %}
-          {% set nebraska_sp = (sp_data | selectattr('team', 'eq', 'Nebraska') | list | first) %}
-          {% if nebraska_sp %}SP+: {{ "%.1f" | format(nebraska_sp.get('rating', 0)) }} (#{{ nebraska_sp.get('ranking', 'NR') }}){% else %}SP+: N/A{% endif %}
-        attributes:
-          sp_rating: >-
-            {% set raw = states('sensor.cfb_sp_ratings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set nebraska = (data | selectattr('team', 'eq', 'Nebraska') | list | first) %}
-            {{ nebraska.get('rating', 0) if nebraska else 0 }}
-          sp_ranking: >-
-            {% set raw = states('sensor.cfb_sp_ratings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set nebraska = (data | selectattr('team', 'eq', 'Nebraska') | list | first) %}
-            {{ nebraska.get('ranking', 'NR') if nebraska else 'NR' }}
-          elo_rating: >-
-            {% set raw = states('sensor.cfb_elo_ratings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set nebraska = (data | selectattr('team', 'eq', 'Nebraska') | list | first) %}
-            {{ nebraska.get('elo', 0) if nebraska else 0 }}
-          fpi_rating: >-
-            {% set raw = states('sensor.cfb_fpi_ratings_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set nebraska = (data | selectattr('team', 'eq', 'Nebraska') | list | first) %}
-            {{ nebraska.get('fpi', 0) if nebraska else 0 }}
-          talent_rating: >-
-            {% set raw = states('sensor.cfb_talent_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set nebraska = (data | selectattr('school', 'eq', 'Nebraska') | list | first) %}
-            {{ nebraska.get('talent', 0) if nebraska else 0 }}
-
-      # Season Statistics Summary
-      - name: huskers_offense_stats
-        unique_id: huskers_offense_stats
-        state: >-
-          {% set raw = states('sensor.huskers_season_stats_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set offense = (data | selectattr('category', 'eq', 'offense') | list) %}
-          {% set total_yards = (offense | selectattr('statName', 'eq', 'totalYards') | list | first) %}
-          {% if total_yards %}{{ total_yards.get('statValue', 0) | round(1) }} total yds/game{% else %}N/A{% endif %}
-        attributes:
-          total_yards_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set offense = (data | selectattr('category', 'eq', 'offense') | list) %}
-            {% set total_yards = (offense | selectattr('statName', 'eq', 'totalYards') | list | first) %}
-            {{ total_yards.get('statValue', 0) if total_yards else 0 }}
-          passing_yards_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set offense = (data | selectattr('category', 'eq', 'offense') | list) %}
-            {% set passing = (offense | selectattr('statName', 'eq', 'passingYards') | list | first) %}
-            {{ passing.get('statValue', 0) if passing else 0 }}
-          rushing_yards_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set offense = (data | selectattr('category', 'eq', 'offense') | list) %}
-            {% set rushing = (offense | selectattr('statName', 'eq', 'rushingYards') | list | first) %}
-            {{ rushing.get('statValue', 0) if rushing else 0 }}
-          points_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set offense = (data | selectattr('category', 'eq', 'offense') | list) %}
-            {% set points = (offense | selectattr('statName', 'eq', 'pointsPerGame') | list | first) %}
-            {{ points.get('statValue', 0) if points else 0 }}
-
-      # Defense Statistics
-      - name: huskers_defense_stats
-        unique_id: huskers_defense_stats
-        state: >-
-          {% set raw = states('sensor.huskers_season_stats_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set defense = (data | selectattr('category', 'eq', 'defense') | list) %}
-          {% set total_yards = (defense | selectattr('statName', 'eq', 'totalYards') | list | first) %}
-          {% if total_yards %}{{ total_yards.get('statValue', 0) | round(1) }} yds allowed/game{% else %}N/A{% endif %}
-        attributes:
-          yards_allowed_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set defense = (data | selectattr('category', 'eq', 'defense') | list) %}
-            {% set total_yards = (defense | selectattr('statName', 'eq', 'totalYards') | list | first) %}
-            {{ total_yards.get('statValue', 0) if total_yards else 0 }}
-          points_allowed_per_game: >-
-            {% set raw = states('sensor.huskers_season_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set defense = (data | selectattr('category', 'eq', 'defense') | list) %}
-            {% set points = (defense | selectattr('statName', 'eq', 'pointsPerGame') | list | first) %}
-            {{ points.get('statValue', 0) if points else 0 }}
-
-      # Live Game Status (enhanced)
-      - name: huskers_live_game_status
-        unique_id: huskers_live_game_status
-        state: >-
-          {% set raw = states('sensor.cfb_scoreboard_raw') %}
-          {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set huskers_game = namespace(game=none) %}
-          {% for game in games %}
-            {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-              {% set huskers_game.game = game %}
+          {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+          {% set game = namespace(ev=None) %}
+          {% for e in events %}
+            {% set comp = (e.competitions | default([])) | first %}
+            {% if comp and comp.competitors is defined %}
+              {% set has_huskers = comp.competitors | selectattr('team.id', 'equalto', '158') | list | count > 0 %}
+              {% if has_huskers %}
+                {% set game.ev = e %}
+                {% break %}
+              {% endif %}
             {% endif %}
           {% endfor %}
-          {% if huskers_game.game %}
-            {% set status = huskers_game.game.get('status', {}) %}
-            {{ status.get('description', 'Unknown') }}
+          {% if game.ev %}
+            {{ game.ev.status.type.description if (game.ev.status is defined and game.ev.status.type is defined) else 'Scheduled' }}
           {% else %}No game today{% endif %}
         attributes:
           home_team: >-
-            {% set raw = states('sensor.cfb_scoreboard_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for game in games %}
-              {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-                {{ game.get('homeTeam', {}).get('school', '') }}
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
               {% endif %}
             {% endfor %}
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {{ home.team.displayName if home and home.team is defined else '' }}
+            {% endif %}
           away_team: >-
-            {% set raw = states('sensor.cfb_scoreboard_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for game in games %}
-              {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-                {{ game.get('awayTeam', {}).get('school', '') }}
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
               {% endif %}
             {% endfor %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+              {{ away.team.displayName if away and away.team is defined else '' }}
+            {% endif %}
           home_score: >-
-            {% set raw = states('sensor.cfb_scoreboard_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for game in games %}
-              {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-                {{ game.get('homeTeam', {}).get('points', 0) }}
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
               {% endif %}
             {% endfor %}
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {{ (home.score | int(0)) if home is defined and home.score is defined else 0 }}
+            {% else %}0{% endif %}
           away_score: >-
-            {% set raw = states('sensor.cfb_scoreboard_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% for game in games %}
-              {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-                {{ game.get('awayTeam', {}).get('points', 0) }}
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(comp=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.comp = comp %}
+                {% break %}
               {% endif %}
             {% endfor %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+              {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
+            {% else %}0{% endif %}
+          quarter: >-
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(ev=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.ev = e %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.ev and game.ev.status is defined %}
+              {{ game.ev.status.period if game.ev.status.period is defined else 'N/A' }}
+            {% else %}N/A{% endif %}
+          clock: >-
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set game = namespace(ev=None) %}
+            {% for e in events %}
+              {% set comp = (e.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined and (comp.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
+                {% set game.ev = e %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if game.ev and game.ev.status is defined %}
+              {{ game.ev.status.displayClock if game.ev.status.displayClock is defined else 'N/A' }}
+            {% else %}N/A{% endif %}
 
-      # Key Players Summary
-      - name: huskers_key_players
-        unique_id: huskers_key_players
+      # Nebraska Schedule (Enhanced Markdown)
+      - name: huskers_schedule_free
+        unique_id: huskers_schedule_free
         state: >-
-          {% set raw = states('sensor.huskers_player_stats_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set qbs = (data | selectattr('category', 'eq', 'passing') | sort(attribute='stat', reverse=true) | list) %}
-          {% set rbs = (data | selectattr('category', 'eq', 'rushing') | sort(attribute='stat', reverse=true) | list) %}
-          {% if qbs %}QB: {{ qbs[0].get('player', 'Unknown') }}{% endif %}{% if rbs %} | RB: {{ rbs[0].get('player', 'Unknown') }}{% endif %}
-        attributes:
-          leading_passer: >-
-            {% set raw = states('sensor.huskers_player_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set qbs = (data | selectattr('category', 'eq', 'passing') | sort(attribute='stat', reverse=true) | list) %}
-            {{ qbs[0].get('player', 'Unknown') if qbs else 'Unknown' }}
-          leading_rusher: >-
-            {% set raw = states('sensor.huskers_player_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set rbs = (data | selectattr('category', 'eq', 'rushing') | sort(attribute='stat', reverse=true) | list) %}
-            {{ rbs[0].get('player', 'Unknown') if rbs else 'Unknown' }}
-          leading_receiver: >-
-            {% set raw = states('sensor.huskers_player_stats_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set wrs = (data | selectattr('category', 'eq', 'receiving') | sort(attribute='stat', reverse=true) | list) %}
-            {{ wrs[0].get('player', 'Unknown') if wrs else 'Unknown' }}
+          {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
+          {% if events %}
+            ## Nebraska Schedule ({{ now().year }})
 
-      # Recruiting Class Ranking
-      - name: huskers_recruiting_class
-        unique_id: huskers_recruiting_class
-        state: >-
-          {% set raw = states('sensor.huskers_recruiting_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% if data %}
-            {% set rec = data[0] %}
-            #{{ rec.get('rank', 'NR') }} ({{ rec.get('points', 0) | round(2) }} pts)
-          {% else %}N/A{% endif %}
-        attributes:
-          national_rank: >-
-            {% set raw = states('sensor.huskers_recruiting_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {{ data[0].get('rank', 'NR') if data else 'NR' }}
-          points: >-
-            {% set raw = states('sensor.huskers_recruiting_raw') %}
-            {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {{ data[0].get('points', 0) if data else 0 }}
-
-      # Enhanced Big Ten standings with more details (Markdown string)
-      - name: b1g_standings_detailed
-        unique_id: b1g_standings_detailed
-        state: >-
-          {% set raw = states('sensor.b1g_standings_raw') %}
-          {% set data = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% if not data %}
-            **Big Ten standings unavailable.**
+            {% for game in events %}
+              {% set comp = (game.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
+              {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
+              {% set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+              {% set loc = 'vs' if us_home else 'at' %}
+              {% set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if done %}
+                {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+                {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h.score if h and h.score is defined else '?' }}-{{ a.score if a and a.score is defined else '?' }}
+              {% else %}
+            - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
+              {% endif %}
+            {% endfor %}
           {% else %}
-            {% set teams = data[0].get('standings', []) %}
-            {% set rows = [] %}
-            {% for t in teams %}
-              {% set name = t.get('team') or t.get('school') %}
-              {% set cw = t.get('conferenceWins', t.get('conference', {}).get('wins', 0)) | int %}
-              {% set cl = t.get('conferenceLosses', t.get('conference', {}).get('losses', 0)) | int %}
-              {% set ow = t.get('overallWins', t.get('total', {}).get('wins', 0)) | int %}
-              {% set ol = t.get('overallLosses', t.get('total', {}).get('losses', 0)) | int %}
-              {% set cpct = (cw / (cw + cl) if (cw + cl) > 0 else 0) %}
-              {% set _ = rows.append({'name': name, 'cw': cw, 'cl': cl, 'ow': ow, 'ol': ol, 'cpct': cpct}) %}
-            {% endfor %}
-            {% set sorted = rows | sort(attribute='cpct', reverse=true) | list %}
-            ## Big Ten Standings ({{ now().year }})
-            | Rank | Team | Conf | Overall | Conf % |
-            |------|------|------|---------|--------|
-            {% for r in sorted -%}
-            | {{ loop.index }} | {{ r.name }} | {{ r.cw }}-{{ r.cl }} | {{ r.ow }}-{{ r.ol }} | {{ "%.3f" | format(r.cpct) }} |
-            {% endfor %}
+            Schedule unavailable
           {% endif %}
 
-      # Enhanced Nebraska schedule with betting lines and TV info (Markdown list)
-      - name: huskers_schedule_enhanced
-        unique_id: huskers_schedule_enhanced
+      # Nebraska Record
+      - name: huskers_record_free
+        unique_id: huskers_record_free
         state: >-
-          {% set games_raw = states('sensor.huskers_schedule_raw') %}
-          {% set games = games_raw | from_json if games_raw | length > 2 and games_raw.startswith('[') else [] %}
-          {% set media_raw = states('sensor.huskers_media_raw') %}
-          {% set media = media_raw | from_json if media_raw | length > 2 and media_raw.startswith('[') else [] %}
-          {% set lines_raw = states('sensor.huskers_betting_lines_raw') %}
-          {% set lines = lines_raw | from_json if lines_raw | length > 2 and lines_raw.startswith('[') else [] %}
-          {% if not games %}
-            **Schedule unavailable.**
+          {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
+          {% set w = 0 %}
+          {% set l = 0 %}
+          {% for game in events %}
+            {% set comp = (game.competitions | default([])) | first %}
+            {% if not comp or not (comp.status is defined and comp.status.type is defined and comp.status.type.completed) %}
+              {% continue %}
+            {% endif %}
+            {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+            {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+            {% if huskers and opp and huskers.score is defined and opp.score is defined %}
+              {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
+                {% set w = w + 1 %}
+              {% else %}
+                {% set l = l + 1 %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ w }}-{{ l }}
+        attributes:
+          wins: >-
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
+            {% set w = 0 %}
+            {% for game in events %}
+              {% set comp = (game.competitions | default([])) | first %}
+              {% if comp and comp.status is defined and comp.status.type is defined and comp.status.type.completed %}
+                {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+                {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+                {% if huskers and opp and huskers.score is defined and opp.score is defined and (huskers.score | int(0)) > (opp.score | int(0)) %}
+                  {% set w = w + 1 %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ w }}
+          losses: >-
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
+            {% set l = 0 %}
+            {% for game in events %}
+              {% set comp = (game.competitions | default([])) | first %}
+              {% if comp and comp.status is defined and comp.status.type is defined and comp.status.type.completed %}
+                {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+                {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+                {% if huskers and opp and huskers.score is defined and opp.score is defined and (huskers.score | int(0)) <= (opp.score | int(0)) %}
+                  {% set l = l + 1 %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ l }}
+          percentage: >-
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
+            {% set w = 0 %}
+            {% set l = 0 %}
+            {% for game in events %}
+              {% set comp = (game.competitions | default([])) | first %}
+              {% if comp and comp.status is defined and comp.status.type is defined and comp.status.type.completed %}
+                {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+                {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+                {% if huskers and opp and huskers.score is defined and opp.score is defined %}
+                  {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
+                    {% set w = w + 1 %}
+                  {% else %}
+                    {% set l = l + 1 %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {% set total = w + l %}
+            {{ ('%.3f' % (w / total)) if total > 0 else '0.000' }}
+
+      # Big Ten Standings (basic table from team summaries)
+      - name: big_ten_standings_free
+        unique_id: big_ten_standings_free
+        state: >-
+          {% set data = state_attr('sensor.big_ten_teams_espn', 'sports') %}
+          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0
+                and data[0].leagues[0].teams is defined %}
+            {% set teams = data[0].leagues[0].teams %}
+            ## Big Ten Standings ({{ now().year }})
+
+            | Rank | Team | Record |
+            |------|------|--------|
+            {%- for t in teams | sort(attribute='team.standingSummary', reverse=true) -%}
+            | {{ loop.index }} | {{ t.team.displayName }} | {{ t.team.standingSummary or 'N/A' }} |
+            {%- endfor -%}
           {% else %}
-            {% set lines_dict = {} %}
-            {% for line in lines %}
-              {% set game_id = line.get('id') %}
-              {% if game_id %}
-                {% set _ = lines_dict.update({game_id: line}) %}
-              {% endif %}
-            {% endfor %}
-            {% set media_dict = {} %}
-            {% for m in media %}
-              {% set game_id = m.get('id') %}
-              {% if game_id %}
-                {% set _ = media_dict.update({game_id: m}) %}
-              {% endif %}
-            {% endfor %}
-            ## Nebraska Schedule ({{ now().year }})
-            {% for g in games %}
-              {% set start = g.get('start_date') or g.get('startTime') or '' %}
-              {% set dt = as_datetime(start) if start else None %}
-              {% set date = (dt.astimezone(now().tzinfo).strftime('%b %-d, %-I:%M %p') if dt else 'TBD') %}
-              {% set home = g.get('home_team') %}
-              {% set away = g.get('away_team') %}
-              {% set opp = (away if home == 'Nebraska' else home) %}
-              {% set loc = ('vs' if home == 'Nebraska' else 'at') %}
-              {% set game_id = g.get('id') %}
-              {% set game_media = media_dict.get(game_id, {}) %}
-              {% set tv = game_media.get('outlet', 'TBD') %}
-              {% set game_lines = lines_dict.get(game_id, {}) %}
-              {% set spread = '' %}
-              {% if game_lines.get('lines') %}
-                {% for ln in game_lines.get('lines', []) %}
-                  {% if ln.get('provider') == 'consensus' %}
-                    {% set spread = ' (Line: ' ~ ln.get('spread', 'N/A') ~ ')' %}
+            Big Ten standings unavailable
+          {% endif %}
+
+      # Current Rankings (AP Poll)
+      - name: huskers_rankings_free
+        unique_id: huskers_rankings_free
+        state: >-
+          {% set rankings = state_attr('sensor.cfb_rankings_espn', 'rankings') or [] %}
+          {% set rank = 'Unranked' %}
+          {% for poll in rankings %}
+            {% if poll.name == 'AP Top 25' and poll.ranks is defined %}
+              {% for team in poll.ranks %}
+                {% if team.team is defined and team.team.id == '158' %}
+                  {% set rank = '#' ~ team.current %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+          {{ rank }}
+        attributes:
+          ap_rank: >-
+            {% set rankings = state_attr('sensor.cfb_rankings_espn', 'rankings') or [] %}
+            {% set rank = none %}
+            {% for poll in rankings %}
+              {% if poll.name == 'AP Top 25' and poll.ranks is defined %}
+                {% for team in poll.ranks %}
+                  {% if team.team is defined and team.team.id == '158' %}
+                    {% set rank = team.current %}
+                    {% break %}
                   {% endif %}
                 {% endfor %}
               {% endif %}
-              {% if g.get('completed') %}
-                {% set score = (g.get('home_points', '?') ~ '–' ~ g.get('away_points', '?')) %}
-                - **{{ date }}** — {{ loc }} {{ opp }} — **Final** {{ score }}{{ ' | ' ~ tv if tv != 'TBD' else '' }}
-              {% else %}
-                - **{{ date }}** — {{ loc }} {{ opp }}{{ spread }}{{ ' | ' ~ tv if tv != 'TBD' else '' }}
-              {% endif %}
             {% endfor %}
-          {% endif %}
+            {{ rank if rank is not none else '' }}
 
-      # Next Game Information
-      - name: huskers_next_game
-        unique_id: huskers_next_game
+      # Next Game Information (from schedule)
+      - name: huskers_next_game_free
+        unique_id: huskers_next_game_free
         state: >-
-          {% set raw = states('sensor.huskers_schedule_raw') %}
-          {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-          {% set next_game = namespace(game=none) %}
+          {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
           {% set now_ts = now().timestamp() %}
-          {% for g in games %}
-            {% if not g.get('completed') %}
-              {% set start = g.get('start_date') or g.get('startTime') %}
-              {% if start and as_timestamp(start) > now_ts and next_game.game is none %}
-                {% set next_game.game = g %}
-              {% endif %}
+          {% set next = namespace(g=None) %}
+          {% for g in events %}
+            {% set comp = (g.competitions | default([])) | first %}
+            {% if not comp %}{% continue %}{% endif %}
+            {% set dt = g.date | as_datetime if g.date is defined else none %}
+            {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+            {% if dt and not completed and dt.timestamp() > now_ts and next.g is none %}
+              {% set next.g = g %}
             {% endif %}
           {% endfor %}
-          {% if next_game.game %}
-            {% set start = next_game.game.get('start_date') or next_game.game.get('startTime') %}
-            {% set dt = as_datetime(start) if start else None %}
-            {% set home = next_game.game.get('home_team') %}
-            {% set away = next_game.game.get('away_team') %}
-            {% set opp = (away if home == 'Nebraska' else home) %}
-            {% set loc = ('vs' if home == 'Nebraska' else 'at') %}
-            {{ loc }} {{ opp }}{% if dt %} on {{ dt.astimezone(now().tzinfo).strftime('%b %-d') }}{% endif %}
+          {% if next.g %}
+            {% set comp = next.g.competitions | first %}
+            {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
+            {% set opponent = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+            {% set loc = 'vs' if us_home else 'at' %}
+            {{ loc }} {{ opponent }}
           {% else %}No upcoming games{% endif %}
         attributes:
           opponent: >-
-            {% set raw = states('sensor.huskers_schedule_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set next_game = namespace(game=none) %}
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
             {% set now_ts = now().timestamp() %}
-            {% for g in games %}
-              {% if not g.get('completed') %}
-                {% set start = g.get('start_date') or g.get('startTime') %}
-                {% if start and as_timestamp(start) > now_ts and next_game.game is none %}
-                  {% set next_game.game = g %}
-                {% endif %}
+            {% set next = namespace(g=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime if g.date is defined else none %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if dt and not completed and dt.timestamp() > now_ts and next.g is none %}
+                {% set next.g = g %}
               {% endif %}
             {% endfor %}
-            {% if next_game.game %}
-              {% set home = next_game.game.get('home_team') %}
-              {% set away = next_game.game.get('away_team') %}
-              {{ away if home == 'Nebraska' else home }}
-            {% else %}None{% endif %}
+            {% if next.g %}
+              {% set comp = next.g.competitions | first %}
+              {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
+              {% set opponent = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+              {{ opponent }}
+            {% else %}''{% endif %}
           kickoff_time: >-
-            {% set raw = states('sensor.huskers_schedule_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set next_game = namespace(game=none) %}
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
             {% set now_ts = now().timestamp() %}
-            {% for g in games %}
-              {% if not g.get('completed') %}
-                {% set start = g.get('start_date') or g.get('startTime') %}
-                {% if start and as_timestamp(start) > now_ts and next_game.game is none %}
-                  {% set next_game.game = g %}
-                {% endif %}
+            {% set next = namespace(g=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime if g.date is defined else none %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if dt and not completed and dt.timestamp() > now_ts and next.g is none %}
+                {% set next.g = g %}
               {% endif %}
             {% endfor %}
-            {% if next_game.game %}
-              {% set start = next_game.game.get('start_date') or next_game.game.get('startTime') %}
-              {{ start if start else 'TBD' }}
-            {% else %}None{% endif %}
+            {% if next.g %}
+              {{ next.g.date }}
+            {% else %}''{% endif %}
           home_away: >-
-            {% set raw = states('sensor.huskers_schedule_raw') %}
-            {% set games = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set next_game = namespace(game=none) %}
+            {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
             {% set now_ts = now().timestamp() %}
-            {% for g in games %}
-              {% if not g.get('completed') %}
-                {% set start = g.get('start_date') or g.get('startTime') %}
-                {% if start and as_timestamp(start) > now_ts and next_game.game is none %}
-                  {% set next_game.game = g %}
-                {% endif %}
+            {% set next = namespace(g=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime if g.date is defined else none %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if dt and not completed and dt.timestamp() > now_ts and next.g is none %}
+                {% set next.g = g %}
               {% endif %}
             {% endfor %}
-            {% if next_game.game %}
-              {% set home = next_game.game.get('home_team') %}
-              {{ 'home' if home == 'Nebraska' else 'away' }}
-            {% else %}None{% endif %}
+            {% if next.g %}
+              {% set comp = next.g.competitions | first %}
+              {{ 'home' if (comp.competitors is defined and comp.competitors|length >= 2 and comp.competitors[0].team.id == '158') else 'away' }}
+            {% else %}''{% endif %}
 
   - binary_sensor:
-      # Enhanced game phase detection
-      - name: huskers_is_pregame
-        unique_id: huskers_is_pregame
+      # Game Phase Detection
+      - name: huskers_is_pregame_free
+        unique_id: huskers_is_pregame_free
         state: >-
-          {% set scoreboard_raw = states('sensor.cfb_scoreboard_raw') %}
-          {% set games = scoreboard_raw | from_json if scoreboard_raw | length > 2 and scoreboard_raw.startswith('[') else [] %}
-          {% set huskers_game = namespace(found=false, status='') %}
-          {% for game in games %}
-            {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-              {% set huskers_game.found = true %}
-              {% set huskers_game.status = game.get('status', {}).get('description', '').lower() %}
-            {% endif %}
-          {% endfor %}
-          {% if huskers_game.found %}
-            {{ huskers_game.status in ['scheduled', 'pregame', 'pre'] }}
-          {% else %}
-            {# Fallback to schedule check #}
-            {% set raw = states('sensor.huskers_schedule_raw') %}
-            {% set schedule = raw | from_json if raw | length > 2 and raw.startswith('[') else [] %}
-            {% set today = now().date() %}
-            {% set game_today = namespace(found=false, kickoff='') %}
-            {% for g in schedule %}
-              {% if not g.get('completed') %}
-                {% set start = g.get('start_date') or g.get('startTime') %}
-                {% if start %}
-                  {% set game_date = as_datetime(start).date() %}
-                  {% if game_date == today %}
-                    {% set game_today.found = true %}
-                    {% set game_today.kickoff = start %}
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            {% endfor %}
-            {% if game_today.found %}
-              {{ as_timestamp(game_today.kickoff) > now().timestamp() }}
-            {% else %}
-              false
-            {% endif %}
-          {% endif %}
+          {% set status = states('sensor.huskers_game_status_free') %}
+          {{ status in ['Scheduled', 'Pre-Game', 'Postponed', 'Delayed'] }}
 
-      - name: huskers_is_live
-        unique_id: huskers_is_live
+      - name: huskers_is_live_free
+        unique_id: huskers_is_live_free
         state: >-
-          {% set scoreboard_raw = states('sensor.cfb_scoreboard_raw') %}
-          {% set games = scoreboard_raw | from_json if scoreboard_raw | length > 2 and scoreboard_raw.startswith('[') else [] %}
-          {% for game in games %}
-            {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-              {% set status = game.get('status', {}).get('description', '').lower() %}
-              {{ status in ['in progress', 'halftime', '1st quarter', '2nd quarter', '3rd quarter', '4th quarter', 'overtime'] }}
-            {% endif %}
-          {% endfor %}
+          {% set status = states('sensor.huskers_game_status_free') %}
+          {{ status in ['In Progress', 'Halftime', '1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter', 'Overtime', 'End Period'] }}
 
-      - name: huskers_is_postgame
-        unique_id: huskers_is_postgame
+      - name: huskers_is_postgame_free
+        unique_id: huskers_is_postgame_free
         state: >-
-          {% set scoreboard_raw = states('sensor.cfb_scoreboard_raw') %}
-          {% set games = scoreboard_raw | from_json if scoreboard_raw | length > 2 and scoreboard_raw.startswith('[') else [] %}
-          {% for game in games %}
-            {% if game.get('homeTeam', {}).get('school') == 'Nebraska' or game.get('awayTeam', {}).get('school') == 'Nebraska' %}
-              {% set status = game.get('status', {}).get('description', '').lower() %}
-              {{ status in ['final', 'completed'] }}
-            {% endif %}
-          {% endfor %}
+          {% set status = states('sensor.huskers_game_status_free') %}
+          {{ status in ['Final', 'Final/OT'] }}
