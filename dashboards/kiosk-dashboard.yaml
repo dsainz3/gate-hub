@@ -1,0 +1,192 @@
+# dashboards/kiosk-dashboard.yaml
+title: Kiosk
+views:
+  - title: Control
+    path: kiosk
+    icon: mdi:monitor-dashboard
+    cards:
+      # =========================
+      # Shows
+      # =========================
+      - type: entities
+        title: Shows
+        entities: []
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: button
+            name: Start 30s Chase
+            icon: mdi:run-fast
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_start
+            show_state: true
+
+          - type: button
+            name: Stop 30s Chase
+            icon: mdi:stop
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase30_stop
+            show_state: true
+
+          - type: button
+            name: Hail Burst (8s)
+            icon: mdi:music-note
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_hail_burst_8s
+            show_state: true
+
+          - type: button
+            name: Start Variable Chase
+            icon: mdi:play-speed
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_start
+            show_state: true
+
+          - type: button
+            name: Stop Variable Chase
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_speed_stop
+            show_state: true
+
+          - type: button
+            name: All Scarlet Scene
+            icon: mdi:palette
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              target:
+                entity_id: scene.huskers_seven_all_scarlet
+            show_state: true
+
+      # =========================
+      # Lights (Individual)
+      # =========================
+      - type: entities
+        title: Lights (Individual)
+        entities: []
+
+      - type: grid
+        columns: 4
+        square: false
+        cards:
+          - type: light
+            entity: light.light_theater_left
+          - type: light
+            entity: light.light_theater_right
+          - type: light
+            entity: light.light_front_left
+          - type: light
+            entity: light.light_front_right
+          - type: light
+            entity: light.light_garage_left
+          - type: light
+            entity: light.lights_garage_center
+          - type: light
+            entity: light.light_garage_right
+          - type: light
+            entity: light.spare_light
+
+      # =========================
+      # Groups
+      # =========================
+      - type: entities
+        title: Groups
+        entities:
+          - entity: group.kiosk_theater_lights
+            name: Theater (Group)
+          - entity: group.kiosk_front_lights
+            name: Front (Group)
+          - entity: group.kiosk_garage_lights
+            name: Garage (Group)
+          - entity: group.huskers_eight_lights
+            name: All Eight (Group)
+
+      # =========================
+      # Plugs (Power)
+      # =========================
+      - type: entities
+        title: Plugs (Power)
+        show_header_toggle: false
+        entities:
+          - switch.plug_basement_burner
+          - switch.plug_mainfloor_burner
+          - switch.plug_bedroom_burner
+
+      - type: button
+        name: All Plugs OFF (Safety)
+        icon: mdi:power-plug-off
+        tap_action:
+          action: call-service
+          service: script.turn_on
+          target:
+            entity_id: script.kiosk_all_plugs_off
+        show_state: false
+
+      # =========================
+      # Maintenance
+      # =========================
+      - type: entities
+        title: Maintenance
+        entities: []
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: button
+            name: Reload Automations
+            icon: mdi:refresh-auto
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_reload_automations
+            show_state: false
+
+          - type: button
+            name: Reload Scripts
+            icon: mdi:script
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_reload_scripts
+            show_state: false
+
+          - type: button
+            name: Reload Scenes
+            icon: mdi:theme-light-dark
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_reload_scenes
+            show_state: false
+
+          - type: button
+            name: Stop All Huskers Shows
+            icon: mdi:close-octagon
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_stop_all_huskers_shows
+            show_state: false

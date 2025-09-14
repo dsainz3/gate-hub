@@ -1,0 +1,65 @@
+# packages/kiosk.yaml
+
+group:
+  kiosk_theater_lights:
+    name: Kiosk Theater Lights
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+
+  kiosk_front_lights:
+    name: Kiosk Front Lights
+    entities:
+      - light.light_front_left
+      - light.light_front_right
+
+  kiosk_garage_lights:
+    name: Kiosk Garage Lights
+    entities:
+      - light.light_garage_left
+      - light.lights_garage_center
+      - light.light_garage_right
+
+script:
+  kiosk_reload_automations:
+    alias: 'Kiosk: Reload Automations'
+    mode: single
+    sequence:
+      - service: automation.reload
+
+  kiosk_reload_scripts:
+    alias: 'Kiosk: Reload Scripts'
+    mode: single
+    sequence:
+      - service: script.reload
+
+  kiosk_reload_scenes:
+    alias: 'Kiosk: Reload Scenes'
+    mode: single
+    sequence:
+      - service: scene.reload
+
+  kiosk_all_plugs_off:
+    alias: 'Kiosk: All Plugs OFF (Safety)'
+    mode: single
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id:
+            - switch.plug_basement_burner
+            - switch.plug_mainfloor_burner
+            - switch.plug_bedroom_burner
+      - service: logbook.log
+        data:
+          name: Kiosk Safety
+          message: All plugs OFF triggered.
+
+  kiosk_stop_all_huskers_shows:
+    alias: 'Kiosk: Stop All Huskers Shows'
+    mode: single
+    sequence:
+      - service: script.turn_on
+        target:
+          entity_id:
+            - script.huskers_chase30_stop
+            - script.huskers_chase_speed_stop
