@@ -262,6 +262,7 @@ huskers_chase30_start:
           - light.light_garage_left
           - light.lights_garage_center
           - light.light_garage_right
+          - light.spare_light
 
     # Base Scarlet first
     - service: light.turn_on
@@ -274,6 +275,7 @@ huskers_chase30_start:
           - light.light_garage_left
           - light.lights_garage_center
           - light.light_garage_right
+          - light.spare_light
       data:
         hs_color: [355, 90]
         brightness: 255
@@ -302,6 +304,7 @@ huskers_chase30_loop:
             'light.light_garage_left',
             'light.lights_garage_center',
             'light.light_garage_right',
+            'light.spare_light',
           ]
     - repeat:
         while:
