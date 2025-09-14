@@ -1,0 +1,50 @@
+name: HA Config Check
+
+'on':
+  push:
+    branches:
+      - main
+    # paths-ignore:
+    #   - '**/*.md'
+  pull_request:
+    # paths-ignore:
+    #   - '**/*.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ha-config-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hass-config-check:
+    name: Validate Home Assistant configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Optional: cache Docker layers to speed up ghcr pulls
+      - name: Cache Docker layers
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-hass-stable
+
+      # Ensure a secrets file exists so HA check doesn't fail due to missing secrets.yaml
+      - name: Ensure secrets file (optional)
+        run: |
+          if [ ! -f secrets.yaml ]; then
+            if [ -f secrets.example.yaml ]; then
+              cp secrets.example.yaml secrets.yaml
+            else
+              echo "# placeholder to satisfy HA check" > secrets.yaml
+            fi
+          fi
+
+      - name: Validate configuration with Home Assistant (stable)
+        env:
+          TZ: America/Chicago
+        run: |
+          docker run --rm             -e TZ="${TZ}"             -v "${{ github.workspace }}:/config"             ghcr.io/home-assistant/home-assistant:stable             python -m homeassistant               --config /config               --script check_config
