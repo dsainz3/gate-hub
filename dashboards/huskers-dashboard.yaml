@@ -1,8 +1,6 @@
 title: Theater Control Dashboard
 views:
-  # ─────────────────────────────────────────────────────────────
   # 1) SUPER FAN (first)
-  # ─────────────────────────────────────────────────────────────
   - title: Super Fan
     path: superfan
     icon: mdi:football-helmet
@@ -19,46 +17,33 @@ views:
           - type: button
             name: START 30s Chase
             icon: mdi:play-speed
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_chase30_start }
           - type: button
             name: START (Variable)
             icon: mdi:play-circle
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_start
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_chase_speed_start }
           - type: button
             name: Hail Burst (8s)
             icon: mdi:music-note
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_hail_burst_8s }
           - type: button
             name: STOP & Restore
             icon: mdi:stop-circle
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id:
-                  - script.huskers_chase30_stop
-                  - script.huskers_chase_speed_stop
+            tap_action: { action: call-service, service: script.turn_on }
+            target:
+              entity_id:
+                - script.huskers_chase30_stop
+                - script.huskers_chase_speed_stop
           - type: button
             name: All-Scarlet Scene
             icon: mdi:palette
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet
+            tap_action: { action: call-service, service: scene.turn_on }
+            target: { entity_id: scene.huskers_seven_all_scarlet }
 
+      # Status + switches
       - type: entities
         title: Game Status & Toggles
         show_header_toggle: false
@@ -75,14 +60,34 @@ views:
             name: Postgame?
           - entity: sensor.huskers_opponent
             name: Opponent
-          - entity: sensor.huskers_kickoff_america_chicago
+          - entity: sensor.huskers_kickoff_local
             name: Kickoff (Local)
-          - entity: sensor.huskers_kickoff_in_min
+          - entity: sensor.huskers_kickoff_in_effective
             name: Kickoff In (min)
 
-      # =========================
+      # NEW: Standings & Record
+      - type: entities
+        title: Standings & Record
+        show_header_toggle: false
+        entities:
+          - entity: sensor.huskers_record_overall
+            name: Record (Overall)
+          - entity: sensor.huskers_record_conference
+            name: Record (Conference)
+          - entity: sensor.huskers_conference_standing
+            name: Conference Standing
+          - entity: sensor.huskers_ap_rank
+            name: AP Rank
+          - entity: sensor.huskers_odds_line
+            name: Odds / Line
+
+      # NEW: Upcoming schedule (markdown fed by template sensor)
+      - type: markdown
+        title: Upcoming Schedule
+        content: |
+          {{ states('sensor.huskers_schedule_md') }}
+
       # PREGAME
-      # =========================
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_pregame
@@ -100,7 +105,7 @@ views:
               entities:
                 - entity: sensor.huskers_opponent
                   name: Opponent
-                - entity: sensor.huskers_kickoff_america_chicago
+                - entity: sensor.huskers_kickoff_local
                   name: Kickoff (Local)
                 - entity: sensor.huskers_venue
                   name: Venue
@@ -109,9 +114,7 @@ views:
                 - entity: sensor.huskers_odds_line
                   name: Odds / Line
 
-      # =========================
-      # LIVE GAME
-      # =========================
+      # LIVE
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_live
@@ -154,9 +157,7 @@ views:
                 - entity: light.light_garage_right
                 - entity: light.spare_light
 
-      # =========================
       # POSTGAME
-      # =========================
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_postgame
@@ -176,22 +177,8 @@ views:
                   name: Final Score
                 - entity: sensor.huskers_last_scoring_play
                   name: Last Scoring Play
-            - type: history-graph
-              title: Light Activity (Last 2 Hours)
-              hours_to_show: 2
-              entities:
-                - entity: light.light_theater_left
-                - entity: light.light_theater_right
-                - entity: light.light_front_left
-                - entity: light.light_front_right
-                - entity: light.light_garage_left
-                - entity: light.lights_garage_center
-                - entity: light.light_garage_right
-                - entity: light.spare_light
 
-      # =========================
       # FALLBACK: no game active
-      # =========================
       - type: conditional
         conditions:
           - entity: binary_sensor.huskers_is_pregame
@@ -207,24 +194,8 @@ views:
               content: |
                 ## No game active
                 When Team Tracker updates to a scheduled/live game, the sections above will populate.
-            - type: entities
-              title: Next Game (if available)
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_opponent
-                  name: Opponent
-                - entity: sensor.huskers_kickoff_america_chicago
-                  name: Kickoff (Local)
-                - entity: sensor.huskers_venue
-                  name: Venue
-                - entity: sensor.huskers_tv_radio
-                  name: TV/Radio
-                - entity: sensor.huskers_odds_line
-                  name: Odds / Line
 
-  # ─────────────────────────────────────────────────────────────
   # 2) THEATER (second)
-  # ─────────────────────────────────────────────────────────────
   - title: Theater
     path: theater
     icon: mdi:theater
@@ -234,62 +205,41 @@ views:
         content: |-
           # Theater Control Dashboard
           **Cream Chase – 30s & Variable Speed + Hail Burst (8s)**
-
-      # Quick actions
       - type: horizontal-stack
         cards:
           - type: button
             name: START 30s Chase
             icon: mdi:play-speed
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_chase30_start }
           - type: button
             name: START (Variable-Speed)
             icon: mdi:play-circle
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_start
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_chase_speed_start }
           - type: button
             name: Hail Burst (8s)
             icon: mdi:music-note
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_hail_burst_8s }
           - type: button
             name: Step Once
             icon: mdi:arrow-right-bold
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_step_once
+            tap_action: { action: call-service, service: script.turn_on }
+            target: { entity_id: script.huskers_chase_step_once }
           - type: button
             name: STOP & Restore
             icon: mdi:stop-circle
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id:
-                  - script.huskers_chase30_stop
-                  - script.huskers_chase_speed_stop
+            tap_action: { action: call-service, service: script.turn_on }
+            target:
+              entity_id:
+                - script.huskers_chase30_stop
+                - script.huskers_chase_speed_stop
           - type: button
             name: All-Scarlet Scene
             icon: mdi:palette
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet
-
-      # Controls
+            tap_action: { action: call-service, service: scene.turn_on }
+            target: { entity_id: scene.huskers_seven_all_scarlet }
       - type: entities
         title: Chase & Burst Controls
         show_header_toggle: false
@@ -304,8 +254,6 @@ views:
             name: Chase Cycle Length (s)
           - entity: input_number.huskers_hail_bpm
             name: Hail Varsity Tempo (BPM)
-
-      # Lights overview
       - type: grid
         square: false
         columns: 4
@@ -334,8 +282,6 @@ views:
           - type: light
             entity: light.spare_light
             name: Spare Light
-
-      # Script status
       - type: entities
         title: Script Status & Debug
         show_header_toggle: false
@@ -367,17 +313,3 @@ views:
           - entity: scene.huskers_seven_all_scarlet
             name: All-Scarlet Scene
             secondary_info: last-changed
-
-      # Activity
-      - type: history-graph
-        title: Light Activity (Last 2 Hours)
-        hours_to_show: 2
-        entities:
-          - entity: light.light_theater_left
-          - entity: light.light_theater_right
-          - entity: light.light_front_left
-          - entity: light.light_front_right
-          - entity: light.light_garage_left
-          - entity: light.lights_garage_center
-          - entity: light.light_garage_right
-          - entity: light.spare_light

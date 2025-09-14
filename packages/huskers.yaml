@@ -630,6 +630,150 @@ template:
             Nebraska {{ home }} – {{ opp }} {{ away }}
           {% endif %}
 
+      # Current record (overall)
+      - name: Huskers Record (Overall)
+        unique_id: huskers_record_overall
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_record',
+            'sensor.team_tracker_nebraska_record',
+            'sensor.nebraska_record'
+          ] %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] %}
+              {{ s }}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+
+      # Current record (conference)
+      - name: Huskers Record (Conference)
+        unique_id: huskers_record_conference
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_record_conference',
+            'sensor.team_tracker_nebraska_record_conference',
+            'sensor.nebraska_record_conference',
+            'sensor.team_tracker_huskers_conf_record',
+            'sensor.team_tracker_nebraska_conf_record'
+          ] %}
+          {% set v = 'unknown' %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] %}
+              {% set v = s %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {{ v }}
+
+      # Conference standing (rank/position)
+      - name: Huskers Conference Standing
+        unique_id: huskers_conference_standing
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_conference_standing',
+            'sensor.team_tracker_nebraska_conference_standing',
+            'sensor.nebraska_conference_standing',
+            'sensor.team_tracker_huskers_standing',
+            'sensor.team_tracker_nebraska_standing'
+          ] %}
+          {% set v = 'unknown' %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] %}
+              {% set v = s %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {{ v }}
+
+      # AP rank (if available)
+      - name: Huskers AP Rank
+        unique_id: huskers_ap_rank
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_ap_rank',
+            'sensor.team_tracker_nebraska_ap_rank',
+            'sensor.nebraska_ap_rank',
+            'sensor.team_tracker_huskers_rank',
+            'sensor.team_tracker_nebraska_rank'
+          ] %}
+          {% set v = 'unknown' %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] %}
+              {% set v = s %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {{ v }}
+
+      # Odds / line (alias of earlier "line" but with friendlier slug)
+      - name: Huskers Odds/Line
+        unique_id: huskers_odds_line
+        state: >-
+          {% set cands = [
+            'sensor.team_tracker_huskers_line',
+            'sensor.team_tracker_nebraska_line',
+            'sensor.nebraska_line',
+            'sensor.huskers_line'
+          ] %}
+          {% set v = 'unknown' %}
+          {% for e in cands %}
+            {% set s = states(e) %}
+            {% if s not in ['unknown','unavailable',''] %}
+              {% set v = s %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {{ v }}
+
+      # Upcoming schedule as Markdown (next ~5 games if exposed by your tracker)
+      - name: Huskers Schedule (Markdown)
+        unique_id: huskers_schedule_md
+        state: >-
+          {% set cand = [
+            'sensor.team_tracker_huskers_schedule',
+            'sensor.team_tracker_nebraska_schedule',
+            'sensor.nebraska_schedule',
+            'sensor.team_tracker_huskers',
+            'sensor.team_tracker_nebraska'
+          ] %}
+          {% set items = none %}
+          {% for e in cand %}
+            {% set a = state_attr(e,'upcoming') or state_attr(e,'next_games') or state_attr(e,'schedule') %}
+            {% if a %}
+              {% set items = a %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if items %}
+            {% set out = namespace(s='') %}
+            {% for g in items[:5] %}
+              {% set when = g.datetime or g.date or g.kickoff or g.start_time %}
+              {% set opp  = g.opponent or g.opp or g.opponent_name %}
+              {% set ha   = (g.home_away or g.site or g.venue_type|string).lower() %}
+              {% set venue= g.venue or g.site_name %}
+              {% set tv   = g.tv or g.television or g.broadcast %}
+              {% if when %}
+                {% set dt = as_datetime(when) %}
+                {% if dt is not none %}
+                  {% set when = as_local(dt).strftime('%a %b %-d, %-I:%M %p %Z') %}
+                {% endif %}
+              {% endif %}
+              {% set tag = 'vs' if ha in ['home','h','vs','home game'] else 'at' %}
+              {% set line = '- ' ~ (when or 'TBD') ~ ' ' ~ tag ~ ' ' ~ (opp or 'TBD') %}
+              {% if venue %}{% set line = line ~ ' (' ~ venue ~ ')' %}{% endif %}
+              {% if tv %}{% set line = line ~ ', ' ~ tv %}{% endif %}
+              {% set out.s = out.s + line + '\n' %}
+            {% endfor %}
+            {{ out.s.strip() }}
+          {% else %}
+            _No upcoming games found._
+          {% endif %}
+
   - binary_sensor:
       - name: Huskers Is Pregame
         unique_id: huskers_is_pregame
