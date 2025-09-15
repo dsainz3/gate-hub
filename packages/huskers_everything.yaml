@@ -631,8 +631,16 @@ template:
         unique_id: huskers_record
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-          {% set w = 0 %}
-          {% set l = 0 %}
+          {% macro to_int_score(s) -%}
+            {%- if s is number -%}{{ s|int }}
+            {%- elif s is string -%}{{ s|int(0) }}
+            {%- elif s is mapping -%}
+              {%- if s.value is defined -%}{{ s.value|int(0) }}
+              {%- elif s.displayValue is defined -%}{{ s.displayValue|int(0) }}
+              {%- else -%}0{%- endif -%}
+            {%- else -%}0{%- endif -%}
+          {%- endmacro %}
+          {% set w = 0 %}{% set l = 0 %}
           {% for game in events %}
             {% set comp = (game.competitions | default([])) | first %}
             {% if not comp or not (comp.status is defined and comp.status.type is defined and comp.status.type.completed) %}
@@ -641,11 +649,9 @@ template:
             {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
             {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
             {% if huskers and opp and huskers.score is defined and opp.score is defined %}
-              {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
-                {% set w = w + 1 %}
-              {% else %}
-                {% set l = l + 1 %}
-              {% endif %}
+              {% set hs = to_int_score(huskers.score) %}
+              {% set os = to_int_score(opp.score) %}
+              {% if hs > os %}{% set w = w + 1 %}{% else %}{% set l = l + 1 %}{% endif %}
             {% endif %}
           {% endfor %}
           {{ w }}-{{ l }}
@@ -661,7 +667,7 @@ template:
         unique_id: huskers_kickoff_in_2
         unit_of_measurement: min
         icon: mdi:timer
-        state_class: measurement
+        #  state_class: measurement
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
           {% set now_ts = now().timestamp() %}
@@ -696,18 +702,27 @@ template:
         unique_id: huskers_our_score_auto
         state: >-
           {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-          {% set score = none %}
+          {% macro to_int_score(s) -%}
+            {%- if s is number -%}{{ s|int }}
+            {%- elif s is string -%}{{ s|int(0) }}
+            {%- elif s is mapping -%}
+              {%- if s.value is defined -%}{{ s.value|int(0) }}
+              {%- elif s.displayValue is defined -%}{{ s.displayValue|int(0) }}
+              {%- else -%}0{%- endif -%}
+            {%- else -%}0{%- endif -%}
+          {%- endmacro %}
+          {% set score = 0 %}
           {% for e in events %}
             {% set comp = (e.competitions | default([])) | first %}
             {% if comp and comp.competitors is defined %}
               {% for c in comp.competitors %}
-                {% if c.team is defined and c.team.id == '158' %}
-                  {% set score = c.score if c.score is defined else 0 %}
+                {% if c.team is defined and c.team.id == '158' and c.score is defined %}
+                  {% set score = to_int_score(c.score) %}
                 {% endif %}
               {% endfor %}
             {% endif %}
           {% endfor %}
-          {{ (score | int(0)) if score is not none else 0 }}
+          {{ score }}
 
       # Effective score (manual override aware)
       - name: huskers_our_score_effective
