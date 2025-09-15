@@ -659,7 +659,9 @@ template:
           {% else %}
             0
           {% endif %}
-        attributes:
+        availability: >-
+          {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+          {{ events | selectattr('date', 'defined') | list | length > 0 }}
           kickoff_iso: >-
             {% if next_dt is defined and next_dt %}
               {{ next_dt.isoformat() }}
@@ -701,10 +703,8 @@ template:
         unit_of_measurement: min
         state_class: measurement
         device_class: duration
-        availability: >-
-          {{ ( /* your calc returns a timestamp? then true/false here */ ) is not none }}
-        state: >-
-          {{ ( /* minutes until kickoff */ ) | float(0) }}
+        state: "{{ states('sensor.huskers_kickoff_in_2') | int(0) }}"
+        availability: "{{ states('sensor.huskers_kickoff_in_2') not in ['unknown', 'unavailable'] }}"
 
       # Effective kickoff minutes (manual override aware)
       - name: huskers_kickoff_in_effective
