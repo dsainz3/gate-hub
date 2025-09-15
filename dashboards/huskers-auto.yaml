@@ -51,7 +51,7 @@ views:
       - type: conditional
         conditions:
           - condition: state
-            entity: binary_sensor.huskers_pregame_window
+            entity: binary_sensor.huskers_is_pregame_espn
             state: 'on'
         card:
           type: vertical-stack
@@ -103,7 +103,7 @@ views:
       - type: conditional
         conditions:
           - condition: state
-            entity: binary_sensor.huskers_game_in_progress_tt
+            entity: binary_sensor.huskers_is_live_espn
             state: 'on'
         card:
           type: vertical-stack
@@ -171,7 +171,7 @@ views:
       - type: conditional
         conditions:
           - condition: state
-            entity: binary_sensor.huskers_postgame_window
+            entity: binary_sensor.huskers_is_postgame_espn
             state: 'on'
         card:
           type: vertical-stack
@@ -320,11 +320,11 @@ views:
         title: '🔧 Game Phase & Status'
         show_header_toggle: false
         entities:
-          - entity: binary_sensor.huskers_pregame_window
+          - entity: binary_sensor.huskers_is_pregame_espn
             name: Pregame Window
-          - entity: binary_sensor.huskers_game_in_progress_tt
+          - entity: binary_sensor.huskers_is_live_espn
             name: Game In Progress
-          - entity: binary_sensor.huskers_postgame_window
+          - entity: binary_sensor.huskers_is_postgame_espn
             name: Postgame Window
           - entity: input_number.huskers_kickoff_in_manual
             name: Kickoff In (minutes)

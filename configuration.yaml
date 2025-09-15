@@ -35,7 +35,7 @@ recorder:
     entities:
       - input_text.huskers_last_score
       - sensor.huskers_kickoff_in
-      - binary_sensor.huskers_postgame_window
+      - binary_sensor.huskers_is_postgame_espn
       - input_number.huskers_chase_cycle_seconds
       - light.light_theater_left
       - light.light_theater_right

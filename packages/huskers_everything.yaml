@@ -2,7 +2,7 @@
 # Single-package setup for Nebraska Huskers:
 # - ESPN REST endpoints (raw data)
 # - Template sensors (schedule/status/scores/record/standings/kickoff)
-# - Phase flags (pre/live/post)
+# - ESPN phase flags (pre/live/post)
 # - Helpers (inputs, groups, scenes)
 # - Light show scripts
 # - Automations (pregame T-20, TD burst, postgame cleanup)
@@ -496,20 +496,16 @@ script:
             - script.huskers_chase_speed_stop
 
 ################################################################################
-# TEMPLATE SENSORS & PHASE FLAGS
+# TEMPLATE SENSORS & ESPN PHASE FLAGS
 ################################################################################
 template:
   - sensor:
-      # Schedule (Markdown)
+      # Schedule (short state, full text in attribute to avoid 255-char limit)
       - name: huskers_schedule_combined
         unique_id: huskers_schedule_combined
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-          {% if events %}
-            {{ events | length }} games scheduled
-          {% else %}
-            No schedule
-          {% endif %}
+          {% if events %}{{ events | length }} games scheduled{% else %}No schedule{% endif %}
         attributes:
           markdown: >-
             {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
@@ -526,20 +522,8 @@ template:
                 {% if done %}
                   {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
                   {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-                  {% if h and h.score is mapping and h.score.value is defined %}
-                    {% set h_score = h.score.value %}
-                  {% elif h and h.score is defined %}
-                    {% set h_score = h.score %}
-                  {% else %}
-                    {% set h_score = '?' %}
-                  {% endif %}
-                  {% if a and a.score is mapping and a.score.value is defined %}
-                    {% set a_score = a.score.value %}
-                  {% elif a and a.score is defined %}
-                    {% set a_score = a.score %}
-                  {% else %}
-                    {% set a_score = '?' %}
-                  {% endif %}
+                  {% set h_score = (h.score.value if h and h.score is mapping and h.score.value is defined else (h.score if h and h.score is defined else '?')) %}
+                  {% set a_score = (a.score.value if a and a.score is mapping and a.score.value is defined else (a.score if a and a.score is defined else '?')) %}
                   - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h_score }}-{{ a_score }}
                 {% else %}
                   - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
@@ -549,7 +533,7 @@ template:
               **Schedule unavailable**
             {% endif %}
 
-      # Game status today + attributes
+      # Today’s game status (plus basic attributes)
       - name: huskers_game_status_espn
         unique_id: huskers_game_status_espn
         state: >-
@@ -631,16 +615,8 @@ template:
         unique_id: huskers_record
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-          {% macro to_int_score(s) -%}
-            {%- if s is number -%}{{ s|int }}
-            {%- elif s is string -%}{{ s|int(0) }}
-            {%- elif s is mapping -%}
-              {%- if s.value is defined -%}{{ s.value|int(0) }}
-              {%- elif s.displayValue is defined -%}{{ s.displayValue|int(0) }}
-              {%- else -%}0{%- endif -%}
-            {%- else -%}0{%- endif -%}
-          {%- endmacro %}
-          {% set w = 0 %}{% set l = 0 %}
+          {% set w = 0 %}
+          {% set l = 0 %}
           {% for game in events %}
             {% set comp = (game.competitions | default([])) | first %}
             {% if not comp or not (comp.status is defined and comp.status.type is defined and comp.status.type.completed) %}
@@ -649,9 +625,11 @@ template:
             {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
             {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
             {% if huskers and opp and huskers.score is defined and opp.score is defined %}
-              {% set hs = to_int_score(huskers.score) %}
-              {% set os = to_int_score(opp.score) %}
-              {% if hs > os %}{% set w = w + 1 %}{% else %}{% set l = l + 1 %}{% endif %}
+              {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
+                {% set w = w + 1 %}
+              {% else %}
+                {% set l = l + 1 %}
+              {% endif %}
             {% endif %}
           {% endfor %}
           {{ w }}-{{ l }}
@@ -663,11 +641,11 @@ template:
           {% set a = states('sensor.huskers_record') %}
           {% if a not in ['unknown','unavailable','None',''] %}{{ a }}{% else %}N/A{% endif %}
 
+      # Time to next kickoff (minutes) — always numeric
       - name: huskers_kickoff_in_2
         unique_id: huskers_kickoff_in_2
         unit_of_measurement: min
         icon: mdi:timer
-        #  state_class: measurement
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
           {% set now_ts = now().timestamp() %}
@@ -687,42 +665,55 @@ template:
           {% else %}
             0
           {% endif %}
-        availability: >-
-          {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-          {{ events | selectattr('date', 'defined') | list | length > 0 }}
+        attributes:
           kickoff_iso: >-
-            {% if next_dt is defined and next_dt %}
-              {{ next_dt.isoformat() }}
-            {% else %}{{ '' }}{% endif %}
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next_dt = none %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if dt and not completed and dt.timestamp() > now_ts %}
+                {% set next_dt = dt %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {{ next_dt.isoformat() if next_dt else '' }}
           has_next_game: >-
-            {{ (next_dt is defined and next_dt) | bool }}
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next_dt = none %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if dt and not completed and dt.timestamp() > now_ts %}
+                {% set next_dt = dt %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {{ (next_dt is not none) | bool }}
 
-      # Our score (auto): pull Nebraska's competitor score from scoreboard
+      # Our score (auto) from scoreboard
       - name: huskers_our_score_auto
         unique_id: huskers_our_score_auto
         state: >-
           {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-          {% macro to_int_score(s) -%}
-            {%- if s is number -%}{{ s|int }}
-            {%- elif s is string -%}{{ s|int(0) }}
-            {%- elif s is mapping -%}
-              {%- if s.value is defined -%}{{ s.value|int(0) }}
-              {%- elif s.displayValue is defined -%}{{ s.displayValue|int(0) }}
-              {%- else -%}0{%- endif -%}
-            {%- else -%}0{%- endif -%}
-          {%- endmacro %}
-          {% set score = 0 %}
+          {% set score = none %}
           {% for e in events %}
             {% set comp = (e.competitions | default([])) | first %}
             {% if comp and comp.competitors is defined %}
               {% for c in comp.competitors %}
-                {% if c.team is defined and c.team.id == '158' and c.score is defined %}
-                  {% set score = to_int_score(c.score) %}
+                {% if c.team is defined and c.team.id == '158' %}
+                  {% set score = c.score if c.score is defined else 0 %}
                 {% endif %}
               {% endfor %}
             {% endif %}
           {% endfor %}
-          {{ score }}
+          {{ (score | int(0)) if score is not none else 0 }}
 
       # Effective score (manual override aware)
       - name: huskers_our_score_effective
@@ -734,12 +725,10 @@ template:
             {{ states('sensor.huskers_our_score_auto') | int(0) }}
           {% endif %}
 
-      # Kickoff minutes (auto) — for completeness
+      # Kickoff minutes (auto) routed from huskers_kickoff_in_2
       - name: huskers_kickoff_in_auto
         unique_id: huskers_kickoff_in_auto
         unit_of_measurement: min
-        state_class: measurement
-        device_class: duration
         state: "{{ states('sensor.huskers_kickoff_in_2') | int(0) }}"
         availability: "{{ states('sensor.huskers_kickoff_in_2') not in ['unknown', 'unavailable'] }}"
 
@@ -772,11 +761,10 @@ template:
           {% endfor %}
           {{ rank }}
 
-      # Big Ten standings (basic)
+      # Big Ten teams/records (short state + markdown attribute)
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
         icon: mdi:trophy
-        # Keep state short to avoid 255-char limit
         state: >-
           {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
           {% if data and data|length>0 and data[0].leagues is defined and data[0].leagues|length>0
@@ -820,19 +808,6 @@ template:
           {% set status = states('sensor.huskers_game_status_espn') %}
           {{ status in ['Final', 'Final/OT'] }}
 
-      # Compatibility flags for your dashboards/automations
-      - name: huskers_pregame_window
-        unique_id: huskers_pregame_window
-        state: "{{ is_state('binary_sensor.huskers_is_pregame_espn', 'on') }}"
-
-      - name: huskers_game_in_progress_tt
-        unique_id: huskers_game_in_progress_tt
-        state: "{{ is_state('binary_sensor.huskers_is_live_espn', 'on') }}"
-
-      - name: huskers_postgame_window
-        unique_id: huskers_postgame_window
-        state: "{{ is_state('binary_sensor.huskers_is_postgame_espn', 'on') }}"
-
 ################################################################################
 # AUTOMATIONS
 ################################################################################
@@ -859,7 +834,7 @@ automation:
       - condition: or
         conditions:
           - condition: state
-            entity_id: binary_sensor.huskers_pregame_window
+            entity_id: binary_sensor.huskers_is_pregame_espn
             state: 'on'
           - condition: state
             entity_id: input_boolean.huskers_test_mode
@@ -916,7 +891,7 @@ automation:
     mode: single
     trigger:
       - platform: state
-        entity_id: binary_sensor.huskers_postgame_window
+        entity_id: binary_sensor.huskers_is_postgame_espn
         from: 'on'
         to: 'off'
     condition:

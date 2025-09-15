@@ -1,7 +1,10 @@
-# templates.yaml  (no top-level "template:" here)
+# templates.yaml  (included via: template: !include templates.yaml)
+# Do NOT add a top-level "template:" key here.
 
 - sensor:
-    # WEATHER & ENVIRONMENT SENSORS — fixed structure
+    ########################################################################
+    # WEATHER & ENVIRONMENT — normalized copies with stable units/classes
+    ########################################################################
     - name: Relative Humidity
       unique_id: kneplatt72_relative_humidity_fixed
       state: "{{ states('sensor.kneplatt72_relative_humidity') }}"
@@ -50,7 +53,9 @@
       unit_of_measurement: 'mph'
       device_class: wind_speed
 
-    # WEATHER & ENVIRONMENT SENSORS (derived)
+    ########################################################################
+    # WEATHER DERIVED — trends using existing WU change sensors
+    ########################################################################
     - name: KNEPLATT72 Pressure Trend
       unique_id: kneplatt72_pressure_trend
       device_class: enum
@@ -68,10 +73,9 @@
         {% else %}steady
         {% endif %}
       icon: >
-        {% set trend = this.state %}
-        {% if trend == 'rising' %}mdi:arrow-up-bold
-        {% elif trend == 'falling' %}mdi:arrow-down-bold
-        {% elif trend == 'steady' %}mdi:swap-horizontal-bold
+        {% if this.state == 'rising' %}mdi:arrow-up-bold
+        {% elif this.state == 'falling' %}mdi:arrow-down-bold
+        {% elif this.state == 'steady' %}mdi:swap-horizontal-bold
         {% else %}mdi:help-circle-outline
         {% endif %}
       attributes:
@@ -142,7 +146,9 @@
         threshold_percent: '5.0'
         current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
 
-    # NETWORK & CONNECTIVITY SENSORS
+    ########################################################################
+    # NETWORK / CONNECTIVITY
+    ########################################################################
     - name: Network Active Hosts (Nmap)
       unique_id: network_nmap_active_hosts
       icon: mdi:lan
@@ -199,68 +205,46 @@
         is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
         latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
 
-    # HUSKERS GAME SENSORS (normalized)
+    ########################################################################
+    # HUSKERS — TeamTracker helpers (kept separate from ESPN package)
+    ########################################################################
     - name: huskers_team_name
+      unique_id: huskers_team_name_tt
       state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
+
     - name: huskers_opponent_name
+      unique_id: huskers_opponent_name_tt
       state: "{{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}"
+
     - name: huskers_team_score
+      unique_id: huskers_team_score_tt
       state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
+
     - name: huskers_opponent_score
+      unique_id: huskers_opponent_score_tt
       state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
+
     - name: Huskers Quarter
       unique_id: huskers_quarter
       availability: "{{ has_value('sensor.husker_team') }}"
       state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
       icon: mdi:numeric
+
     - name: huskers_game_clock_ct
+      unique_id: huskers_game_clock_ct_tt
       state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
+
     - name: huskers_kickoff_time_ct
+      unique_id: huskers_kickoff_time_ct_tt
       state: >
         {% set iso = state_attr('sensor.husker_team','date') %}
         {% if iso not in [None,'','unknown','unavailable'] %}
           {{ as_datetime(iso) | as_local | strftime('%-I:%M %p CT') }}
         {% else %}unknown{% endif %}
+
+    # Keep this alias so your recorder/dashboard references to sensor.huskers_kickoff_in keep working.
+    # It’s always numeric to avoid the "non-numeric 'unknown'" error.
     - name: huskers_kickoff_in
+      unique_id: huskers_kickoff_in_alias
       unit_of_measurement: 'min'
-      state: >
-        {% set iso = state_attr('sensor.husker_team','date') %}
-        {% if iso in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {% set t = as_datetime(iso) %}
-          {% if t %}{{ ((t - now()).total_seconds() / 60) | round(0) }}{% else %}unknown{% endif %}
-        {% endif %}
-
-- binary_sensor:
-    - name: Huskers Pregame Window
-      unique_id: huskers_pregame_window
-      device_class: running
-      availability: "{{ has_value('sensor.huskers_kickoff_in_effective') }}"
-      state: >
-        {% set minutes_until = states('sensor.huskers_kickoff_in_effective') | int(-1) %}
-        {{ 0 < minutes_until <= 120 }}
-      icon: >
-        {% if this.state %}mdi:clock-fast{% else %}mdi:clock-outline{% endif %}
-      attributes:
-        friendly_name: Pregame Window (2 hours)
-
-    - name: Huskers Game In Progress (TT)
-      unique_id: huskers_game_in_progress_tt
-      device_class: running
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >
-        {% set game_state = states('sensor.husker_team') %}
-        {{ game_state in ['IN', 'LIVE'] }}
-      icon: >
-        {% if this.state %}mdi:football{% else %}mdi:football-helmet{% endif %}
-
-    - name: Huskers Postgame Window
-      unique_id: huskers_postgame_window
-      device_class: running
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >
-        {% set game_state = states('sensor.husker_team') %}
-        {{ game_state == 'POST' }}
-      icon: >
-        {% if this.state %}mdi:flag-checkered{% else %}mdi:flag-outline{% endif %}
+      state: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
