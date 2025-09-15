@@ -20,10 +20,10 @@
             - condition: or
               conditions:
                 - condition: state
-                  entity_id: binary_sensor.huskers_pregame_window
+                  entity_id: binary_sensor.huskers_is_pregame_espn
                   state: 'on'
                 - condition: state
-                  entity_id: binary_sensor.huskers_game_in_progress_tt
+                  entity_id: binary_sensor.huskers_is_live_espn
                   state: 'on'
   action:
     - parallel:
