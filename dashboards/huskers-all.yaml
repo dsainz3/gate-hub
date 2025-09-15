@@ -207,9 +207,8 @@ views:
             name: Record
 
       - type: markdown
-        title: '🏟️ Big Ten Standings'
-        content: |
-          {{ states('sensor.big_ten_standings_espn') }}
+        title: 📊 Big Ten
+        content: "{{ state_attr('sensor.big_ten_standings_espn', 'markdown') }}"
 
       # Game phase summary
       - type: entities

@@ -690,8 +690,12 @@ template:
       - name: huskers_kickoff_in_auto
         unique_id: huskers_kickoff_in_auto
         unit_of_measurement: min
+        state_class: measurement
+        device_class: duration
+        availability: >-
+          {{ ( /* your calc returns a timestamp? then true/false here */ ) is not none }}
         state: >-
-          {{ states('sensor.huskers_kickoff_in_2') }}
+          {{ ( /* minutes until kickoff */ ) | float(0) }}
 
       # Effective kickoff minutes (manual override aware)
       - name: huskers_kickoff_in_effective
@@ -725,15 +729,17 @@ template:
       # Big Ten standings (basic)
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
-        state: >-
-          {% set s = state_attr('sensor.espn_big_ten_teams', 'sports') %}
-          {% set leagues = s[0].leagues if s and s|length>0 and s[0].leagues is defined else [] %}
-          {% set teams_raw = leagues[0].teams if leagues and leagues|length>0 and leagues[0].teams is defined else [] %}
-          {% set teams = teams_raw | map(attribute='team') | list %}
-          {% if teams and teams|length > 0 %}
+        state: 'ok'
+        attributes:
+          markdown: >-
+            {% set s = state_attr('sensor.espn_big_ten_teams','sports') %}
+            {% set leagues = s[0].leagues if s and s|length>0 and s[0].leagues is defined else [] %}
+            {% set teams_raw = leagues[0].teams if leagues and leagues|length>0 and leagues[0].teams is defined else [] %}
+            {% set teams = teams_raw | map(attribute='team') | list %}
+            {% if teams and teams|length > 0 %}
             ## Big Ten Teams ({{ now().year }})
-            | Rank | Team | Record |
-            |------|------|--------|
+            | # | Team | Record |
+            |---|------|--------|
             {%- for t in teams | sort(attribute='displayName') -%}
             {%- set rec = (
                   (t.record.items | selectattr('type','equalto','total') | list | first).summary
@@ -741,9 +747,9 @@ template:
                 (t.standingSummary if t.standingSummary is defined else 'N/A') -%}
             | {{ loop.index }} | {{ t.displayName }} | {{ rec }} |
             {%- endfor -%}
-          {% else %}
+            {% else %}
             Big Ten standings unavailable
-          {% endif %}
+            {% endif %}
 
   - binary_sensor:
       - name: huskers_is_pregame_espn
