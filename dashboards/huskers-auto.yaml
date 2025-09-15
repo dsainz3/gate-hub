@@ -205,8 +205,8 @@ views:
       # ——— ESPN Live Game Data (if available) ———
       - type: conditional
         conditions:
-          - condition: template
-            value_template: "{{ states('sensor.huskers_game_status_espn') != 'No game today' }}"
+          - entity: sensor.huskers_game_status_espn
+            state_not: 'No game today'
         card:
           type: entities
           title: '🏈 ESPN Live Game Data'
@@ -326,28 +326,22 @@ views:
             name: Game In Progress
           - entity: binary_sensor.huskers_postgame_window
             name: Postgame Window
-          - entity: sensor.huskers_kickoff_in_2
+          - entity: input_number.huskers_kickoff_in_manual
             name: Kickoff In (minutes)
 
       # ——— Schedule (ESPN combined / free fallback) ———
-      - type: conditional
-        conditions:
-          - condition: template
-            value_template: "{{ has_value('sensor.huskers_schedule_combined') }}"
-        card:
-          type: markdown
-          title: '📅 Schedule'
-          content: |
-            {{ states('sensor.huskers_schedule_combined') }}
-      - type: conditional
-        conditions:
-          - condition: template
-            value_template: "{{ not has_value('sensor.huskers_schedule_combined') and has_value('sensor.huskers_schedule_free') }}"
-        card:
-          type: markdown
-          title: '📅 Schedule'
-          content: |
-            {{ states('sensor.huskers_schedule_free') }}
+      - type: markdown
+        title: '📅 Schedule'
+        content: |
+          {% set c = states('sensor.huskers_schedule_combined') %}
+          {% set f = states('sensor.huskers_schedule_free') %}
+          {% if c not in ['unknown','unavailable','None',''] %}
+            {{ c }}
+          {% elif f not in ['unknown','unavailable','None',''] %}
+            {{ f }}
+          {% else %}
+            **Schedule unavailable**
+          {% endif %}
 
       # ——— Rankings/Record ———
       - type: entities

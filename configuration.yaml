@@ -73,6 +73,13 @@ logger:
 
 lovelace:
   dashboards:
+    huskers-gameday:
+      mode: yaml
+      title: Huskers Game Day
+      icon: mdi:football-helmet
+      show_in_sidebar: true
+      filename: dashboards/huskers-all.yaml
+
     weather-dashboard:              # must contain a hyphen
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
