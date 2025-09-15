@@ -1,149 +1,231 @@
+###############################################################################
+# KIOSK — clean groups + simple one-tap scripts (no segment lights)
+###############################################################################
+
 group:
-  kiosk_theater_lights:
-    name: Kiosk Theater Lights
+  # Core, non-segment lights you actually have
+  kiosk_all_lights_core:
+    name: Kiosk — All Lights (Core)
     entities:
+      - light.all_lights
+      - light.office_lights
+      - light.theater_lights
+      - light.front_porch_lights
+      - light.all_exterior_lights
+      - light.permanent_outdoor_lights
       - light.light_theater_left
       - light.light_theater_right
-  kiosk_front_lights:
-    name: Kiosk Front Lights
-    entities:
       - light.light_front_left
       - light.light_front_right
-  kiosk_garage_lights:
-    name: Kiosk Garage Lights
-    entities:
-      - light.light_garage_left
       - light.lights_garage_center
+      - light.light_garage_left
       - light.light_garage_right
-  kiosk_all_automations:
-    name: Kiosk All Automations
+      - light.light_parents
+      - light.light_guest_room
+      - light.light_attic
+      - light.sunroom_light
+      - light.livingroom_light
+      - light.diningroom_light
+      - light.light_office
+      - light.spare_light
+
+  # Exterior-only (no segments)
+  kiosk_exterior_lights:
+    name: Kiosk — Exterior Lights
     entities:
-      - automation.3_30_am_light_activation
-      - automation.bedroom_purifier_off
-      - automation.bedroom_purifier_on
-      - automation.early_morning_lights_03_30
-      - automation.evening_lights_at_sunset
-      - automation.exterior_led_monthly_effect
-      - automation.humidor_above_temp
-      - automation.humidor_below_temp
-      - automation.humidor_plug_temperature_control
-      - automation.huskers_debug_exterior_brightness_change
-      - automation.huskers_debug_scene_activated
-      - automation.huskers_debug_script_start
-      - automation.huskers_debug_script_stop
-      - automation.huskers_debug_theater_color_change
-      - automation.huskers_exterior_alternating_loop_start
-      - automation.huskers_exterior_light_show_start
-      - automation.huskers_exterior_show_auto_start
-      - automation.huskers_exterior_show_auto_stop
-      - automation.huskers_game_day_show_auto_start
-      - automation.huskers_game_day_show_auto_stop
-      - automation.huskers_halftime
-      - automation.huskers_halftime_calm_theater
-      - automation.huskers_in_game
-      - automation.huskers_kickoff_start_game_loop
-      - automation.huskers_new_item_notifier
-      - automation.huskers_new_item_notifier_2
-      - automation.huskers_phase_observer_log
-      - automation.huskers_postgame
-      - automation.huskers_postgame_cleanup
-      - automation.huskers_postgame_cleanup_20
-      - automation.huskers_postgame_event
-      - automation.huskers_postgame_monthly_led_effect_20m
-      - automation.huskers_pregame_event
-      - automation.huskers_pregame_t_20
-      - automation.huskers_pregame_theater_alternating
-      - automation.huskers_pregame_window_t_20_t0
-      - automation.huskers_react_to_test_score
-      - automation.huskers_react_to_test_score_2
-      - automation.huskers_set_led_gametime_on_kickoff
-      - automation.huskers_showtime_at_t_20
-      - automation.huskers_stop_shows_20m_after_final
-      - automation.huskers_td_burst_on_score
-      - automation.huskers_theater_show_auto_start
-      - automation.huskers_theater_show_auto_stop
-      - automation.huskers_toggle_debug_logging
-      - automation.huskers_touchdown_boost
-      - automation.huskers_touchdown_burst
-      - automation.huskers_touchdown_celebration
-      - automation.huskers_touchdown_flash_on_score_update
-      - automation.huskers_update_last_score_test
-      - automation.huskers_update_last_score_test_2
-      - automation.interior_lights_off_15_minutes_after_sunrise
-      - automation.lighting_morning_lights_off_sunrise
-      - automation.lighting_night_mode_at_midnight
-      - automation.lights_off_except_porch_garage_attic_23_30
-      - automation.midnight_lights
-      - automation.new_automation
-      - automation.night_lights_at_midnight
-      - automation.outdoor_lights_control_sunrise_sunset
-      - automation.purifier_on_bedroom
-      - automation.safety_turn_off_burner_plugs_at_11_00_pm
-      - automation.sunrise
-      - automation.weather_severe_alert_notification
+      - light.all_exterior_lights
+      - light.permanent_outdoor_lights
+      - light.front_porch_lights
+      # keep this commented if it doesn’t behave like a real group for you
+      # - light.lights_exterior
+
+  # Purifier power switches
+  kiosk_purifiers:
+    name: Kiosk — Purifiers
+    entities:
+      - switch.bedroom_purifier_power_switch
+      - switch.guest_room_purifier_power_switch
+      - switch.garage_air_purifier_power_switch
+
+  # Smart plugs / safety shutoffs
+  kiosk_plugs:
+    name: Kiosk — Plugs
+    entities:
+      - switch.plug_basement_burner
+      - switch.plug_mainfloor_burner
+      - switch.plug_bedroom_burner
+      - switch.plug_humidor
+      - switch.tree_power_switch
+
+  # Light “power switch” relays (for Govee/relays/etc) — no segments
+  kiosk_light_power_switches:
+    name: Kiosk — Light Power Switches
+    entities:
+      - switch.bar_light_power_switch
+      - switch.diningroom_light_power_switch
+      - switch.livingroom_light_power_switch
+      - switch.light_parents_power_switch
+      - switch.light_guest_room_power_switch
+      - switch.sunroom_light_power_switch
+      - switch.light_attic_power_switch
+      - switch.permanent_outdoor_lights_power_switch
+      - switch.exterior_lights_power_switch
+      - switch.outside_power_switch
+      - switch.main_power_switch
+      - switch.mainfloor_power_switch
+      - switch.main_floor_power_switch
+      - switch.light_ari_power_switch
+      - switch.christmas_tree_lights_power_switch
+      - switch.tv_lights_power_switch
+      - switch.scenic_dreamview_power_switch
+      - switch.scenic_dreamview1_power_switch
+      - switch.scenic_dreamview2_power_switch
+
+###############################################################################
+# Scripts (mapping style; aliases quoted)
+###############################################################################
 script:
-  kiosk_reload_automations:
-    alias: 'Kiosk: Reload Automations'
+  kiosk_all_lights_on:
+    alias: 'Kiosk: All Lights — ON'
     mode: single
     sequence:
-      - service: automation.reload
-  kiosk_reload_scripts:
-    alias: 'Kiosk: Reload Scripts'
+      - service: light.turn_on
+        target:
+          entity_id: group.kiosk_all_lights_core
+
+  kiosk_all_lights_off:
+    alias: 'Kiosk: All Lights — OFF'
     mode: single
     sequence:
-      - service: script.reload
-  kiosk_reload_scenes:
-    alias: 'Kiosk: Reload Scenes'
+      - service: light.turn_off
+        target:
+          entity_id: group.kiosk_all_lights_core
+
+  kiosk_exterior_on:
+    alias: 'Kiosk: Exterior — ON'
     mode: single
     sequence:
-      - service: scene.reload
-  kiosk_all_plugs_off:
-    alias: 'Kiosk: All Plugs OFF (Safety)'
+      - service: light.turn_on
+        target:
+          entity_id: group.kiosk_exterior_lights
+
+  kiosk_exterior_off:
+    alias: 'Kiosk: Exterior — OFF'
+    mode: single
+    sequence:
+      - service: light.turn_off
+        target:
+          entity_id: group.kiosk_exterior_lights
+
+  # Uses your existing kiosk_* scene groups if you prefer; otherwise the core group above
+  kiosk_theater_on:
+    alias: 'Kiosk: Theater — ON'
+    mode: single
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - group.kiosk_theater_lights
+            - light.theater_lights
+
+  kiosk_theater_off:
+    alias: 'Kiosk: Theater — OFF'
+    mode: single
+    sequence:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - group.kiosk_theater_lights
+            - light.theater_lights
+
+  kiosk_front_on:
+    alias: 'Kiosk: Front — ON'
+    mode: single
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - group.kiosk_front_lights
+            - light.front_porch_lights
+
+  kiosk_front_off:
+    alias: 'Kiosk: Front — OFF'
+    mode: single
+    sequence:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - group.kiosk_front_lights
+            - light.front_porch_lights
+
+  kiosk_garage_on:
+    alias: 'Kiosk: Garage — ON'
+    mode: single
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - group.kiosk_garage_lights
+            - light.lights_garage_center
+            - light.light_garage_left
+            - light.light_garage_right
+
+  kiosk_garage_off:
+    alias: 'Kiosk: Garage — OFF'
+    mode: single
+    sequence:
+      - service: light.turn_off
+        target:
+          entity_id:
+            - group.kiosk_garage_lights
+            - light.lights_garage_center
+            - light.light_garage_left
+            - light.light_garage_right
+
+  kiosk_purifiers_on:
+    alias: 'Kiosk: Purifiers — ON'
+    mode: single
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: group.kiosk_purifiers
+
+  kiosk_purifiers_off:
+    alias: 'Kiosk: Purifiers — OFF'
     mode: single
     sequence:
       - service: switch.turn_off
         target:
-          entity_id:
-            - switch.bar_light_power_switch
-            - switch.basement_power_switch
-            - switch.bedroom_purifier_power_switch
-            - switch.burners_all
-            - switch.christmas_tree_lights_power_switch
-            - switch.diningroom_light_power_switch
-            - switch.exterior_lights_power_switch
-            - switch.external_power_switch
-            - switch.garage_air_purifier_power_switch
-            - switch.guest_room_purifier_power_switch
-            - switch.light_ari_power_switch
-            - switch.light_attic_power_switch
-            - switch.light_guest_room_power_switch
-            - switch.light_parents_power_switch
-            - switch.livingroom_light_power_switch
-            - switch.main_floor_power_switch
-            - switch.main_power_switch
-            - switch.mainfloor_power_switch
-            - switch.outside_power_switch
-            - switch.permanent_outdoor_lights_power_switch
-            - switch.plug_basement_burner
-            - switch.plug_bedroom_burner
-            - switch.plug_humidor
-            - switch.plug_mainfloor_burner
-            - switch.scenic_dreamview1_power_switch
-            - switch.scenic_dreamview2_power_switch
-            - switch.scenic_dreamview_power_switch
-            - switch.sunroom_light_power_switch
-            - switch.tree_power_switch
-            - switch.tv_lights_power_switch
-      - service: logbook.log
-        data:
-          name: Kiosk Safety
-          message: All plugs OFF triggered.
-  kiosk_stop_all_huskers_shows:
-    alias: 'Kiosk: Stop All Huskers Shows'
+          entity_id: group.kiosk_purifiers
+
+  kiosk_plugs_on:
+    alias: 'Kiosk: Plugs — ON'
     mode: single
     sequence:
-      - service: script.turn_on
+      - service: switch.turn_on
         target:
-          entity_id:
-            - script.huskers_chase30_stop
-            - script.huskers_chase_speed_stop
+          entity_id: group.kiosk_plugs
+
+  kiosk_plugs_off:
+    alias: 'Kiosk: Plugs — OFF'
+    mode: single
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: group.kiosk_plugs
+
+  kiosk_light_relays_on:
+    alias: 'Kiosk: Light Power Switches — ON'
+    mode: single
+    sequence:
+      - service: switch.turn_on
+        target:
+          entity_id: group.kiosk_light_power_switches
+
+  kiosk_light_relays_off:
+    alias: 'Kiosk: Light Power Switches — OFF'
+    mode: single
+    sequence:
+      - service: switch.turn_off
+        target:
+          entity_id: group.kiosk_light_power_switches

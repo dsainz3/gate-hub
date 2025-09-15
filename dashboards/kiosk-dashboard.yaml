@@ -1,465 +1,298 @@
-# dashboards/kiosk-dashboard.yaml
-title: Kiosk
+title: 'Kiosk'
 views:
-  - title: Overview
-    path: kiosk-overview
-    icon: mdi:monitor-dashboard
+  - title: 'Control'
+    path: control
+    icon: mdi:lightbulb-group
     cards:
+      #########################################################################
+      # QUICK ACTIONS — LIGHTS
+      #########################################################################
       - type: grid
-        columns: 3
+        title: 'Quick Actions — Lights'
+        columns: 4
         square: false
         cards:
           - type: button
-            name: Start 30s Chase
-            icon: mdi:run-fast
+            name: 'All Lights — ON'
+            icon: mdi:lightbulb-on
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
-            show_state: true
+              target: { entity_id: script.kiosk_all_lights_on }
           - type: button
-            name: Stop 30s Chase
-            icon: mdi:stop
+            name: 'All Lights — OFF'
+            icon: mdi:lightbulb-off
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_stop
-            show_state: true
+              target: { entity_id: script.kiosk_all_lights_off }
+
           - type: button
-            name: Hail Burst (8s)
-            icon: mdi:music-note
+            name: 'Exterior — ON'
+            icon: mdi:lightbulb-group-outline
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
-            show_state: true
+              target: { entity_id: script.kiosk_exterior_on }
           - type: button
-            name: Start Variable Chase
-            icon: mdi:play-speed
+            name: 'Exterior — OFF'
+            icon: mdi:lightbulb-group-off-outline
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_start
-            show_state: true
+              target: { entity_id: script.kiosk_exterior_off }
+
           - type: button
-            name: Stop Variable Chase
-            icon: mdi:stop-circle
+            name: 'Theater — ON'
+            icon: mdi:movie-open
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.huskers_chase_speed_stop
-            show_state: true
+              target: { entity_id: script.kiosk_theater_on }
           - type: button
-            name: All Scarlet Scene
-            icon: mdi:palette
+            name: 'Theater — OFF'
+            icon: mdi:movie-off
             tap_action:
               action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet
-            show_state: true
+              service: script.turn_on
+              target: { entity_id: script.kiosk_theater_off }
+
+          - type: button
+            name: 'Front — ON'
+            icon: mdi:coach-lamp
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_front_on }
+          - type: button
+            name: 'Front — OFF'
+            icon: mdi:coach-lamp
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_front_off }
+
+          - type: button
+            name: 'Garage — ON'
+            icon: mdi:garage-open
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_garage_on }
+          - type: button
+            name: 'Garage — OFF'
+            icon: mdi:garage
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_garage_off }
+
+      #########################################################################
+      # QUICK ACTIONS — DEVICES
+      #########################################################################
       - type: grid
-        columns: 3
-        square: false
-        cards:
-          - type: light
-            entity: light.all_exterior_lights
-          - type: light
-            entity: light.all_lights
-          - type: light
-            entity: light.light_front_left
-          - type: light
-            entity: light.light_front_right
-          - type: light
-            entity: light.light_garage_left
-          - type: light
-            entity: light.light_garage_right
-          - type: light
-            entity: light.light_theater_left
-          - type: light
-            entity: light.light_theater_right
-          - type: light
-            entity: light.lights_garage_center
-          - type: light
-            entity: light.permanent_outdoor_lights
-          - type: light
-            entity: light.permanent_outdoor_lights_2
-          - type: light
-            entity: light.spare_light
-      - type: entities
-        title: Purifier Power Switches
-        show_header_toggle: false
-        entities:
-          - switch.bedroom_purifier_power_switch
-          - switch.garage_air_purifier_power_switch
-          - switch.guest_room_purifier_nightlight_toggle
-          - switch.guest_room_purifier_power_switch
-      - type: grid
-        columns: 2
+        title: 'Quick Actions — Devices'
+        columns: 4
         square: false
         cards:
           - type: button
-            name: All Plugs OFF (Safety)
-            icon: mdi:power-plug-off
+            name: 'Purifiers — ON'
+            icon: mdi:air-purifier
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.kiosk_all_plugs_off
-            show_state: false
+              target: { entity_id: script.kiosk_purifiers_on }
           - type: button
-            name: Stop All Huskers Shows
-            icon: mdi:close-octagon
+            name: 'Purifiers — OFF'
+            icon: mdi:air-purifier-off
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.kiosk_stop_all_huskers_shows
-            show_state: false
-      - type: entities
-        title: Automations (All Current)
-        show_header_toggle: false
-        entities:
-          - automation.3_30_am_light_activation
-          - automation.bedroom_purifier_off
-          - automation.bedroom_purifier_on
-          - automation.early_morning_lights_03_30
-          - automation.evening_lights_at_sunset
-          - automation.exterior_led_monthly_effect
-          - automation.humidor_above_temp
-          - automation.humidor_below_temp
-          - automation.humidor_plug_temperature_control
-          - automation.huskers_debug_exterior_brightness_change
-          - automation.huskers_debug_scene_activated
-          - automation.huskers_debug_script_start
-          - automation.huskers_debug_script_stop
-          - automation.huskers_debug_theater_color_change
-          - automation.huskers_exterior_alternating_loop_start
-          - automation.huskers_exterior_light_show_start
-          - automation.huskers_exterior_show_auto_start
-          - automation.huskers_exterior_show_auto_stop
-          - automation.huskers_game_day_show_auto_start
-          - automation.huskers_game_day_show_auto_stop
-          - automation.huskers_halftime
-          - automation.huskers_halftime_calm_theater
-          - automation.huskers_in_game
-          - automation.huskers_kickoff_start_game_loop
-          - automation.huskers_new_item_notifier
-          - automation.huskers_new_item_notifier_2
-          - automation.huskers_phase_observer_log
-          - automation.huskers_postgame
-          - automation.huskers_postgame_cleanup
-          - automation.huskers_postgame_cleanup_20
-          - automation.huskers_postgame_event
-          - automation.huskers_postgame_monthly_led_effect_20m
-          - automation.huskers_pregame_event
-          - automation.huskers_pregame_t_20
-          - automation.huskers_pregame_theater_alternating
-          - automation.huskers_pregame_window_t_20_t0
-          - automation.huskers_react_to_test_score
-          - automation.huskers_react_to_test_score_2
-          - automation.huskers_set_led_gametime_on_kickoff
-          - automation.huskers_showtime_at_t_20
-          - automation.huskers_stop_shows_20m_after_final
-          - automation.huskers_td_burst_on_score
-          - automation.huskers_theater_show_auto_start
-          - automation.huskers_theater_show_auto_stop
-          - automation.huskers_toggle_debug_logging
-          - automation.huskers_touchdown_boost
-          - automation.huskers_touchdown_burst
-          - automation.huskers_touchdown_celebration
-          - automation.huskers_touchdown_flash_on_score_update
-          - automation.huskers_update_last_score_test
-          - automation.huskers_update_last_score_test_2
-          - automation.interior_lights_off_15_minutes_after_sunrise
-          - automation.lighting_morning_lights_off_sunrise
-          - automation.lighting_night_mode_at_midnight
-          - automation.lights_off_except_porch_garage_attic_23_30
-          - automation.midnight_lights
-          - automation.new_automation
-          - automation.night_lights_at_midnight
-          - automation.outdoor_lights_control_sunrise_sunset
-          - automation.purifier_on_bedroom
-          - automation.safety_turn_off_burner_plugs_at_11_00_pm
-          - automation.sunrise
-          - automation.weather_severe_alert_notification
-      - type: grid
-        columns: 3
-        square: false
-        cards:
+              target: { entity_id: script.kiosk_purifiers_off }
+
           - type: button
-            name: Reload Automations
+            name: 'Plugs — ON'
+            icon: mdi:power-socket-us
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_plugs_on }
+          - type: button
+            name: 'Plugs — OFF'
+            icon: mdi:power-socket-off
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_plugs_off }
+
+          - type: button
+            name: 'Light Relays — ON'
+            icon: mdi:toggle-switch
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_light_relays_on }
+          - type: button
+            name: 'Light Relays — OFF'
+            icon: mdi:toggle-switch-off
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_light_relays_off }
+
+          - type: button
+            name: 'All Plugs OFF (Safety)'
+            icon: mdi:alert
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target: { entity_id: script.kiosk_all_plugs_off }
+
+          - type: button
+            name: 'Reload Automations'
             icon: mdi:refresh-auto
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.kiosk_reload_automations
-            show_state: false
+              target: { entity_id: script.kiosk_reload_automations }
           - type: button
-            name: Reload Scripts
-            icon: mdi:script
+            name: 'Reload Scripts'
+            icon: mdi:script-text-outline
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.kiosk_reload_scripts
-            show_state: false
+              target: { entity_id: script.kiosk_reload_scripts }
           - type: button
-            name: Reload Scenes
-            icon: mdi:theme-light-dark
+            name: 'Reload Scenes'
+            icon: mdi:palette-swatch
             tap_action:
               action: call-service
               service: script.turn_on
-              target:
-                entity_id: script.kiosk_reload_scenes
-            show_state: false
+              target: { entity_id: script.kiosk_reload_scenes }
 
-  - title: Switches by Area
-    path: kiosk-area
-    icon: mdi:map
-    cards:
+      #########################################################################
+      # GROUP OVERVIEW (toggles)
+      #########################################################################
       - type: entities
-        title: Attic Switches
+        title: 'Groups Overview'
+        state_color: true
         show_header_toggle: false
         entities:
-          - switch.light_attic_power_switch
-      - type: entities
-        title: Basement Switches
-        show_header_toggle: false
-        entities:
-          - switch.basement_power_switch
-          - switch.plug_basement_burner
-      - type: entities
-        title: Bedroom Switches
-        show_header_toggle: false
-        entities:
-          - switch.bedroom_purifier_power_switch
-          - switch.plug_bedroom_burner
-      - type: entities
-        title: Dining Room Switches
-        show_header_toggle: false
-        entities:
-          - switch.diningroom_light_power_switch
-      - type: entities
-        title: Garage Switches
-        show_header_toggle: false
-        entities:
-          - switch.garage_air_purifier_power_switch
-      - type: entities
-        title: Guest Room Switches
-        show_header_toggle: false
-        entities:
-          - switch.guest_room_purifier_nightlight_toggle
-          - switch.guest_room_purifier_power_switch
-          - switch.light_guest_room_power_switch
-      - type: entities
-        title: Living Room Switches
-        show_header_toggle: false
-        entities:
-          - switch.livingroom_light_power_switch
-      - type: entities
-        title: Mainfloor Switches
-        show_header_toggle: false
-        entities:
-          - switch.main_floor_power_switch
-          - switch.mainfloor_power_switch
-          - switch.plug_mainfloor_burner
-      - type: entities
-        title: Other Switches
-        show_header_toggle: false
-        entities:
-          - switch.bar_light_power_switch
-          - switch.burners_all
-          - switch.christmas_tree_lights_power_switch
-          - switch.external_power_switch
-          - switch.light_ari_power_switch
-          - switch.main_power_switch
-          - switch.plug_humidor
-          - switch.scenic_dreamview1_power_switch
-          - switch.scenic_dreamview2_power_switch
-          - switch.scenic_dreamview_power_switch
-          - switch.sunroom_light_power_switch
-          - switch.tree_power_switch
-      - type: entities
-        title: Outdoor Switches
-        show_header_toggle: false
-        entities:
-          - switch.exterior_lights_power_switch
-          - switch.outside_power_switch
-          - switch.permanent_outdoor_lights_power_switch
-      - type: entities
-        title: Parents Room Switches
-        show_header_toggle: false
-        entities:
-          - switch.light_parents_power_switch
-      - type: entities
-        title: TV Area Switches
-        show_header_toggle: false
-        entities:
-          - switch.tv_lights_power_switch
+          - entity: group.kiosk_all_lights_core
+            name: 'All Lights (Core)'
+          - entity: group.kiosk_exterior_lights
+            name: 'Exterior Lights'
+          - entity: group.kiosk_theater_lights
+            name: 'Theater Lights'
+          - entity: group.kiosk_front_lights
+            name: 'Front Lights'
+          - entity: group.kiosk_garage_lights
+            name: 'Garage Lights'
+          - entity: group.kiosk_purifiers
+            name: 'Purifiers'
+          - entity: group.kiosk_plugs
+            name: 'Plugs'
+          - entity: group.kiosk_light_power_switches
+            name: 'Light Power Switches'
 
-  - title: Switches by Device
-    path: kiosk-device
-    icon: mdi:devices
-    cards:
+      #########################################################################
+      # LIGHTS — INDIVIDUAL (No segments)
+      #########################################################################
       - type: entities
-        title: Bar Light
+        title: 'Lights — Individual'
+        state_color: true
         show_header_toggle: false
         entities:
-          - switch.bar_light_power_switch
+          - light.all_lights
+          - light.office_lights
+          - light.theater_lights
+          - light.front_porch_lights
+          - light.all_exterior_lights
+          - light.permanent_outdoor_lights
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.lights_garage_center
+          - light.light_garage_left
+          - light.light_garage_right
+          - light.light_parents
+          - light.light_guest_room
+          - light.light_attic
+          - light.sunroom_light
+          - light.livingroom_light
+          - light.diningroom_light
+          - light.light_office
+          - light.spare_light
+
+      #########################################################################
+      # PURIFIERS — POWER & MODES
+      #########################################################################
       - type: entities
-        title: Basement
+        title: 'Purifiers'
+        state_color: true
         show_header_toggle: false
         entities:
-          - switch.basement_power_switch
+          - entity: switch.bedroom_purifier_power_switch
+            name: 'Bedroom Purifier Power'
+          - entity: select.bedroom_purifier_mode
+            name: 'Bedroom Mode'
+          - entity: number.bedroom_purifier_gearmode
+            name: 'Bedroom Gear'
+
+          - type: divider
+
+          - entity: switch.guest_room_purifier_power_switch
+            name: 'Guest Room Purifier Power'
+          - entity: select.guest_room_purifier_mode
+            name: 'Guest Room Mode'
+          - entity: number.guest_room_purifier_gearmode
+            name: 'Guest Room Gear'
+
+          - type: divider
+
+          - entity: switch.garage_air_purifier_power_switch
+            name: 'Garage Purifier Power'
+          - entity: select.garage_air_purifier_mode
+            name: 'Garage Mode'
+          - entity: number.garage_air_purifier_gearmode
+            name: 'Garage Gear'
+
+      #########################################################################
+      # PLUGS — POWER & LIVE WATTS
+      #########################################################################
       - type: entities
-        title: Basement Burner
+        title: 'Plugs & Power'
+        state_color: true
         show_header_toggle: false
         entities:
-          - switch.plug_basement_burner
-      - type: entities
-        title: Bedroom Burner
-        show_header_toggle: false
-        entities:
-          - switch.plug_bedroom_burner
-      - type: entities
-        title: Bedroom Purifier
-        show_header_toggle: false
-        entities:
-          - switch.bedroom_purifier_power_switch
-      - type: entities
-        title: Burners All
-        show_header_toggle: false
-        entities:
-          - switch.burners_all
-      - type: entities
-        title: Christmas Tree Lights
-        show_header_toggle: false
-        entities:
-          - switch.christmas_tree_lights_power_switch
-      - type: entities
-        title: Diningroom Light
-        show_header_toggle: false
-        entities:
-          - switch.diningroom_light_power_switch
-      - type: entities
-        title: Exterior Lights
-        show_header_toggle: false
-        entities:
-          - switch.exterior_lights_power_switch
-      - type: entities
-        title: External
-        show_header_toggle: false
-        entities:
-          - switch.external_power_switch
-      - type: entities
-        title: Garage Air Purifier
-        show_header_toggle: false
-        entities:
-          - switch.garage_air_purifier_power_switch
-      - type: entities
-        title: Guest Room Purifier
-        show_header_toggle: false
-        entities:
-          - switch.guest_room_purifier_power_switch
-      - type: entities
-        title: Guest Room Purifier Nightlight
-        show_header_toggle: false
-        entities:
-          - switch.guest_room_purifier_nightlight_toggle
-      - type: entities
-        title: Humidor
-        show_header_toggle: false
-        entities:
-          - switch.plug_humidor
-      - type: entities
-        title: Light Ari
-        show_header_toggle: false
-        entities:
-          - switch.light_ari_power_switch
-      - type: entities
-        title: Light Attic
-        show_header_toggle: false
-        entities:
-          - switch.light_attic_power_switch
-      - type: entities
-        title: Light Guest Room
-        show_header_toggle: false
-        entities:
-          - switch.light_guest_room_power_switch
-      - type: entities
-        title: Light Parents
-        show_header_toggle: false
-        entities:
-          - switch.light_parents_power_switch
-      - type: entities
-        title: Livingroom Light
-        show_header_toggle: false
-        entities:
-          - switch.livingroom_light_power_switch
-      - type: entities
-        title: Main
-        show_header_toggle: false
-        entities:
-          - switch.main_power_switch
-      - type: entities
-        title: Main Floor
-        show_header_toggle: false
-        entities:
-          - switch.main_floor_power_switch
-      - type: entities
-        title: Mainfloor
-        show_header_toggle: false
-        entities:
-          - switch.mainfloor_power_switch
-      - type: entities
-        title: Mainfloor Burner
-        show_header_toggle: false
-        entities:
-          - switch.plug_mainfloor_burner
-      - type: entities
-        title: Outside
-        show_header_toggle: false
-        entities:
-          - switch.outside_power_switch
-      - type: entities
-        title: Permanent Outdoor Lights
-        show_header_toggle: false
-        entities:
-          - switch.permanent_outdoor_lights_power_switch
-      - type: entities
-        title: Scenic Dreamview
-        show_header_toggle: false
-        entities:
-          - switch.scenic_dreamview_power_switch
-      - type: entities
-        title: Scenic Dreamview1
-        show_header_toggle: false
-        entities:
-          - switch.scenic_dreamview1_power_switch
-      - type: entities
-        title: Scenic Dreamview2
-        show_header_toggle: false
-        entities:
-          - switch.scenic_dreamview2_power_switch
-      - type: entities
-        title: Sunroom Light
-        show_header_toggle: false
-        entities:
-          - switch.sunroom_light_power_switch
-      - type: entities
-        title: Tree
-        show_header_toggle: false
-        entities:
-          - switch.tree_power_switch
-      - type: entities
-        title: Tv Lights
-        show_header_toggle: false
-        entities:
-          - switch.tv_lights_power_switch
+          - entity: switch.plug_basement_burner
+            name: 'Basement Burner'
+          - entity: sensor.plug_basement_burner_power
+            name: 'Basement Burner Power (W)'
+
+          - type: divider
+
+          - entity: switch.plug_mainfloor_burner
+            name: 'Mainfloor Burner'
+          - entity: sensor.plug_mainfloor_burner_power
+            name: 'Mainfloor Burner Power (W)'
+
+          - type: divider
+
+          - entity: switch.plug_bedroom_burner
+            name: 'Bedroom Burner'
+          - entity: sensor.plug_bedroom_burner_power
+            name: 'Bedroom Burner Power (W)'
+
+          - type: divider
+
+          - entity: switch.plug_humidor
+            name: 'Humidor'
+          - entity: sensor.plug_humidor_power
+            name: 'Humidor Power (W)'
+
+          - type: divider
+
+          - entity: switch.tree_power_switch
+            name: 'Tree Power'

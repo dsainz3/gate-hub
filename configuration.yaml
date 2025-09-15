@@ -95,23 +95,9 @@ lovelace:
       show_in_sidebar: true
       # require_admin: false
 
-    huskers-dashboard:              # example: your Theater dashboard
-      mode: yaml
-      filename: dashboards/huskers-dashboard.yaml
-      title: Huskers Package
-      icon: mdi:football
-      show_in_sidebar: true
-
     kiosk-dashboard:
       mode: yaml
       filename: dashboards/kiosk-dashboard.yaml
       title: Kiosk Package
-      icon: mdi:monitor-dashboard
-      show_in_sidebar: true
-
-    huskers-auto-dashboard:
-      mode: yaml
-      filename: dashboards/huskers-auto.yaml
-      title: Huskers Auto
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
