@@ -193,9 +193,9 @@ views:
 
       # Always-visible schedule + rankings
       - type: markdown
-        title: '📅 Schedule'
+        title: 'Schedule'
         content: |
-          {{ states('sensor.huskers_schedule_combined') }}
+          {{ state_attr('sensor.huskers_schedule_combined', 'markdown') }}
 
       - type: entities
         title: '🏅 Rankings & Record'
