@@ -638,25 +638,41 @@ template:
       - name: huskers_kickoff_in_2
         unique_id: huskers_kickoff_in_2
         unit_of_measurement: min
+        state_class: measurement
+        device_class: duration
+        availability: >-
+          {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+          {% set now_ts = now().timestamp() %}
+          {% set next = namespace(dt=None) %}
+          {% for g in events %}
+            {% set comp = (g.competitions | default([])) | first %}
+            {% set dt = g.date | as_datetime if g.date is defined else none %}
+            {% set completed = comp.status.type.completed if (comp and comp.status is defined and comp.status.type is defined) else false %}
+            {% if dt and not completed and dt.timestamp() > now_ts %}
+              {% set next.dt = dt %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {{ next.dt is not none }}
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
           {% set now_ts = now().timestamp() %}
-          {% set next = namespace(g=None) %}
+          {% set next = namespace(dt=None) %}
           {% for g in events %}
             {% set comp = (g.competitions | default([])) | first %}
-            {% if not comp %}{% continue %}{% endif %}
             {% set dt = g.date | as_datetime if g.date is defined else none %}
-            {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
-            {% if dt and not completed and dt.timestamp() > now_ts and next.g is none %}
-              {% set next.g = g %}
+            {% set completed = comp.status.type.completed if (comp and comp.status is defined and comp.status.type is defined) else false %}
+            {% if dt and not completed and dt.timestamp() > now_ts %}
+              {% set next.dt = dt %}
+              {% break %}
             {% endif %}
           {% endfor %}
-          {% if next.g %}
-            {% set dt = as_datetime(next.g.date) %}
-            {% if dt is not none %}
-              {{ ((dt - now()).total_seconds() / 60) | round(0) }}
-            {% else %}unknown{% endif %}
-          {% else %}unknown{% endif %}
+          {% if next.dt is not none %}
+            {% set mins = ((next.dt - now()).total_seconds() / 60) %}
+            {{ (mins if mins > 0 else 0) | round(0) }}
+          {% else %}
+            0
+          {% endif %}
 
       # Our score (auto): pull Nebraska's competitor score from scoreboard
       - name: huskers_our_score_auto

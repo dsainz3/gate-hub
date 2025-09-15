@@ -76,16 +76,13 @@ template:
       # Visibility: km -> mi
       - name: 'Outdoor Visibility (wx)'
         unique_id: wx_visibility
-        state: >-
-          {% set v = state_attr('weather.kneplatt72','visibility')|float(0) %}
-          {% if v > 0 %}
-            {{ (v * 0.621371) | round(1) }}
-          {% else %}
-            unknown
-          {% endif %}
         unit_of_measurement: 'mi'
-        icon: mdi:eye
+        device_class: distance
         state_class: measurement
+        icon: mdi:eye
+        state: >-
+          {% set v_km = state_attr('weather.kneplatt72','visibility') | float(0) %}
+          {{ (v_km * 0.621371) | round(1) }}
 
       # Dew point (approx) from current temp/humidity
       - name: 'Outdoor Dew Point (approx)'
