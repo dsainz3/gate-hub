@@ -726,15 +726,20 @@ template:
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
         state: >-
-          {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
-          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0
-                and data[0].leagues[0].teams is defined %}
-            {% set teams = data[0].leagues[0].teams %}
-            ## Big Ten Standings ({{ now().year }})
+          {% set s = state_attr('sensor.espn_big_ten_teams', 'sports') %}
+          {% set leagues = s[0].leagues if s and s|length>0 and s[0].leagues is defined else [] %}
+          {% set teams_raw = leagues[0].teams if leagues and leagues|length>0 and leagues[0].teams is defined else [] %}
+          {% set teams = teams_raw | map(attribute='team') | list %}
+          {% if teams and teams|length > 0 %}
+            ## Big Ten Teams ({{ now().year }})
             | Rank | Team | Record |
             |------|------|--------|
-            {%- for t in teams | sort(attribute='team.standingSummary', reverse=true) -%}
-            | {{ loop.index }} | {{ t.team.displayName }} | {{ t.team.standingSummary or 'N/A' }} |
+            {%- for t in teams | sort(attribute='displayName') -%}
+            {%- set rec = (
+                  (t.record.items | selectattr('type','equalto','total') | list | first).summary
+                ) if (t.record is defined and t.record.items is defined) else
+                (t.standingSummary if t.standingSummary is defined else 'N/A') -%}
+            | {{ loop.index }} | {{ t.displayName }} | {{ rec }} |
             {%- endfor -%}
           {% else %}
             Big Ten standings unavailable
