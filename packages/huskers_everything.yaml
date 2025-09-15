@@ -638,41 +638,34 @@ template:
       - name: huskers_kickoff_in_2
         unique_id: huskers_kickoff_in_2
         unit_of_measurement: min
+        icon: mdi:timer
         state_class: measurement
-        device_class: duration
-        availability: >-
-          {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-          {% set now_ts = now().timestamp() %}
-          {% set next = namespace(dt=None) %}
-          {% for g in events %}
-            {% set comp = (g.competitions | default([])) | first %}
-            {% set dt = g.date | as_datetime if g.date is defined else none %}
-            {% set completed = comp.status.type.completed if (comp and comp.status is defined and comp.status.type is defined) else false %}
-            {% if dt and not completed and dt.timestamp() > now_ts %}
-              {% set next.dt = dt %}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-          {{ next.dt is not none }}
         state: >-
           {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
           {% set now_ts = now().timestamp() %}
-          {% set next = namespace(dt=None) %}
+          {% set next_dt = none %}
           {% for g in events %}
             {% set comp = (g.competitions | default([])) | first %}
-            {% set dt = g.date | as_datetime if g.date is defined else none %}
-            {% set completed = comp.status.type.completed if (comp and comp.status is defined and comp.status.type is defined) else false %}
+            {% if not comp %}{% continue %}{% endif %}
+            {% set dt = g.date | as_datetime %}
+            {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
             {% if dt and not completed and dt.timestamp() > now_ts %}
-              {% set next.dt = dt %}
+              {% set next_dt = dt %}
               {% break %}
             {% endif %}
           {% endfor %}
-          {% if next.dt is not none %}
-            {% set mins = ((next.dt - now()).total_seconds() / 60) %}
-            {{ (mins if mins > 0 else 0) | round(0) }}
+          {% if next_dt %}
+            {{ max(0, ((next_dt - now()).total_seconds() / 60) | round(0) | int) }}
           {% else %}
             0
           {% endif %}
+        attributes:
+          kickoff_iso: >-
+            {% if next_dt is defined and next_dt %}
+              {{ next_dt.isoformat() }}
+            {% else %}{{ '' }}{% endif %}
+          has_next_game: >-
+            {{ (next_dt is defined and next_dt) | bool }}
 
       # Our score (auto): pull Nebraska's competitor score from scoreboard
       - name: huskers_our_score_auto
@@ -745,26 +738,30 @@ template:
       # Big Ten standings (basic)
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
-        state: 'ok'
+        icon: mdi:trophy
+        # Keep state short to avoid 255-char limit
+        state: >-
+          {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
+          {% if data and data|length>0 and data[0].leagues is defined and data[0].leagues|length>0
+                and data[0].leagues[0].teams is defined %}
+            {{ (data[0].leagues[0].teams | count) }} teams
+          {% else %}
+            unavailable
+          {% endif %}
         attributes:
           markdown: >-
-            {% set s = state_attr('sensor.espn_big_ten_teams','sports') %}
-            {% set leagues = s[0].leagues if s and s|length>0 and s[0].leagues is defined else [] %}
-            {% set teams_raw = leagues[0].teams if leagues and leagues|length>0 and leagues[0].teams is defined else [] %}
-            {% set teams = teams_raw | map(attribute='team') | list %}
-            {% if teams and teams|length > 0 %}
-            ## Big Ten Teams ({{ now().year }})
-            | # | Team | Record |
-            |---|------|--------|
-            {%- for t in teams | sort(attribute='displayName') -%}
-            {%- set rec = (
-                  (t.record.items | selectattr('type','equalto','total') | list | first).summary
-                ) if (t.record is defined and t.record.items is defined) else
-                (t.standingSummary if t.standingSummary is defined else 'N/A') -%}
-            | {{ loop.index }} | {{ t.displayName }} | {{ rec }} |
-            {%- endfor -%}
+            {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
+            {% if data and data|length>0 and data[0].leagues is defined and data[0].leagues|length>0
+                  and data[0].leagues[0].teams is defined %}
+              {% set teams = data[0].leagues[0].teams %}
+              ## Big Ten Teams ({{ now().year }})
+              | Rank | Team | Record |
+              |------|------|--------|
+              {%- for t in teams | sort(attribute='team.displayName') -%}
+              | {{ loop.index }} | {{ t.team.displayName }} | {{ (t.team.standingSummary if t.team is defined and t.team.standingSummary is defined else 'N/A') }} |
+              {%- endfor -%}
             {% else %}
-            Big Ten standings unavailable
+              Big Ten standings unavailable
             {% endif %}
 
   - binary_sensor:
