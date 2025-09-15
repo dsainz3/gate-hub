@@ -4,6 +4,87 @@ views:
     path: control
     icon: mdi:lightbulb-group
     cards:
+      # --- HUMIDOR (Temp, RH, Status, Plug Power + Alerts) ---
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: '### Humidor'
+
+          # Gauges
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: gauge
+                name: Temperature (°F)
+                entity: sensor.hygrometer_humidor_temperature
+                min: 55
+                max: 85
+              - type: gauge
+                name: Humidity (%)
+                entity: sensor.hygrometer_humidor_humidity
+                min: 40
+                max: 80
+
+          # Status + Power + Battery + Watts
+          - type: entities
+            state_color: true
+            show_header_toggle: false
+            entities:
+              - entity: sensor.humidor_status
+                name: System Status
+              - entity: sensor.plug_humidor_power
+                name: Plug Power (W)
+              - entity: switch.plug_humidor
+                name: Power
+              - entity: sensor.hygrometer_humidor_battery
+                name: Hygrometer Battery
+
+          # Alerts (show only when out of range)
+          - type: conditional
+            conditions:
+              - condition: numeric_state
+                entity: sensor.hygrometer_humidor_humidity
+                below: 60
+            card:
+              type: markdown
+              content: |
+                **🟠 Humidity Low**
+                Current: **{{ states('sensor.hygrometer_humidor_humidity') }}%** (target 62–70%)
+
+          - type: conditional
+            conditions:
+              - condition: numeric_state
+                entity: sensor.hygrometer_humidor_humidity
+                above: 70
+            card:
+              type: markdown
+              content: |
+                **🟠 Humidity High**
+                Current: **{{ states('sensor.hygrometer_humidor_humidity') }}%** (target 62–70%)
+
+          - type: conditional
+            conditions:
+              - condition: numeric_state
+                entity: sensor.hygrometer_humidor_temperature
+                below: 62
+            card:
+              type: markdown
+              content: |
+                **🟠 Temperature Low**
+                Current: **{{ states('sensor.hygrometer_humidor_temperature') }}°F** (target ~65–72°F)
+
+          - type: conditional
+            conditions:
+              - condition: numeric_state
+                entity: sensor.hygrometer_humidor_temperature
+                above: 74
+            card:
+              type: markdown
+              content: |
+                **🟠 Temperature High**
+                Current: **{{ states('sensor.hygrometer_humidor_temperature') }}°F** (target ~65–72°F)
+
       #########################################################################
       # QUICK ACTIONS — LIGHTS
       #########################################################################
