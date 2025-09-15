@@ -1,7 +1,6 @@
 # packages/huskers_espn_api.yaml
 # ESPN API to supplement existing CFBD data
 rest:
-  # ESPN College Football Scoreboard (live scores)
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'
     method: GET
     scan_interval: 300
@@ -17,7 +16,6 @@ rest:
           - season
         availability: >-
           {{ value_json is defined }}
-  # Nebraska Team Information from ESPN
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158'
     method: GET
     scan_interval: 3600
@@ -31,7 +29,6 @@ rest:
           - team
         availability: >-
           {{ value_json is defined }}
-  # Nebraska Schedule from ESPN
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158/schedule'
     method: GET
     scan_interval: 1800
@@ -47,7 +44,6 @@ rest:
           - requestedSeason
         availability: >-
           {{ value_json is defined }}
-  # College Football Rankings from ESPN
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings'
     method: GET
     scan_interval: 3600
@@ -61,7 +57,6 @@ rest:
           - rankings
         availability: >-
           {{ value_json is defined }}
-  # Big Ten Conference Teams
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?group=4'
     method: GET
     scan_interval: 1800
@@ -81,7 +76,6 @@ rest:
           {{ value_json is defined }}
 template:
   - sensor:
-      # Combined Schedule (ESPN + existing data)
       - name: huskers_schedule_combined
         unique_id: huskers_schedule_combined
         state: >-
@@ -110,7 +104,6 @@ template:
           {% else %}
             **Schedule data unavailable from both sources.**
           {% endif %}
-      # Current Game Status from ESPN
       - name: huskers_game_status_espn
         unique_id: huskers_game_status_espn
         state: >-
@@ -186,7 +179,6 @@ template:
               {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
             {% else %}0{% endif %}
-      # Nebraska Current Rankings
       - name: huskers_ap_ranking_espn
         unique_id: huskers_ap_ranking_espn
         state: >-
@@ -203,13 +195,11 @@ template:
             {% endif %}
           {% endfor %}
           {{ rank }}
-      # Big Ten Standings from ESPN
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
         state: >-
           {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
-          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0
-                and data[0].leagues[0].teams is defined %}
+          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0 and data[0].leagues[0].teams is defined %}
             {% set teams = data[0].leagues[0].teams %}
             ## Big Ten Standings (2025) - ESPN Data
             | Rank | Team | Record |
@@ -221,7 +211,6 @@ template:
             Big Ten standings unavailable from ESPN
           {% endif %}
   - binary_sensor:
-      # ESPN-based game phase detection
       - name: huskers_is_pregame_espn
         unique_id: huskers_is_pregame_espn
         state: >-

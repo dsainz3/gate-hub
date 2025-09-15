@@ -1,10 +1,6 @@
-# packages/huskers_free_api.yaml
+# packages/huskers_enhanced_cfbd.yaml
 # Free Nebraska football data using ESPN's public endpoints
-
 rest:
-  # ===== FREE ESPN API ENDPOINTS =====
-
-  # College Football Scoreboard (live scores, current day)
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard'
     method: GET
     scan_interval: 300
@@ -17,8 +13,6 @@ rest:
           - events
           - week
           - season
-
-  # Nebraska Team Information
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158'
     method: GET
     scan_interval: 3600
@@ -29,8 +23,6 @@ rest:
           {{ value_json.team.displayName if (value_json is defined and value_json.team is defined) else "Nebraska" }}
         json_attributes:
           - team
-
-  # Big Ten Conference Teams
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?group=4'
     method: GET
     scan_interval: 1800
@@ -38,15 +30,11 @@ rest:
       - name: big_ten_teams_espn
         unique_id: big_ten_teams_espn
         value_template: >-
-          {% if value_json is defined and value_json.sports is defined and value_json.sports|length > 0
-                and value_json.sports[0].leagues is defined and value_json.sports[0].leagues|length > 0
-                and value_json.sports[0].leagues[0].teams is defined %}
+          {% if value_json is defined and value_json.sports is defined and value_json.sports|length > 0 and value_json.sports[0].leagues is defined and value_json.sports[0].leagues|length > 0 and value_json.sports[0].leagues[0].teams is defined %}
             {{ value_json.sports[0].leagues[0].teams | length }}
           {% else %}0{% endif %}
         json_attributes:
           - sports
-
-  # Nebraska Schedule (current season)
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/158/schedule'
     method: GET
     scan_interval: 1800
@@ -59,8 +47,6 @@ rest:
           - events
           - team
           - requestedSeason
-
-  # College Football Rankings
   - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings'
     method: GET
     scan_interval: 3600
@@ -71,12 +57,8 @@ rest:
           {{ (value_json.rankings | length) if (value_json is defined and value_json.rankings is defined) else 0 }}
         json_attributes:
           - rankings
-
 template:
   - sensor:
-      # ===== PROCESSED NEBRASKA DATA =====
-
-      # Nebraska Current Game Status (from scoreboard, today only)
       - name: huskers_game_status_free
         unique_id: huskers_game_status_free
         state: >-
@@ -153,7 +135,7 @@ template:
               {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
             {% else %}0{% endif %}
           quarter: >-
-            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events') or [] %}
+            {% set events = state_attr('sensor.cfb_scoreboard_espn', 'events')) or [] %}
             {% set game = namespace(ev=None) %}
             {% for e in events %}
               {% set comp = (e.competitions | default([])) | first %}
@@ -178,15 +160,12 @@ template:
             {% if game.ev and game.ev.status is defined %}
               {{ game.ev.status.displayClock if game.ev.status.displayClock is defined else 'N/A' }}
             {% else %}N/A{% endif %}
-
-      # Nebraska Schedule (Enhanced Markdown)
       - name: huskers_schedule_free
         unique_id: huskers_schedule_free
         state: >-
           {% set events = state_attr('sensor.nebraska_schedule_espn', 'events') or [] %}
           {% if events %}
             ## Nebraska Schedule ({{ now().year }})
-
             {% for game in events %}
               {% set comp = (game.competitions | default([])) | first %}
               {% if not comp %}{% continue %}{% endif %}
@@ -206,8 +185,6 @@ template:
           {% else %}
             Schedule unavailable
           {% endif %}
-
-      # Nebraska Record
       - name: huskers_record_free
         unique_id: huskers_record_free
         state: >-
@@ -279,17 +256,13 @@ template:
             {% endfor %}
             {% set total = w + l %}
             {{ ('%.3f' % (w / total)) if total > 0 else '0.000' }}
-
-      # Big Ten Standings (basic table from team summaries)
       - name: big_ten_standings_free
         unique_id: big_ten_standings_free
         state: >-
           {% set data = state_attr('sensor.big_ten_teams_espn', 'sports') %}
-          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0
-                and data[0].leagues[0].teams is defined %}
+          {% if data and data|length > 0 and data[0].leagues is defined and data[0].leagues|length > 0 and data[0].leagues[0].teams is defined %}
             {% set teams = data[0].leagues[0].teams %}
             ## Big Ten Standings ({{ now().year }})
-
             | Rank | Team | Record |
             |------|------|--------|
             {%- for t in teams | sort(attribute='team.standingSummary', reverse=true) -%}
@@ -298,8 +271,6 @@ template:
           {% else %}
             Big Ten standings unavailable
           {% endif %}
-
-      # Current Rankings (AP Poll)
       - name: huskers_rankings_free
         unique_id: huskers_rankings_free
         state: >-
@@ -331,8 +302,6 @@ template:
               {% endif %}
             {% endfor %}
             {{ rank if rank is not none else '' }}
-
-      # Next Game Information (from schedule)
       - name: huskers_next_game_free
         unique_id: huskers_next_game_free
         state: >-
@@ -408,21 +377,17 @@ template:
               {% set comp = next.g.competitions | first %}
               {{ 'home' if (comp.competitors is defined and comp.competitors|length >= 2 and comp.competitors[0].team.id == '158') else 'away' }}
             {% else %}''{% endif %}
-
   - binary_sensor:
-      # Game Phase Detection
       - name: huskers_is_pregame_free
         unique_id: huskers_is_pregame_free
         state: >-
           {% set status = states('sensor.huskers_game_status_free') %}
           {{ status in ['Scheduled', 'Pre-Game', 'Postponed', 'Delayed'] }}
-
       - name: huskers_is_live_free
         unique_id: huskers_is_live_free
         state: >-
           {% set status = states('sensor.huskers_game_status_free') %}
           {{ status in ['In Progress', 'Halftime', '1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter', 'Overtime', 'End Period'] }}
-
       - name: huskers_is_postgame_free
         unique_id: huskers_is_postgame_free
         state: >-
