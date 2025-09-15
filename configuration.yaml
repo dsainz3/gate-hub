@@ -67,9 +67,16 @@ recorder:
 
 
 logger:
-  default: info
+  default: warning
   logs:
-    homeassistant.components.logbook: debug
+    homeassistant.setup: debug
+    homeassistant.helpers.package: debug
+    homeassistant.util.yaml.loader: debug
+    homeassistant.components.input_boolean: debug
+    homeassistant.components.input_number: debug
+    homeassistant.components.input_text: debug
+    homeassistant.components.script: debug
+
 
 lovelace:
   dashboards:
