@@ -1,0 +1,55 @@
+name: Home Assistant - Config Check
+
+'on':
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/*.json'
+      - 'dashboards/**'
+      - 'packages/**'
+      - 'custom_components/**'
+      - 'configuration.yaml'
+      - 'themes.yaml'
+      - '.github/workflows/ha-config-check.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/*.json'
+      - 'dashboards/**'
+      - 'packages/**'
+      - 'custom_components/**'
+      - 'configuration.yaml'
+      - 'themes.yaml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-config:
+    name: Validate HA configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull Home Assistant container
+        run: docker pull ghcr.io/home-assistant/home-assistant:stable
+
+      - name: Run hass --script check_config
+        env:
+          TZ: America/Chicago
+        run: |
+          docker run --rm \
+            -e TZ \
+            -v "${{ github.workspace }}":/config \
+            ghcr.io/home-assistant/home-assistant:stable \
+            python -m homeassistant --config /config --script check_config
