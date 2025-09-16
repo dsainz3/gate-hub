@@ -1,0 +1,49 @@
+Huskers Cream:
+  # Core brand palette
+  huskers-cream: '#FDF3E7' # base background (cream)
+  huskers-scarlet: '#E41C38' # accent
+  huskers-black: '#000000' # accent/contrast
+  huskers-ink: '#111111' # primary text
+  huskers-muted: '#5c5c5c' # secondary text
+
+  # App frame
+  primary-background-color: var(--huskers-cream)
+  card-background-color: '#FFF9F0'
+  app-header-background-color: var(--huskers-scarlet)
+  app-header-text-color: var(--huskers-cream)
+
+  # Accents & links
+  primary-color: var(--huskers-scarlet) # buttons, sliders, active states
+  accent-color: var(--huskers-black) # secondary accent (toggles, focus)
+  text-primary-color: var(--huskers-ink)
+  primary-text-color: var(--huskers-ink)
+  secondary-text-color: var(--huskers-muted)
+  disabled-text-color: '#9b9b9b'
+
+  # Icons & states
+  state-icon-color: var(--huskers-black)
+  state-icon-active-color: var(--huskers-scarlet)
+  state-unavailable-color: '#9b9b9b'
+
+  # Chips / badges / pills
+  label-badge-background-color: '#FFF4E6'
+  label-badge-text-color: var(--huskers-ink)
+  label-badge-red: var(--huskers-scarlet)
+  label-badge-yellow: '#DDBE7E'
+  label-badge-blue: '#9DB7D5'
+  paper-item-icon-color: var(--huskers-black)
+  paper-item-icon-active-color: var(--huskers-scarlet)
+
+  # Cards polish
+  ha-card-border-radius: '16px'
+  ha-card-box-shadow: '0 2px 12px rgba(0,0,0,0.08)'
+  divider-color: 'rgba(0,0,0,0.06)'
+
+  # Inputs, sliders
+  slider-color: var(--huskers-scarlet)
+  slider-secondary-color: 'rgba(228,28,56,0.2)'
+
+  # Tables & markdown
+  markdown-code-background-color: '#FFF2E6'
+  table-row-background-color: '#FFF7EC'
+  table-row-alternative-background-color: '#FFF2E0'

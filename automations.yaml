@@ -1,0 +1,296 @@
+# === AUTOMATIONS (Base / generic) ===
+
+- id: evening_lights_at_sunset
+  alias: 'Lighting: Evening Lights at Sunset'
+  description: >
+    Activates evening lighting at sunset. Skips if Huskers game mode is active.
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: '00:05:00'
+  condition:
+    - condition: not
+      conditions:
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: input_boolean.huskers_game_mode
+              state: 'on'
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: binary_sensor.huskers_is_pregame_espn
+                  state: 'on'
+                - condition: state
+                  entity_id: binary_sensor.huskers_is_live_espn
+                  state: 'on'
+  action:
+    - parallel:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+          data:
+            brightness_pct: 60
+            transition: 2
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.light_garage_left
+              - light.lights_garage_center
+              - light.light_garage_right
+          data:
+            color_temp: 500
+            brightness_pct: 10
+            transition: 2
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 50
+            transition: 2
+          continue_on_error: true
+
+- id: night_mode_at_midnight
+  alias: 'Lighting: Night Mode at Midnight'
+  description: >
+    Turns off most interior/accent lights and dims exterior LED to 20%.
+  mode: single
+  trigger:
+    - platform: time
+      at: '00:00:00'
+  action:
+    - parallel:
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+              - light.theater_lights
+          data:
+            transition: 5
+        - service: light.turn_off
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.light_garage_left
+              - light.lights_garage_center
+              - light.light_garage_right
+          data:
+            transition: 5
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 20
+            transition: 5
+          continue_on_error: true
+
+- id: early_morning_lights_0330
+  alias: 'Lighting: Early Morning Gentle Wake (3:30 AM)'
+  description: >
+    Soft ambient lighting for early risers.
+  mode: single
+  trigger:
+    - platform: time
+      at: '03:30:00'
+  action:
+    - parallel:
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.sunroom_light
+              - light.diningroom_light
+              - light.livingroom_light
+          data:
+            brightness_pct: 10
+            color_temp: 454
+            transition: 3
+        - service: light.turn_on
+          target:
+            entity_id:
+              - light.front_porch_lights
+              - light.light_garage_left
+              - light.lights_garage_center
+              - light.light_garage_right
+          data:
+            color_temp: 500
+            brightness_pct: 10
+            transition: 3
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            brightness_pct: 50
+            transition: 3
+          continue_on_error: true
+
+- id: interior_lights_sunrise_off
+  alias: 'Lighting: Morning Lights Off (Sunrise + 15min)'
+  description: >
+    Turns off ambient interior lighting after sunrise.
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: '00:15:00'
+  condition:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_boolean.huskers_game_mode
+          state: 'on'
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.sunroom_light
+          - light.livingroom_light
+          - light.diningroom_light
+      data:
+        transition: 10
+
+- id: exterior_lights_sunrise_off
+  alias: 'Lighting: Morning Lights Off (Sunrise)'
+  description: >
+    Turns off exterior lighting a few minutes after sunrise.
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: '00:05:00'
+  condition:
+    - condition: not
+      conditions:
+        - condition: state
+          entity_id: input_boolean.huskers_game_mode
+          state: 'on'
+  action:
+    - service: light.turn_off
+      target:
+        entity_id:
+          - light.front_porch_lights
+          - light.lights_garage_center
+          - light.light_garage_right
+          - light.light_garage_left
+          - light.permanent_outdoor_lights
+      data:
+        transition: 10
+
+- id: exterior_led_monthly_effect
+  alias: 'LED: Monthly Effect Scheduler'
+  description: >
+    Sets seasonal/holiday effects on exterior LED strip.
+  mode: single
+  trigger:
+    - platform: time
+      at: '00:00:01'
+    - platform: homeassistant
+      event: start
+  variables:
+    current_month: '{{ now().month }}'
+    monthly_effects:
+      1: LED-January
+      2: LED-February
+      3: LED-March
+      4: LED-April
+      5: BSMT-Patriotic
+      6: BSMT-Patriotic
+      7: BSMT-Patriotic
+      8: LED-August
+      9: LED-August
+      10: Halloween
+      11: LED-Thanksgiving
+      12: Christmas
+    target_effect: '{{ monthly_effects[current_month] }}'
+  action:
+    - condition: template
+      value_template: >-
+        {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
+        {{ target_effect in available_effects }}
+    - service: light.turn_on
+      target:
+        entity_id: light.permanent_outdoor_lights
+      data:
+        effect: '{{ target_effect }}'
+      continue_on_error: true
+    - service: logbook.log
+      data:
+        name: LED Monthly Effect
+        message: 'Applied {{ target_effect }} for month {{ current_month }}'
+
+- id: humidor_plug_temp_control
+  alias: 'Climate: Humidor Temperature Control'
+  description: >
+    Hysteresis control for humidor: ON >74°F, OFF <68°F.
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.hygrometer_humidor_temperature
+      above: 74
+      for: { minutes: 2 }
+    - platform: numeric_state
+      entity_id: sensor.hygrometer_humidor_temperature
+      below: 68
+      for: { minutes: 2 }
+  condition:
+    - condition: template
+      value_template: >-
+        {% set temp = trigger.to_state.state | float(-999) %}
+        {% set on = is_state('switch.plug_humidor','on') %}
+        {{ (temp > 74 and not on) or (temp < 68 and on) }}
+  action:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometer_humidor_temperature
+              above: 74
+          sequence:
+            - service: switch.turn_on
+              target: { entity_id: switch.plug_humidor }
+            - service: logbook.log
+              data:
+                name: Humidor Control
+                message: 'Cooling ON - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F'
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.hygrometer_humidor_temperature
+              below: 68
+          sequence:
+            - service: switch.turn_off
+              target: { entity_id: switch.plug_humidor }
+            - service: logbook.log
+              data:
+                name: Humidor Control
+                message: 'Cooling OFF - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F'
+
+- id: burner_plugs_off_2300
+  alias: 'Safety: Nightly Burner Plug Shutoff'
+  description: >
+    Safety shutoff for burner plugs at 11 PM daily.
+  mode: single
+  trigger:
+    - platform: time
+      at: '23:00:00'
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id:
+          - switch.plug_basement_burner
+          - switch.plug_mainfloor_burner
+          - switch.plug_bedroom_burner
+      continue_on_error: true
+    - service: persistent_notification.create
+      data:
+        title: 'Safety: Burner Plugs'
+        message: 'All burner plugs turned off at 11 PM.'
+        notification_id: nightly_burner_shutoff
+    - service: logbook.log
+      data:
+        name: Safety Automation
+        message: Nightly burner plug shutoff completed

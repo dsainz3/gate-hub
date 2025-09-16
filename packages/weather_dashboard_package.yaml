@@ -1,0 +1,238 @@
+---
+input_boolean:
+  weather_notifications_enabled:
+    name: Weather Notifications Enabled
+    icon: mdi:bell-alert
+
+group:
+  weather_dashboard_all:
+    name: Weather Dashboard - All
+    entities:
+      - weather.kneplatt72
+      - sensor.outdoor_temperature_wx
+      - sensor.outdoor_humidity_wx
+      - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_pressure_wx
+      - sensor.outdoor_visibility_wx
+      - sensor.outdoor_dew_point_approx
+      - sensor.outdoor_feels_like
+      - sensor.kneplatt72_uv_index
+      - sensor.uv_category_wx
+      - sensor.wind_gust
+      - sensor.wx_pressure_rate_1h
+      - sensor.wx_pressure_rate_3h
+      - sensor.wx_pressure_change_3h
+      - sensor.wx_pressure_change_24h
+      - sensor.wx_pressure_tendency_3h
+      - binary_sensor.wx_pressure_falling_rapid
+      - binary_sensor.wx_pressure_falling_very_fast
+      - binary_sensor.wx_storm_watch_pressure
+      - binary_sensor.wx_storm_warning_pressure
+
+template:
+  - sensor:
+      # Current temperature
+      - name: 'Outdoor Temperature (wx)'
+        unique_id: wx_temp_primary
+        state: "{{ state_attr('weather.kneplatt72', 'temperature') }}"
+        unit_of_measurement: '°F'
+        device_class: temperature
+        state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72','temperature') is not none }}"
+
+      # Current humidity
+      - name: 'Outdoor Humidity (wx)'
+        unique_id: wx_humidity_primary
+        state: "{{ state_attr('weather.kneplatt72', 'humidity') }}"
+        unit_of_measurement: '%'
+        device_class: humidity
+        state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72','humidity') is not none }}"
+
+      # Current wind speed
+      - name: 'Outdoor Wind Speed (wx)'
+        unique_id: wx_wind_primary
+        state: "{{ state_attr('weather.kneplatt72', 'wind_speed') }}"
+        unit_of_measurement: 'mph'
+        icon: mdi:weather-windy
+        state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72','wind_speed') is not none }}"
+
+      # Pressure: Already in inHg from weather.kneplatt72 - NO CONVERSION NEEDED
+      - name: 'Outdoor Pressure (wx)'
+        unique_id: wx_pressure
+        state: >-
+          {% set p = state_attr('weather.kneplatt72', 'pressure') %}
+          {% if p is not none %}
+            {{ p | float | round(2) }}
+          {% else %}
+            unavailable
+          {% endif %}
+        unit_of_measurement: 'inHg'
+        icon: mdi:gauge
+        state_class: measurement
+        availability: "{{ state_attr('weather.kneplatt72', 'pressure') is not none }}"
+
+      # Visibility: km -> mi
+      - name: 'Outdoor Visibility (wx)'
+        unique_id: wx_visibility
+        unit_of_measurement: 'mi'
+        device_class: distance
+        state_class: measurement
+        icon: mdi:eye
+        state: >-
+          {% set v_km = state_attr('weather.kneplatt72','visibility') | float(0) %}
+          {{ (v_km * 0.621371) | round(1) }}
+
+      # Dew point (approx) from current temp/humidity
+      - name: 'Outdoor Dew Point (approx)'
+        unique_id: wx_dewpoint
+        unit_of_measurement: '°F'
+        device_class: temperature
+        state_class: measurement
+        state: >-
+          {% set T = state_attr('weather.kneplatt72','temperature')|float(0) %}
+          {% set RH = state_attr('weather.kneplatt72','humidity')|float(0) %}
+          {% set Tc = (T - 32) * 5 / 9 %}
+          {% set TdC = Tc - ((100 - RH) / 5) %}
+          {{ (TdC * 9 / 5 + 32) | round(1) }}
+
+      # Feels like (heat index / wind chill)
+      - name: 'Outdoor Feels Like'
+        unique_id: wx_feels_like
+        unit_of_measurement: '°F'
+        device_class: temperature
+        state_class: measurement
+        icon: mdi:thermometer-auto
+        state: >-
+          {% set T = state_attr('weather.kneplatt72','temperature')|float(0) %}
+          {% set RH = state_attr('weather.kneplatt72','humidity')|float(0) %}
+          {% set V  = state_attr('weather.kneplatt72','wind_speed')|float(0) %}
+          {% if T >= 80 and RH >= 40 %}
+            {% set HI = -42.379 + 2.04901523*T + 10.14333127*RH - 0.22475541*T*RH - 0.00683783*T*T - 0.05481717*RH*RH + 0.00122874*T*T*RH + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH %}
+            {{ HI | round(1) }}
+          {% elif T <= 50 and V >= 3 %}
+            {% set WC = 35.74 + 0.6215*T - 35.75*(V ** 0.16) + 0.4275*T*(V ** 0.16) %}
+            {{ WC | round(1) }}
+          {% else %}
+            {{ T | round(1) }}
+          {% endif %}
+
+      # UV category label from your UV sensor
+      - name: 'UV Category (wx)'
+        unique_id: wx_uv_category
+        state: >-
+          {% set u = states('sensor.kneplatt72_uv_index')|int(0) %}
+          {% if u <= 2 %}Low{% elif u <= 5 %}Moderate{% elif u <= 7 %}High{% elif u <= 10 %}Very High{% else %}Extreme{% endif %}
+        icon: mdi:weather-sunny-alert
+
+  # Pressure tendency label + attributes
+  - sensor:
+      - name: 'WX Pressure tendency (3h)'
+        unique_id: wx_pressure_tendency_label
+        icon: mdi:gauge
+        state: >-
+          {% set d = states('sensor.wx_pressure_change_3h')|float(0) %}
+          {% if d >= 0.09 %}Rising very fast (+≥0.09 inHg / 3h)
+          {% elif d >= 0.06 %}Rising fast (+≥0.06 inHg / 3h)
+          {% elif d >= 0.02 %}Rising (+0.02-0.06 inHg / 3h)
+          {% elif d <= -0.09 %}Falling very fast (≤−0.09 inHg / 3h)
+          {% elif d <= -0.06 %}Falling fast (≤−0.06 inHg / 3h)
+          {% elif d <= -0.02 %}Falling (−0.02-−0.06 inHg / 3h)
+          {% else %}Steady (±<0.02 inHg / 3h)
+          {% endif %}
+        attributes:
+          change_3h_inHg: "{{ states('sensor.wx_pressure_change_3h') }}"
+          rate_1h_inHg_per_h: "{{ states('sensor.wx_pressure_rate_1h') }}"
+          rate_3h_inHg_per_h: "{{ states('sensor.wx_pressure_rate_3h') }}"
+
+  - binary_sensor:
+      # Watch (pressure-only heuristic): ≥0.06 inHg drop over 3h
+      - name: 'WX Storm Watch (pressure)'
+        unique_id: wx_storm_watch_pressure
+        device_class: problem
+        state: "{{ states('sensor.wx_pressure_change_3h')|float(0) <= -0.06 }}"
+
+      # Warning (pressure-only heuristic): ≥0.09 inHg drop over 3h
+      - name: 'WX Storm Warning (pressure)'
+        unique_id: wx_storm_warning_pressure
+        device_class: safety
+        state: "{{ states('sensor.wx_pressure_change_3h')|float(0) <= -0.09 }}"
+
+# Derivatives & statistics for pressure trend metrics
+sensor:
+  - platform: derivative
+    name: WX Pressure rate 1h
+    source: sensor.outdoor_pressure_wx
+    unit_time: h
+    time_window: '01:00:00'
+    round: 4
+    unit: 'inHg/h'
+
+  - platform: derivative
+    name: WX Pressure rate 3h
+    source: sensor.outdoor_pressure_wx
+    unit_time: h
+    time_window: '03:00:00'
+    round: 4
+    unit: 'inHg/h'
+
+  - platform: statistics
+    name: WX Pressure change 3h
+    entity_id: sensor.outdoor_pressure_wx
+    state_characteristic: change
+    max_age:
+      hours: 3
+    sampling_size: 180 # Reduced for faster convergence
+    precision: 4
+    unique_id: wx_pressure_change_3h
+
+  - platform: statistics
+    name: WX Pressure change 24h
+    entity_id: sensor.outdoor_pressure_wx
+    state_characteristic: change
+    max_age:
+      hours: 24
+    sampling_size: 720 # Reduced for faster convergence
+    precision: 4
+    unique_id: wx_pressure_change_24h
+
+# Rapid-fall detectors (inHg/s). 0.06 inHg/h ≈ -0.0000167 inHg/s; 0.09 ≈ -0.000025.
+binary_sensor:
+  - platform: trend
+    sensors:
+      wx_pressure_falling_rapid:
+        entity_id: sensor.outdoor_pressure_wx
+        friendly_name: WX Pressure falling rapidly (≥0.06 inHg/h)
+        sample_duration: 3600
+        max_samples: 120
+        min_samples: 15
+        min_gradient: -0.0000167
+        device_class: problem
+      wx_pressure_falling_very_fast:
+        entity_id: sensor.outdoor_pressure_wx
+        friendly_name: WX Pressure falling very fast (≥0.09 inHg/h)
+        sample_duration: 3600
+        max_samples: 120
+        min_samples: 15
+        min_gradient: -0.000025
+        device_class: problem
+
+automation:
+  # Swap 'sensor.nws_alerts' to your actual alert entity when available
+  - id: weather_alert_notify
+    alias: 'Weather: Severe Alert → Notification'
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.nws_alerts
+    condition:
+      - condition: state
+        entity_id: input_boolean.weather_notifications_enabled
+        state: 'on'
+    action:
+      - service: persistent_notification.create
+        data:
+          title: 'Weather Alert'
+          message: 'Update from {{ trigger.entity_id }}: {{ states(trigger.entity_id) }}'
