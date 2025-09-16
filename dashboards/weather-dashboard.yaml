@@ -1,200 +1,272 @@
 ---
 title: Weather Dashboard
 views:
-  # =======================
-  # 1) OVERVIEW (everyday)
-  # =======================
   - title: Overview
     path: weather-overview
     icon: mdi:weather-partly-cloudy
     badges: []
     cards:
-      - type: weather-forecast
-        entity: weather.kneplatt72
-
-      - type: glance
-        title: Now
-        show_name: true
-        show_state: true
-        entities:
-          - entity: sensor.outdoor_temperature_wx
-            name: Temp
-          - entity: sensor.outdoor_feels_like
-            name: Feels Like
-          - entity: sensor.outdoor_dew_point_approx
-            name: Dew Point
-          - entity: sensor.outdoor_humidity_wx
-            name: Humidity
-          - entity: sensor.outdoor_wind_speed_wx
-            name: Wind
-          - entity: sensor.wind_gust
-            name: Gust
-          - entity: sensor.kneplatt72_uv_index
-            name: UV
-          - entity: sensor.uv_category_wx
-            name: UV Cat
-          - entity: sensor.outdoor_pressure_wx
-            name: Pressure
-          - entity: sensor.outdoor_visibility_wx
-            name: Visibility
-
-      - type: entities
-        title: Controls
-        show_header_toggle: false
-        entities:
-          - entity: input_boolean.weather_notifications_enabled
-            name: Weather Notifications
-          - entity: group.weather_dashboard_all
-            name: All Weather Entities
-
-      - type: horizontal-stack
+      - type: grid
+        columns: 2
+        square: false
         cards:
-          - type: sensor
+          - type: weather-forecast
+            entity: weather.kneplatt72
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: >-
+                  ### Station Snapshot
+                  **Location:** KnePlatt72 personal weather station
+                  **Barometer:** {{ states('sensor.outdoor_pressure_wx') }} inHg
+                  **Pressure tendency:** {{ states('sensor.wx_pressure_tendency_3h') }}
+                  **Alerts:** {% if is_state('binary_sensor.wx_storm_warning_pressure','on') %}Storm warning pressure drop{% elif is_state('binary_sensor.wx_storm_watch_pressure','on') %}Storm watch pressure drop{% else %}No pressure based alerts{% endif %}
+              - type: entities
+                title: Notification Controls
+                show_header_toggle: false
+                entities:
+                  - entity: input_boolean.weather_notifications_enabled
+                    name: Weather notifications
+                  - entity: group.weather_dashboard_all
+                    name: Weather entity bundle
+      - type: grid
+        columns: 4
+        square: false
+        cards:
+          - type: tile
             entity: sensor.outdoor_temperature_wx
             name: Temperature
-            graph: line
-          - type: sensor
+            color: '#ef5350'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
+            entity: sensor.outdoor_feels_like
+            name: Feels like
+            color: '#ef5350'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
             entity: sensor.outdoor_humidity_wx
             name: Humidity
-            graph: line
-          - type: sensor
+            color: '#3949ab'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
+            entity: sensor.outdoor_dew_point_approx
+            name: Dew point
+            color: '#00897b'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
             entity: sensor.outdoor_wind_speed_wx
-            name: Wind
-
-      - type: horizontal-stack
-        cards:
-          - type: gauge
-            entity: sensor.outdoor_temperature_wx
-            name: Temp
-            min: -20
-            max: 120
-          - type: gauge
-            entity: sensor.outdoor_humidity_wx
-            name: Humidity
-            min: 0
-            max: 100
-          - type: gauge
+            name: Wind speed
+            color: '#039be5'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
+            entity: sensor.wind_gust
+            name: Wind gust
+            color: '#0277bd'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
             entity: sensor.kneplatt72_uv_index
-            name: UV
-            min: 0
-            max: 11
-
-  # ============================
-  # 2) BAROMETER & STORM SIGNALS
-  # ============================
+            name: UV index
+            color: '#f9a825'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
+            entity: sensor.outdoor_visibility_wx
+            name: Visibility
+            color: '#546e7a'
+      - type: vertical-stack
+        cards:
+          - type: statistics-graph
+            title: 48 hour trend - core weather
+            days_to_show: 2
+            chart_type: line
+            stat_types:
+              - mean
+            entities:
+              - entity: sensor.outdoor_temperature_wx
+                name: Temperature
+              - entity: sensor.outdoor_humidity_wx
+                name: Humidity
+              - entity: sensor.outdoor_wind_speed_wx
+                name: Wind speed
+          - type: statistics-graph
+            title: 48 hour barometer watch
+            days_to_show: 2
+            chart_type: line
+            stat_types:
+              - mean
+            hide_legend: false
+            entities:
+              - entity: sensor.outdoor_pressure_wx
+                name: Sea-level pressure
+              - entity: sensor.wx_pressure_change_3h
+                name: Change over 3h
+              - entity: sensor.wx_pressure_rate_1h
+                name: Rate 1h
+      - type: history-graph
+        title: Pressure with storm signals (last 24h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - entity: sensor.outdoor_pressure_wx
+            name: Pressure
+          - entity: binary_sensor.wx_storm_watch_pressure
+            name: Storm watch (pressure)
+          - entity: binary_sensor.wx_storm_warning_pressure
+            name: Storm warning (pressure)
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: tile
+            entity: binary_sensor.wx_storm_warning_pressure
+            name: Pressure storm warning
+            color: '#ef5350'
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: binary_sensor.wx_storm_watch_pressure
+            name: Pressure storm watch
+            color: '#f9a825'
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: binary_sensor.wx_pressure_falling_very_fast
+            name: Falling very fast
+            color: '#d84315'
+            state_content:
+              - state
+              - last_changed
   - title: Barometer & Storms
     path: barometer
     icon: mdi:gauge
     badges: []
     cards:
+      - type: markdown
+        content: >-
+          ### Barometer status
+          **Pressure:** {{ states('sensor.outdoor_pressure_wx') }} inHg
+          **1h rate:** {{ states('sensor.wx_pressure_rate_1h') }} inHg/h
+          **3h change:** {{ states('sensor.wx_pressure_change_3h') }} inHg
+          **24h change:** {{ states('sensor.wx_pressure_change_24h') }} inHg
       - type: entities
-        title: Barometer & Tendency
+        title: Derived tendency metrics
         show_header_toggle: false
         entities:
-          - entity: sensor.outdoor_pressure_wx
-            name: Sea-level pressure
           - entity: sensor.wx_pressure_tendency_3h
-            name: 3-hour tendency
-          - entity: sensor.wx_pressure_change_3h
-            name: Change (3h, inHg)
+            name: 3 hour tendency label
           - entity: sensor.wx_pressure_rate_1h
-            name: Rate (1h, inHg/h)
+            name: Rate last hour (inHg/h)
           - entity: sensor.wx_pressure_rate_3h
-            name: Rate (3h, inHg/h)
-
-      - type: horizontal-stack
-        cards:
-          - type: sensor
-            entity: sensor.outdoor_pressure_wx
-            name: Pressure
-            graph: line
-          - type: sensor
-            entity: sensor.wx_pressure_rate_1h
-            name: Rate 1h
-            graph: line
-          - type: sensor
-            entity: sensor.wx_pressure_change_3h
-            name: Δ 3h
-            graph: line
-
-      - type: history-graph
-        title: Pressure - Last 24 hours
-        hours_to_show: 24
-        entities:
-          - entity: sensor.outdoor_pressure_wx
+            name: Rate last 3h (inHg/h)
           - entity: sensor.wx_pressure_change_3h
-          - entity: sensor.wx_pressure_rate_1h
-
-      - type: entities
-        title: Storm Heuristics (pressure-only)
-        show_header_toggle: false
-        entities:
-          - entity: binary_sensor.wx_pressure_falling_rapid
-            name: Falling rapidly (≥0.06 inHg/h)
-          - entity: binary_sensor.wx_pressure_falling_very_fast
-            name: Falling very fast (≥0.09 inHg/h)
-          - entity: binary_sensor.wx_storm_watch_pressure
-            name: Storm Watch (≥0.06 inHg/3h)
-          - entity: binary_sensor.wx_storm_warning_pressure
-            name: Storm Warning (≥0.09 inHg/3h)
-
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.wx_storm_warning_pressure
-            state: 'on'
-        card:
-          type: markdown
-          content: |
-            ## ⚠️ **Storm Warning (pressure)**
-            Rapid pressure fall (≥ 0.09 inHg in the last 3 hours).
-            Check official alerts & radar.
-
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.wx_storm_watch_pressure
-            state: 'on'
-          - entity: binary_sensor.wx_storm_warning_pressure
-            state: 'off'
-        card:
-          type: markdown
-          content: |
-            ### ⚠️ Storm Watch (pressure)
-            Rapid pressure fall (≥ 0.06 inHg in the last 3 hours).
-
-  # =====================
-  # 3) DETAILS & HISTORY
-  # =====================
+            name: Change last 3h (inHg)
+          - entity: sensor.wx_pressure_change_24h
+            name: Change last 24h (inHg)
+      - type: vertical-stack
+        cards:
+          - type: statistics-graph
+            title: Pressure trend focus (72h)
+            days_to_show: 3
+            chart_type: line
+            stat_types:
+              - mean
+            entities:
+              - entity: sensor.outdoor_pressure_wx
+                name: Sea-level pressure
+              - entity: sensor.wx_pressure_rate_1h
+                name: Rate 1h
+              - entity: sensor.wx_pressure_rate_3h
+                name: Rate 3h
+          - type: history-graph
+            title: Pressure change vs alerts (48h)
+            hours_to_show: 48
+            entities:
+              - entity: sensor.wx_pressure_change_3h
+                name: Change 3h
+              - entity: sensor.wx_pressure_change_24h
+                name: Change 24h
+              - entity: binary_sensor.wx_pressure_falling_rapid
+                name: Falling rapid alert
+              - entity: binary_sensor.wx_pressure_falling_very_fast
+                name: Falling very fast alert
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: markdown
+            content: >-
+              #### Response guidance
+              * **Warning active:** Prepare to verify official weather statements and secure outdoor items.
+              * **Watch active:** Monitor sky conditions, confirm equipment readiness, and keep notifications enabled.
+          - type: entities
+            title: Quick reference flags
+            show_header_toggle: false
+            entities:
+              - entity: binary_sensor.wx_storm_warning_pressure
+                name: Storm warning from pressure drop
+              - entity: binary_sensor.wx_storm_watch_pressure
+                name: Storm watch from pressure drop
+              - entity: binary_sensor.wx_pressure_falling_rapid
+                name: Rapid fall (1h)
+              - entity: binary_sensor.wx_pressure_falling_very_fast
+                name: Very fast fall (1h)
   - title: Details & History
     path: weather-details
     icon: mdi:chart-line
     badges: []
     cards:
-      - type: history-graph
-        title: Last 24 hours (core)
-        hours_to_show: 24
-        entities:
-          - entity: sensor.outdoor_temperature_wx
-          - entity: sensor.outdoor_humidity_wx
-          - entity: sensor.outdoor_wind_speed_wx
-          - entity: sensor.outdoor_pressure_wx
-          - entity: sensor.kneplatt72_uv_index
-
       - type: statistics-graph
-        title: 24h Trends (mean/min/max)
-        days_to_show: 1
+        title: Temperature, humidity, wind (7 day overview)
+        days_to_show: 7
+        chart_type: line
         stat_types:
           - mean
           - min
           - max
-        chart_type: line
         entities:
           - entity: sensor.outdoor_temperature_wx
+            name: Temperature
           - entity: sensor.outdoor_humidity_wx
+            name: Humidity
           - entity: sensor.outdoor_wind_speed_wx
-
+            name: Wind speed
+      - type: history-graph
+        title: Last 72 hours - extended sensors
+        hours_to_show: 72
+        entities:
+          - entity: sensor.outdoor_dew_point_approx
+            name: Dew point
+          - entity: sensor.outdoor_feels_like
+            name: Feels like
+          - entity: sensor.outdoor_visibility_wx
+            name: Visibility
+          - entity: sensor.uv_category_wx
+            name: UV category
       - type: entities
-        title: All Weather Entities
+        title: Reference entities
         show_header_toggle: false
         entities:
           - entity: group.weather_dashboard_all
-            name: Open group
+            name: Expand all weather helpers
