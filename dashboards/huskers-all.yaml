@@ -1,356 +1,103 @@
 # dashboards/huskers-all.yaml
 title: Memorial Stadium Command Center
+theme: Huskers Cream
 views:
+  # ======================
+  # View 1 — Game Day
+  # ======================
   - title: Game Day
     path: huskers-gameday
-    icon: mdi:football-helmet
+    icon: mdi:football
     cards:
-      # Quick Refresh
-      - type: entities
-        title: '🔄 Data Refresh'
-        show_header_toggle: false
-        entities:
-          - type: call-service
-            name: Refresh Scoreboard
-            icon: mdi:refresh
-            action_name: Refresh
-            service: homeassistant.update_entity
-            target:
-              entity_id: sensor.espn_cfb_scoreboard
-          - type: call-service
-            name: Refresh Schedule
-            icon: mdi:calendar-refresh
-            action_name: Refresh
-            service: homeassistant.update_entity
-            target:
-              entity_id: sensor.espn_nebraska_schedule
-          - type: call-service
-            name: Refresh Rankings
-            icon: mdi:trophy-outline
-            action_name: Refresh
-            service: homeassistant.update_entity
-            target:
-              entity_id: sensor.espn_cfb_rankings
-
-      # Live Game Info (always visible; values depend on phase)
-      - type: entities
-        title: '📊 Live Game Info'
-        show_header_toggle: false
-        entities:
-          - entity: sensor.huskers_game_status_espn
-            name: Game Status
-            icon: mdi:football
-          - entity: sensor.huskers_game_status_espn
-            type: attribute
-            attribute: home_team
-            name: Home Team
-          - entity: sensor.huskers_game_status_espn
-            type: attribute
-            attribute: away_team
-            name: Away Team
-          - entity: sensor.huskers_game_status_espn
-            type: attribute
-            attribute: home_score
-            name: Home Score
-          - entity: sensor.huskers_game_status_espn
-            type: attribute
-            attribute: away_score
-            name: Away Score
-
-      # Pregame
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_pregame_espn
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: '## 🏁 Pregame'
-            - type: entities
-              title: '🎯 Next Game'
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_kickoff_in_2
-                  name: Kickoff In (minutes)
-            - type: horizontal-stack
-              cards:
-                - type: button
-                  name: Start 30s Chase
-                  icon: mdi:play-speed
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase30_start
-                - type: button
-                  name: Hail Burst
-                  icon: mdi:music-note
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_hail_burst_8s
-                - type: button
-                  name: All Scarlet
-                  icon: mdi:palette
-                  tap_action:
-                    action: call-service
-                    service: scene.turn_on
-                    target:
-                      entity_id: scene.huskers_seven_all_scarlet_base
-
-      # Live
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_live_espn
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: '## 🔴 Live Game'
-            - type: entities
-              title: '🏆 Scoreboard'
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_game_status_espn
-                  name: Status
-                - entity: sensor.huskers_game_status_espn
-                  type: attribute
-                  attribute: home_score
-                  name: Home
-                - entity: sensor.huskers_game_status_espn
-                  type: attribute
-                  attribute: away_score
-                  name: Away
-            - type: horizontal-stack
-              cards:
-                - type: button
-                  name: 🎉 Touchdown
-                  icon: mdi:football
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_hail_burst_8s
-                - type: button
-                  name: Chase Lights
-                  icon: mdi:play-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase_speed_start
-                - type: button
-                  name: Stop All Shows
-                  icon: mdi:stop-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.kiosk_stop_all_huskers_shows
-            - type: history-graph
-              title: '🎨 Light Show Activity'
-              hours_to_show: 2
-              entities:
-                - entity: light.theater_lights
-                - entity: light.front_porch_lights
-                - entity: light.all_exterior_lights
-
-      # Postgame
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_postgame_espn
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: '## ✅ Final'
-            - type: entities
-              title: '🏁 Result'
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_game_status_espn
-                  name: Final Status
-                - entity: sensor.huskers_game_status_espn
-                  type: attribute
-                  attribute: home_score
-                  name: Home
-                - entity: sensor.huskers_game_status_espn
-                  type: attribute
-                  attribute: away_score
-                  name: Away
-            - type: button
-              name: 🎊 Victory Celebration
-              icon: mdi:trophy
-              tap_action:
-                action: call-service
-                service: script.turn_on
-                target:
-                  entity_id: script.huskers_hail_burst_8s
-
-      # Always-visible schedule + rankings
+      # Header / quick info (standard Markdown)
       - type: markdown
-        title: 'Schedule'
         content: |
-          {{ state_attr('sensor.huskers_schedule_combined', 'markdown') }}
+          ## Nebraska Cornhuskers — Game Center
+          {{ state_attr('sensor.huskers_game_status_espn','phase') | default('') }}
 
+          {% set opp  = state_attr('sensor.huskers_game_status_espn','opponent_name') %}
+          {% set venue= state_attr('sensor.huskers_game_status_espn','venue_name') %}
+          {% set city = state_attr('sensor.huskers_game_status_espn','venue_city') %}
+          {% set tv   = state_attr('sensor.huskers_game_status_espn','tv') %}
+
+          **Opponent:** {{ opp or 'TBD' }}
+          **Venue:** {{ venue or 'TBD' }} — {{ city or '' }}
+          **TV:** {{ tv or 'TBD' }}
+
+      # Record line (standard Entities)
       - type: entities
-        title: '🏅 Rankings & Record'
-        show_header_toggle: false
+        title: Record
         entities:
-          - entity: sensor.huskers_ap_ranking_espn
-            name: AP Rank
           - entity: sensor.huskers_record_dashboard
-            name: Record
 
-      - type: markdown
-        title: 📊 Big Ten
-        content: "{{ state_attr('sensor.big_ten_standings_espn', 'markdown') }}"
-
-      # Game phase summary
+      # Kickoff time remaining (standard Entities)
       - type: entities
-        title: '🔧 Game Phase & Status'
-        show_header_toggle: false
+        title: Kickoff
         entities:
-          - entity: binary_sensor.huskers_is_pregame_espn
-            name: Pregame
-          - entity: binary_sensor.huskers_is_live_espn
-            name: Live
-          - entity: binary_sensor.huskers_is_postgame_espn
-            name: Postgame
-          - entity: sensor.huskers_kickoff_in_2
-            name: Kickoff In (minutes)
+          - entity: sensor.huskers_kickoff_in_effective
+            name: Minutes to kickoff
 
+      # >>> NEW: Kickoff gauge (standard Gauge; inherits theme accents)
+      - type: gauge
+        name: Kickoff (minutes)
+        entity: sensor.huskers_kickoff_in_effective
+        min: 0
+        max: 180
+        needle: true
+        severity:
+          green: 180
+          yellow: 60
+          red: 30
+
+      # Game status / score state (standard Entities)
+      - type: entities
+        title: Game status
+        entities:
+          - entity: sensor.huskers_game_status_espn
+
+      # Schedule from ESPN (standard Markdown via template attribute)
+      - type: markdown
+        title: Schedule
+        content: |
+          {{ state_attr('sensor.huskers_schedule_combined','markdown') }}
+
+      # Big Ten standings (standard Markdown via template attribute)
+      - type: markdown
+        title: Big Ten Standings
+        content: |
+          {{ state_attr('sensor.big_ten_standings_espn','markdown') }}
+
+  # ======================
+  # View 2 — Light Show Control
+  # (keep your existing content here; left minimal & standard)
+  # ======================
   - title: Light Show Control
     path: huskers-lights
-    icon: mdi:lightbulb-group
+    icon: mdi:lightbulb-multiple
     cards:
       - type: entities
-        title: '🤖 Automation Status'
-        show_header_toggle: false
+        title: Theater Controls
         entities:
-          - entity: input_boolean.huskers_automations_enabled
-            name: Automations Enabled
-          - entity: input_boolean.huskers_color_show
-            name: Color Show Active
+          - entity: script.huskers_theater_game_show_start
+            name: START Huskers Game Show
+          - entity: script.huskers_theater_game_show_stop
+            name: STOP Game Show
           - entity: input_boolean.huskers_theater_show_running
-            name: Theater Show Running
+            name: Show Status
 
-      - type: entities
-        title: '⚙️ Light Configuration'
-        show_header_toggle: false
-        entities:
-          - entity: input_number.huskers_hail_varsity_bpm
-            name: Hail Varsity BPM
-          - entity: input_number.huskers_chase_cycle_seconds
-            name: Chase Cycle Duration
-          - entity: input_number.huskers_hail_bpm
-            name: Hail BPM
-
-      - type: entities
-        title: '🎮 Script Controls'
-        show_header_toggle: false
-        entities:
-          - type: call-service
-            name: Start 30s Chase
-            icon: mdi:play-speed
-            action_name: Start
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase30_start
-          - type: call-service
-            name: Stop 30s Chase
-            icon: mdi:stop
-            action_name: Stop
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase30_stop
-          - type: call-service
-            name: Start Variable Chase
-            icon: mdi:play-circle
-            action_name: Start
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase_speed_start
-          - type: call-service
-            name: Stop Variable Chase
-            icon: mdi:stop-circle
-            action_name: Stop
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_chase_speed_stop
-          - type: call-service
-            name: Hail Varsity Burst
-            icon: mdi:music-note
-            action_name: Play
-            service: script.turn_on
-            target:
-              entity_id: script.huskers_hail_burst_8s
-          - type: call-service
-            name: All Scarlet Scene
-            icon: mdi:palette
-            action_name: Activate
-            service: scene.turn_on
-            target:
-              entity_id: scene.huskers_seven_all_scarlet_base
-          - type: call-service
-            name: Stop All Shows
-            icon: mdi:stop-circle-outline
-            action_name: Stop All
-            service: script.turn_on
-            target:
-              entity_id: script.kiosk_stop_all_huskers_shows
-
-      - type: grid
-        square: false
-        columns: 3
-        cards:
-          - type: light
-            entity: light.theater_lights
-            name: Theater Lights
-          - type: light
-            entity: light.front_porch_lights
-            name: Front Porch
-          - type: light
-            entity: light.all_exterior_lights
-            name: All Exterior
-          - type: light
-            entity: light.office_lights
-            name: Office Lights
-          - type: light
-            entity: light.mainfloor_lights
-            name: Main Floor
-          - type: light
-            entity: light.all_lights
-            name: All Lights
-
+  # ======================
+  # View 3 — System Status
+  # (keep your existing content here; standard Entities only)
+  # ======================
   - title: System Status
     path: huskers-system
-    icon: mdi:cog
+    icon: mdi:heart-pulse
     cards:
       - type: entities
-        title: '📡 Game Data Status (Raw)'
-        show_header_toggle: false
+        title: Huskers Sensors Health
         entities:
-          - entity: sensor.espn_nebraska_team_info
-            name: Team Info Raw
-          - entity: sensor.espn_nebraska_schedule
-            name: Schedule Raw
-          - entity: sensor.espn_cfb_rankings
-            name: Rankings Raw
           - entity: sensor.espn_cfb_scoreboard
-            name: Scoreboard Raw
-
-      - type: entities
-        title: '🔧 Phase Flags'
-        show_header_toggle: false
-        entities:
-          - entity: binary_sensor.huskers_is_pregame_espn
-            name: Pregame
-          - entity: binary_sensor.huskers_is_live_espn
-            name: Live
-          - entity: binary_sensor.huskers_is_postgame_espn
-            name: Postgame
+          - entity: sensor.espn_nebraska_schedule
+          - entity: sensor.espn_big_ten_teams
+          - entity: sensor.huskers_game_status_espn
+          - entity: sensor.huskers_record
