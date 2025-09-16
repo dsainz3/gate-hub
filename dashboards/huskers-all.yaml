@@ -2,15 +2,12 @@
 title: Memorial Stadium Command Center
 theme: Huskers Cream
 views:
-  # ======================
-  # View 1 — Game Day
-  # ======================
   - title: Game Day
     path: huskers-gameday
     icon: mdi:football
     badges: []
     cards:
-      # Header / quick info — uniform Entities card pulling attributes
+      # Header / quick info — shows the sensor state and actual attributes it exposes
       - type: entities
         title: Nebraska Cornhuskers — Game Center
         entities:
@@ -18,41 +15,33 @@ views:
             name: Phase / Status
           - type: attribute
             entity: sensor.huskers_game_status_espn
-            attribute: opponent_name
-            name: Opponent
+            attribute: home_team
+            name: Home Team
           - type: attribute
             entity: sensor.huskers_game_status_espn
-            attribute: venue_name
-            name: Venue
+            attribute: away_team
+            name: Away Team
           - type: attribute
             entity: sensor.huskers_game_status_espn
-            attribute: venue_city
-            name: City
+            attribute: home_score
+            name: Home Score
           - type: attribute
             entity: sensor.huskers_game_status_espn
-            attribute: tv
-            name: TV
-          # (Optional: uncomment if your sensor exposes it)
-          # - type: attribute
-          #   entity: sensor.huskers_game_status_espn
-          #   attribute: kickoff_local
-          #   name: Kickoff (Local)
+            attribute: away_score
+            name: Away Score
 
-      # Record line — standard Entities
       - type: entities
         title: Record
         entities:
           - entity: sensor.huskers_record_dashboard
             name: Nebraska
 
-      # Kickoff time remaining — standard Entities
       - type: entities
         title: Kickoff
         entities:
           - entity: sensor.huskers_kickoff_in_effective
             name: Minutes to kickoff
 
-      # Kickoff gauge — standard Gauge; inherits theme accents
       - type: gauge
         name: Kickoff (minutes)
         entity: sensor.huskers_kickoff_in_effective
@@ -64,27 +53,21 @@ views:
           yellow: 60
           red: 30
 
-      # Game status — keep a raw-state view for quick diagnostics
       - type: entities
         title: Game status
         entities:
           - entity: sensor.huskers_game_status_espn
 
-      # Schedule — rendered from template attribute (markdown)
       - type: markdown
         title: Schedule
         content: |
           {{ state_attr('sensor.huskers_schedule_combined','markdown') }}
 
-      # Big Ten standings — rendered from template attribute (markdown)
       - type: markdown
         title: Big Ten Standings
         content: |
           {{ state_attr('sensor.big_ten_standings_espn','markdown') }}
 
-  # ======================
-  # View 2 — Light Show Control
-  # ======================
   - title: Light Show Control
     path: huskers-lights
     icon: mdi:lightbulb-multiple
@@ -100,9 +83,6 @@ views:
           - entity: input_boolean.huskers_theater_show_running
             name: Show Status
 
-  # ======================
-  # View 3 — System Status
-  # ======================
   - title: System Status
     path: huskers-system
     icon: mdi:heart-pulse
