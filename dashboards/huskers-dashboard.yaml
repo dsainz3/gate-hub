@@ -101,7 +101,7 @@ views:
             entity: light.light_garage_left
             name: Garage Left
           - type: light
-            entity: light.lights_garage_center
+            entity: light.garage_center
             name: Garage Center
           - type: light
             entity: light.light_garage_right
@@ -153,7 +153,7 @@ views:
           - entity: light.light_front_left
           - entity: light.light_front_right
           - entity: light.light_garage_left
-          - entity: light.lights_garage_center
+          - entity: light.garage_center
           - entity: light.light_garage_right
           - entity: light.spare_light
   - title: Super Fan
@@ -319,7 +319,7 @@ views:
                 - entity: light.light_front_left
                 - entity: light.light_front_right
                 - entity: light.light_garage_left
-                - entity: light.lights_garage_center
+                - entity: light.garage_center
                 - entity: light.light_garage_right
                 - entity: light.spare_light
 
@@ -354,6 +354,6 @@ views:
                 - entity: light.light_front_left
                 - entity: light.light_front_right
                 - entity: light.light_garage_left
-                - entity: light.lights_garage_center
+                - entity: light.garage_center
                 - entity: light.light_garage_right
                 - entity: light.spare_light

@@ -43,7 +43,7 @@ recorder:
       - light.light_front_left
       - light.light_front_right
       - light.light_garage_left
-      - light.lights_garage_center
+      - light.garage_center
       - light.light_garage_right
       - light.permanent_outdoor_lights
       - sensor.outdoor_temperature_wx
