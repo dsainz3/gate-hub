@@ -1,10 +1,12 @@
-title: 'Kiosk'
+title: Kiosk
 views:
-  - title: 'Control'
+  - title: Control
     path: control
     icon: mdi:lightbulb-group
     cards:
-      # --- HUMIDOR (Temp, RH, Status, Plug Power + Alerts) ---
+      ############################################################
+      # HUMIDOR (Temp, RH, Plug + history)
+      ############################################################
       - type: vertical-stack
         cards:
           - type: markdown
@@ -12,7 +14,6 @@ views:
               ## Humidor
               Target: **68–72°F**, **62–68% RH**
 
-          # Quick at-a-glance gauges
           - type: horizontal-stack
             cards:
               - type: gauge
@@ -21,23 +22,15 @@ views:
                 min: 40
                 max: 80
                 needle: true
-                severity:
-                  green: 62
-                  yellow: 55
-                  red: 40
-                # (Green band ≈ 62–68, yellow near edges, red otherwise)
+                severity: { green: 62, yellow: 55, red: 40 }
               - type: gauge
                 name: Temperature
                 entity: sensor.hygrometer_humidor_temperature
                 min: 60
                 max: 80
                 needle: true
-                severity:
-                  green: 68
-                  yellow: 66
-                  red: 60
+                severity: { green: 68, yellow: 66, red: 60 }
 
-          # Details + controls
           - type: entities
             show_header_toggle: false
             entities:
@@ -61,302 +54,172 @@ views:
                 name: Energy (kWh)
                 icon: mdi:lightning-bolt
 
-          # Simple 24h trend
           - type: history-graph
             hours_to_show: 24
             entities:
               - sensor.hygrometer_humidor_temperature
               - sensor.hygrometer_humidor_humidity
 
-      #########################################################################
-      # QUICK ACTIONS — LIGHTS
-      #########################################################################
+      ############################################################
+      # LIGHTS — AT-A-GLANCE (ALL as LIGHT CARDS)
+      ############################################################
       - type: grid
-        title: 'Quick Actions — Lights'
+        title: Lights — Overview
         columns: 4
         square: false
         cards:
-          - type: button
-            name: 'All Lights — ON'
-            icon: mdi:lightbulb-on
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_all_lights_on }
-          - type: button
-            name: 'All Lights — OFF'
-            icon: mdi:lightbulb-off
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_all_lights_off }
+          # Core groups that are lights
+          - type: light
+            entity: light.all_lights
+            name: All Lights
+          - type: light
+            entity: light.all_exterior_lights
+            name: Exterior Lights
 
-          - type: button
-            name: 'Exterior — ON'
-            icon: mdi:lightbulb-group-outline
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_exterior_on }
-          - type: button
-            name: 'Exterior — OFF'
-            icon: mdi:lightbulb-group-off-outline
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_exterior_off }
+          # Main zones / rooms
+          - type: light
+            entity: light.theater_lights
+            name: Theater
+          - type: light
+            entity: light.office_lights
+            name: Office
+          - type: light
+            entity: light.front_porch_lights
+            name: Front Porch
+          - type: light
+            entity: light.permanent_outdoor_lights
+            name: Permanent Strip
 
-          - type: button
-            name: 'Theater — ON'
-            icon: mdi:movie-open
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_theater_on }
-          - type: button
-            name: 'Theater — OFF'
-            icon: mdi:movie-off
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_theater_off }
+          # Theater detail
+          - type: light
+            entity: light.light_theater_left
+            name: Theater Left
+          - type: light
+            entity: light.light_theater_right
+            name: Theater Right
 
-          - type: button
-            name: 'Front — ON'
-            icon: mdi:coach-lamp
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_front_on }
-          - type: button
-            name: 'Front — OFF'
-            icon: mdi:coach-lamp
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_front_off }
+          # Front detail
+          - type: light
+            entity: light.light_front_left
+            name: Front Left
+          - type: light
+            entity: light.light_front_right
+            name: Front Right
 
-          - type: button
-            name: 'Garage — ON'
-            icon: mdi:garage-open
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_garage_on }
-          - type: button
-            name: 'Garage — OFF'
-            icon: mdi:garage
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_garage_off }
+          # Garage
+          - type: light
+            entity: light.lights_garage_center
+            name: Garage Center
+          - type: light
+            entity: light.light_garage_left
+            name: Garage Left
+          - type: light
+            entity: light.light_garage_right
+            name: Garage Right
 
-      #########################################################################
-      # QUICK ACTIONS — DEVICES
-      #########################################################################
-      - type: grid
-        title: 'Quick Actions — Devices'
-        columns: 4
-        square: false
-        cards:
-          - type: button
-            name: 'Purifiers — ON'
-            icon: mdi:air-purifier
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_purifiers_on }
-          - type: button
-            name: 'Purifiers — OFF'
-            icon: mdi:air-purifier-off
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_purifiers_off }
+          # Other rooms
+          - type: light
+            entity: light.light_parents
+            name: Parents
+          - type: light
+            entity: light.light_guest_room
+            name: Guest Room
+          - type: light
+            entity: light.light_attic
+            name: Attic
+          - type: light
+            entity: light.sunroom_light
+            name: Sunroom
+          - type: light
+            entity: light.livingroom_light
+            name: Living Room
+          - type: light
+            entity: light.diningroom_light
+            name: Dining Room
+          - type: light
+            entity: light.light_office
+            name: Light-Office
+          - type: light
+            entity: light.spare_light
+            name: Spare
 
-          - type: button
-            name: 'Plugs — ON'
-            icon: mdi:power-socket-us
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_plugs_on }
-          - type: button
-            name: 'Plugs — OFF'
-            icon: mdi:power-socket-off
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_plugs_off }
-
-          - type: button
-            name: 'Light Relays — ON'
-            icon: mdi:toggle-switch
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_light_relays_on }
-          - type: button
-            name: 'Light Relays — OFF'
-            icon: mdi:toggle-switch-off
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_light_relays_off }
-
-          - type: button
-            name: 'All Plugs OFF (Safety)'
-            icon: mdi:alert
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_all_plugs_off }
-
-          - type: button
-            name: 'Reload Automations'
-            icon: mdi:refresh-auto
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_reload_automations }
-          - type: button
-            name: 'Reload Scripts'
-            icon: mdi:script-text-outline
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_reload_scripts }
-          - type: button
-            name: 'Reload Scenes'
-            icon: mdi:palette-swatch
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target: { entity_id: script.kiosk_reload_scenes }
-
-      #########################################################################
-      # GROUP OVERVIEW (toggles)
-      #########################################################################
+      ############################################################
+      # GROUPS — SIMPLE TOGGLES (only groups you actually have)
+      ############################################################
       - type: entities
-        title: 'Groups Overview'
+        title: Groups — Toggles
         state_color: true
         show_header_toggle: false
         entities:
-          - entity: group.kiosk_all_lights_core
-            name: 'All Lights (Core)'
-          - entity: group.kiosk_exterior_lights
-            name: 'Exterior Lights'
+          - entity: group.huskers_eight_lights
+            name: Huskers — All Eight Lights
           - entity: group.kiosk_theater_lights
-            name: 'Theater Lights'
+            name: Kiosk Theater Lights
           - entity: group.kiosk_front_lights
-            name: 'Front Lights'
+            name: Kiosk Front Lights
           - entity: group.kiosk_garage_lights
-            name: 'Garage Lights'
-          - entity: group.kiosk_purifiers
-            name: 'Purifiers'
-          - entity: group.kiosk_plugs
-            name: 'Plugs'
-          - entity: group.kiosk_light_power_switches
-            name: 'Light Power Switches'
+            name: Kiosk Garage Lights
+          - entity: group.kiosk_all_automations
+            name: Kiosk All Automations
+          - entity: group.weather_dashboard_all
+            name: Weather Dashboard – All
 
-      #########################################################################
-      # LIGHTS — INDIVIDUAL (No segments)
-      #########################################################################
-      - type: entities
-        title: 'Lights — Individual'
-        state_color: true
-        show_header_toggle: false
-        entities:
-          - light.all_lights
-          - light.office_lights
-          - light.theater_lights
-          - light.front_porch_lights
-          - light.all_exterior_lights
-          - light.permanent_outdoor_lights
-          - light.light_theater_left
-          - light.light_theater_right
-          - light.light_front_left
-          - light.light_front_right
-          - light.lights_garage_center
-          - light.light_garage_left
-          - light.light_garage_right
-          - light.light_parents
-          - light.light_guest_room
-          - light.light_attic
-          - light.sunroom_light
-          - light.livingroom_light
-          - light.diningroom_light
-          - light.light_office
-          - light.spare_light
-
-      #########################################################################
+      ############################################################
       # PURIFIERS — POWER & MODES
-      #########################################################################
+      ############################################################
       - type: entities
-        title: 'Purifiers'
+        title: Purifiers
         state_color: true
         show_header_toggle: false
         entities:
           - entity: switch.bedroom_purifier_power_switch
-            name: 'Bedroom Purifier Power'
+            name: Bedroom Purifier Power
           - entity: select.bedroom_purifier_mode
-            name: 'Bedroom Mode'
+            name: Bedroom Mode
           - entity: number.bedroom_purifier_gearmode
-            name: 'Bedroom Gear'
-
+            name: Bedroom Gear
           - type: divider
-
           - entity: switch.guest_room_purifier_power_switch
-            name: 'Guest Room Purifier Power'
+            name: Guest Room Purifier Power
           - entity: select.guest_room_purifier_mode
-            name: 'Guest Room Mode'
+            name: Guest Room Mode
           - entity: number.guest_room_purifier_gearmode
-            name: 'Guest Room Gear'
-
+            name: Guest Room Gear
           - type: divider
-
           - entity: switch.garage_air_purifier_power_switch
-            name: 'Garage Purifier Power'
+            name: Garage Purifier Power
           - entity: select.garage_air_purifier_mode
-            name: 'Garage Mode'
+            name: Garage Mode
           - entity: number.garage_air_purifier_gearmode
-            name: 'Garage Gear'
+            name: Garage Gear
 
-      #########################################################################
-      # PLUGS — POWER & LIVE WATTS
-      #########################################################################
+      ############################################################
+      # PLUGS — POWER + LIVE WATTS
+      ############################################################
       - type: entities
-        title: 'Plugs & Power'
+        title: Plugs & Power
         state_color: true
         show_header_toggle: false
         entities:
           - entity: switch.plug_basement_burner
-            name: 'Basement Burner'
+            name: Basement Burner
           - entity: sensor.plug_basement_burner_power
-            name: 'Basement Burner Power (W)'
-
+            name: Basement Burner Power (W)
           - type: divider
-
           - entity: switch.plug_mainfloor_burner
-            name: 'Mainfloor Burner'
+            name: Mainfloor Burner
           - entity: sensor.plug_mainfloor_burner_power
-            name: 'Mainfloor Burner Power (W)'
-
+            name: Mainfloor Burner Power (W)
           - type: divider
-
           - entity: switch.plug_bedroom_burner
-            name: 'Bedroom Burner'
+            name: Bedroom Burner
           - entity: sensor.plug_bedroom_burner_power
-            name: 'Bedroom Burner Power (W)'
-
+            name: Bedroom Burner Power (W)
           - type: divider
-
           - entity: switch.plug_humidor
-            name: 'Humidor'
+            name: Humidor
           - entity: sensor.plug_humidor_power
-            name: 'Humidor Power (W)'
-
+            name: Humidor Power (W)
           - type: divider
-
           - entity: switch.tree_power_switch
-            name: 'Tree Power'
+            name: Tree Power
