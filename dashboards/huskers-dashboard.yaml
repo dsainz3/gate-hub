@@ -1,20 +1,229 @@
-title: Theater Control Dashboard
+title: Huskers Game Center
 views:
-  - title: Theater
-    path: theater
-    icon: mdi:theater
+  - title: Game Center
+    path: huskers-game-center
+    icon: mdi:football-helmet
     badges: []
     cards:
       - type: markdown
-        content: |-
-          # Theater Control Dashboard
-          **Cream Chase – 30s & Variable Speed + Hail Burst (8s)**
-
-      # Quick actions
-      - type: horizontal-stack
+        content: >
+          {% set team_logo = states('sensor.huskers_team_logo') %}
+          {% set opponent_logo = states('sensor.huskers_opponent_logo') %}
+          <div style="background:#f7f1d4;color:#2b1b12;padding:20px;border-radius:18px;border:3px solid #cc0000;box-shadow:0 8px 14px rgba(204,0,0,0.12);">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;">
+              <div style="flex:1;min-width:200px;text-align:center;">
+                <img src="{{ '/local/huskers_logo.svg' if team_logo in ['unknown','unavailable',''] else team_logo }}" alt="Nebraska" style="height:80px;max-width:100%;object-fit:contain;">
+                <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:#cc0000;">{{ states('sensor.huskers_team_name') }}</div>
+                <div style="font-size:1rem;color:#6b5845;">{{ states('sensor.huskers_team_record') }}</div>
+                <div style="font-size:0.9rem;color:#6b5845;">{{ states('sensor.huskers_team_rank') }}</div>
+              </div>
+              <div style="flex:1;min-width:220px;text-align:center;">
+                <div style="font-size:3.2rem;font-weight:800;color:#cc0000;line-height:1;">
+                  {{ states('sensor.huskers_team_score') }} <span style="color:#b44416;">-</span> {{ states('sensor.huskers_opponent_score') }}
+                </div>
+                <div style="margin-top:8px;font-size:1.1rem;font-weight:600;color:#6b5845;">{{ states('sensor.huskers_game_phase_label') }}</div>
+                <div style="font-size:0.95rem;color:#6b5845;">
+                  {{ states('sensor.huskers_game_clock_ct') }} | Q{{ states('sensor.huskers_quarter') }}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  Possession: {{ states('sensor.huskers_possession') }}
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px;text-align:center;">
+                <img src="{{ '/local/huskers_logo.svg' if opponent_logo in ['unknown','unavailable',''] else opponent_logo }}" alt="Opponent" style="height:80px;max-width:100%;object-fit:contain;">
+                <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:#133a63;">{{ states('sensor.huskers_opponent_name') }}</div>
+                <div style="font-size:1rem;color:#6b5845;">{{ states('sensor.huskers_opponent_record') }}</div>
+                <div style="font-size:0.9rem;color:#6b5845;">{{ states('sensor.huskers_opponent_rank') }}</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;text-align:center;font-size:0.95rem;font-weight:600;color:#6b5845;">
+              {{ states('sensor.huskers_game_detail') }}
+            </div>
+            <div style="margin-top:12px;text-align:center;">
+              <a href="{{ states('sensor.huskers_event_url') }}" target="_blank" style="color:#cc0000;font-weight:600;text-decoration:none;">Open ESPN Gamecast</a>
+            </div>
+          </div>
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: markdown
+            content: >
+              {% set kickoff_time = states('sensor.huskers_kickoff_time_ct') %}
+              {% set kickoff_in = states('sensor.huskers_kickoff_in') %}
+              <div style="background:#fdf7e6;border-radius:14px;border:2px solid #cc0000;padding:14px;text-align:center;">
+                <div style="font-size:0.9rem;font-weight:700;color:#cc0000;">Kickoff</div>
+                <div style="font-size:1.3rem;font-weight:700;">
+                  {% if kickoff_time in ['unknown','unavailable',''] %}
+                    TBA
+                  {% else %}
+                    {{ kickoff_time }}
+                  {% endif %}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  {% if kickoff_in in ['unknown','unavailable',''] %}
+                    Countdown unavailable
+                  {% else %}
+                    In {{ kickoff_in }} min
+                  {% endif %}
+                </div>
+              </div>
+          - type: markdown
+            content: >
+              {% set venue = states('sensor.huskers_venue') %}
+              {% set location = states('sensor.huskers_location') %}
+              <div style="background:#fdf7e6;border-radius:14px;border:2px solid #cc0000;padding:14px;text-align:center;">
+                <div style="font-size:0.9rem;font-weight:700;color:#cc0000;">Venue</div>
+                <div style="font-size:1.2rem;font-weight:700;">
+                  {% if venue in ['unknown','unavailable',''] %}
+                    Venue TBA
+                  {% else %}
+                    {{ venue }}
+                  {% endif %}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  {% if location in ['unknown','unavailable',''] %}
+                    Location TBD
+                  {% else %}
+                    {{ location }}
+                  {% endif %}
+                </div>
+              </div>
+          - type: markdown
+            content: >
+              {% set tv = states('sensor.huskers_tv_network') %}
+              {% set odds = states('sensor.huskers_odds') %}
+              {% set overunder = states('sensor.huskers_overunder') %}
+              <div style="background:#fdf7e6;border-radius:14px;border:2px solid #cc0000;padding:14px;text-align:center;">
+                <div style="font-size:0.9rem;font-weight:700;color:#cc0000;">Broadcast</div>
+                <div style="font-size:1.1rem;font-weight:700;">
+                  {% if tv in ['unknown','unavailable',''] %}
+                    Network TBA
+                  {% else %}
+                    {{ tv }}
+                  {% endif %}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  {% if odds in ['unknown','unavailable',''] %}
+                    Line TBA
+                  {% else %}
+                    {{ odds }}
+                  {% endif %}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  {% if overunder in ['unknown','unavailable',''] %}
+                    O/U TBA
+                  {% else %}
+                    {{ overunder }}
+                  {% endif %}
+                </div>
+              </div>
+          - type: markdown
+            content: >
+              {% set win = states('sensor.huskers_win_probability') %}
+              {% set opp = states('sensor.huskers_opponent_win_probability') %}
+              <div style="background:#fdf7e6;border-radius:14px;border:2px solid #cc0000;padding:14px;text-align:center;">
+                <div style="font-size:0.9rem;font-weight:700;color:#cc0000;">Win Probability</div>
+                <div style="font-size:1.3rem;font-weight:700;">
+                  {% if win in ['unknown','unavailable',''] %}
+                    N/A
+                  {% else %}
+                    {{ win }}%
+                  {% endif %}
+                </div>
+                <div style="font-size:0.9rem;color:#6b5845;">
+                  Opponent:
+                  {% if opp in ['unknown','unavailable',''] %}
+                    N/A
+                  {% else %}
+                    {{ opp }}%
+                  {% endif %}
+                </div>
+              </div>
+      - type: markdown
+        content: >
+          <div style="background:#fdf1d6;border-radius:16px;border:2px solid #cc0000;padding:16px;">
+            <div style="display:flex;flex-wrap:wrap;gap:24px;">
+              <div style="flex:1;min-width:200px;">
+                <div style="font-weight:700;color:#cc0000;font-size:1rem;text-transform:uppercase;">Last Play</div>
+                <div style="margin-top:8px;color:#2b1b12;font-size:0.95rem;">{{ states('sensor.huskers_last_play') }}</div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div style="font-weight:700;color:#cc0000;font-size:1rem;text-transform:uppercase;">Down and Distance</div>
+                <div style="margin-top:8px;color:#2b1b12;font-size:0.95rem;">{{ states('sensor.huskers_down_distance') }}</div>
+                <div style="margin-top:6px;color:#6b5845;font-size:0.9rem;">Timeouts NEB: {{ states('sensor.huskers_team_timeouts') }} | Opp: {{ states('sensor.huskers_opponent_timeouts') }}</div>
+              </div>
+            </div>
+          </div>
+      - type: entities
+        title: Game Snapshot
+        show_header_toggle: false
+        entities:
+          - entity: sensor.huskers_team_score
+            name: Huskers Score
+          - entity: sensor.huskers_opponent_score
+            name: Opponent Score
+          - entity: sensor.huskers_quarter
+            name: Quarter
+          - entity: sensor.huskers_game_clock_ct
+            name: Game Clock
+          - entity: sensor.huskers_last_scoring_play
+            name: Last Scoring Play
+          - entity: sensor.huskers_series_summary
+            name: Series Summary
+          - entity: sensor.huskers_win_probability
+            name: Win Probability
+          - entity: sensor.huskers_opponent_win_probability
+            name: Opponent Win Probability
+      - type: history-graph
+        title: Score Trend (last 6 hours)
+        hours_to_show: 6
+        refresh_interval: 60
+        entities:
+          - entity: sensor.huskers_team_score
+            name: Nebraska
+          - entity: sensor.huskers_opponent_score
+            name: Opponent
+      - type: entities
+        title: Phases and Automations
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.huskers_is_pregame_espn
+            name: Pregame Window
+          - entity: binary_sensor.huskers_is_live_espn
+            name: Live Game
+          - entity: binary_sensor.huskers_is_postgame_espn
+            name: Postgame Window
+          - entity: automation.huskers_showtime_at_t_20
+            name: Pregame Showtime (T-20)
+          - entity: automation.huskers_td_burst_on_score
+            name: Touchdown Celebration
+          - entity: automation.huskers_postgame_cleanup
+            name: Postgame Cleanup
+      - type: markdown
+        content: >
+          <div style="background:#f7f1d4;border-radius:16px;border:2px solid #cc0000;padding:16px;">
+            <div style="font-weight:700;color:#cc0000;">Series Outlook</div>
+            <div style="margin-top:8px;color:#2b1b12;font-size:0.95rem;">{{ states('sensor.huskers_series_summary') }}</div>
+            <div style="margin-top:12px;font-size:0.9rem;color:#6b5845;">Last Scoring Play: {{ states('sensor.huskers_last_scoring_play') }}</div>
+          </div>
+  - title: Lights and Shows
+    path: huskers-shows
+    icon: mdi:spotlight-beam
+    badges: []
+    cards:
+      - type: markdown
+        content: >
+          <div style="background:#f7f1d4;color:#2b1b12;padding:16px;border-radius:16px;border:3px solid #cc0000;">
+            <div style="font-size:1.4rem;font-weight:700;color:#cc0000;">Huskers Lighting Control</div>
+            <div style="margin-top:6px;font-size:0.95rem;">Trigger show scripts, adjust tempo, and monitor theater lighting during game moments.</div>
+          </div>
+      - type: grid
+        columns: 3
+        square: false
         cards:
           - type: button
-            name: START 30s Chase
+            name: Start 30s Chase
             icon: mdi:play-speed
             tap_action:
               action: call-service
@@ -22,7 +231,7 @@ views:
               target:
                 entity_id: script.huskers_chase30_start
           - type: button
-            name: START (Variable-Speed)
+            name: Start Variable Chase
             icon: mdi:play-circle
             tap_action:
               action: call-service
@@ -30,7 +239,7 @@ views:
               target:
                 entity_id: script.huskers_chase_speed_start
           - type: button
-            name: Hail Burst (8s)
+            name: Hail Varsity Burst
             icon: mdi:music-note
             tap_action:
               action: call-service
@@ -46,27 +255,23 @@ views:
               target:
                 entity_id: script.huskers_chase_step_once
           - type: button
-            name: STOP & Restore
-            icon: mdi:stop-circle
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id:
-                  - script.huskers_chase30_stop
-                  - script.huskers_chase_speed_stop
-          - type: button
-            name: All-Scarlet Scene
+            name: All Scarlet Scene
             icon: mdi:palette
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
                 entity_id: scene.huskers_seven_all_scarlet
-
-      # Controls
+          - type: button
+            name: Stop All Shows
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_stop_all_huskers_shows
       - type: entities
-        title: Chase & Burst Controls
+        title: Show Configuration
         show_header_toggle: false
         entities:
           - entity: input_boolean.huskers_effects_enabled
@@ -74,16 +279,28 @@ views:
           - entity: input_boolean.huskers_reverse_direction
             name: Reverse Direction
           - entity: input_number.huskers_global_brightness
-            name: Brightness
+            name: Global Brightness
           - entity: input_number.huskers_chase_cycle_seconds
-            name: Chase Cycle Length (s)
+            name: Chase Cycle Seconds
           - entity: input_number.huskers_hail_bpm
-            name: Hail Varsity Tempo (BPM)
-
-      # Lights overview
+            name: Hail Varsity Tempo
+      - type: entities
+        title: Manual Overrides
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.huskers_use_manual_score
+            name: Use Manual Score
+          - entity: input_number.huskers_our_score_manual
+            name: Manual Nebraska Score
+          - entity: input_number.huskers_opponent_score_manual
+            name: Manual Opponent Score
+          - entity: input_boolean.huskers_use_manual_kickoff
+            name: Use Manual Kickoff Time
+          - entity: input_number.huskers_kickoff_in_manual
+            name: Manual Kickoff Minutes
       - type: grid
-        square: false
         columns: 4
+        square: false
         cards:
           - type: light
             entity: light.light_theater_left
@@ -109,44 +326,35 @@ views:
           - type: light
             entity: light.spare_light
             name: Spare Light
-
-      # Script status
       - type: entities
-        title: Script Status & Debug
+        title: Script Status
         show_header_toggle: false
         entities:
           - entity: script.huskers_chase30_start
-            name: Start (30s)
+            name: Start 30s
             secondary_info: last-changed
           - entity: script.huskers_chase30_loop
-            name: Loop 30s (internal)
+            name: Loop 30s
             secondary_info: last-changed
           - entity: script.huskers_chase30_stop
-            name: Stop 30s & Restore
+            name: Stop 30s
             secondary_info: last-changed
           - entity: script.huskers_chase_speed_start
-            name: Start (variable-speed)
+            name: Start Variable Speed
             secondary_info: last-changed
           - entity: script.huskers_chase_speed_loop
-            name: Loop variable (internal)
+            name: Loop Variable Speed
             secondary_info: last-changed
           - entity: script.huskers_chase_speed_stop
-            name: Stop variable & Restore
+            name: Stop Variable Speed
             secondary_info: last-changed
           - entity: script.huskers_hail_burst_8s
-            name: Hail Burst (8s)
+            name: Hail Burst
             secondary_info: last-changed
-          - entity: script.huskers_chase_step_once
-            name: Step Once
-            secondary_info: last-changed
-          - entity: scene.huskers_seven_all_scarlet
-            name: All-Scarlet Scene
-            secondary_info: last-changed
-
-      # Activity
       - type: history-graph
-        title: Light Activity (Last 2 Hours)
+        title: Theater Lights Activity (last 2 hours)
         hours_to_show: 2
+        refresh_interval: 60
         entities:
           - entity: light.light_theater_left
           - entity: light.light_theater_right
@@ -156,204 +364,77 @@ views:
           - entity: light.garage_center
           - entity: light.light_garage_right
           - entity: light.spare_light
-  - title: Super Fan
-    path: superfan
-    icon: mdi:football-helmet
+      - type: entities
+        title: Automation Toggles
+        show_header_toggle: false
+        entities:
+          - entity: input_boolean.huskers_automations_enabled
+            name: Huskers Automations Enabled
+          - entity: input_boolean.huskers_game_mode
+            name: Game Mode
+          - entity: input_boolean.huskers_test_mode
+            name: Test Mode
+          - entity: input_boolean.huskers_color_show
+            name: Color Show Active
+          - entity: input_boolean.huskers_theater_show_running
+            name: Theater Show Running
+  - title: Data and Ops
+    path: huskers-ops
+    icon: mdi:database-eye
     badges: []
     cards:
-      # =========================
-      # PREGAME
-      # =========================
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_pregame
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: |
-                # Pregame
-                **Opponent, kickoff (America/Chicago), venue, TV/Radio, and line**
-            - type: entities
-              title: Game Info
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_opponent
-                  name: Opponent
-                - entity: sensor.huskers_kickoff_local
-                  name: Kickoff (Local)
-                - entity: sensor.huskers_venue
-                  name: Venue
-                - entity: sensor.huskers_tv_radio
-                  name: TV/Radio
-                - entity: sensor.huskers_line
-                  name: Odds / Line
-            - type: horizontal-stack
-              cards:
-                - type: button
-                  name: START 30s Chase
-                  icon: mdi:play-speed
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase30_start
-                - type: button
-                  name: START (Variable)
-                  icon: mdi:play-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase_speed_start
-                - type: button
-                  name: Hail Burst (8s)
-                  icon: mdi:music-note
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_hail_burst_8s
-                - type: button
-                  name: STOP & Restore
-                  icon: mdi:stop-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id:
-                        - script.huskers_chase30_stop
-                        - script.huskers_chase_speed_stop
-                - type: button
-                  name: All-Scarlet Scene
-                  icon: mdi:palette
-                  tap_action:
-                    action: call-service
-                    service: scene.turn_on
-                    target:
-                      entity_id: scene.huskers_seven_all_scarlet
-
-      # =========================
-      # LIVE GAME
-      # =========================
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_live
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: |
-                # Live Game
-                **Score, quarter/clock, possession, down & distance**
-            - type: entities
-              title: Scoreboard
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_score_home
-                  name: Nebraska (Home)
-                - entity: sensor.huskers_score_away
-                  name: Opponent (Away)
-                - entity: sensor.huskers_quarter
-                  name: Quarter
-                - entity: sensor.huskers_clock
-                  name: Clock
-                - entity: sensor.huskers_possession
-                  name: Possession
-                - entity: sensor.huskers_down_distance
-                  name: Down & Distance
-                - entity: sensor.huskers_last_scoring_play
-                  name: Last Scoring Play
-            - type: horizontal-stack
-              cards:
-                - type: button
-                  name: START 30s Chase
-                  icon: mdi:play-speed
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase30_start
-                - type: button
-                  name: START (Variable)
-                  icon: mdi:play-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_chase_speed_start
-                - type: button
-                  name: Hail Burst (8s)
-                  icon: mdi:music-note
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id: script.huskers_hail_burst_8s
-                - type: button
-                  name: STOP & Restore
-                  icon: mdi:stop-circle
-                  tap_action:
-                    action: call-service
-                    service: script.turn_on
-                    target:
-                      entity_id:
-                        - script.huskers_chase30_stop
-                        - script.huskers_chase_speed_stop
-                - type: button
-                  name: All-Scarlet Scene
-                  icon: mdi:palette
-                  tap_action:
-                    action: call-service
-                    service: scene.turn_on
-                    target:
-                      entity_id: scene.huskers_seven_all_scarlet
-            - type: history-graph
-              title: Light Activity (Last 2 Hours)
-              hours_to_show: 2
-              entities:
-                - entity: light.light_theater_left
-                - entity: light.light_theater_right
-                - entity: light.light_front_left
-                - entity: light.light_front_right
-                - entity: light.light_garage_left
-                - entity: light.garage_center
-                - entity: light.light_garage_right
-                - entity: light.spare_light
-
-      # =========================
-      # POSTGAME
-      # =========================
-      - type: conditional
-        conditions:
-          - entity: binary_sensor.huskers_is_postgame
-            state: 'on'
-        card:
-          type: vertical-stack
-          cards:
-            - type: markdown
-              content: |
-                # Final
-                **Scoreline and summary**
-            - type: entities
-              title: Result
-              show_header_toggle: false
-              entities:
-                - entity: sensor.huskers_final_scoreline
-                  name: Final Score
-                - entity: sensor.huskers_last_scoring_play
-                  name: Last Scoring Play
-            - type: history-graph
-              title: Light Activity (Last 2 Hours)
-              hours_to_show: 2
-              entities:
-                - entity: light.light_theater_left
-                - entity: light.light_theater_right
-                - entity: light.light_front_left
-                - entity: light.light_front_right
-                - entity: light.light_garage_left
-                - entity: light.garage_center
-                - entity: light.light_garage_right
-                - entity: light.spare_light
+      - type: entities
+        title: Data Refresh
+        show_header_toggle: false
+        entities:
+          - type: call-service
+            name: Refresh Huskers Data
+            icon: mdi:refresh-circle
+            action_name: Update All
+            service: homeassistant.update_entity
+            target:
+              entity_id:
+                - sensor.husker_team
+                - sensor.espn_cfb_scoreboard
+                - sensor.espn_nebraska_schedule
+                - sensor.espn_cfb_rankings
+      - type: entities
+        title: Core Data Sensors
+        show_header_toggle: false
+        entities:
+          - entity: sensor.husker_team
+            name: TeamTracker Sensor
+          - entity: sensor.espn_cfb_scoreboard
+            name: ESPN Scoreboard Feed
+          - entity: sensor.espn_nebraska_schedule
+            name: ESPN Schedule Feed
+          - entity: sensor.espn_cfb_rankings
+            name: ESPN Rankings Feed
+          - entity: sensor.huskers_schedule_combined
+            name: Combined Schedule
+          - entity: sensor.big_ten_standings_espn
+            name: Big Ten Standings
+      - type: markdown
+        title: Upcoming Schedule
+        content: >
+          {{ state_attr('sensor.huskers_schedule_combined','markdown') }}
+      - type: markdown
+        title: Big Ten Standings
+        content: >
+          {{ state_attr('sensor.big_ten_standings_espn','markdown') }}
+      - type: entities
+        title: Diagnostics
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.internet_reachable
+            name: Internet Reachable
+          - entity: sensor.internet_reachable_latency
+            name: Internet Latency
+          - entity: sensor.huskers_game_status_espn
+            name: ESPN Game Status
+          - entity: sensor.huskers_kickoff_in_2
+            name: Kickoff Auto Minutes
+          - entity: sensor.huskers_our_score_effective
+            name: Effective Huskers Score
+          - entity: sensor.huskers_kickoff_in_effective
+            name: Effective Kickoff Minutes

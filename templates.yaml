@@ -248,3 +248,281 @@
       unique_id: huskers_kickoff_in_alias
       unit_of_measurement: 'min'
       state: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
+    - name: huskers_team_logo
+      unique_id: huskers_team_logo_tt
+      icon: mdi:shield-football
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: "{{ state_attr(''sensor.husker_team'',''team_logo'') or '' }}"
+
+    - name: huskers_opponent_logo
+      unique_id: huskers_opponent_logo_tt
+      icon: mdi:shield-outline
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: "{{ state_attr(''sensor.husker_team'',''opponent_logo'') or '' }}"
+
+    - name: huskers_team_record
+      unique_id: huskers_team_record_tt
+      icon: mdi:clipboard-text
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set rec = state_attr('sensor.husker_team','team_record') %}
+        {% if rec in [None,'','unknown','unavailable'] %}
+          {% set fallback = states('sensor.huskers_record_dashboard') %}
+          {% if fallback in ['unknown','unavailable','None',''] %}
+            N/A
+          {% else %}
+            {{ fallback }}
+          {% endif %}
+        {% else %}
+          {{ rec }}
+        {% endif %}
+
+    - name: huskers_opponent_record
+      unique_id: huskers_opponent_record_tt
+      icon: mdi:clipboard-text-outline
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set rec = state_attr('sensor.husker_team','opponent_record') %}
+        {% if rec in [None,'','unknown','unavailable'] %}
+          N/A
+        {% else %}
+          {{ rec }}
+        {% endif %}
+
+    - name: huskers_team_rank
+      unique_id: huskers_team_rank_tt
+      icon: mdi:numeric-1-box
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set rank = state_attr('sensor.husker_team','team_rank') %}
+        {% if rank in [None,'','unknown','unavailable'] %}
+          Unranked
+        {% else %}
+          #{{ rank }}
+        {% endif %}
+
+    - name: huskers_opponent_rank
+      unique_id: huskers_opponent_rank_tt
+      icon: mdi:numeric-1-box-multiple
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set rank = state_attr('sensor.husker_team','opponent_rank') %}
+        {% if rank in [None,'','unknown','unavailable'] %}
+          Unranked
+        {% else %}
+          #{{ rank }}
+        {% endif %}
+
+    - name: huskers_event_url
+      unique_id: huskers_event_url_tt
+      icon: mdi:link-variant
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: "{{ state_attr(''sensor.husker_team'',''event_url'') or 'https://www.espn.com/college-football/' }}"
+
+    - name: huskers_venue
+      unique_id: huskers_venue_tt
+      icon: mdi:stadium
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set venue = state_attr('sensor.husker_team','venue') %}
+        {% if venue in [None,'','unknown','unavailable'] %}
+          Venue TBA
+        {% else %}
+          {{ venue }}
+        {% endif %}
+
+    - name: huskers_location
+      unique_id: huskers_location_tt
+      icon: mdi:map-marker
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set loc = state_attr('sensor.husker_team','location') %}
+        {% if loc in [None,'','unknown','unavailable'] %}
+          Location TBA
+        {% else %}
+          {{ loc }}
+        {% endif %}
+
+    - name: huskers_tv_network
+      unique_id: huskers_tv_network_tt
+      icon: mdi:television-play
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set tv = state_attr('sensor.husker_team','tv_network') %}
+        {% if tv in [None,'','unknown','unavailable'] %}
+          Network TBA
+        {% else %}
+          {{ tv }}
+        {% endif %}
+
+    - name: huskers_odds
+      unique_id: huskers_odds_tt
+      icon: mdi:chart-line
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set odds = state_attr('sensor.husker_team','odds') %}
+        {% if odds in [None,'','unknown','unavailable'] %}
+          Line TBA
+        {% else %}
+          {{ odds }}
+        {% endif %}
+
+    - name: huskers_overunder
+      unique_id: huskers_overunder_tt
+      icon: mdi:scale-balance
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set ou = state_attr('sensor.husker_team','overunder') %}
+        {% if ou in [None,'','unknown','unavailable'] %}
+          O/U TBA
+        {% else %}
+          O/U {{ ou }}
+        {% endif %}
+
+    - name: huskers_series_summary
+      unique_id: huskers_series_summary_tt
+      icon: mdi:history
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set summary = state_attr('sensor.husker_team','series_summary') %}
+        {% if summary in [None,'','unknown','unavailable'] %}
+          Series history unavailable
+        {% else %}
+          {{ summary }}
+        {% endif %}
+
+    - name: huskers_last_play
+      unique_id: huskers_last_play_tt
+      icon: mdi:football
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set play = state_attr('sensor.husker_team','last_play') %}
+        {% if play in [None,'','unknown','unavailable'] %}
+          No recent play
+        {% else %}
+          {{ play }}
+        {% endif %}
+
+    - name: huskers_down_distance
+      unique_id: huskers_down_distance_tt
+      icon: mdi:numeric
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set info = state_attr('sensor.husker_team','down_distance_text') %}
+        {% if info in [None,'','unknown','unavailable'] %}
+          N/A
+        {% else %}
+          {{ info }}
+        {% endif %}
+
+    - name: huskers_possession
+      unique_id: huskers_possession_tt
+      icon: mdi:football-helmet
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set pos = state_attr('sensor.husker_team','possession') %}
+        {% set huskers_id = state_attr('sensor.husker_team','team_id') %}
+        {% set opp_id = state_attr('sensor.husker_team','opponent_id') %}
+        {% if pos in [None,'','unknown','unavailable'] %}
+          None
+        {% elif pos|string == huskers_id|string %}
+          Nebraska
+        {% elif pos|string == opp_id|string %}
+          {{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}
+        {% else %}
+          {{ pos }}
+        {% endif %}
+
+    - name: huskers_team_timeouts
+      unique_id: huskers_team_timeouts_tt
+      icon: mdi:timer-outline
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set to = state_attr('sensor.husker_team','team_timeouts') %}
+        {% if to in [None,'','unknown','unavailable'] %}
+          unknown
+        {% else %}
+          {{ to }}
+        {% endif %}
+
+    - name: huskers_opponent_timeouts
+      unique_id: huskers_opponent_timeouts_tt
+      icon: mdi:timer-sand
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
+        {% if to in [None,'','unknown','unavailable'] %}
+          unknown
+        {% else %}
+          {{ to }}
+        {% endif %}
+
+    - name: huskers_win_probability
+      unique_id: huskers_win_probability_tt
+      icon: mdi:percent
+      unit_of_measurement: '%'
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
+        {% if prob in [None,'','unknown','unavailable'] %}
+          unknown
+        {% else %}
+          {{ (prob | float(0) * 100) | round(1) }}
+        {% endif %}
+
+    - name: huskers_opponent_win_probability
+      unique_id: huskers_opponent_win_probability_tt
+      icon: mdi:percent-outline
+      unit_of_measurement: '%'
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
+        {% if prob in [None,'','unknown','unavailable'] %}
+          unknown
+        {% else %}
+          {{ (prob | float(0) * 100) | round(1) }}
+        {% endif %}
+
+    - name: huskers_game_phase_label
+      unique_id: huskers_game_phase_label_tt
+      icon: mdi:timeline-clock
+      availability: '{{ True }}'
+      state: >-
+        {% set phase = states('sensor.husker_team') %}
+        {% set status = states('sensor.huskers_game_status_espn') %}
+        {% set mapping = {'PRE':'Pregame','IN':'Live Game','POST':'Final'} %}
+        {% if phase in mapping %}
+          {{ mapping[phase] }}
+        {% elif status not in ['unknown','unavailable',''] %}
+          {{ status }}
+        {% else %}
+          Game status unavailable
+        {% endif %}
+
+    - name: huskers_game_detail
+      unique_id: huskers_game_detail_tt
+      icon: mdi:information-outline
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set kickoff = states('sensor.huskers_kickoff_time_ct') %}
+        {% set tv = state_attr('sensor.husker_team','tv_network') %}
+        {% set odds = state_attr('sensor.husker_team','odds') %}
+        {% set loc = state_attr('sensor.husker_team','location') %}
+        {% set parts = [] %}
+        {% if kickoff not in ['unknown','unavailable',''] %}
+          {% set parts = parts + [kickoff] %}
+        {% endif %}
+        {% if tv not in [None,'','unknown','unavailable'] %}
+          {% set parts = parts + [tv] %}
+        {% endif %}
+        {% if odds not in [None,'','unknown','unavailable'] %}
+          {% set parts = parts + [odds] %}
+        {% endif %}
+        {% if loc not in [None,'','unknown','unavailable'] %}
+          {% set parts = parts + [loc] %}
+        {% endif %}
+        {% if parts %}
+          {{ parts | join(' | ') }}
+        {% else %}
+          Details unavailable
+        {% endif %}
