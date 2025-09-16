@@ -38,50 +38,50 @@ views:
             name: Temperature
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_feels_like
             name: Feels like
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_humidity_wx
             name: Humidity
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_dew_point_approx
             name: Dew point
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_wind_speed_wx
             name: Wind speed
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.wind_gust
             name: Wind gust
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.kneplatt72_uv_index
             name: UV index
             features:
               - type: graph
-                graph: line
                 detail: 2
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_visibility_wx
             name: Visibility
