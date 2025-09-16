@@ -526,3 +526,46 @@
         {% else %}
           Details unavailable
         {% endif %}
+    - name: huskers_tailgate_countdown
+      unique_id: huskers_tailgate_countdown_tt
+      icon: mdi:party-popper
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
+        {% if minutes <= 0 %}
+          It's game time!
+        {% elif minutes < 60 %}
+          {{ minutes }} minutes to kickoff
+        {% elif minutes < 1440 %}
+          {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
+        {% else %}
+          {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
+        {% endif %}
+
+    - name: huskers_hype_message
+      unique_id: huskers_hype_message_tt
+      icon: mdi:bullhorn
+      availability: "{{ has_value(''sensor.husker_team'') }}"
+      state: >-
+        {% set phase = states('sensor.husker_team') %}
+        {% if phase == 'IN' %}
+          On your feet—make Memorial Stadium shake!
+        {% elif phase == 'PRE' %}
+          Tailgate mode: get the speakers blasting and paint the town scarlet.
+        {% elif phase == 'POST' %}
+          Celebrate the result and light the victory lights!
+        {% else %}
+          Forever Huskers. GO BIG RED!
+        {% endif %}
+
+    - name: huskers_fight_song_verse
+      unique_id: huskers_fight_song_verse_tt
+      icon: mdi:music-circle
+      availability: '{{ True }}'
+      state: |
+        There is no place like Nebraska, dear old Nebraska U!
+        Where the girls are the fairest, the boys are the squarest,
+        Of any old place that I knew.
+        There is no place like Nebraska, where they're all true blue.
+        We'll all stick together, in all kinds of weather,
+        For dear old Nebraska U!
