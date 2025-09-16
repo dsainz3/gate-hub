@@ -17,7 +17,7 @@ group:
       - light.light_theater_right
       - light.light_front_left
       - light.light_front_right
-      - light.lights_garage_center
+      - light.garage_center
       - light.light_garage_left
       - light.light_garage_right
       - light.light_parents
@@ -166,7 +166,7 @@ script:
         target:
           entity_id:
             - group.kiosk_garage_lights
-            - light.lights_garage_center
+            - light.garage_center
             - light.light_garage_left
             - light.light_garage_right
 
@@ -178,7 +178,7 @@ script:
         target:
           entity_id:
             - group.kiosk_garage_lights
-            - light.lights_garage_center
+            - light.garage_center
             - light.light_garage_left
             - light.light_garage_right
 

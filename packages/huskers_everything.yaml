@@ -201,7 +201,7 @@ group:
       - light.light_front_left
       - light.light_front_right
       - light.light_garage_left
-      - light.lights_garage_center
+      - light.garage_center
       - light.light_garage_right
       - light.spare_light
 
@@ -232,7 +232,7 @@ scene:
         state: 'on'
         hs_color: [355, 90]
         brightness: 255
-      light.lights_garage_center:
+      light.garage_center:
         state: 'on'
         hs_color: [355, 90]
         brightness: 255
@@ -283,7 +283,7 @@ script:
             - light.light_front_left
             - light.light_front_right
             - light.light_garage_left
-            - light.lights_garage_center
+            - light.garage_center
             - light.light_garage_right
             - light.spare_light
           step_ms: 3750
@@ -365,7 +365,7 @@ script:
             - light.light_front_left
             - light.light_front_right
             - light.light_garage_left
-            - light.lights_garage_center
+            - light.garage_center
             - light.light_garage_right
             - light.spare_light
       - repeat:
@@ -426,7 +426,7 @@ script:
             - light.light_front_left
             - light.light_front_right
             - light.light_garage_left
-            - light.lights_garage_center
+            - light.garage_center
             - light.light_garage_right
             - light.spare_light
           bpm: "{{ states('input_number.huskers_hail_bpm') | float(132) }}"
@@ -440,7 +440,7 @@ script:
               - light.light_front_left
             - - light.light_garage_left
               - light.spare_light
-            - - light.lights_garage_center
+            - - light.garage_center
               - light.light_garage_right
             - - light.light_theater_left
               - light.light_garage_left

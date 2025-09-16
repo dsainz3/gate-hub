@@ -205,12 +205,12 @@ $SensorsBlock_ListItem = @"
         unit_of_measurement: "mph"
         device_class: wind_speed
 "@
+$SensorsBlock_Rootless = ($SensorsBlock_ListItem -split "`r?`n" | ForEach-Object {
+  if ($_ -match '^  (.*)') { $Matches[1] } else { $_ }
+}) -join "`r`n"
 
 if (-not (Test-Path -LiteralPath $TemplatesYaml)) {
-  $fullBlock = @"
-template:
-$SensorsBlock_ListItem
-"@
+  $fullBlock = "# AUTO-FIX: WUnderground wrapper sensors`r`n$SensorsBlock_Rootless`r`n"
   Write-File $TemplatesYaml $fullBlock
   Write-Host "Created templates.yaml with WUnderground wrapper sensors"
 } else {
@@ -225,14 +225,12 @@ $SensorsBlock_ListItem
       Write-Host "templates.yaml already contains wrapper sensors (no change)"
     }
   } else {
-    # File exists but does not have a 'template:' root; prepend a proper root.
     if (-not $already) {
       Backup-File $TemplatesYaml
-      $newContent = "template:`n$SensorsBlock_ListItem`n`n# (Existing content below)`n$tmpl"
-      Set-Content -LiteralPath $TemplatesYaml -Value $newContent -Encoding UTF8
-      Write-Host "Prepended 'template:' root and sensors to templates.yaml"
+      Add-Content -LiteralPath $TemplatesYaml -Value "`n# AUTO-FIX: WUnderground wrapper sensors`n$SensorsBlock_Rootless"
+      Write-Host "Appended WUnderground wrapper sensors to templates.yaml"
     } else {
-      Write-Host "templates.yaml did not have 'template:' root, but wrapper sensors already present (no change)"
+      Write-Host "templates.yaml already contains wrapper sensors (no change)"
     }
   }
 }
@@ -274,8 +272,8 @@ Write-Host ("Converted color_temp->color_temp_kelvin in {0} file(s)" -f $totalCo
 #    Keeps the first 'url: /hacsfiles/lovelace-mushroom/mushroom.js' found,
 #    comments out any later duplicates with '# AUTO-FIX: duplicate'.
 # -----------------------------
-$seen = $false
-[int]$dedupCount = 0
+$script:seen = $false
+$script:dedupCount = 0
 foreach ($f in $YamlFiles) {
   $txt = Get-Content -LiteralPath $f.FullName -Raw
   # Match 'url:' lines referencing mushroom.js
@@ -297,8 +295,8 @@ foreach ($f in $YamlFiles) {
     }
   }
 }
-if ($dedupCount -gt 0) {
-  Write-Host "Commented $dedupCount duplicate Mushroom resource line(s) in YAML"
+if ($script:dedupCount -gt 0) {
+  Write-Host "Commented $script:dedupCount duplicate Mushroom resource line(s) in YAML"
 } else {
   Write-Host "No duplicate Mushroom YAML resource lines found (or UI-managed resources)"
 }

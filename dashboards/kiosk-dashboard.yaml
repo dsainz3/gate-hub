@@ -108,7 +108,7 @@ views:
 
           # Garage
           - type: light
-            entity: light.lights_garage_center
+            entity: light.garage_center
             name: Garage Center
           - type: light
             entity: light.light_garage_left
