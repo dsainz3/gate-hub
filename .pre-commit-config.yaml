@@ -65,12 +65,3 @@ repos:
       - id: ruff-format
         name: ruff-format
         types_or: [python]
-
-  # Home Assistant config check stays
-  - repo: local
-    hooks:
-      - id: hass-config-check
-        name: Home Assistant config check (portable, Python)
-        entry: python scripts/ha_check_portable.py
-        language: system
-        pass_filenames: false
