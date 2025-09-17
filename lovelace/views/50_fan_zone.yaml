@@ -1,68 +1,141 @@
-# Huskers – Fan Zone
-- title: Huskers – Fan Zone
+# Huskers - Fan Zone
+- title: Huskers - Fan Zone
   path: huskers-fan-zone
   icon: mdi:stadium-variant
   badges: []
   cards:
     - type: markdown
-      content: |
-        # Go Big Red!
-        Welcome to the **Huskers Fan Zone**. Cheer on Nebraska and control game-day lighting.
-    - type: picture
-      image: /local/huskers_logo.svg
-      tap_action:
-        action: none
+      title: Huskers Scoreboard
+      content: >
+        <div style="background:#101820; color:#ffffff; padding:16px; border-radius:12px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <img src="{{ states('sensor.huskers_team_logo') }}" alt="Nebraska" style="height:64px; width:64px; object-fit:contain;">
+              <div>
+                <div style="font-size:24px; font-weight:700;">{{ states('sensor.huskers_team_name') }}</div>
+                <div style="opacity:0.8;">{{ states('sensor.huskers_team_record') }} • {{ states('sensor.huskers_team_rank') }}</div>
+              </div>
+            </div>
+            <div style="text-align:center; min-width:120px;">
+              <div style="font-size:56px; font-weight:700; line-height:1;">{{ states('sensor.huskers_team_score') }}</div>
+              <div style="opacity:0.8; font-size:14px;">Q{{ states('sensor.huskers_quarter') }} • {{ states('sensor.huskers_game_clock_ct') }}</div>
+              <div style="margin-top:8px; font-size:14px;">{{ states('sensor.huskers_game_phase_label') }}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; text-align:right;">
+              <div>
+                <div style="font-size:24px; font-weight:700;">{{ states('sensor.huskers_opponent_name') }}</div>
+                <div style="opacity:0.8;">{{ states('sensor.huskers_opponent_record') }} • {{ states('sensor.huskers_opponent_rank') }}</div>
+              </div>
+              <img src="{{ states('sensor.huskers_opponent_logo') }}" alt="Opponent" style="height:64px; width:64px; object-fit:contain;">
+            </div>
+          </div>
+          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:12px; font-size:14px; justify-content:space-between;">
+            <div>Status: {{ states('sensor.huskers_game_status_espn') }}</div>
+            <div>Kickoff In: {{ states('sensor.huskers_kickoff_in') }} min</div>
+          </div>
+          <div style="margin-top:12px; font-size:14px;">{{ states('sensor.huskers_game_detail') }}</div>
+          <div style="margin-top:12px; font-size:16px; font-weight:600;">{{ states('sensor.huskers_hype_message') }}</div>
+        </div>
+
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: markdown
+          content: >
+            ### Drive & Possession
+            - **Possession:** {{ states('sensor.huskers_possession') }}
+            - **Last Play:** {{ states('sensor.huskers_last_play') }}
+            - **Down & Distance:** {{ states('sensor.huskers_down_distance') }}
+            - **Series Summary:** {{ states('sensor.huskers_series_summary') }}
+        - type: entities
+          title: Game Controls & Flags
+          state_color: true
+          entities:
+            - sensor.huskers_tailgate_countdown
+            - sensor.huskers_event_url
+            - sensor.huskers_team_timeouts
+            - sensor.huskers_opponent_timeouts
+            - binary_sensor.huskers_is_pregame_espn
+            - binary_sensor.huskers_is_live_espn
+            - binary_sensor.huskers_is_postgame_espn
+
     - type: grid
       columns: 2
       square: false
       cards:
         - type: gauge
-          entity: sensor.huskers_our_score
+          entity: sensor.huskers_win_probability
+          name: Huskers Win %
           min: 0
           max: 100
-          name: Nebraska
+          needle: true
+          severity:
+            green: 60
+            yellow: 40
+            red: 0
         - type: gauge
-          entity: sensor.huskers_opponent_score
+          entity: sensor.huskers_opponent_win_probability
+          name: Opponent Win %
           min: 0
           max: 100
-          name: Opponent
-    - type: entities
-      title: Game Info
-      state_color: true
-      entities:
-        - entity: sensor.huskers_game_status
-          name: Status
-        - entity: sensor.huskers_quarter
-          name: Quarter
-        - entity: sensor.huskers_game_clock
-          name: Clock
-        - entity: sensor.huskers_next_game_start
-          name: Next Game
+          needle: true
+          severity:
+            green: 0
+            yellow: 40
+            red: 60
+
     - type: grid
-      columns: 3
+      columns: 2
       square: false
       cards:
         - type: button
-          name: Start Show
-          icon: mdi:play
+          name: Start 30s Cream Chase
+          icon: mdi:play-circle
           tap_action:
             action: call-service
             service: script.turn_on
             target:
-              entity_id: script.huskers_theater_show_start
+              entity_id: script.huskers_chase30_start
         - type: button
-          name: Touchdown Burst
+          name: Start Variable Speed Chase
+          icon: mdi:speedometer
+          tap_action:
+            action: call-service
+            service: script.turn_on
+            target:
+              entity_id: script.huskers_chase_speed_start
+        - type: button
+          name: Hail Varsity Burst
           icon: mdi:firework
           tap_action:
             action: call-service
             service: script.turn_on
             target:
-              entity_id: script.huskers_touchdown_burst
+              entity_id: script.huskers_hail_burst_8s
         - type: button
-          name: Stop Show
-          icon: mdi:stop
+          name: Stop All Huskers Shows
+          icon: mdi:stop-circle
           tap_action:
             action: call-service
             service: script.turn_on
             target:
-              entity_id: script.huskers_theater_show_stop
+              entity_id: script.kiosk_stop_all_huskers_shows
+
+    - type: markdown
+      title: Nebraska Schedule
+      content: >
+        {{ state_attr('sensor.huskers_schedule_combined', 'markdown') }}
+
+    - type: markdown
+      title: Big Ten Standings
+      content: >
+        {{ state_attr('sensor.big_ten_standings_espn', 'markdown') }}
+
+    - type: markdown
+      title: Tailgate & Traditions
+      content: >
+        **Tailgate Countdown:** {{ states('sensor.huskers_tailgate_countdown') }}
+        **Event Link:** [Open ESPN]({{ states('sensor.huskers_event_url') }})
+        **Fight Song:**
+        {{ states('sensor.huskers_fight_song_verse') }}
