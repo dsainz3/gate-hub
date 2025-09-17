@@ -508,29 +508,95 @@ template:
           {% if events %}{{ events | length }} games scheduled{% else %}No schedule{% endif %}
         attributes:
           markdown: >-
+
             {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+
             {% if events %}
-              ## Nebraska Schedule ({{ now().year }})
-              {% for game in events %}
-                {% set comp = (game.competitions | default([])) | first %}
-                {% if not comp %}{% continue %}{% endif %}
-                {% set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
-                {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
-                {% set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
-                {% set loc = 'vs' if us_home else 'at' %}
-                {% set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
-                {% if done %}
-                  {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
-                  {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-                  {% set h_score = (h.score.value if h and h.score is mapping and h.score.value is defined else (h.score if h and h.score is defined else '?')) %}
-                  {% set a_score = (a.score.value if a and a.score is mapping and a.score.value is defined else (a.score if a and a.score is defined else '?')) %}
-                  - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h_score }}-{{ a_score }}
-                {% else %}
-                  - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
-                {% endif %}
-              {% endfor %}
+
+              <table style="width:100%; border-collapse:collapse;">
+
+                <thead>
+
+                  <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.2);">
+
+                    <th style="padding:6px 0;">Date</th>
+
+                    <th style="padding:6px 0;">Matchup</th>
+
+                    <th style="padding:6px 0;">Status</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {% for game in events -%}
+
+                    {% set comp = (game.competitions | default([])) | first %}
+
+                    {% if not comp %}{% continue %}{% endif %}
+
+                    {% set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
+
+                    {% set date_str = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
+
+                    {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+
+                    {% set opponent = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+
+                    {% set us_home = huskers.homeAway == 'home' if huskers is defined and huskers.homeAway is defined else false %}
+
+                    {% set opp_name = opponent.team.displayName if opponent and opponent.team is defined and opponent.team.displayName is defined else 'TBD' %}
+
+                    {% set loc = 'vs' if us_home else 'at' %}
+
+                    {% set status = comp.status if comp.status is defined else none %}
+
+                    {% set completed = status.type.completed if status is defined and status.type is defined else false %}
+
+                    {% set desc = status.type.description if status is defined and status.type is defined and status.type.description is defined else 'Scheduled' %}
+
+                    {% set our_score = (huskers.score.value if huskers and huskers.score is mapping and huskers.score.value is defined else (huskers.score if huskers and huskers.score is defined else '?')) %}
+
+                    {% set opp_score = (opponent.score.value if opponent and opponent.score is mapping and opponent.score.value is defined else (opponent.score if opponent and opponent.score is defined else '?')) %}
+
+                    {% if completed %}
+
+                      {% set our_int = our_score | int(0) %}
+
+                      {% set opp_int = opp_score | int(0) %}
+
+                      {% set result = 'W' if our_int > opp_int else 'L' if our_int < opp_int else 'T' %}
+
+                      {% set status_text = result ~ ' ' ~ our_int ~ '-' ~ opp_int %}
+
+                    {% else %}
+
+                      {% set status_text = desc %}
+
+                    {% endif %}
+
+                    <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+
+                      <td style="padding:6px 0;">{{ date_str }}</td>
+
+                      <td style="padding:6px 0;">{{ loc }} {{ opp_name }}</td>
+
+                      <td style="padding:6px 0;">{{ status_text }}</td>
+
+                    </tr>
+
+                  {% endfor -%}
+
+                </tbody>
+
+              </table>
+
             {% else %}
-              **Schedule unavailable**
+
+              <strong>Schedule unavailable</strong>
+
             {% endif %}
 
       # Today’s game status (plus basic attributes)
