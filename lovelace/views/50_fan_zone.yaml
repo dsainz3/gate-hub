@@ -7,35 +7,31 @@
     - type: markdown
       title: Huskers Scoreboard
       content: >
-        <div style="background:#101820; color:#ffffff; padding:16px; border-radius:12px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="{{ states('sensor.huskers_team_logo') }}" alt="Nebraska" style="height:64px; width:64px; object-fit:contain;">
-              <div>
-                <div style="font-size:24px; font-weight:700;">{{ states('sensor.huskers_team_name') }}</div>
-                <div style="opacity:0.8;">{{ states('sensor.huskers_team_record') }} • {{ states('sensor.huskers_team_rank') }}</div>
-              </div>
-            </div>
-            <div style="text-align:center; min-width:120px;">
-              <div style="font-size:56px; font-weight:700; line-height:1;">{{ states('sensor.huskers_team_score') }}</div>
-              <div style="opacity:0.8; font-size:14px;">Q{{ states('sensor.huskers_quarter') }} • {{ states('sensor.huskers_game_clock_ct') }}</div>
-              <div style="margin-top:8px; font-size:14px;">{{ states('sensor.huskers_game_phase_label') }}</div>
-            </div>
-            <div style="display:flex; align-items:center; gap:12px; text-align:right;">
-              <div>
-                <div style="font-size:24px; font-weight:700;">{{ states('sensor.huskers_opponent_name') }}</div>
-                <div style="opacity:0.8;">{{ states('sensor.huskers_opponent_record') }} • {{ states('sensor.huskers_opponent_rank') }}</div>
-              </div>
-              <img src="{{ states('sensor.huskers_opponent_logo') }}" alt="Opponent" style="height:64px; width:64px; object-fit:contain;">
-            </div>
-          </div>
-          <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:12px; font-size:14px; justify-content:space-between;">
-            <div>Status: {{ states('sensor.huskers_game_status_espn') }}</div>
-            <div>Kickoff In: {{ states('sensor.huskers_kickoff_in') }} min</div>
-          </div>
-          <div style="margin-top:12px; font-size:14px;">{{ states('sensor.huskers_game_detail') }}</div>
-          <div style="margin-top:12px; font-size:16px; font-weight:600;">{{ states('sensor.huskers_hype_message') }}</div>
-        </div>
+        <table width="100%">
+          <tr>
+            <td width="33%" valign="top" align="left">
+              <img src="{{ states('sensor.huskers_team_logo') }}" alt="Nebraska" height="64"><br>
+              <strong>{{ states('sensor.huskers_team_name') }}</strong><br>
+              Record: {{ states('sensor.huskers_team_record') }}<br>
+              Rank: {{ states('sensor.huskers_team_rank') }}
+            </td>
+            <td width="34%" valign="top" align="center">
+              <h2>{{ states('sensor.huskers_team_score') }} - {{ states('sensor.huskers_opponent_score') }}</h2>
+              <p>Quarter {{ states('sensor.huskers_quarter') }} | {{ states('sensor.huskers_game_clock_ct') }}</p>
+              <p>{{ states('sensor.huskers_game_phase_label') }}</p>
+              <p>Status: {{ states('sensor.huskers_game_status_espn') }}</p>
+              <p>Kickoff In: {{ states('sensor.huskers_kickoff_in') }} min</p>
+            </td>
+            <td width="33%" valign="top" align="right">
+              <img src="{{ states('sensor.huskers_opponent_logo') }}" alt="Opponent" height="64"><br>
+              <strong>{{ states('sensor.huskers_opponent_name') }}</strong><br>
+              Record: {{ states('sensor.huskers_opponent_record') }}<br>
+              Rank: {{ states('sensor.huskers_opponent_rank') }}
+            </td>
+          </tr>
+        </table>
+        <p>{{ states('sensor.huskers_game_detail') }}</p>
+        <p>{{ states('sensor.huskers_hype_message') }}</p>
 
     - type: grid
       columns: 2
@@ -43,13 +39,13 @@
       cards:
         - type: markdown
           content: >
-            ### Drive & Possession
-            - **Possession:** {{ states('sensor.huskers_possession') }}
-            - **Last Play:** {{ states('sensor.huskers_last_play') }}
-            - **Down & Distance:** {{ states('sensor.huskers_down_distance') }}
-            - **Series Summary:** {{ states('sensor.huskers_series_summary') }}
+            ### Drive and Possession
+            - Possession: {{ states('sensor.huskers_possession') }}
+            - Last Play: {{ states('sensor.huskers_last_play') }}
+            - Down and Distance: {{ states('sensor.huskers_down_distance') }}
+            - Series Summary: {{ states('sensor.huskers_series_summary') }}
         - type: entities
-          title: Game Controls & Flags
+          title: Game Controls and Flags
           state_color: true
           entities:
             - sensor.huskers_tailgate_countdown
@@ -133,7 +129,7 @@
         {{ state_attr('sensor.big_ten_standings_espn', 'markdown') }}
 
     - type: markdown
-      title: Tailgate & Traditions
+      title: Tailgate and Traditions
       content: >
         **Tailgate Countdown:** {{ states('sensor.huskers_tailgate_countdown') }}
         **Event Link:** [Open ESPN]({{ states('sensor.huskers_event_url') }})
