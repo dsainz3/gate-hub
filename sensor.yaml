@@ -57,3 +57,42 @@
   max_age:
     hours: 24
   precision: 1
+# =========================================================
+# HUMIDOR - STATISTICS & TRENDS
+# =========================================================
+
+- platform: statistics
+  name: Humidor Temp Stats (24h)
+  unique_id: humidor_temp_stats_24h
+  entity_id: sensor.hygrometer_humidor_temperature
+  state_characteristic: mean
+  max_age:
+    hours: 24
+  precision: 1
+
+- platform: statistics
+  name: Humidor Temp Change (1h)
+  unique_id: humidor_temp_change_1h
+  entity_id: sensor.hygrometer_humidor_temperature
+  state_characteristic: change
+  max_age:
+    hours: 1
+  precision: 2
+
+- platform: statistics
+  name: Humidor Humidity Stats (24h)
+  unique_id: humidor_humidity_stats_24h
+  entity_id: sensor.hygrometer_humidor_humidity
+  state_characteristic: mean
+  max_age:
+    hours: 24
+  precision: 1
+
+- platform: statistics
+  name: Humidor Humidity Change (1h)
+  unique_id: humidor_humidity_change_1h
+  entity_id: sensor.hygrometer_humidor_humidity
+  state_characteristic: change
+  max_age:
+    hours: 1
+  precision: 2

@@ -569,3 +569,120 @@
         There is no place like Nebraska, where they're all true blue.
         We'll all stick together, in all kinds of weather,
         For dear old Nebraska U!
+    ########################################################################
+    # HUMIDOR - derived metrics
+    ########################################################################
+    - name: Humidor Temp Range Today
+      unique_id: humidor_temp_range_today
+      unit_of_measurement: '°F'
+      state: >-
+        {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
+        {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
+        {% if max_v is number and min_v is number %}
+          {{ (max_v - min_v) | round(1) }}
+        {% else %}
+          unknown
+        {% endif %}
+
+    - name: Humidor Humidity Range Today
+      unique_id: humidor_humidity_range_today
+      unit_of_measurement: '%'
+      state: >-
+        {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
+        {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
+        {% if max_v is number and min_v is number %}
+          {{ (max_v - min_v) | round(1) }}
+        {% else %}
+          unknown
+        {% endif %}
+
+    - name: Humidor Temperature Trend
+      unique_id: humidor_temperature_trend
+      state: >-
+        {% set raw = states('sensor.humidor_temp_change_1h') %}
+        {% if raw in ['unknown', 'unavailable', ''] %}
+          Unknown
+        {% else %}
+          {% set delta = raw | float(0) %}
+          {% if delta > 0.6 %}
+            Rising
+          {% elif delta < -0.6 %}
+            Falling
+          {% else %}
+            Stable
+          {% endif %}
+        {% endif %}
+      icon: >-
+        {% set delta = states('sensor.humidor_temp_change_1h') | float(0) %}
+        {% if delta > 0.6 %}
+          mdi:trending-up
+        {% elif delta < -0.6 %}
+          mdi:trending-down
+        {% else %}
+          mdi:trending-neutral
+        {% endif %}
+
+    - name: Humidor System Status
+      unique_id: humidor_system_status
+      state: >-
+        {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
+        {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
+        {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
+          Data Pending
+        {% else %}
+          {% set temp = temp_state | float(0) %}
+          {% set hum = hum_state | float(0) %}
+          {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
+            Optimal
+          {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
+            Acceptable
+          {% else %}
+            Attention
+          {% endif %}
+        {% endif %}
+      icon: >-
+        {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
+        {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
+        {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
+          mdi:help-circle
+        {% else %}
+          {% set temp = temp_state | float(0) %}
+          {% set hum = hum_state | float(0) %}
+          {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
+            mdi:checkbox-marked-circle
+          {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
+            mdi:alert-circle-check
+          {% else %}
+            mdi:alert
+          {% endif %}
+        {% endif %}
+      attributes:
+        temperature_f: "{{ states('sensor.hygrometer_humidor_temperature') }}"
+        humidity_percent: "{{ states('sensor.hygrometer_humidor_humidity') }}"
+        temperature_trend: "{{ states('sensor.humidor_temperature_trend') }}"
+
+    - name: Humidor System Health
+      unique_id: humidor_system_health
+      unit_of_measurement: '%'
+      state: >-
+        {% set status = states('sensor.humidor_system_status') %}
+        {% if status == 'Optimal' %}
+          100
+        {% elif status == 'Acceptable' %}
+          75
+        {% elif status == 'Attention' %}
+          40
+        {% else %}
+          unknown
+        {% endif %}
+      icon: >-
+        {% set status = states('sensor.humidor_system_status') %}
+        {% if status == 'Optimal' %}
+          mdi:emoticon-happy
+        {% elif status == 'Acceptable' %}
+          mdi:emoticon-neutral
+        {% elif status == 'Attention' %}
+          mdi:emoticon-sad
+        {% else %}
+          mdi:emoticon-question
+        {% endif %}
