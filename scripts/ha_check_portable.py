@@ -1,3 +1,10 @@
+"""Portable Home Assistant config check used by pre-commit and CI.
+
+Creates a temporary secrets file when needed and shells out to Docker to run
+`homeassistant --script check_config`. Falls back to a no-op when Docker is
+missing so local development still passes.
+"""
+
 import shutil
 import subprocess
 import sys

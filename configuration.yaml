@@ -1,3 +1,5 @@
+# Global Home Assistant configuration entry point.
+# All domain-specific settings are split into include files and packages/ for clarity.
 homeassistant:
   packages: !include_dir_named packages
   name: Our Home
