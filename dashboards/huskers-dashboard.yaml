@@ -43,8 +43,13 @@ views:
               <a href="{{ states('sensor.huskers_event_url') }}" target="_blank" style="color:#cc0000;font-weight:600;text-decoration:none;">Open ESPN Gamecast</a>
             </div>
           </div>
+      - type: markdown
+        content: >
+          <div style="background:#cc0000;color:#ffffff;padding:16px;border-radius:14px;text-align:center;font-weight:700;letter-spacing:0.08em;">
+            GO BIG RED! {{ states('sensor.huskers_hype_message') }}
+          </div>
       - type: grid
-        columns: 3
+        columns: 4
         square: false
         cards:
           - type: markdown
@@ -142,6 +147,70 @@ views:
               </div>
       - type: markdown
         content: >
+          <div style="background:#fbeac7;border-radius:16px;border:2px solid #cc0000;padding:18px;text-align:center;">
+            <div style="font-size:1.2rem;font-weight:700;color:#cc0000;">Tailgate Countdown</div>
+            <div style="margin-top:8px;font-size:1.1rem;color:#2b1b12;">{{ states('sensor.huskers_tailgate_countdown') }}</div>
+          </div>
+      - type: markdown
+        content: >
+          <div style="background:#fcf2da;border-radius:16px;border:2px solid #cc0000;padding:18px;">
+            <div style="font-size:1.1rem;font-weight:700;color:#cc0000;">Fight Song</div>
+            <pre style="white-space:pre-wrap;margin-top:8px;font-size:0.95rem;color:#2b1b12;font-family:'Segoe UI',sans-serif;">{{ states('sensor.huskers_fight_song_verse') }}</pre>
+          </div>
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: button
+            name: Play Touchdown Burst
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_touchdown_burst
+          - type: button
+            name: Fire Victory Lights
+            icon: mdi:lightbulb-group
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_led_gameday_start
+          - type: button
+            name: Hail Varsity Burst
+            icon: mdi:music
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_hail_burst_8s
+          - type: button
+            name: Step the Chase
+            icon: mdi:arrow-right-bold
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_chase_step_once
+          - type: button
+            name: Toggle Game Mode
+            icon: mdi:stadium
+            tap_action:
+              action: call-service
+              service: input_boolean.toggle
+              target:
+                entity_id: input_boolean.huskers_game_mode
+          - type: button
+            name: Toggle Automations
+            icon: mdi:robot
+            tap_action:
+              action: call-service
+              service: input_boolean.toggle
+              target:
+                entity_id: input_boolean.huskers_automations_enabled
+      - type: markdown
+        content: >
           <div style="background:#fdf1d6;border-radius:16px;border:2px solid #cc0000;padding:16px;">
             <div style="display:flex;flex-wrap:wrap;gap:24px;">
               <div style="flex:1;min-width:200px;">
@@ -175,6 +244,25 @@ views:
             name: Win Probability
           - entity: sensor.huskers_opponent_win_probability
             name: Opponent Win Probability
+      - type: entities
+        title: Superfan Metrics
+        show_header_toggle: false
+        entities:
+          - entity: sensor.huskers_tailgate_countdown
+            name: Tailgate Countdown
+          - entity: sensor.huskers_hype_message
+            name: Rally Cry
+          - entity: sensor.huskers_fight_song_verse
+            name: Fight Song Verse
+      - type: history-graph
+        title: Win Probability (last 6 hours)
+        hours_to_show: 6
+        refresh_interval: 60
+        entities:
+          - entity: sensor.huskers_win_probability
+            name: Nebraska
+          - entity: sensor.huskers_opponent_win_probability
+            name: Opponent
       - type: history-graph
         title: Score Trend (last 6 hours)
         hours_to_show: 6

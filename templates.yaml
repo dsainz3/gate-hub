@@ -251,19 +251,19 @@
     - name: huskers_team_logo
       unique_id: huskers_team_logo_tt
       icon: mdi:shield-football
-      availability: "{{ has_value(''sensor.husker_team'') }}"
-      state: "{{ state_attr(''sensor.husker_team'',''team_logo'') or '' }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team','team_logo') or '' }}"
 
     - name: huskers_opponent_logo
       unique_id: huskers_opponent_logo_tt
       icon: mdi:shield-outline
-      availability: "{{ has_value(''sensor.husker_team'') }}"
-      state: "{{ state_attr(''sensor.husker_team'',''opponent_logo'') or '' }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team','opponent_logo') or '' }}"
 
     - name: huskers_team_record
       unique_id: huskers_team_record_tt
       icon: mdi:clipboard-text
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set rec = state_attr('sensor.husker_team','team_record') %}
         {% if rec in [None,'','unknown','unavailable'] %}
@@ -280,7 +280,7 @@
     - name: huskers_opponent_record
       unique_id: huskers_opponent_record_tt
       icon: mdi:clipboard-text-outline
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set rec = state_attr('sensor.husker_team','opponent_record') %}
         {% if rec in [None,'','unknown','unavailable'] %}
@@ -292,7 +292,7 @@
     - name: huskers_team_rank
       unique_id: huskers_team_rank_tt
       icon: mdi:numeric-1-box
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set rank = state_attr('sensor.husker_team','team_rank') %}
         {% if rank in [None,'','unknown','unavailable'] %}
@@ -304,7 +304,7 @@
     - name: huskers_opponent_rank
       unique_id: huskers_opponent_rank_tt
       icon: mdi:numeric-1-box-multiple
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set rank = state_attr('sensor.husker_team','opponent_rank') %}
         {% if rank in [None,'','unknown','unavailable'] %}
@@ -316,13 +316,13 @@
     - name: huskers_event_url
       unique_id: huskers_event_url_tt
       icon: mdi:link-variant
-      availability: "{{ has_value(''sensor.husker_team'') }}"
-      state: "{{ state_attr(''sensor.husker_team'',''event_url'') or 'https://www.espn.com/college-football/' }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: "{{ state_attr('sensor.husker_team','event_url') or 'https://www.espn.com/college-football/' }}"
 
     - name: huskers_venue
       unique_id: huskers_venue_tt
       icon: mdi:stadium
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set venue = state_attr('sensor.husker_team','venue') %}
         {% if venue in [None,'','unknown','unavailable'] %}
@@ -334,7 +334,7 @@
     - name: huskers_location
       unique_id: huskers_location_tt
       icon: mdi:map-marker
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set loc = state_attr('sensor.husker_team','location') %}
         {% if loc in [None,'','unknown','unavailable'] %}
@@ -346,7 +346,7 @@
     - name: huskers_tv_network
       unique_id: huskers_tv_network_tt
       icon: mdi:television-play
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set tv = state_attr('sensor.husker_team','tv_network') %}
         {% if tv in [None,'','unknown','unavailable'] %}
@@ -358,7 +358,7 @@
     - name: huskers_odds
       unique_id: huskers_odds_tt
       icon: mdi:chart-line
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set odds = state_attr('sensor.husker_team','odds') %}
         {% if odds in [None,'','unknown','unavailable'] %}
@@ -370,7 +370,7 @@
     - name: huskers_overunder
       unique_id: huskers_overunder_tt
       icon: mdi:scale-balance
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set ou = state_attr('sensor.husker_team','overunder') %}
         {% if ou in [None,'','unknown','unavailable'] %}
@@ -382,7 +382,7 @@
     - name: huskers_series_summary
       unique_id: huskers_series_summary_tt
       icon: mdi:history
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set summary = state_attr('sensor.husker_team','series_summary') %}
         {% if summary in [None,'','unknown','unavailable'] %}
@@ -394,7 +394,7 @@
     - name: huskers_last_play
       unique_id: huskers_last_play_tt
       icon: mdi:football
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set play = state_attr('sensor.husker_team','last_play') %}
         {% if play in [None,'','unknown','unavailable'] %}
@@ -406,7 +406,7 @@
     - name: huskers_down_distance
       unique_id: huskers_down_distance_tt
       icon: mdi:numeric
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set info = state_attr('sensor.husker_team','down_distance_text') %}
         {% if info in [None,'','unknown','unavailable'] %}
@@ -418,7 +418,7 @@
     - name: huskers_possession
       unique_id: huskers_possession_tt
       icon: mdi:football-helmet
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set pos = state_attr('sensor.husker_team','possession') %}
         {% set huskers_id = state_attr('sensor.husker_team','team_id') %}
@@ -436,7 +436,7 @@
     - name: huskers_team_timeouts
       unique_id: huskers_team_timeouts_tt
       icon: mdi:timer-outline
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set to = state_attr('sensor.husker_team','team_timeouts') %}
         {% if to in [None,'','unknown','unavailable'] %}
@@ -448,7 +448,7 @@
     - name: huskers_opponent_timeouts
       unique_id: huskers_opponent_timeouts_tt
       icon: mdi:timer-sand
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
         {% if to in [None,'','unknown','unavailable'] %}
@@ -461,7 +461,7 @@
       unique_id: huskers_win_probability_tt
       icon: mdi:percent
       unit_of_measurement: '%'
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
         {% if prob in [None,'','unknown','unavailable'] %}
@@ -474,7 +474,7 @@
       unique_id: huskers_opponent_win_probability_tt
       icon: mdi:percent-outline
       unit_of_measurement: '%'
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
         {% if prob in [None,'','unknown','unavailable'] %}
@@ -502,7 +502,7 @@
     - name: huskers_game_detail
       unique_id: huskers_game_detail_tt
       icon: mdi:information-outline
-      availability: "{{ has_value(''sensor.husker_team'') }}"
+      availability: "{{ has_value('sensor.husker_team') }}"
       state: >-
         {% set kickoff = states('sensor.huskers_kickoff_time_ct') %}
         {% set tv = state_attr('sensor.husker_team','tv_network') %}
@@ -526,3 +526,46 @@
         {% else %}
           Details unavailable
         {% endif %}
+    - name: huskers_tailgate_countdown
+      unique_id: huskers_tailgate_countdown_tt
+      icon: mdi:party-popper
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: >-
+        {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
+        {% if minutes <= 0 %}
+          It's game time!
+        {% elif minutes < 60 %}
+          {{ minutes }} minutes to kickoff
+        {% elif minutes < 1440 %}
+          {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
+        {% else %}
+          {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
+        {% endif %}
+
+    - name: huskers_hype_message
+      unique_id: huskers_hype_message_tt
+      icon: mdi:bullhorn
+      availability: "{{ has_value('sensor.husker_team') }}"
+      state: >-
+        {% set phase = states('sensor.husker_team') %}
+        {% if phase == 'IN' %}
+          On your feet—make Memorial Stadium shake!
+        {% elif phase == 'PRE' %}
+          Tailgate mode: get the speakers blasting and paint the town scarlet.
+        {% elif phase == 'POST' %}
+          Celebrate the result and light the victory lights!
+        {% else %}
+          Forever Huskers. GO BIG RED!
+        {% endif %}
+
+    - name: huskers_fight_song_verse
+      unique_id: huskers_fight_song_verse_tt
+      icon: mdi:music-circle
+      availability: '{{ True }}'
+      state: |
+        There is no place like Nebraska, dear old Nebraska U!
+        Where the girls are the fairest, the boys are the squarest,
+        Of any old place that I knew.
+        There is no place like Nebraska, where they're all true blue.
+        We'll all stick together, in all kinds of weather,
+        For dear old Nebraska U!
