@@ -1,5 +1,5 @@
 # templates.yaml  (included via: template: !include templates.yaml)
-# Do NOT add a top-level "template:" key here.
+# Do NOT add a top-level "template:" key here. 9
 
 - sensor:
     ########################################################################
