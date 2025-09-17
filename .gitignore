@@ -33,9 +33,6 @@ __pycache__/
 # Local workspace
 /external/
 
-# HACS components
-custom_components/hacs/
-
 # Zigbee config
 zigbee2mqtt/*# Zigbee2MQTT runtime state/cache files
 zigbee2mqtt/state.json
