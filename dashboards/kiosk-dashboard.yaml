@@ -177,8 +177,8 @@ views:
           ha-card {padding: 16px 20px; font-size: 1.05rem;}
         content: |
           ### Humidor Snapshot
-          Target comfort band: **68-72 °F** temperature / **62-68 %** humidity.
-          Metrics below update in near real-time and include trend and long-term statistics.
+          Target comfort band: **68-72 degF** temperature / **62-68 %** humidity.
+          Tiles track live readings while the charts below surface weekly trends and plug usage.
 
       - type: grid
         columns: 3
@@ -211,7 +211,7 @@ views:
                 entity: switch.plug_humidor
 
       - type: grid
-        title: Trends & Metrics
+        title: Trend Metrics
         columns: 4
         square: false
         cards:
@@ -246,7 +246,7 @@ views:
         square: false
         cards:
           - type: statistics-graph
-            title: Temperature & Humidity Overview
+            title: Temperature & Humidity (7d)
             days_to_show: 7
             period: hour
             chart_type: line
@@ -260,7 +260,7 @@ views:
               - entity: sensor.hygrometer_humidor_humidity
                 name: Humidity
           - type: history-graph
-            title: Power & Change (48h)
+            title: Power & Delta (48h)
             hours_to_show: 48
             refresh_interval: 0
             entities:
@@ -269,7 +269,7 @@ views:
               - sensor.humidor_humidity_change_1h
 
       - type: entities
-        title: Controls
+        title: Controls & Diagnostics
         state_color: true
         show_header_toggle: false
         entities:
