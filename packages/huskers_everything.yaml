@@ -512,34 +512,29 @@ template:
             {% if events -%}
             ## Nebraska Schedule ({{ now().year }})
 
+            {% set ns = namespace(lines=[]) -%}
             {% set score_unknown = ['?', None, '', 'unknown', 'unavailable'] -%}
-            {% set ns = namespace(lines=['| Date & Time | Opponent | Result |', '| --- | --- | --- |']) -%}
             {%- for game in events %}
               {%- set comp = (game.competitions | default([])) | first %}
               {%- if not comp %}{%- continue %}{%- endif %}
               {%- set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
-              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
               {%- set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
               {%- set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
               {%- set loc = 'vs' if us_home else 'at' %}
-              {%- set status = comp.status if comp.status is defined else none %}
-              {%- set done = status.type.completed if (status is defined and status.type is defined) else false %}
-              {%- set detail = status.type.detail if (status is defined and status.type is defined and status.type.detail is defined) else '' %}
+              {%- set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
               {%- set home = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
               {%- set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {%- set h_score = (home.score.value if home and home.score is mapping and home.score.value is defined else (home.score if home and home.score is defined else '?')) %}
               {%- set a_score = (away.score.value if away and away.score is mapping and away.score.value is defined else (away.score if away and away.score is defined else '?')) %}
+              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
               {%- set h_fmt = h_score if h_score in score_unknown else (h_score | float(0) | round(0) | int) %}
               {%- set a_fmt = a_score if a_score in score_unknown else (a_score | float(0) | round(0) | int) %}
               {%- if done %}
-                {%- set result = 'Final ' ~ h_fmt ~ '-' ~ a_fmt %}
-              {%- elif detail %}
-                {%- set result = detail %}
+                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp ~ ' — **Final** ' ~ h_fmt ~ '-' ~ a_fmt %}
               {%- else %}
-                {%- set result = 'Scheduled' %}
+                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp %}
               {%- endif %}
-              {%- set row = '| **' ~ date_text ~ '** | ' ~ loc ~ ' ' ~ opp ~ ' | ' ~ result ~ ' |' %}
-              {%- set ns.lines = ns.lines + [row] %}
+              {%- set ns.lines = ns.lines + [line] %}
             {%- endfor %}
             {{ ns.lines | join('\n') }}
             {%- else %}
@@ -897,34 +892,50 @@ template:
           {% endfor %}
           {{ rank }}
 
-      # Big Ten teams/records (short state + markdown attribute)
+      # Big Ten standings (short state + markdown attribute)
       - name: big_ten_standings_espn
         unique_id: big_ten_standings_espn
         icon: mdi:trophy
         state: >-
-          {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
-          {% if data and data|length>0 and data[0].leagues is defined and data[0].leagues|length>0
-                and data[0].leagues[0].teams is defined %}
-            {{ (data[0].leagues[0].teams | count) }} teams
+          {% set entries = state_attr('sensor.espn_big_ten_teams', 'entries') or [] %}
+          {% if entries %}
+            {{ entries | length }} teams
           {% else %}
             unavailable
           {% endif %}
         attributes:
           markdown: >-
-            {% set data = state_attr('sensor.espn_big_ten_teams', 'sports') %}
-            {% if data and data|length>0 and data[0].leagues is defined and data[0].leagues|length>0
-                  and data[0].leagues[0].teams is defined %}
-              {% set teams = data[0].leagues[0].teams %}
-              ## Big Ten Teams ({{ now().year }})
-              | Rank | Team | Record |
-              |------|------|--------|
-              {%- for t in teams | sort(attribute='team.displayName') -%}
-              | {{ loop.index }} | {{ t.team.displayName }} | {{ (t.team.standingSummary if t.team is defined and t.team.standingSummary is defined else 'N/A') }} |
-              {%- endfor -%}
+            {% set entries = state_attr('sensor.espn_big_ten_teams', 'entries') or [] %}
+            {% set season = state_attr('sensor.espn_big_ten_teams', 'seasonDisplayName') or now().year %}
+            {% if entries %}
+              ## Big Ten Standings ({{ season }})
+              | Rank | Team | Overall | Conf | Streak |
+              | --- | --- | --- | --- | --- |
+              {% set ns = namespace(rows=[]) %}
+              {%- for entry in entries %}
+                {% set stats = entry.stats %}
+                {% set wins_stat = (stats | selectattr('name','equalto','wins') | list | first) %}
+                {% set losses_stat = (stats | selectattr('name','equalto','losses') | list | first) %}
+                {% set overall_stat = (stats | selectattr('name','equalto','overall') | list | first) %}
+                {% set conf_stat = (stats | selectattr('name','equalto','vs. Conf.') | list | first) %}
+                {% set streak_stat = (stats | selectattr('name','equalto','streak') | list | first) %}
+                {% set row = {
+                  'team': entry.team.displayName,
+                  'wins': wins_stat.value | default(0, true),
+                  'losses': losses_stat.value | default(0, true),
+                  'overall': overall_stat.displayValue | default('0-0', true),
+                  'conf': conf_stat.displayValue | default('0-0', true),
+                  'streak': streak_stat.displayValue | default('-', true)
+                } %}
+                {% set ns.rows = ns.rows + [row] %}
+              {%- endfor %}
+              {% set rows = ns.rows | sort(attribute='losses') | sort(attribute='wins', reverse=True) %}
+              {%- for row in rows %}
+              | {{ loop.index }} | {{ row.team }} | {{ row.overall }} | {{ row.conf }} | {{ row.streak }} |
+              {%- endfor %}
             {% else %}
               Big Ten standings unavailable
             {% endif %}
-
   - binary_sensor:
       - name: huskers_is_pregame_espn
         unique_id: huskers_is_pregame_espn
