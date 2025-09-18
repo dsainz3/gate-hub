@@ -8,40 +8,60 @@ views:
     cards:
       - type: markdown
         content: >
+          {% set invalid = ['unknown','unavailable','','None','none'] %}
           {% set team_logo = states('sensor.huskers_team_logo') %}
           {% set opponent_logo = states('sensor.huskers_opponent_logo') %}
+          {% set team_score_raw = states('sensor.huskers_team_score') %}
+          {% set opponent_score_raw = states('sensor.huskers_opponent_score') %}
+          {% set team_score = (team_score_raw | int(0)) if team_score_raw not in invalid else '–' %}
+          {% set opponent_score = (opponent_score_raw | int(0)) if opponent_score_raw not in invalid else '–' %}
+          {% set phase_raw = states('sensor.huskers_game_phase_label') %}
+          {% set phase = 'Phase TBD' if phase_raw in invalid else phase_raw %}
+          {% set clock_raw = states('sensor.huskers_game_clock_ct') %}
+          {% set clock = 'Clock TBA' if clock_raw in invalid else clock_raw %}
+          {% set quarter_raw = states('sensor.huskers_quarter') %}
+          {% set quarter_val = quarter_raw | int(0) if quarter_raw not in invalid else 0 %}
+          {% set quarter_display = quarter_val if quarter_val > 0 else '–' %}
+          {% set possession_raw = states('sensor.huskers_possession') %}
+          {% set possession = 'TBD' if possession_raw in invalid or possession_raw == 'None' else possession_raw %}
+          {% set detail_raw = states('sensor.huskers_game_detail') %}
+          {% set detail = 'Details unavailable' if detail_raw in invalid else detail_raw %}
+          {% set opponent_name_raw = states('sensor.huskers_opponent_name') %}
+          {% set opponent_name = 'Opponent' if opponent_name_raw in invalid else opponent_name_raw %}
+          {% set event_url_raw = states('sensor.huskers_event_url') %}
+          {% set event_url = 'https://www.espn.com/college-football/' if event_url_raw in invalid else event_url_raw %}
           <div style="background:#f7f1d4;color:#2b1b12;padding:20px;border-radius:18px;border:3px solid #cc0000;box-shadow:0 8px 14px rgba(204,0,0,0.12);">
             <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;">
               <div style="flex:1;min-width:200px;text-align:center;">
-                <img src="{{ '/local/huskers_logo.svg' if team_logo in ['unknown','unavailable',''] else team_logo }}" alt="Nebraska" style="height:80px;max-width:100%;object-fit:contain;">
+                <img src="{{ '/local/huskers_logo.svg' if team_logo in invalid else team_logo }}" alt="Nebraska" style="height:80px;max-width:100%;object-fit:contain;">
                 <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:#cc0000;">{{ states('sensor.huskers_team_name') }}</div>
                 <div style="font-size:1rem;color:#6b5845;">{{ states('sensor.huskers_team_record') }}</div>
                 <div style="font-size:0.9rem;color:#6b5845;">{{ states('sensor.huskers_team_rank') }}</div>
               </div>
               <div style="flex:1;min-width:220px;text-align:center;">
                 <div style="font-size:3.2rem;font-weight:800;color:#cc0000;line-height:1;">
-                  {{ states('sensor.huskers_team_score') }} <span style="color:#b44416;">-</span> {{ states('sensor.huskers_opponent_score') }}
+                  {{ team_score }} <span style="color:#b44416;">-</span> {{ opponent_score }}
                 </div>
-                <div style="margin-top:8px;font-size:1.1rem;font-weight:600;color:#6b5845;">{{ states('sensor.huskers_game_phase_label') }}</div>
+                <div style="margin-top:8px;font-size:1.1rem;font-weight:600;color:#6b5845;">{{ phase }}</div>
                 <div style="font-size:0.95rem;color:#6b5845;">
-                  {{ states('sensor.huskers_game_clock_ct') }} | Q{{ states('sensor.huskers_quarter') }}
+                  {{ clock }} | Q{{ quarter_display }}
                 </div>
                 <div style="font-size:0.9rem;color:#6b5845;">
-                  Possession: {{ states('sensor.huskers_possession') }}
+                  Possession: {{ possession }}
                 </div>
               </div>
               <div style="flex:1;min-width:200px;text-align:center;">
-                <img src="{{ '/local/huskers_logo.svg' if opponent_logo in ['unknown','unavailable',''] else opponent_logo }}" alt="Opponent" style="height:80px;max-width:100%;object-fit:contain;">
-                <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:#133a63;">{{ states('sensor.huskers_opponent_name') }}</div>
+                <img src="{{ '/local/huskers_logo.svg' if opponent_logo in invalid else opponent_logo }}" alt="Opponent" style="height:80px;max-width:100%;object-fit:contain;">
+                <div style="margin-top:8px;font-size:1.6rem;font-weight:700;color:#133a63;">{{ opponent_name }}</div>
                 <div style="font-size:1rem;color:#6b5845;">{{ states('sensor.huskers_opponent_record') }}</div>
                 <div style="font-size:0.9rem;color:#6b5845;">{{ states('sensor.huskers_opponent_rank') }}</div>
               </div>
             </div>
             <div style="margin-top:16px;text-align:center;font-size:0.95rem;font-weight:600;color:#6b5845;">
-              {{ states('sensor.huskers_game_detail') }}
+              {{ detail }}
             </div>
             <div style="margin-top:12px;text-align:center;">
-              <a href="{{ states('sensor.huskers_event_url') }}" target="_blank" style="color:#cc0000;font-weight:600;text-decoration:none;">Open ESPN Gamecast</a>
+              <a href="{{ event_url }}" target="_blank" style="color:#cc0000;font-weight:600;text-decoration:none;">Open ESPN Gamecast</a>
             </div>
           </div>
       - type: markdown

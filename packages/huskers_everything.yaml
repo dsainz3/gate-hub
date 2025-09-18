@@ -508,31 +508,33 @@ template:
           {% if events %}{{ events | length }} games scheduled{% else %}No schedule{% endif %}
         attributes:
           markdown: >-
-            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-            {% if events %}
-              ## Nebraska Schedule ({{ now().year }})
-              {% for game in events %}
-                {% set comp = (game.competitions | default([])) | first %}
-                {% if not comp %}{% continue %}{% endif %}
-                {% set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
-                {% set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
-                {% set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
-                {% set loc = 'vs' if us_home else 'at' %}
-                {% set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
-                {% if done %}
-                  {% set h = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
-                  {% set a = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-                  {% set h_score = (h.score.value if h and h.score is mapping and h.score.value is defined else (h.score if h and h.score is defined else '?')) %}
-                  {% set a_score = (a.score.value if a and a.score is mapping and a.score.value is defined else (a.score if a and a.score is defined else '?')) %}
-                  - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }} — **Final** {{ h_score }}-{{ a_score }}
-                {% else %}
-                  - **{{ date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' }}** — {{ loc }} {{ opp }}
-                {% endif %}
-              {% endfor %}
-            {% else %}
-              **Schedule unavailable**
-            {% endif %}
-
+            {% if events -%}
+            ## Nebraska Schedule ({{ now().year }})
+            {% set ns = namespace(lines=[]) -%}
+            {%- for game in events %}
+              {%- set comp = (game.competitions | default([])) | first %}
+              {%- if not comp %}{%- continue %}{%- endif %}
+              {%- set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
+              {%- set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
+              {%- set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
+              {%- set loc = 'vs' if us_home else 'at' %}
+              {%- set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {%- set home = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {%- set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+              {%- set h_score = (home.score.value if home and home.score is mapping and home.score.value is defined else (home.score if home and home.score is defined else '?')) %}
+              {%- set a_score = (away.score.value if away and away.score is mapping and away.score.value is defined else (away.score if away and away.score is defined else '?')) %}
+              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
+              {%- if done %}
+                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp ~ ' — **Final** ' ~ h_score ~ '-' ~ a_score %}
+              {%- else %}
+                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp %}
+              {%- endif %}
+              {%- set ns.lines = ns.lines + [line] %}
+            {%- endfor %}
+            {{- ns.lines | join('\n') -}}
+            {%- else %}
+            **Schedule unavailable**
+            {%- endif %}
       - name: huskers_next_game
         unique_id: huskers_next_game
         icon: mdi:calendar-clock
