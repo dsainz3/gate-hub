@@ -508,6 +508,7 @@ template:
           {% if events %}{{ events | length }} games scheduled{% else %}No schedule{% endif %}
         attributes:
           markdown: >-
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
             {% if events -%}
             ## Nebraska Schedule ({{ now().year }})
             {% set ns = namespace(lines=[]) -%}
