@@ -1,4 +1,5 @@
 title: Huskers Game Center
+theme: Huskers Cream
 views:
   - title: Game Center
     path: huskers-game-center
