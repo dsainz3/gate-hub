@@ -512,29 +512,34 @@ template:
             {% if events -%}
             ## Nebraska Schedule ({{ now().year }})
 
-            {% set ns = namespace(lines=[]) -%}
             {% set score_unknown = ['?', None, '', 'unknown', 'unavailable'] -%}
+            {% set ns = namespace(lines=['| Date & Time | Opponent | Result |', '| --- | --- | --- |']) -%}
             {%- for game in events %}
               {%- set comp = (game.competitions | default([])) | first %}
               {%- if not comp %}{%- continue %}{%- endif %}
               {%- set date = (game.date | as_datetime | as_local) if game.date is defined else none %}
+              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
               {%- set us_home = comp.competitors[0].team.id == '158' if (comp.competitors is defined and comp.competitors|length >= 2) else false %}
               {%- set opp = comp.competitors[1].team.displayName if us_home and comp.competitors|length >= 2 else (comp.competitors[0].team.displayName if comp.competitors|length >= 1 else 'TBD') %}
               {%- set loc = 'vs' if us_home else 'at' %}
-              {%- set done = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {%- set status = comp.status if comp.status is defined else none %}
+              {%- set done = status.type.completed if (status is defined and status.type is defined) else false %}
+              {%- set detail = status.type.detail if (status is defined and status.type is defined and status.type.detail is defined) else '' %}
               {%- set home = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
               {%- set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {%- set h_score = (home.score.value if home and home.score is mapping and home.score.value is defined else (home.score if home and home.score is defined else '?')) %}
               {%- set a_score = (away.score.value if away and away.score is mapping and away.score.value is defined else (away.score if away and away.score is defined else '?')) %}
-              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
               {%- set h_fmt = h_score if h_score in score_unknown else (h_score | float(0) | round(0) | int) %}
               {%- set a_fmt = a_score if a_score in score_unknown else (a_score | float(0) | round(0) | int) %}
               {%- if done %}
-                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp ~ ' — **Final** ' ~ h_fmt ~ '-' ~ a_fmt %}
+                {%- set result = 'Final ' ~ h_fmt ~ '-' ~ a_fmt %}
+              {%- elif detail %}
+                {%- set result = detail %}
               {%- else %}
-                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp %}
+                {%- set result = 'Scheduled' %}
               {%- endif %}
-              {%- set ns.lines = ns.lines + [line] %}
+              {%- set row = '| **' ~ date_text ~ '** | ' ~ loc ~ ' ' ~ opp ~ ' | ' ~ result ~ ' |' %}
+              {%- set ns.lines = ns.lines + [row] %}
             {%- endfor %}
             {{ ns.lines | join('\n') }}
             {%- else %}
