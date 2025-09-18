@@ -913,19 +913,20 @@ template:
               | --- | --- | --- | --- | --- |
               {% set ns = namespace(rows=[]) %}
               {%- for entry in entries %}
-                {% set stats = entry.stats %}
+                {% set team = entry.get('team', {}) %}
+                {% set stats = entry.get('stats', []) %}
                 {% set wins_stat = (stats | selectattr('name','equalto','wins') | list | first) %}
                 {% set losses_stat = (stats | selectattr('name','equalto','losses') | list | first) %}
                 {% set overall_stat = (stats | selectattr('name','equalto','overall') | list | first) %}
                 {% set conf_stat = (stats | selectattr('name','equalto','vs. Conf.') | list | first) %}
                 {% set streak_stat = (stats | selectattr('name','equalto','streak') | list | first) %}
                 {% set row = {
-                  'team': entry.team.displayName,
-                  'wins': wins_stat.value | default(0, true),
-                  'losses': losses_stat.value | default(0, true),
-                  'overall': overall_stat.displayValue | default('0-0', true),
-                  'conf': conf_stat.displayValue | default('0-0', true),
-                  'streak': streak_stat.displayValue | default('-', true)
+                  'team': team.get('displayName', 'Unknown'),
+                  'wins': wins_stat.value | default(0, true) if wins_stat is defined else 0,
+                  'losses': losses_stat.value | default(0, true) if losses_stat is defined else 0,
+                  'overall': overall_stat.displayValue | default('0-0', true) if overall_stat is defined else '0-0',
+                  'conf': conf_stat.displayValue | default('0-0', true) if conf_stat is defined else '0-0',
+                  'streak': streak_stat.displayValue | default('-', true) if streak_stat is defined else '-'
                 } %}
                 {% set ns.rows = ns.rows + [row] %}
               {%- endfor %}
