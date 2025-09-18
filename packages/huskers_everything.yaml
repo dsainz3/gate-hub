@@ -511,7 +511,9 @@ template:
             {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
             {% if events -%}
             ## Nebraska Schedule ({{ now().year }})
+
             {% set ns = namespace(lines=[]) -%}
+            {% set score_unknown = ['?', None, '', 'unknown', 'unavailable'] -%}
             {%- for game in events %}
               {%- set comp = (game.competitions | default([])) | first %}
               {%- if not comp %}{%- continue %}{%- endif %}
@@ -525,14 +527,16 @@ template:
               {%- set h_score = (home.score.value if home and home.score is mapping and home.score.value is defined else (home.score if home and home.score is defined else '?')) %}
               {%- set a_score = (away.score.value if away and away.score is mapping and away.score.value is defined else (away.score if away and away.score is defined else '?')) %}
               {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
+              {%- set h_fmt = h_score if h_score in score_unknown else (h_score | float(0) | round(0) | int) %}
+              {%- set a_fmt = a_score if a_score in score_unknown else (a_score | float(0) | round(0) | int) %}
               {%- if done %}
-                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp ~ ' — **Final** ' ~ h_score ~ '-' ~ a_score %}
+                {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp ~ ' — **Final** ' ~ h_fmt ~ '-' ~ a_fmt %}
               {%- else %}
                 {%- set line = '- **' ~ date_text ~ '** — ' ~ loc ~ ' ' ~ opp %}
               {%- endif %}
               {%- set ns.lines = ns.lines + [line] %}
             {%- endfor %}
-            {{- ns.lines | join('\n') -}}
+            {{ ns.lines | join('\n') }}
             {%- else %}
             **Schedule unavailable**
             {%- endif %}
