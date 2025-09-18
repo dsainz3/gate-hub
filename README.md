@@ -25,6 +25,7 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 
 - Modular `packages/` layout keeps automations, helpers, and dashboards scoped by feature.
 - Lovelace dashboards are YAML-driven and stored in the repo so UI state matches commits.
+- Custom Huskers theme in `themes.yaml` exposes `--huskers-*` variables for consistent Scarlet & Cream styling across dashboards.
 - Pre-commit and GitHub Actions enforce formatting, linting, and Home Assistant config checks.
 - Helper scripts normalise secrets and run containerised validation for local or CI usage.
 - Documentation under `docs/` captures infrastructure, add-ons, ADRs, and package notes.
