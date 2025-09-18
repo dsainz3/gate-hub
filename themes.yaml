@@ -2,11 +2,11 @@ Huskers Cream:
   modes:
     light:
       # Core brand palette
-      huskers-cream: '#FDF3E7' # base background (cream)
-      huskers-scarlet: '#E41C38' # accent
-      huskers-black: '#000000' # accent/contrast
-      huskers-ink: '#111111' # primary text
-      huskers-muted: '#5c5c5c' # secondary text
+      --huskers-cream: '#FDF3E7' # base background (cream)
+      --huskers-scarlet: '#E41C38' # accent
+      --huskers-black: '#000000' # accent/contrast
+      --huskers-ink: '#111111' # primary text
+      --huskers-muted: '#5c5c5c' # secondary text
 
       # App frame
       primary-background-color: var(--huskers-cream)
@@ -49,11 +49,11 @@ Huskers Cream:
 
     dark:
       # Dark-mode surfaces (warm, low-glare)
-      huskers-cream: '#1F1A18' # base surface
-      huskers-scarlet: '#FF3A52' # brighter scarlet for dark mode
-      huskers-black: '#E0E0E0' # light accent for controls
-      huskers-ink: '#F2F2F2'
-      huskers-muted: '#C8C8C8'
+      --huskers-cream: '#1F1A18' # base surface
+      --huskers-scarlet: '#FF3A52' # brighter scarlet for dark mode
+      --huskers-black: '#E0E0E0' # light accent for controls
+      --huskers-ink: '#F2F2F2'
+      --huskers-muted: '#C8C8C8'
 
       primary-background-color: var(--huskers-cream)
       card-background-color: '#26201D'

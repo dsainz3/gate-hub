@@ -5,6 +5,13 @@ It is split into **three views**, each with a different purpose.
 
 ---
 
+## Theme
+
+- Set the view theme to `Huskers Cream` (defined in `themes.yaml`).
+- Reload themes after deployment (`Developer Tools -> YAML -> Reload themes`) so the `--huskers-*` tokens are available.
+- The palettes expose CSS variables such as `--huskers-scarlet` and `--huskers-cream`; cards reference them via `var(...)`.
+
+
 ## 1. Husker LED – Test (`/husker-led-test`)
 
 **Purpose:** Validation sandbox for LED MQTT and scoring test scripts.
