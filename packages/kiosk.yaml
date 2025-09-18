@@ -29,6 +29,39 @@ group:
       - light.light_office
       - light.spare_light
 
+  kiosk_theater_lights:
+    name: Kiosk — Theater Lights
+    entities:
+      - light.theater_lights
+      - light.light_theater_left
+      - light.light_theater_right
+
+  kiosk_front_lights:
+    name: Kiosk — Front Lights
+    entities:
+      - light.front_porch_lights
+      - light.light_front_left
+      - light.light_front_right
+
+  kiosk_garage_lights:
+    name: Kiosk — Garage Lights
+    entities:
+      - light.garage_center
+      - light.light_garage_left
+      - light.light_garage_right
+
+  kiosk_all_automations:
+    name: Kiosk — Core Automations
+    entities:
+      - automation.evening_lights_at_sunset
+      - automation.night_mode_at_midnight
+      - automation.early_morning_lights_0330
+      - automation.interior_lights_sunrise_off
+      - automation.exterior_lights_sunrise_off
+      - automation.exterior_led_monthly_effect
+      - automation.humidor_plug_temp_control
+      - automation.burner_plugs_off_2300
+
   # Exterior-only (no segments)
   kiosk_exterior_lights:
     name: Kiosk — Exterior Lights
