@@ -533,6 +533,130 @@ template:
               **Schedule unavailable**
             {% endif %}
 
+      - name: huskers_next_game
+        unique_id: huskers_next_game
+        icon: mdi:calendar-clock
+        state: >-
+          {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+          {% set now_ts = now().timestamp() %}
+          {% set next = namespace(game=None, comp=None, dt=None) %}
+          {% for g in events %}
+            {% set comp = (g.competitions | default([])) | first %}
+            {% if not comp %}{% continue %}{% endif %}
+            {% set dt = g.date | as_datetime %}
+            {% if not dt %}{% continue %}{% endif %}
+            {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+            {% if not completed and dt.timestamp() >= (now_ts - 21600) %}
+              {% set next.game = g %}
+              {% set next.comp = comp %}
+              {% set next.dt = dt %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if next.dt %}
+            {% set local = next.dt | as_local %}
+            {% set our_team = next.comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+            {% set opponent = next.comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+            {% set is_home = our_team.homeAway == 'home' if our_team is defined and our_team.homeAway is defined else false %}
+            {% set opp_name = opponent.team.displayName if opponent and opponent.team is defined else 'TBD' %}
+            {{ local.strftime('%b %-d, %Y %-I:%M %p %Z') if local else 'TBD' }} — {% if is_home %}vs{% else %}@{% endif %} {{ opp_name }}
+          {% else %}No upcoming game{% endif %}
+        attributes:
+          date: >-
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next = namespace(dt=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% if not dt %}{% continue %}{% endif %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if not completed and dt.timestamp() >= (now_ts - 21600) %}
+                {% set next.dt = dt %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if next.dt %}
+              {% set local = next.dt | as_local %}
+              {{ local.strftime('%b %-d, %Y') if local else 'TBD' }}
+            {% else %}No upcoming game{% endif %}
+          time: >-
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next = namespace(dt=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% if not dt %}{% continue %}{% endif %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if not completed and dt.timestamp() >= (now_ts - 21600) %}
+                {% set next.dt = dt %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if next.dt %}
+              {% set local = next.dt | as_local %}
+              {{ local.strftime('%-I:%M %p %Z') if local else 'TBD' }}
+            {% else %}No upcoming game{% endif %}
+          location: >-
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next = namespace(comp=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% if not dt %}{% continue %}{% endif %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if not completed and dt.timestamp() >= (now_ts - 21600) %}
+                {% set next.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if next.comp %}
+              {% set venue = next.comp.venue if next.comp.venue is defined else none %}
+              {% set parts = [] %}
+              {% if venue and venue.fullName is defined and venue.fullName %}
+                {% set parts = parts + [venue.fullName] %}
+              {% endif %}
+              {% if venue and venue.address is defined %}
+                {% set city = venue.address.city if venue.address.city is defined else '' %}
+                {% set state = venue.address.state if venue.address.state is defined else '' %}
+                {% set loc_parts = [] %}
+                {% if city %}{% set loc_parts = loc_parts + [city] %}{% endif %}
+                {% if state %}{% set loc_parts = loc_parts + [state] %}{% endif %}
+                {% if loc_parts %}{% set parts = parts + [loc_parts | join(', ')] %}{% endif %}
+              {% endif %}
+              {% set base = parts | join(' – ') if parts else 'TBD' %}
+              {% set our_team = next.comp.competitors | selectattr('team.id','equalto','158') | list | first %}
+              {% set descriptor = 'Home' if our_team and our_team.homeAway is defined and our_team.homeAway == 'home' else 'Away' %}
+              {% if base != 'TBD' %}
+                {{ base }} ({{ descriptor }})
+              {% else %}TBD{% endif %}
+            {% else %}No upcoming game{% endif %}
+          opponent: >-
+            {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set next = namespace(comp=None) %}
+            {% for g in events %}
+              {% set comp = (g.competitions | default([])) | first %}
+              {% if not comp %}{% continue %}{% endif %}
+              {% set dt = g.date | as_datetime %}
+              {% if not dt %}{% continue %}{% endif %}
+              {% set completed = comp.status.type.completed if (comp.status is defined and comp.status.type is defined) else false %}
+              {% if not completed and dt.timestamp() >= (now_ts - 21600) %}
+                {% set next.comp = comp %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% if next.comp %}
+              {% set opponent = next.comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
+              {% if opponent and opponent.team is defined %}
+                {{ opponent.team.displayName }}
+              {% else %}TBD{% endif %}
+            {% else %}No upcoming game{% endif %}
       # Today’s game status (plus basic attributes)
       - name: huskers_game_status_espn
         unique_id: huskers_game_status_espn
