@@ -5,66 +5,10 @@ views:
     icon: mdi:lightbulb-group
     cards:
       ############################################################
-      # HUMIDOR (Temp, RH, Plug + history)
-      ############################################################
-      - type: vertical-stack
-        cards:
-          - type: markdown
-            content: |
-              ## Humidor
-              Target: **68–72°F**, **62–68% RH**
-
-          - type: horizontal-stack
-            cards:
-              - type: gauge
-                name: Humidity
-                entity: sensor.hygrometer_humidor_humidity
-                min: 40
-                max: 80
-                needle: true
-                severity: { green: 62, yellow: 55, red: 40 }
-              - type: gauge
-                name: Temperature
-                entity: sensor.hygrometer_humidor_temperature
-                min: 60
-                max: 80
-                needle: true
-                severity: { green: 68, yellow: 66, red: 60 }
-
-          - type: entities
-            show_header_toggle: false
-            entities:
-              - entity: sensor.hygrometer_humidor_temperature
-                name: Temperature
-                icon: mdi:thermometer
-              - entity: sensor.hygrometer_humidor_humidity
-                name: Humidity
-                icon: mdi:water-percent
-              - entity: sensor.hygrometer_humidor_battery
-                name: Sensor Battery
-                icon: mdi:battery
-              - type: divider
-              - entity: switch.plug_humidor
-                name: Humidor Power
-                icon: mdi:power-socket-us
-              - entity: sensor.plug_humidor_power
-                name: Power (W)
-                icon: mdi:flash
-              - entity: sensor.plug_humidor_energy
-                name: Energy (kWh)
-                icon: mdi:lightning-bolt
-
-          - type: history-graph
-            hours_to_show: 24
-            entities:
-              - sensor.hygrometer_humidor_temperature
-              - sensor.hygrometer_humidor_humidity
-
-      ############################################################
-      # LIGHTS — AT-A-GLANCE (ALL as LIGHT CARDS)
+      # LIGHTS - AT-A-GLANCE (ALL as LIGHT CARDS)
       ############################################################
       - type: grid
-        title: Lights — Overview
+        title: Lights - Overview
         columns: 4
         square: false
         cards:
@@ -144,15 +88,15 @@ views:
             name: Spare
 
       ############################################################
-      # GROUPS — SIMPLE TOGGLES (only groups you actually have)
+      # GROUPS - SIMPLE TOGGLES (only groups you actually have)
       ############################################################
       - type: entities
-        title: Groups — Toggles
+        title: Groups - Toggles
         state_color: true
         show_header_toggle: false
         entities:
           - entity: group.huskers_eight_lights
-            name: Huskers — All Eight Lights
+            name: Huskers - All Eight Lights
           - entity: group.kiosk_theater_lights
             name: Kiosk Theater Lights
           - entity: group.kiosk_front_lights
@@ -162,10 +106,10 @@ views:
           - entity: group.kiosk_all_automations
             name: Kiosk All Automations
           - entity: group.weather_dashboard_all
-            name: Weather Dashboard – All
+            name: Weather Dashboard - All
 
       ############################################################
-      # PURIFIERS — POWER & MODES
+      # PURIFIERS - POWER & MODES
       ############################################################
       - type: entities
         title: Purifiers
@@ -194,7 +138,7 @@ views:
             name: Garage Gear
 
       ############################################################
-      # PLUGS — POWER + LIVE WATTS
+      # PLUGS - POWER + LIVE WATTS
       ############################################################
       - type: entities
         title: Plugs & Power
@@ -223,3 +167,130 @@ views:
           - type: divider
           - entity: switch.tree_power_switch
             name: Tree Power
+
+  - title: Humidor
+    path: humidor
+    icon: mdi:cigar
+    cards:
+      - type: markdown
+        style: |
+          ha-card {padding: 16px 20px; font-size: 1.05rem;}
+        content: |
+          ### Humidor Snapshot
+          Target comfort band: **68-72 °F** temperature / **62-68 %** humidity.
+          Metrics below update in near real-time and include trend and long-term statistics.
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: tile
+            entity: sensor.hygrometer_humidor_temperature
+            name: Temperature
+            color: accent
+            features:
+              - type: graph
+                graph: line
+                hours_to_show: 24
+                detail: 2
+          - type: tile
+            entity: sensor.hygrometer_humidor_humidity
+            name: Humidity
+            color: accent
+            features:
+              - type: graph
+                graph: line
+                hours_to_show: 24
+                detail: 2
+          - type: tile
+            entity: sensor.humidor_system_status
+            name: System Status
+            color: green
+            features:
+              - type: target-entity
+                entity: switch.plug_humidor
+
+      - type: grid
+        title: Trends & Metrics
+        columns: 4
+        square: false
+        cards:
+          - type: tile
+            entity: sensor.humidor_temp_stats_24h
+            name: Temp Mean (24h)
+          - type: tile
+            entity: sensor.humidor_temp_range_today
+            name: Temp Range (24h)
+          - type: tile
+            entity: sensor.humidor_temp_change_1h
+            name: Temp Change (1h)
+          - type: tile
+            entity: sensor.humidor_temperature_trend
+            name: Temp Trend
+          - type: tile
+            entity: sensor.humidor_humidity_stats_24h
+            name: Humidity Mean (24h)
+          - type: tile
+            entity: sensor.humidor_humidity_range_today
+            name: Humidity Range (24h)
+          - type: tile
+            entity: sensor.humidor_humidity_change_1h
+            name: Humidity Change (1h)
+          - type: tile
+            entity: sensor.humidor_system_health
+            name: System Health
+            color: blue
+
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: statistics-graph
+            title: Temperature & Humidity Overview
+            days_to_show: 7
+            period: hour
+            chart_type: line
+            stat_types:
+              - mean
+              - min
+              - max
+            entities:
+              - entity: sensor.hygrometer_humidor_temperature
+                name: Temperature
+              - entity: sensor.hygrometer_humidor_humidity
+                name: Humidity
+          - type: history-graph
+            title: Power & Change (48h)
+            hours_to_show: 48
+            refresh_interval: 0
+            entities:
+              - sensor.plug_humidor_power
+              - sensor.humidor_temp_change_1h
+              - sensor.humidor_humidity_change_1h
+
+      - type: entities
+        title: Controls
+        state_color: true
+        show_header_toggle: false
+        entities:
+          - entity: switch.plug_humidor
+            name: Humidor Power
+          - entity: select.plug_humidor_power_on_behavior
+            name: Power-on Behavior
+          - entity: sensor.plug_humidor_energy
+            name: Energy (kWh)
+          - entity: sensor.plug_humidor_current
+            name: Current (A)
+          - entity: sensor.plug_humidor_voltage
+            name: Voltage (V)
+          - entity: sensor.hygrometer_humidor_battery
+            name: Sensor Battery
+
+      - type: logbook
+        title: Humidor Activity Log
+        hours_to_show: 72
+        entities:
+          - automation.humidor_plug_temp_control
+          - switch.plug_humidor
+          - sensor.hygrometer_humidor_temperature
+          - sensor.hygrometer_humidor_humidity

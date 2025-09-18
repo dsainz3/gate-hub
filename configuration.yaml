@@ -67,6 +67,17 @@ recorder:
       - binary_sensor.wx_pressure_falling_very_fast
       - binary_sensor.wx_storm_watch_pressure
       - binary_sensor.wx_storm_warning_pressure
+      - sensor.hygrometer_humidor_temperature
+      - sensor.hygrometer_humidor_humidity
+      - sensor.humidor_temp_stats_24h
+      - sensor.humidor_temp_change_1h
+      - sensor.humidor_temp_range_today
+      - sensor.humidor_humidity_stats_24h
+      - sensor.humidor_humidity_change_1h
+      - sensor.humidor_humidity_range_today
+      - sensor.humidor_temperature_trend
+      - sensor.humidor_system_status
+      - sensor.humidor_system_health
 
 
 logger:
