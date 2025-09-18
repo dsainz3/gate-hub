@@ -223,3 +223,98 @@ views:
           - type: divider
           - entity: switch.tree_power_switch
             name: Tree Power
+  - title: Humidor
+    path: humidor
+    icon: mdi:cigar
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Humidor Overview
+              Target window: 68-72°F temperature / 62-68% humidity.
+
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                name: Temperature
+                entity: sensor.hygrometer_humidor_temperature
+                min: 60
+                max: 80
+                needle: true
+                severity:
+                  green: 70
+                  yellow: 74
+                  red: 78
+              - type: gauge
+                name: Humidity
+                entity: sensor.hygrometer_humidor_humidity
+                min: 45
+                max: 80
+                needle: true
+                severity:
+                  green: 65
+                  yellow: 70
+                  red: 75
+              - type: tile
+                entity: sensor.humidor_system_status
+                name: Status
+                color: accent
+
+          - type: entities
+            title: Trends & Metrics
+            show_header_toggle: false
+            entities:
+              - entity: sensor.humidor_temp_stats_24h
+                name: Temp Mean (24h)
+              - entity: sensor.humidor_temp_change_1h
+                name: Temp Change (1h)
+              - entity: sensor.humidor_temp_range_today
+                name: Temp Range (24h)
+              - entity: sensor.humidor_humidity_stats_24h
+                name: Humidity Mean (24h)
+              - entity: sensor.humidor_humidity_change_1h
+                name: Humidity Change (1h)
+              - entity: sensor.humidor_humidity_range_today
+                name: Humidity Range (24h)
+              - entity: sensor.humidor_temperature_trend
+                name: Temperature Trend
+              - entity: sensor.humidor_system_health
+                name: System Health
+              - type: divider
+              - entity: switch.plug_humidor
+                name: Humidor Power
+              - entity: sensor.plug_humidor_power
+                name: Power Draw (W)
+
+          - type: statistics-graph
+            title: Humidor Temperature & Humidity (24h)
+            days_to_show: 1
+            period: 5minute
+            chart_type: line
+            stat_types:
+              - mean
+              - min
+              - max
+            entities:
+              - entity: sensor.hygrometer_humidor_temperature
+                name: Temperature
+              - entity: sensor.hygrometer_humidor_humidity
+                name: Humidity
+
+          - type: history-graph
+            title: Humidor Change (1h)
+            hours_to_show: 24
+            refresh_interval: 0
+            entities:
+              - sensor.humidor_temp_change_1h
+              - sensor.humidor_humidity_change_1h
+
+          - type: logbook
+            title: Humidor Automations & Events
+            hours_to_show: 48
+            entities:
+              - automation.humidor_plug_temp_control
+              - switch.plug_humidor
+              - sensor.hygrometer_humidor_temperature
+              - sensor.hygrometer_humidor_humidity
