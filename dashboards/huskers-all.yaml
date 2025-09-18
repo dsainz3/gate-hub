@@ -11,24 +11,22 @@ views:
       - type: entities
         title: Nebraska Cornhuskers — Game Center
         entities:
-          - entity: sensor.huskers_game_status_espn
-            name: Phase / Status
           - type: attribute
-            entity: sensor.huskers_game_status_espn
-            attribute: home_team
-            name: Home Team
+            entity: sensor.huskers_next_game
+            attribute: date
+            name: Date
           - type: attribute
-            entity: sensor.huskers_game_status_espn
-            attribute: away_team
-            name: Away Team
+            entity: sensor.huskers_next_game
+            attribute: time
+            name: Time
           - type: attribute
-            entity: sensor.huskers_game_status_espn
-            attribute: home_score
-            name: Home Score
+            entity: sensor.huskers_next_game
+            attribute: location
+            name: Location
           - type: attribute
-            entity: sensor.huskers_game_status_espn
-            attribute: away_score
-            name: Away Score
+            entity: sensor.huskers_next_game
+            attribute: opponent
+            name: Opponent
 
       - type: entities
         title: Record
