@@ -960,6 +960,81 @@ template:
 # AUTOMATIONS
 ################################################################################
 automation:
+  - id: huskers_game_mode_enable_window
+    alias: 'Huskers: Enable Game Mode Window'
+    description: 'Automatically turns game mode on 2 hours before kickoff and while a game is active.'
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.huskers_kickoff_in_effective
+        below: 121
+        for:
+          minutes: 1
+      - platform: state
+        entity_id: binary_sensor.huskers_is_pregame_espn
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.huskers_is_live_espn
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_game_mode
+        state: 'off'
+      - condition: or
+        conditions:
+          - condition: template
+            value_template: >-
+              {{ state_attr('sensor.huskers_kickoff_in_2', 'has_next_game') | default(false) }}
+          - condition: state
+            entity_id: binary_sensor.huskers_is_pregame_espn
+            state: 'on'
+          - condition: state
+            entity_id: binary_sensor.huskers_is_live_espn
+            state: 'on'
+    action:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.huskers_game_mode
+      - service: logbook.log
+        data:
+          name: Huskers Game Mode
+          message: >-
+            Game mode enabled (kickoff in {{ states('sensor.huskers_kickoff_in_effective') }} min).
+
+  - id: huskers_game_mode_disable_window
+    alias: 'Huskers: Disable Game Mode Window'
+    description: 'Turns game mode off two hours after postgame or when the next kickoff is more than two hours away.'
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.huskers_is_postgame_espn
+        to: 'on'
+        for:
+          hours: 2
+      - platform: numeric_state
+        entity_id: sensor.huskers_kickoff_in_effective
+        above: 120
+        for:
+          minutes: 5
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_game_mode
+        state: 'on'
+      - condition: state
+        entity_id: binary_sensor.huskers_is_pregame_espn
+        state: 'off'
+      - condition: state
+        entity_id: binary_sensor.huskers_is_live_espn
+        state: 'off'
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.huskers_game_mode
+      - service: logbook.log
+        data:
+          name: Huskers Game Mode
+          message: Game mode disabled after postgame window.
+
   - id: huskers_showtime_at_t_20
     alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
     description: 'Starts the 30s cream chase ~20 minutes before kickoff.'
