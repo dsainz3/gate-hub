@@ -781,7 +781,9 @@ template:
             {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
             {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
             {% if huskers and opp and huskers.score is defined and opp.score is defined %}
-              {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
+              {% set huskers_score = huskers.score.value if huskers.score is defined and huskers.score is not none and huskers.score.value is defined else huskers.score %}
+              {% set opp_score = opp.score.value if opp.score is defined and opp.score is not none and opp.score.value is defined else opp.score %}
+              {% if (huskers_score | int(0)) > (opp_score | int(0)) %}
                 {% set w = w + 1 %}
               {% else %}
                 {% set l = l + 1 %}
