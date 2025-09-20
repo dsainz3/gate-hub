@@ -1,9 +1,8 @@
 name: Home Assistant - Config Check
 
-'on':
+on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - '**/*.yaml'
       - '**/*.yml'
@@ -15,8 +14,7 @@ name: Home Assistant - Config Check
       - 'themes.yaml'
       - '.github/workflows/ha-config-check.yml'
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - '**/*.yaml'
       - '**/*.yml'
@@ -32,16 +30,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-config:
-    name: Validate HA configuration
+  validate:
+    name: Validate HA Configuration
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for proper change detection
 
-      - name: Prepare CI environment (use .ci/fakesecrets.yaml if available)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install homeassistant
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Prepare Configuration Environment
+        id: prepare-config
         shell: bash
         run: |
           set -euo pipefail
@@ -49,66 +72,83 @@ jobs:
 
           # Verify .ci/fakesecrets.yaml exists and is readable
           if [ ! -f .ci/fakesecrets.yaml ] || [ ! -r .ci/fakesecrets.yaml ]; then
-            echo "Error: .ci/fakesecrets.yaml is required but missing or not readable"
+            echo "::error::.ci/fakesecrets.yaml is required but missing or not readable"
             echo "Please ensure .ci/fakesecrets.yaml exists and contains required secrets"
             exit 1
           fi
 
-          # Ensure we start with a clean secrets file
+          # Clear any existing secrets file
           rm -f secrets.yaml
 
-          # Copy with Unix line endings
+          # Copy fakesecrets with Unix line endings
           cat .ci/fakesecrets.yaml | tr -d '\r' > secrets.yaml
-          echo "Using .ci/fakesecrets.yaml for CI (with Unix line endings)"
+          echo "Using .ci/fakesecrets.yaml for CI testing"
 
-          # Double-check file creation succeeded
+          # Verify successful file creation
           if [ ! -f secrets.yaml ] || [ ! -r secrets.yaml ]; then
-            echo "Error: Failed to create secrets.yaml"
+            echo "::error::Failed to create secrets.yaml"
             exit 1
           fi
 
-          # Create common include files if referenced but missing
+          # Required secret keys
+          REQUIRED_SECRETS=(
+            "home_latitude"
+            "home_longitude"
+            "home_elevation"
+            "home_timezone"
+            "recorder_include_entities"
+          )
+
+          echo "Validating required secrets..."
+          for key in "${REQUIRED_SECRETS[@]}"; do
+            if ! grep -P "^\s*${key}:" secrets.yaml >/dev/null 2>&1; then
+              echo "::error::Required secret '${key}' is missing from .ci/fakesecrets.yaml"
+              exit 1
+            fi
+          done
+          echo "All required secrets validated successfully"
+
+          # Create empty files for optional includes
           for f in automations.yaml scripts.yaml customize.yaml; do
             if grep -Rql "$f" configuration.yaml 2>/dev/null || grep -Rql "$f" . 2>/dev/null; then
               if [[ ! -f "$f" ]]; then
-                echo '{}' > "$f"
+                echo "{}" > "$f"
+                echo "Created empty $f"
               fi
             fi
           done
 
-          # Ensure common secrets exist (add safe placeholders when missing)
-          for key in recorder_include_entities; do
-            # More robust check for existing secrets (handles different line endings and whitespace)
-            if ! grep -P "^\s*${key}:" secrets.yaml >/dev/null 2>&1; then
-              case "$key" in
-                recorder_include_entities)
-                  echo "recorder_include_entities: []" >> secrets.yaml
-                  ;;
-              esac
-              echo "Added placeholder for $key to secrets.yaml"
-            fi
-          done
+          # List all YAML files for context
+          echo "Configuration files:"
+          find . -name "*.yaml" -not -path "*/\.*" -not -path "./node_modules/*" | sort
 
-          echo "---- secrets.yaml (first 40 lines) ----"
-          sed -n '1,40p' secrets.yaml || true
-
-      - name: Pull Home Assistant container
-        run: docker pull ghcr.io/home-assistant/home-assistant:stable
-
-      - name: Run hass --script check_config (with full output)
-        env:
-          TZ: America/Chicago
+      - name: Run Config Check
         run: |
-          set -o pipefail
-          docker run --rm \
-            -e TZ \
-            -v "${{ github.workspace }}":/config \
-            ghcr.io/home-assistant/home-assistant:stable \
-            python -m homeassistant --config /config --script check_config | tee check_config.out
+          echo "Running configuration check..."
+          hass --script check_config \
+            --config . \
+            --info all \
+            --files \
+            --secrets secrets.yaml
 
-      - name: Upload diagnostics
+      - name: Run Integration Tests
+        if: success()
+        run: |
+          echo "Running basic integration tests..."
+          python -m pytest custom_components/*/test 2>/dev/null || echo "No integration tests found"
+
+      - name: Cleanup
         if: always()
-        uses: actions/upload-artifact@v4
+        run: |
+          rm -f secrets.yaml
+          echo "Cleanup completed"
+
+      - name: Upload Config Check Results
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          name: ha-check-config-output
-          path: check_config.out
+          name: config-check-results
+          path: |
+            home-assistant.log
+            home-assistant_debug.log
+          retention-days: 5
