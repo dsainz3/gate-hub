@@ -3,28 +3,16 @@
 - id: evening_lights_at_sunset
   alias: 'Lighting: Evening Lights at Sunset'
   description: >
-    Activates evening lighting at sunset. Skips if Huskers game mode is active.
+    Activates evening lighting at sunset. Skips while Husker lighting hold is active.
   mode: single
   trigger:
     - platform: sun
       event: sunset
       offset: '00:05:00'
   condition:
-    - condition: not
-      conditions:
-        - condition: and
-          conditions:
-            - condition: state
-              entity_id: input_boolean.huskers_game_mode
-              state: 'on'
-            - condition: or
-              conditions:
-                - condition: state
-                  entity_id: binary_sensor.huskers_is_pregame_espn
-                  state: 'on'
-                - condition: state
-                  entity_id: binary_sensor.huskers_is_live_espn
-                  state: 'on'
+    - condition: state
+      entity_id: binary_sensor.huskers_lighting_hold
+      state: 'off'
   action:
     - parallel:
         - service: light.turn_on
@@ -133,18 +121,16 @@
 - id: interior_lights_sunrise_off
   alias: 'Lighting: Morning Lights Off (Sunrise + 15min)'
   description: >
-    Turns off ambient interior lighting after sunrise.
+    Turns off ambient interior lighting after sunrise unless the Husker light show is running.
   mode: single
   trigger:
     - platform: sun
       event: sunrise
       offset: '00:15:00'
   condition:
-    - condition: not
-      conditions:
-        - condition: state
-          entity_id: input_boolean.huskers_game_mode
-          state: 'on'
+    - condition: state
+      entity_id: binary_sensor.huskers_light_show_active
+      state: 'off'
   action:
     - service: light.turn_off
       target:
@@ -158,18 +144,16 @@
 - id: exterior_lights_sunrise_off
   alias: 'Lighting: Morning Lights Off (Sunrise)'
   description: >
-    Turns off exterior lighting a few minutes after sunrise.
+    Turns off exterior lighting a few minutes after sunrise unless the Husker light show is running.
   mode: single
   trigger:
     - platform: sun
       event: sunrise
       offset: '00:05:00'
   condition:
-    - condition: not
-      conditions:
-        - condition: state
-          entity_id: input_boolean.huskers_game_mode
-          state: 'on'
+    - condition: state
+      entity_id: binary_sensor.huskers_light_show_active
+      state: 'off'
   action:
     - service: light.turn_off
       target:

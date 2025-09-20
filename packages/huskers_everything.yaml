@@ -781,7 +781,9 @@ template:
             {% set huskers = comp.competitors | selectattr('team.id','equalto','158') | list | first %}
             {% set opp = comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
             {% if huskers and opp and huskers.score is defined and opp.score is defined %}
-              {% if (huskers.score | int(0)) > (opp.score | int(0)) %}
+              {% set huskers_score = huskers.score.value if huskers.score is defined and huskers.score is not none and huskers.score.value is defined else huskers.score %}
+              {% set opp_score = opp.score.value if opp.score is defined and opp.score is not none and opp.score.value is defined else opp.score %}
+              {% if (huskers_score | int(0)) > (opp_score | int(0)) %}
                 {% set w = w + 1 %}
               {% else %}
                 {% set l = l + 1 %}
@@ -980,6 +982,27 @@ template:
         state: >-
           {% set status = states('sensor.huskers_game_status_espn') %}
           {{ status in ['Final', 'Final/OT'] }}
+
+      - name: huskers_light_show_active
+        unique_id: huskers_light_show_active
+        device_class: running
+        state: >-
+          {{ is_state('script.huskers_chase30_loop','on')
+             or is_state('script.huskers_chase_speed_loop','on')
+             or is_state('script.huskers_hail_burst_8s','on') }}
+
+      - name: huskers_lighting_hold
+        unique_id: huskers_lighting_hold
+        state: >-
+          {% set auto_enabled = is_state('input_boolean.huskers_automations_enabled','on') %}
+          {% set game_mode = is_state('input_boolean.huskers_game_mode','on') %}
+          {% set manual_kick = is_state('input_boolean.huskers_use_manual_kickoff','on') %}
+          {% set has_next = state_attr('sensor.huskers_kickoff_in_2','has_next_game') | default(false) %}
+          {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(999) %}
+          {% set pre_window = (manual_kick or has_next) and minutes <= 120 %}
+          {% set live = is_state('binary_sensor.huskers_is_live_espn','on') %}
+          {% set show_active = is_state('binary_sensor.huskers_light_show_active','on') %}
+          {{ auto_enabled and game_mode and (show_active or live or pre_window) }}
 
 ################################################################################
 # AUTOMATIONS
