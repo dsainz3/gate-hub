@@ -1,6 +1,10 @@
 # TODO
 
 ## Active Items
+- [ ] Remove obsolete HA helper scripts and associated tooling
+  - Delete legacy helpers from `scripts/` and the `.ci/fakesecrets.yaml` placeholder once the workflow no longer needs them.
+  - Drop PowerShell utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) or relocate them to an archival location.
+  - Update `.pre-commit-config.yaml` to run `hass --script check_config` via Docker or the supported runner after the local scripts are gone.
 - [ ] Fix Huskers theme issue for Huskers Team Tracker dashboard
   - Background: top app bar still renders blue despite theme overrides.
   - Completed so far:
@@ -33,12 +37,11 @@
 - [x] Split Huskers Team Tracker dashboard into separate Game Day and Team & Data views for clarity.
 
 ## Recent actions (cleanup)
-- Deleted obsolete CI and helper scripts: `.ci/fakesecrets.yaml` (if present), `scripts/ha_check_portable.py`, `scripts/ha_check_portable.sh`, `scripts/hass_check.py`, `scripts/hass_check.sh`.
-- Removed PowerShell helpers: `Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`.
-- Updated `.pre-commit-config.yaml` to run the HA config check via Docker rather than the removed local script.
+- Audited cleanup plan and confirmed legacy helper scripts still exist (`.ci/fakesecrets.yaml`, `scripts/ha_check_portable.py`, `scripts/ha_check_portable.sh`, `scripts/hass_check.py`, `scripts/hass_check.sh`).
+- Verified PowerShell helper utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) remain in the repository and need deliberate removal or archival.
 - Updated `.github/workflows/ha-config-check.yaml` to create valid empty YAML files (`{}`) for `secrets.yaml`, `automations.yaml`, `scripts.yaml`, and `customize.yaml` when missing.
 
 ## Next steps
-- Push cleanup branch: `cleanup/remove-obsolete-artifacts-2025-09` (already pushed).
-- Open PR when ready: `Remove obsolete scripts, configs, and CI/test artifacts (cleanup)`.
-- Review dashboards and themes (Huskers) visual regression after cleanup.
+- Create a cleanup branch once the obsolete script removal and tool updates are staged.
+- Open PR: `Remove obsolete scripts, configs, and CI/test artifacts (cleanup)` once the branch is ready.
+- Review dashboards and themes (Huskers) for visual regressions after cleanup work lands.
