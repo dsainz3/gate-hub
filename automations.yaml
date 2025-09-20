@@ -218,12 +218,16 @@
       value_template: >-
         {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
         {{ target_effect in available_effects }}
-    - service: light.turn_on
-      target:
-        entity_id: light.permanent_outdoor_lights
-      data:
-        effect: '{{ target_effect }}'
-      continue_on_error: true
+    - if:
+        - condition: template
+          value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+      then:
+        - service: light.turn_on
+          target:
+            entity_id: light.permanent_outdoor_lights
+          data:
+            effect: '{{ target_effect }}'
+          continue_on_error: true
     - service: logbook.log
       data:
         name: LED Monthly Effect
