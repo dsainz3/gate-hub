@@ -9,7 +9,7 @@
 ![Open PRs](https://img.shields.io/github/issues-pr/dsainz3/gate-hub)
 ![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-1f425f.svg)
 ![YAML: prettier+yamllint](https://img.shields.io/badge/yaml-prettier%20%2B%20yamllint-blue)
-![Python](https://img.shields.io/badge/python-3.13-blue)
+![Python](https://img.shields.io/badge/python-3.11-blue)
 
 Gate Hub contains the reproducible Home Assistant OS configuration that powers a multi-room smart home. It integrates Zigbee, MQTT, TP-Link Deco, BLE sensors, and a Nebraska Huskers game-day experience while remaining portable through automation tooling and documentation.
 
@@ -63,12 +63,13 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 ### Clone & provide secrets
 
 1. Clone the repository into your Home Assistant `/config` directory.
-2. Copy `fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
+2. Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
 3. Review `Fix-HAConfig.ps1` for optional one-time normalisation tasks.
 
 ### Local tooling
 
 ```bash
+poetry env use 3.11   # ensure the Python 3.11 toolchain that matches pyproject.toml
 poetry install        # install Python tooling (Ruff, pre-commit)
 pre-commit install    # enable git hook
 ```
