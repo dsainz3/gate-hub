@@ -14,13 +14,13 @@ homeassistant:
   customize:
     sensor.kneplatt72_solar_radiation:
       friendly_name: 'Solar Radiation (Raw)'
-      unit_of_measurement: 'W/m²'
+      unit_of_measurement: 'W/m^2'
       device_class: irradiance
       state_class: measurement
       icon: mdi:weather-sunny
     sensor.kneplatt72_solar_radiation_fixed:
       friendly_name: 'Solar Radiation'
-      unit_of_measurement: 'W/m²'
+      unit_of_measurement: 'W/m^2'
       device_class: irradiance
       state_class: measurement
       icon: mdi:weather-sunny
@@ -55,7 +55,6 @@ recorder:
       - input_boolean
     entities: !secret recorder_include_entities
 
-
 logger:
   default: warning
   logs:
@@ -66,7 +65,6 @@ logger:
     homeassistant.components.input_number: debug
     homeassistant.components.input_text: debug
     homeassistant.components.script: debug
-
 
 lovelace:
   dashboards:

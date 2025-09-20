@@ -13,9 +13,13 @@
     - Reload themes in Home Assistant frontend and verify header color.
     - If header remains blue, inspect global theme precedence and confirm Huskers Cream is applied to the dashboard/user.
     - Check for per-user theme overrides.
-- [ ] Add Grafana monitoring
-  - Goal: deploy Grafana dashboards for Home Assistant metrics and historical trends.
-  - Considerations: select data source (InfluxDB, Prometheus), deployment method (Docker, add-on), HA auth/integration.
+- [ ] Add monitoring and alerting capabilities
+  - Goal: Implement monitoring for Home Assistant metrics and historical trends
+  - Currently: No metrics or dashboards for performance, sensor, or automation tracking
+  - Future considerations:
+    - Native Home Assistant history/recorder for metrics storage
+    - Custom dashboards and cards for visualization
+    - Automations for alerts and notifications
 - [ ] Build household package for lights/plugs/vacuums
   - Goal: consolidate common helpers, automations, scenes, and groups into a reusable package.
   - Considerations: device coverage, naming conventions, package structure.
@@ -27,3 +31,14 @@
   - Considerations: create entry in secrets.yaml (or package), update recorder config to reference secret, ensure reload succeeds.
 ## Completed Items
 - [x] Split Huskers Team Tracker dashboard into separate Game Day and Team & Data views for clarity.
+
+## Recent actions (cleanup)
+- Deleted obsolete CI and helper scripts: `.ci/fakesecrets.yaml` (if present), `scripts/ha_check_portable.py`, `scripts/ha_check_portable.sh`, `scripts/hass_check.py`, `scripts/hass_check.sh`.
+- Removed PowerShell helpers: `Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`.
+- Updated `.pre-commit-config.yaml` to run the HA config check via Docker rather than the removed local script.
+- Updated `.github/workflows/ha-config-check.yaml` to create valid empty YAML files (`{}`) for `secrets.yaml`, `automations.yaml`, `scripts.yaml`, and `customize.yaml` when missing.
+
+## Next steps
+- Push cleanup branch: `cleanup/remove-obsolete-artifacts-2025-09` (already pushed).
+- Open PR when ready: `Remove obsolete scripts, configs, and CI/test artifacts (cleanup)`.
+- Review dashboards and themes (Huskers) visual regression after cleanup.

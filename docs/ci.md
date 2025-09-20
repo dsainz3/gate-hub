@@ -5,7 +5,18 @@ Continuous integration lives in `.github/workflows/` and mirrors the local tooli
 ## Workflows
 
 - `ci.yml` (always on): runs Ruff and the non-Python pre-commit hooks on pushes and pull requests.
-- `ha-config-check.yaml` (optional): containerised Home Assistant `check_config` for branches that need full validation.
+- `ha-config-check.yaml` (optional): containerised Home Assistant `check_config` for branches that need full validation. Uses `.ci/fakesecrets.yaml` for testing to avoid leaking sensitive information.
+
+## Home Assistant CI
+
+The `ha-config-check.yaml` workflow runs Home Assistant's configuration validation in a container:
+
+1. Copies `.ci/fakesecrets.yaml` (if present) to `secrets.yaml` for testing.
+2. Adds safe fallback values for any missing required secrets.
+3. Runs `hass --script check_config` inside an official Home Assistant container.
+4. Full diagnostics are available as workflow artifacts.
+
+For local testing, copy `.ci/fakesecrets.yaml` to `secrets.yaml` or add appropriate placeholder values.
 
 ## Jobs in `ci.yml`
 
@@ -31,10 +42,10 @@ ruff check . && ruff format --check .
 pre-commit run --all-files
 ```
 
-Add `python scripts/ha_check_portable.py` or `ha core check` when you need to mirror the optional Home Assistant workflow.
+Use `ha core check` (Home Assistant CLI) to run a local config validation, or rely on the `ha-config-check` workflow in `.github/workflows/` for CI validation.
 
 ## Troubleshooting
 
 - Delete `~/.cache/pre-commit` or rerun with `PRE_COMMIT_ALLOW_NO_CONFIG=1` if hook versions stick after updates.
 - Clear the Ruff cache (`ruff clean`) when upgrading Ruff to a new major/minor release.
-- For HA config validation failures, run `python scripts/ha_check_portable.py --verbose` locally; it will print the docker command it uses.
+- For HA config validation failures, run `ha core check` locally or use the `ha-config-check` workflow. The workflow runs Home Assistant in Docker and prints full diagnostics.

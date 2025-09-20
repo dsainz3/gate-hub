@@ -1,6 +1,6 @@
 minimum_pre_commit_version: '3.7.1'
 default_language_version:
-  python: python3.13
+  python: python3.11
 
 exclude: ^backup/
 repos:
@@ -66,11 +66,12 @@ repos:
         name: ruff-format
         types_or: [python]
 
-  # Home Assistant config check stays
+  # Home Assistant config check using Python
   - repo: local
     hooks:
       - id: hass-config-check
-        name: Home Assistant config check (portable, Python)
-        entry: python scripts/ha_check_portable.py
-        language: system
+        name: Home Assistant config check (Python)
+        entry: bash -c "cp .ci/fakesecrets.yaml secrets.yaml && hass --script check_config --config . --info all --files --secrets secrets.yaml && rm secrets.yaml"
+        language: python
+        additional_dependencies: ['homeassistant']
         pass_filenames: false
