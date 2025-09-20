@@ -307,3 +307,43 @@ views:
           - type: attribute
             entity: sensor.husker_team
             attribute: private_fast_refresh
+  - title: Lighting & Scenes
+    path: huskers-lighting
+    icon: mdi:lightbulb-group
+    badges: []
+    cards:
+      - type: markdown
+        title: Huskers Lighting Controls
+        content: |-
+          ### Husker Lighting Control Center
+          Use these automations and scenes to set the mood around the house for every Huskers moment.
+          - **Automations** handle the daily schedule so lighting always matches the time of day.
+          - **Scenes** instantly trigger game day looks like Scarlet, Chase, or Burst.
+          Tap any item below to enable or activate it.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: entities
+            title: Lighting Automations
+            show_header_toggle: false
+            entities:
+              - entity: automation.evening_lights_at_sunset
+                secondary_info: last-triggered
+              - entity: automation.night_mode_at_midnight
+                secondary_info: last-triggered
+              - entity: automation.early_morning_lights_0330
+                secondary_info: last-triggered
+              - entity: automation.interior_lights_sunrise_off
+                secondary_info: last-triggered
+              - entity: automation.exterior_lights_sunrise_off
+                secondary_info: last-triggered
+              - entity: automation.exterior_led_monthly_effect
+                secondary_info: last-triggered
+          - type: entities
+            title: Huskers Scenes
+            show_header_toggle: false
+            entities:
+              - entity: scene.huskers_seven_all_scarlet
+              - entity: scene.huskers_before_chase
+              - entity: scene.huskers_before_burst
