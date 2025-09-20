@@ -66,11 +66,12 @@ repos:
         name: ruff-format
         types_or: [python]
 
-  # Home Assistant config check stays
+  # Home Assistant config check using Python
   - repo: local
     hooks:
       - id: hass-config-check
-        name: Home Assistant config check (docker)
-        entry: bash -c "docker pull ghcr.io/home-assistant/home-assistant:stable && docker run --rm -v \"$PWD\":/config ghcr.io/home-assistant/home-assistant:stable python -m homeassistant --config /config --script check_config"
-        language: system
+        name: Home Assistant config check (Python)
+        entry: bash -c "cp .ci/fakesecrets.yaml secrets.yaml && hass --script check_config --config . --info all --files --secrets secrets.yaml && rm secrets.yaml"
+        language: python
+        additional_dependencies: ['homeassistant']
         pass_filenames: false
