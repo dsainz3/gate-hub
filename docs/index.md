@@ -1,6 +1,6 @@
 # Project Docs Index
 
-_Last updated: 2025-09-17_
+_Last updated: 2025-09-20_
 
 Welcome! This is the landing page for project documentation, ADRs, and operating notes.
 
@@ -27,22 +27,22 @@ Existing ADRs:
 
 - [`pre-commit.md`](./pre-commit.md) — hook configuration and local workflows.
 - [`ci.md`](./ci.md) — GitHub Actions jobs and troubleshooting.
-- `infrastructure.md` — HAOS host, backups, networking, and storage notes.
-- `ai-automation-builder.md` — notes on automation scaffolding experiments.
+- [`infrastructure.md`](./infrastructure.md) — HAOS host, backups, networking, and storage notes.
+- [`ai-automation-builder.md`](./ai-automation-builder.md) — notes on automation scaffolding experiments.
 
 ---
 
 ## Guides
 
 - [`husker_package/husker_readme.md`](./husker_package/husker_readme.md) — Huskers dashboards and automations.
-- `lighting/` — room-by-room lighting, effects, and monthly palettes.
+- [`lighting/`](./lighting/) — lighting control integrations and MQTT details.
 
 ---
 
 ## Packages
 
-- `addons/` — add-on configuration snapshots and setup docs.
-- `husker_package/` — comprehensive Huskers package documentation.
+- [`addons/`](./addons/) — add-on configuration snapshots and setup docs.
+- [`husker_package/`](./husker_package/) — comprehensive Huskers package documentation.
 
 ---
 
@@ -55,6 +55,6 @@ Existing ADRs:
 
 ## Reference
 
-- `optimizing_code.md` — historical tuning notes and automation ideas.
-- `infrastructure.md` — hardware inventory, networking, and monitoring stack.
-- Create daily or weekly notes inside `docs/logs/YYYY-MM-DD-topic.md` when needed (newest first).
+- [`optimizing_code.md`](./optimizing_code.md) — historical tuning notes and automation ideas.
+- [`infrastructure.md`](./infrastructure.md) — hardware inventory, networking, and monitoring stack.
+- [`ai-automation-builder.md`](./ai-automation-builder.md) — quick reference for the automation builder prototype.
