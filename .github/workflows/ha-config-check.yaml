@@ -77,20 +77,11 @@ jobs:
             fi
           done
 
-          # Ensure common monitoring and recorder secrets exist (add safe placeholders when missing)
-          for key in grafana_health_endpoint grafana_rest_authorization grafana_admin_password recorder_include_entities; do
+          # Ensure common secrets exist (add safe placeholders when missing)
+          for key in recorder_include_entities; do
             # More robust check for existing secrets (handles different line endings and whitespace)
             if ! grep -P "^\s*${key}:" secrets.yaml >/dev/null 2>&1; then
               case "$key" in
-                grafana_health_endpoint)
-                  echo "grafana_health_endpoint: 'http://localhost:3000/api/health'" >> secrets.yaml
-                  ;;
-                grafana_rest_authorization)
-                  echo "grafana_rest_authorization: 'Bearer placeholder'" >> secrets.yaml
-                  ;;
-                grafana_admin_password)
-                  echo "grafana_admin_password: 'replace-with-strong-password'" >> secrets.yaml
-                  ;;
                 recorder_include_entities)
                   echo "recorder_include_entities: []" >> secrets.yaml
                   ;;
