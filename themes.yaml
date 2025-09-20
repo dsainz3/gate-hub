@@ -12,7 +12,10 @@ Huskers Cream:
       primary-background-color: var(--huskers-cream)
       card-background-color: '#FFF9F0'
       app-header-background-color: var(--huskers-scarlet)
-      app-header-text-color: var(--huskers-cream)
+      app-header-text-color: var(--huskers-black)
+      app-header-icon-color: var(--huskers-black)
+      app-header-button-text-color: var(--huskers-black)
+      header-icon-color: var(--huskers-black)
 
       # Accents & links
       primary-color: var(--huskers-scarlet)
@@ -35,8 +38,10 @@ Huskers Cream:
 
       # Cards polish
       ha-card-border-radius: '16px'
+      ha-card-border-color: 'rgba(0,0,0,0.12)'
       ha-card-box-shadow: '0 2px 12px rgba(0,0,0,0.08)'
       divider-color: 'rgba(0,0,0,0.06)'
+      app-header-border-bottom: '1px solid var(--huskers-black)'
 
       # Inputs, sliders
       slider-color: var(--huskers-scarlet)
