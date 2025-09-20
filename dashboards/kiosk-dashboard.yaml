@@ -52,7 +52,7 @@ views:
 
           # Garage
           - type: light
-            entity: light.garage_center
+            entity: light.light_garage_center
             name: Garage Center
           - type: light
             entity: light.light_garage_left
@@ -305,7 +305,6 @@ views:
         title: Humidor Activity Log
         hours_to_show: 72
         entities:
-          - automation.humidor_plug_temp_control
           - switch.plug_humidor
           - sensor.hygrometer_humidor_temperature
           - sensor.hygrometer_humidor_humidity

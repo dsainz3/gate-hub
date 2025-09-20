@@ -34,50 +34,12 @@ history:
 
 recorder:
   include:
-    domains: [script, scene, light, input_boolean]
-    entities:
-      - input_text.huskers_last_score
-      - sensor.huskers_kickoff_in
-      - binary_sensor.huskers_is_postgame_espn
-      - input_number.huskers_chase_cycle_seconds
-      - light.light_theater_left
-      - light.light_theater_right
-      - light.light_front_left
-      - light.light_front_right
-      - light.light_garage_left
-      - light.garage_center
-      - light.light_garage_right
-      - light.permanent_outdoor_lights
-      - sensor.outdoor_temperature_wx
-      - sensor.outdoor_humidity_wx
-      - sensor.outdoor_wind_speed_wx
-      - sensor.outdoor_pressure_wx
-      - sensor.outdoor_dew_point_approx
-      - sensor.outdoor_feels_like
-      - sensor.kneplatt72_uv_index
-      - sensor.wind_gust
-      - sensor.outdoor_visibility_wx
-      - sensor.uv_category_wx
-      - sensor.wx_pressure_rate_1h
-      - sensor.wx_pressure_rate_3h
-      - sensor.wx_pressure_change_3h
-      - sensor.wx_pressure_change_24h
-      - sensor.wx_pressure_tendency_3h
-      - binary_sensor.wx_pressure_falling_rapid
-      - binary_sensor.wx_pressure_falling_very_fast
-      - binary_sensor.wx_storm_watch_pressure
-      - binary_sensor.wx_storm_warning_pressure
-      - sensor.hygrometer_humidor_temperature
-      - sensor.hygrometer_humidor_humidity
-      - sensor.humidor_temp_stats_24h
-      - sensor.humidor_temp_change_1h
-      - sensor.humidor_temp_range_today
-      - sensor.humidor_humidity_stats_24h
-      - sensor.humidor_humidity_change_1h
-      - sensor.humidor_humidity_range_today
-      - sensor.humidor_temperature_trend
-      - sensor.humidor_system_status
-      - sensor.humidor_system_health
+    domains:
+      - script
+      - scene
+      - light
+      - input_boolean
+    entities: !secret recorder_include_entities
 
 
 logger:
