@@ -60,7 +60,10 @@ jobs:
 
           # Create common include files if referenced but missing
             # Ensure common monitoring secrets exist (add safe placeholders when missing)
-            for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password; do
+            for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password recorder_include_entities; do
+                recorder_include_entities)
+                  echo "recorder_include_entities: []" >> secrets.yaml
+                  ;;
               if ! grep -E "^[[:space:]]*$key:" secrets.yaml >/dev/null 2>&1; then
           for f in automations.yaml scripts.yaml customize.yaml; do
             if grep -Rql "$f" configuration.yaml 2>/dev/null || grep -Rql "$f" . 2>/dev/null; then
