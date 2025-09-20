@@ -22,7 +22,7 @@ Huskers Cream:
   # Header/App Bar
   app-header-background-color: var(--ha-theme-color-scarlet)
   app-header-text-color: var(--ha-theme-color-cream)
-  
+
   # Sidebar
   sidebar-background-color: var(--ha-theme-color-dark)
   sidebar-icon-color: var(--ha-theme-color-cream)
