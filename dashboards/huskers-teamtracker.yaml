@@ -1,4 +1,4 @@
-title: Huskers Team Tracker
+﻿title: Huskers Team Tracker
 theme: Huskers Cream
 views:
   - title: Game Day
@@ -33,12 +33,12 @@ views:
               {% set opp_prob = (state_attr('sensor.husker_team', 'opponent_win_probability') | float(0) * 100) | round(1) %}
               <div
                 style="
-                  background:#fef8ed;
-                  color:#2b1b12;
+                  background: var(--card-background-color);
+                  color: var(--primary-text-color);
                   padding:20px;
                   border-radius:18px;
-                  border:3px solid #cc0000;
-                  box-shadow:0 10px 20px rgba(204,0,0,0.15);
+                  border:3px solid var(--primary-color);
+                  box-shadow: var(--ha-card-box-shadow, 0 10px 20px rgba(0,0,0,0.15));
                 "
               >
                 <div
@@ -66,13 +66,13 @@ views:
                         object-fit:contain;
                       "
                     >
-                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color:#cc0000;">
+                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-color);">
                       {{ huskers_name or 'Nebraska Cornhuskers' }}
                     </p>
-                    <p style="margin:0;color:#6b5845;">
+                    <p style="margin:0;color: var(--secondary-text-color);">
                       {{ state_attr('sensor.husker_team', 'team_record') or 'Record TBA' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color:#6b5845;">
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
                       Rank {{ state_attr('sensor.husker_team', 'team_rank') or 'N/A' }}
                       |
                       {{ state_attr('sensor.husker_team', 'team_homeaway') | title if state_attr('sensor.husker_team', 'team_homeaway') else 'Venue TBA' }}
@@ -85,22 +85,22 @@ views:
                       text-align:center;
                     "
                   >
-                    <p style="margin:0;font-size:3.4rem;font-weight:800;color:#cc0000;line-height:1;">
+                    <p style="margin:0;font-size:3.4rem;font-weight:800;color: var(--primary-color);line-height:1;">
                       {{ team_score }}
-                      <span style="color:#b44416;">-</span>
+                      <span style="color: var(--primary-color);">-</span>
                       {{ opponent_score }}
                     </p>
-                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color:#6b5845;">
+                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color: var(--secondary-text-color);">
                       {{ phase_label if phase_label not in invalid else phase }}
                     </p>
-                    <p style="margin:4px 0 0 0;color:#6b5845;">
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
                       {{ clock or 'Clock TBA' }} |
                       Q{{ quarter or '-' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color:#6b5845;">
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
                       Possession: {{ possession or 'Unknown' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color:#6b5845;">
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
                       Win Prob: {{ team_prob }}% / {{ opp_prob }}%
                     </p>
                   </div>
@@ -120,20 +120,20 @@ views:
                         object-fit:contain;
                       "
                     >
-                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color:#133a63;">
+                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-text-color);">
                       {{ opponent_name or 'Opponent' }}
                     </p>
-                    <p style="margin:0;color:#6b5845;">
+                    <p style="margin:0;color: var(--secondary-text-color);">
                       {{ state_attr('sensor.husker_team', 'opponent_record') or 'Record TBA' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color:#6b5845;">
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
                       Rank {{ state_attr('sensor.husker_team', 'opponent_rank') or 'N/A' }}
                       |
                       {{ state_attr('sensor.husker_team', 'opponent_homeaway') | title if state_attr('sensor.husker_team', 'opponent_homeaway') else 'Venue TBA' }}
                     </p>
                   </div>
                 </div>
-                <p style="margin:16px 0 0 0;text-align:center;font-weight:600;color:#6b5845;">
+                <p style="margin:16px 0 0 0;text-align:center;font-weight:600;color: var(--secondary-text-color);">
                   {{ detail if detail not in invalid else 'Game details will appear when available.' }}
                 </p>
               </div>
