@@ -21,7 +21,7 @@ The repository is intended to be opened within VS Code. A minimal, anonymized `.
 
 ## Home Assistant OS
 
-- Recorded version: `2025.8.1` (see `.HA_VERSION`)
+- Recorded version: `2025.8.1` (confirm via Settings → System → About or `ha os info`).
 - Host-specific details are intentionally redacted.
 
 ## Git Integration
@@ -64,9 +64,14 @@ poetry run pre-commit run --all-files
 ├─ configuration.yaml
 ├─ automations.yaml
 ├─ blueprints/
+├─ packages/
+├─ custom_components/
+├─ dashboards/
+├─ scripts/
 ├─ scripts.yaml
 ├─ scenes.yaml
-└─ docs/
+├─ docs/
+└─ www/
 ```
 
 This structure forms the baseline for rebuilding the HAOS infrastructure in a hypermodern methodology.
