@@ -64,4 +64,4 @@ backup/
 govee_learning.yaml
 make_fake_secrets.py
 
-/.entites/
+/.entities/
