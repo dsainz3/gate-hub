@@ -17,7 +17,7 @@ group:
       - light.light_theater_right
       - light.light_front_left
       - light.light_front_right
-      - light.garage_center
+      - light.light_garage_center
       - light.light_garage_left
       - light.light_garage_right
       - light.light_parents
@@ -46,7 +46,7 @@ group:
   kiosk_garage_lights:
     name: Kiosk — Garage Lights
     entities:
-      - light.garage_center
+      - light.light_garage_center
       - light.light_garage_left
       - light.light_garage_right
 
