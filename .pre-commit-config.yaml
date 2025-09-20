@@ -70,7 +70,7 @@ repos:
   - repo: local
     hooks:
       - id: hass-config-check
-        name: Home Assistant config check (portable, Python)
-        entry: python scripts/ha_check_portable.py
+        name: Home Assistant config check (docker)
+        entry: bash -c "docker pull ghcr.io/home-assistant/home-assistant:stable && docker run --rm -v \"$PWD\":/config ghcr.io/home-assistant/home-assistant:stable python -m homeassistant --config /config --script check_config"
         language: system
         pass_filenames: false

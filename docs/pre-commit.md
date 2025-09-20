@@ -8,7 +8,7 @@ This repository enforces formatting and validation with [pre-commit](https://pre
 - `trailing-whitespace`, `end-of-file-fixer`, `mixed-line-ending`, and `check-yaml` from `pre-commit-hooks`
 - `yamllint` with the project `.yamllint.yml`
 - `ruff` (lint + autofix) and `ruff-format` for Python code
-- `hass-config-check` which invokes `scripts/ha_check_portable.py` for dockerised Home Assistant validation
+ - `hass-config-check` which runs the Home Assistant config check in CI; locally prefer `ha core check` or the CI workflow for parity.
 
 ## Install & run locally
 

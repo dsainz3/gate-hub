@@ -1,0 +1,75 @@
+# Monitoring stack package: surface add-on health status and summary sensor.
+
+homeassistant:
+  customize:
+    binary_sensor.monitoring_influxdb_health:
+      friendly_name: 'InfluxDB Add-on Healthy'
+      icon: mdi:database-check
+    binary_sensor.monitoring_grafana_health:
+      friendly_name: 'Grafana Add-on Healthy'
+      icon: mdi:chart-areaspline
+    sensor.monitoring_stack_status:
+      friendly_name: 'Monitoring Stack Status'
+      icon: mdi:chart-box
+
+binary_sensor:
+  - platform: rest
+    name: 'Monitoring InfluxDB Health'
+    unique_id: monitoring_influxdb_health
+    resource: !secret influxdb_health_endpoint
+    method: GET
+    device_class: connectivity
+    scan_interval: 120
+    value_template: >-
+      {% if value_json is defined and value_json.status %}
+        {{ value_json.status | lower == 'pass' }}
+      {% else %}
+        false
+      {% endif %}
+    availability_template: '{{ value_json is defined }}'
+
+  - platform: rest
+    name: 'Monitoring Grafana Health'
+    unique_id: monitoring_grafana_health
+    resource: !secret grafana_health_endpoint
+    method: GET
+    headers:
+      Authorization: !secret grafana_rest_authorization
+    device_class: connectivity
+    scan_interval: 120
+    value_template: >-
+      {% if value_json is defined and value_json.status %}
+        {{ value_json.status | lower == 'ok' }}
+      {% else %}
+        false
+      {% endif %}
+    availability_template: '{{ value_json is defined }}'
+
+template:
+  - sensor:
+      - name: 'Monitoring Stack Status'
+        unique_id: monitoring_stack_status
+        state: >-
+          {% set influx = is_state('binary_sensor.monitoring_influxdb_health', 'on') %}
+          {% set grafana = is_state('binary_sensor.monitoring_grafana_health', 'on') %}
+          {% if influx and grafana %}
+            ready
+          {% elif influx or grafana %}
+            degraded
+          {% else %}
+            offline
+          {% endif %}
+        attributes:
+          influxdb: "{{ states('binary_sensor.monitoring_influxdb_health') }}"
+          grafana: "{{ states('binary_sensor.monitoring_grafana_health') }}"
+          last_checked: '{{ now().isoformat() }}'
+        icon: >-
+          {% set influx = is_state('binary_sensor.monitoring_influxdb_health', 'on') %}
+          {% set grafana = is_state('binary_sensor.monitoring_grafana_health', 'on') %}
+          {% if influx and grafana %}
+            mdi:chart-box
+          {% elif influx or grafana %}
+            mdi:alert-circle-outline
+          {% else %}
+            mdi:alert-octagon
+          {% endif %}

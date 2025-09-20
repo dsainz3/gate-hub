@@ -31,10 +31,10 @@ ruff check . && ruff format --check .
 pre-commit run --all-files
 ```
 
-Add `python scripts/ha_check_portable.py` or `ha core check` when you need to mirror the optional Home Assistant workflow.
+Use `ha core check` (Home Assistant CLI) to run a local config validation, or rely on the `ha-config-check` workflow in `.github/workflows/` for CI validation.
 
 ## Troubleshooting
 
 - Delete `~/.cache/pre-commit` or rerun with `PRE_COMMIT_ALLOW_NO_CONFIG=1` if hook versions stick after updates.
 - Clear the Ruff cache (`ruff clean`) when upgrading Ruff to a new major/minor release.
-- For HA config validation failures, run `python scripts/ha_check_portable.py --verbose` locally; it will print the docker command it uses.
+- For HA config validation failures, run `ha core check` locally or use the `ha-config-check` workflow. The workflow runs Home Assistant in Docker and prints full diagnostics.
