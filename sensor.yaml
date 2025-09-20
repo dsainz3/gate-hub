@@ -96,3 +96,8 @@
   max_age:
     hours: 1
   precision: 2
+# Repository TODO tracker
+- platform: command_line
+  name: Todo Repo Tracker
+  command: 'cat /config/TODO.md'
+  scan_interval: 120

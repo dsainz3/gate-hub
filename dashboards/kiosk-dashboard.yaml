@@ -1,4 +1,4 @@
-title: Kiosk
+﻿title: Kiosk
 views:
   - title: Control
     path: control
@@ -175,7 +175,14 @@ views:
       - type: markdown
         title: Running TODOs
         content: |-
-          {{ state_attr('sensor.todo_repo_tracker','markdown') if has_value('sensor.todo_repo_tracker') else states('sensor.todo_repo_tracker') }}
+          {% set todo = states('sensor.todo_repo_tracker') %}
+          {% if todo not in ['unknown', 'unavailable', ''] %}
+            ```markdown
+            {{ todo }}
+            ```
+          {% else %}
+            TODO list not available.
+          {% endif %}
   - title: Humidor
     path: humidor
     icon: mdi:cigar
