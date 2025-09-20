@@ -20,7 +20,14 @@ views:
                   **Location:** KnePlatt72 personal weather station
                   **Barometer:** {{ states('sensor.outdoor_pressure_wx') }} inHg
                   **Pressure tendency:** {{ states('sensor.wx_pressure_tendency_3h') }}
-                  **Alerts:** {% if is_state('binary_sensor.wx_storm_warning_pressure','on') %}Storm warning pressure drop{% elif is_state('binary_sensor.wx_storm_watch_pressure','on') %}Storm watch pressure drop{% else %}No pressure based alerts{% endif %}
+                  **Alerts:**
+                  {% if is_state('binary_sensor.wx_storm_warning_pressure','on') %}
+                    Storm warning pressure drop
+                  {% elif is_state('binary_sensor.wx_storm_watch_pressure','on') %}
+                    Storm watch pressure drop
+                  {% else %}
+                    No pressure based alerts
+                  {% endif %}
               - type: entities
                 title: Notification Controls
                 show_header_toggle: false

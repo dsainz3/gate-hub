@@ -1,4 +1,4 @@
-title: Kiosk
+﻿title: Kiosk
 views:
   - title: Control
     path: control
@@ -168,6 +168,21 @@ views:
           - entity: switch.tree_power_switch
             name: Tree Power
 
+  - title: Todos
+    path: todos
+    icon: mdi:check-circle-outline
+    cards:
+      - type: markdown
+        title: Running TODOs
+        content: |-
+          {% set todo = states('sensor.todo_repo_tracker') %}
+          {% if todo not in ['unknown', 'unavailable', ''] %}
+            ```markdown
+            {{ todo }}
+            ```
+          {% else %}
+            TODO list not available.
+          {% endif %}
   - title: Humidor
     path: humidor
     icon: mdi:cigar

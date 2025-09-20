@@ -1,0 +1,309 @@
+﻿title: Huskers Team Tracker
+theme: Huskers Cream
+views:
+  - title: Game Day
+    path: huskers-game-day
+    icon: mdi:football-helmet
+    badges: []
+    cards:
+      - type: custom:teamtracker-card
+        entity: sensor.husker_team
+        name: Huskers Snapshot
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: markdown
+            title: Game Day Scoreboard
+            content: |-
+              {% set invalid = ['unknown', 'unavailable', '', 'None', 'none'] %}
+              {% set team_logo = state_attr('sensor.husker_team', 'team_logo') %}
+              {% set opponent_logo = state_attr('sensor.husker_team', 'opponent_logo') %}
+              {% set team_score = state_attr('sensor.husker_team', 'team_score') | int(0) %}
+              {% set opponent_score = state_attr('sensor.husker_team', 'opponent_score') | int(0) %}
+              {% set phase = states('sensor.husker_team') %}
+              {% set phase_label = states('sensor.huskers_game_phase_label') %}
+              {% set clock = state_attr('sensor.husker_team', 'clock') %}
+              {% set quarter = state_attr('sensor.husker_team', 'quarter') %}
+              {% set possession = state_attr('sensor.husker_team', 'possession') %}
+              {% set huskers_name = state_attr('sensor.husker_team', 'team_long_name') or state_attr('sensor.husker_team', 'team_name') %}
+              {% set opponent_name = state_attr('sensor.husker_team', 'opponent_long_name') or state_attr('sensor.husker_team', 'opponent_name') %}
+              {% set detail = states('sensor.huskers_game_detail') %}
+              {% set team_prob = (state_attr('sensor.husker_team', 'team_win_probability') | float(0) * 100) | round(1) %}
+              {% set opp_prob = (state_attr('sensor.husker_team', 'opponent_win_probability') | float(0) * 100) | round(1) %}
+              <div
+                style="
+                  background: var(--card-background-color);
+                  color: var(--primary-text-color);
+                  padding:20px;
+                  border-radius:18px;
+                  border:3px solid var(--primary-color);
+                  box-shadow: var(--ha-card-box-shadow, 0 10px 20px rgba(0,0,0,0.15));
+                "
+              >
+                <div
+                  style="
+                    display:flex;
+                    flex-wrap:wrap;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:24px;
+                  "
+                >
+                  <div
+                    style="
+                      flex:1;
+                      min-width:210px;
+                      text-align:center;
+                    "
+                  >
+                    <img
+                      src="{{ '/local/huskers_logo.svg' if team_logo in invalid else team_logo }}"
+                      alt="Nebraska"
+                      style="
+                        height:85px;
+                        max-width:100%;
+                        object-fit:contain;
+                      "
+                    >
+                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-color);">
+                      {{ huskers_name or 'Nebraska Cornhuskers' }}
+                    </p>
+                    <p style="margin:0;color: var(--secondary-text-color);">
+                      {{ state_attr('sensor.husker_team', 'team_record') or 'Record TBA' }}
+                    </p>
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                      Rank {{ state_attr('sensor.husker_team', 'team_rank') or 'N/A' }}
+                      |
+                      {{ state_attr('sensor.husker_team', 'team_homeaway') | title if state_attr('sensor.husker_team', 'team_homeaway') else 'Venue TBA' }}
+                    </p>
+                  </div>
+                  <div
+                    style="
+                      flex:1.2;
+                      min-width:230px;
+                      text-align:center;
+                    "
+                  >
+                    <p style="margin:0;font-size:3.4rem;font-weight:800;color: var(--primary-color);line-height:1;">
+                      {{ team_score }}
+                      <span style="color: var(--primary-color);">-</span>
+                      {{ opponent_score }}
+                    </p>
+                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color: var(--secondary-text-color);">
+                      {{ phase_label if phase_label not in invalid else phase }}
+                    </p>
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                      {{ clock or 'Clock TBA' }} |
+                      Q{{ quarter or '-' }}
+                    </p>
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                      Possession: {{ possession or 'Unknown' }}
+                    </p>
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                      Win Prob: {{ team_prob }}% / {{ opp_prob }}%
+                    </p>
+                  </div>
+                  <div
+                    style="
+                      flex:1;
+                      min-width:210px;
+                      text-align:center;
+                    "
+                  >
+                    <img
+                      src="{{ '/local/huskers_logo.svg' if opponent_logo in invalid else opponent_logo }}"
+                      alt="Opponent"
+                      style="
+                        height:85px;
+                        max-width:100%;
+                        object-fit:contain;
+                      "
+                    >
+                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-text-color);">
+                      {{ opponent_name or 'Opponent' }}
+                    </p>
+                    <p style="margin:0;color: var(--secondary-text-color);">
+                      {{ state_attr('sensor.husker_team', 'opponent_record') or 'Record TBA' }}
+                    </p>
+                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                      Rank {{ state_attr('sensor.husker_team', 'opponent_rank') or 'N/A' }}
+                      |
+                      {{ state_attr('sensor.husker_team', 'opponent_homeaway') | title if state_attr('sensor.husker_team', 'opponent_homeaway') else 'Venue TBA' }}
+                    </p>
+                  </div>
+                </div>
+                <p style="margin:16px 0 0 0;text-align:center;font-weight:600;color: var(--secondary-text-color);">
+                  {{ detail if detail not in invalid else 'Game details will appear when available.' }}
+                </p>
+              </div>
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                title: Game Essentials
+                content: |-
+                  {% set event = state_attr('sensor.husker_team', 'event_name') %}
+                  {% set kickoff_iso = state_attr('sensor.husker_team', 'date') %}
+                  {% set kickoff_local = '' %}
+                  {% if kickoff_iso not in [None, '', 'unknown', 'unavailable'] %}
+                    {% set kickoff_local = as_datetime(kickoff_iso) | as_local | strftime('%A, %B %-d · %-I:%M %p %Z') %}
+                  {% endif %}
+                  {% set kickoff_in = state_attr('sensor.husker_team', 'kickoff_in') %}
+                  {% set venue = state_attr('sensor.husker_team', 'venue') %}
+                  {% set location = state_attr('sensor.husker_team', 'location') %}
+                  {% set tv = state_attr('sensor.husker_team', 'tv_network') %}
+                  {% set odds = state_attr('sensor.husker_team', 'odds') %}
+                  {% set overunder = state_attr('sensor.husker_team', 'overunder') %}
+                  ### Kickoff & Broadcast
+                  - **Event:** {{ event or 'Nebraska Football' }}
+                  - **Kickoff:** {{ kickoff_local or 'TBA' }} ({{ kickoff_in or '-' }})
+                  - **Venue:** {{ venue or 'TBA' }} — {{ location or 'Location TBA' }}
+                  - **Watch:** {{ tv or 'Network TBA' }}
+                  - **Line:** {{ odds or 'Line TBA' }} | O/U {{ overunder or 'TBA' }}
+              - type: markdown
+                title: Tailgate Countdown
+                content: |-
+                  {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
+                  {% if minutes <= 0 %}
+                    ### It's game time!
+                  {% elif minutes < 60 %}
+                    ### {{ minutes }} minutes to kickoff
+                  {% elif minutes < 1440 %}
+                    ### {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
+                  {% else %}
+                    ### {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
+                  {% endif %}
+                  {{ states('sensor.huskers_tailgate_countdown') }}
+      - type: markdown
+        title: In-Game Situation
+        content: |-
+          {% set down_distance = state_attr('sensor.husker_team', 'down_distance_text') %}
+          {% set last_play = state_attr('sensor.husker_team', 'last_play') %}
+          {% set outs = state_attr('sensor.husker_team', 'outs') %}
+          {% set balls = state_attr('sensor.husker_team', 'balls') %}
+          {% set strikes = state_attr('sensor.husker_team', 'strikes') %}
+          {% set on_first = state_attr('sensor.husker_team', 'on_first') %}
+          {% set on_second = state_attr('sensor.husker_team', 'on_second') %}
+          {% set on_third = state_attr('sensor.husker_team', 'on_third') %}
+          {% set shots_team = state_attr('sensor.husker_team', 'team_shots_on_target') %}
+          {% set shots_team_total = state_attr('sensor.husker_team', 'team_total_shots') %}
+          {% set shots_opp = state_attr('sensor.husker_team', 'opponent_shots_on_target') %}
+          {% set shots_opp_total = state_attr('sensor.husker_team', 'opponent_total_shots') %}
+          {% set team_sets = state_attr('sensor.husker_team', 'team_sets_won') %}
+          {% set opp_sets = state_attr('sensor.husker_team', 'opponent_sets_won') %}
+          ### Situation Snapshot
+          - **Down & Distance:** {{ down_distance or '-' }}
+          - **Last Play:** {{ last_play or 'Waiting for the next play...' }}
+          - **Base Runners:**
+            - 1B: {{ on_first if on_first is not none else '-' }}
+            - 2B: {{ on_second if on_second is not none else '-' }}
+            - 3B: {{ on_third if on_third is not none else '-' }}
+          - **Count:** Balls {{ balls if balls is not none else '-' }} |
+            Strikes {{ strikes if strikes is not none else '-' }} |
+            Outs {{ outs if outs is not none else '-' }}
+          - **Shots:** Nebraska {{ shots_team or '-' }}/{{ shots_team_total or '-' }} |
+            Opponent {{ shots_opp or '-' }}/{{ shots_opp_total or '-' }}
+          - **Sets Won:** Nebraska {{ team_sets if team_sets is not none else '-' }} |
+            Opponent {{ opp_sets if opp_sets is not none else '-' }}
+      - type: markdown
+        title: Hype Message
+        content: |-
+          ### GO BIG RED!
+          {{ states('sensor.huskers_hype_message') }}
+  - title: Team & Data
+    path: huskers-team-data
+    icon: mdi:chart-box
+    badges: []
+    cards:
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: markdown
+            title: Huskers Profile
+            content: |-
+              ### Huskers Profile
+              - **Name:** {{ state_attr('sensor.husker_team', 'team_long_name') or 'Nebraska Cornhuskers' }}
+              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'team_abbr') or 'NEB' }}
+              - **Team ID:** {{ state_attr('sensor.husker_team', 'team_id') or '158' }}
+              - **Conference:** {{ state_attr('sensor.husker_team', 'team_conference_id') or 'Big Ten' }}
+              - **Record:** {{ state_attr('sensor.husker_team', 'team_record') or 'TBA' }}
+              - **Rank:** {{ state_attr('sensor.husker_team', 'team_rank') or 'Unranked' }}
+              - **Colors:** {{ state_attr('sensor.husker_team', 'team_colors') or 'Scarlet & Cream' }}
+              - **Timeouts:** {{ state_attr('sensor.husker_team', 'team_timeouts') if state_attr('sensor.husker_team', 'team_timeouts') is not none else 'TBA' }}
+              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'team_winner') }}
+              - **Website:** {{ state_attr('sensor.husker_team', 'team_url') or 'https://huskers.com' }}
+          - type: markdown
+            title: Opponent Profile
+            content: |-
+              ### Opponent Profile
+              - **Name:** {{ state_attr('sensor.husker_team', 'opponent_long_name') or 'Opponent' }}
+              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'opponent_abbr') or '-' }}
+              - **Team ID:** {{ state_attr('sensor.husker_team', 'opponent_id') or '-' }}
+              - **Conference:** {{ state_attr('sensor.husker_team', 'opponent_conference_id') or '-' }}
+              - **Record:** {{ state_attr('sensor.husker_team', 'opponent_record') or 'TBA' }}
+              - **Rank:** {{ state_attr('sensor.husker_team', 'opponent_rank') or 'Unranked' }}
+              - **Colors:** {{ state_attr('sensor.husker_team', 'opponent_colors') or 'TBA' }}
+              - **Timeouts:** {{ state_attr('sensor.husker_team', 'opponent_timeouts') if state_attr('sensor.husker_team', 'opponent_timeouts') is not none else 'TBA' }}
+              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'opponent_winner') }}
+              - **Website:** {{ state_attr('sensor.husker_team', 'opponent_url') or '#' }}
+          - type: markdown
+            title: League & API
+            content: |-
+              ### League & API
+              - **Sport:** {{ state_attr('sensor.husker_team', 'sport') or 'Football' }}
+                ({{ state_attr('sensor.husker_team', 'sport_path') or 'college-football' }})
+              - **League:** {{ state_attr('sensor.husker_team', 'league') or 'NCAAF' }}
+                ({{ state_attr('sensor.husker_team', 'league_path') or 'college-football' }})
+              - **Season:** {{ state_attr('sensor.husker_team', 'season') or 'Current' }}
+              - **API Status:** {{ state_attr('sensor.husker_team', 'api_message') or 'OK' }}
+              - **API URL:** {{ state_attr('sensor.husker_team', 'api_url') or 'n/a' }}
+              - **Last Update:** {{ state_attr('sensor.husker_team', 'last_update') or '-' }}
+              - **Rapid Refresh:** {{ 'Yes' if state_attr('sensor.husker_team', 'private_fast_refresh') else 'No' }}
+      - type: markdown
+        title: Series Summary
+        content: |-
+          {{ state_attr('sensor.husker_team', 'series_summary') or 'Series history will appear here.' }}
+      - type: entities
+        title: Raw Sensor Reference
+        show_header_toggle: false
+        entities:
+          - entity: sensor.husker_team
+            name: TeamTracker Raw Sensor
+            secondary_info: last-changed
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_score
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_score
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_win_probability
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_win_probability
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_timeouts
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_timeouts
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: team_winner
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: opponent_winner
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: api_message
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: api_url
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: last_update
+          - type: attribute
+            entity: sensor.husker_team
+            attribute: private_fast_refresh
