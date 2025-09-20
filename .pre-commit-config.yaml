@@ -1,6 +1,6 @@
 minimum_pre_commit_version: '3.7.1'
 default_language_version:
-  python: python3.13
+  python: python3.11
 
 exclude: ^backup/
 repos:
