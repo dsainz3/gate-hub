@@ -101,6 +101,13 @@ lovelace:
       show_in_sidebar: true
       filename: dashboards/huskers-all.yaml
 
+    huskers-teamtracker:
+      mode: yaml
+      title: Huskers Team Tracker
+      icon: mdi:scoreboard-outline
+      show_in_sidebar: true
+      filename: dashboards/huskers-teamtracker.yaml
+
     weather-dashboard:              # must contain a hyphen
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
