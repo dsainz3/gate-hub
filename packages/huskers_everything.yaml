@@ -195,13 +195,6 @@ input_number:
 # CONNECTIVITY
 ################################################################################
 
-binary_sensor:
-  - platform: ping
-    host: 1.1.1.1
-    name: Internet Reachable
-    count: 3
-    scan_interval: 60
-
 sensor:
   - platform: ping
     host: 1.1.1.1
