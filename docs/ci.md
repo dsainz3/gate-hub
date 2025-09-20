@@ -5,7 +5,18 @@ Continuous integration lives in `.github/workflows/` and mirrors the local tooli
 ## Workflows
 
 - `ci.yml` (always on): runs Ruff and the non-Python pre-commit hooks on pushes and pull requests.
-- `ha-config-check.yaml` (optional): containerised Home Assistant `check_config` for branches that need full validation.
+- `ha-config-check.yaml` (optional): containerised Home Assistant `check_config` for branches that need full validation. Uses `.ci/fakesecrets.yaml` for testing to avoid leaking sensitive information.
+
+## Home Assistant CI
+
+The `ha-config-check.yaml` workflow runs Home Assistant's configuration validation in a container:
+
+1. Copies `.ci/fakesecrets.yaml` (if present) to `secrets.yaml` for testing.
+2. Adds safe fallback values for any missing required secrets.
+3. Runs `hass --script check_config` inside an official Home Assistant container.
+4. Full diagnostics are available as workflow artifacts.
+
+For local testing, copy `.ci/fakesecrets.yaml` to `secrets.yaml` or add appropriate placeholder values.
 
 ## Jobs in `ci.yml`
 
