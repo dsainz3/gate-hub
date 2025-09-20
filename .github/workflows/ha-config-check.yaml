@@ -47,15 +47,25 @@ jobs:
           set -euo pipefail
           cd "${{ github.workspace }}"
 
+          # Ensure we start with a clean secrets file
+          rm -f secrets.yaml
+
           if [ -f .ci/fakesecrets.yaml ]; then
-            cp .ci/fakesecrets.yaml secrets.yaml
-            echo "Using .ci/fakesecrets.yaml for CI"
+            # Copy and ensure Unix line endings
+            cat .ci/fakesecrets.yaml | tr -d '\r' > secrets.yaml
+            echo "Using .ci/fakesecrets.yaml for CI (with Unix line endings)"
           elif [ -f fakesecrets.yaml ]; then
-            cp fakesecrets.yaml secrets.yaml
-            echo "Using fakesecrets.yaml for CI"
+            cat fakesecrets.yaml | tr -d '\r' > secrets.yaml
+            echo "Using fakesecrets.yaml for CI (with Unix line endings)"
           else
-            [[ -f secrets.yaml ]] || echo "{}" > secrets.yaml
-            echo "No fakesecrets.yaml found; using existing or empty secrets.yaml"
+            echo "{}" > secrets.yaml
+            echo "No fakesecrets.yaml found; using empty secrets.yaml"
+          fi
+
+          # Verify the file exists and is readable
+          if [ ! -f secrets.yaml ] || [ ! -r secrets.yaml ]; then
+            echo "Error: secrets.yaml is missing or not readable"
+            exit 1
           fi
 
           # Create common include files if referenced but missing
@@ -69,7 +79,8 @@ jobs:
 
           # Ensure common monitoring and recorder secrets exist (add safe placeholders when missing)
           for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password recorder_include_entities; do
-            if ! grep -E "^[[:space:]]*$key:" secrets.yaml >/dev/null 2>&1; then
+            # More robust check for existing secrets (handles different line endings and whitespace)
+            if ! grep -P "^\s*${key}:" secrets.yaml >/dev/null 2>&1; then
               case "$key" in
                 influxdb_health_endpoint)
                   echo "influxdb_health_endpoint: 'http://localhost:8086/health'" >> secrets.yaml
