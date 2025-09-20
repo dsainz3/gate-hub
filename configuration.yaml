@@ -55,45 +55,6 @@ recorder:
       - input_boolean
     entities: !secret recorder_include_entities
 
-influxdb:
-  api_version: 2
-  host: !secret influxdb_host
-  port: !secret influxdb_port
-  token: !secret influxdb_token
-  organization: !secret influxdb_org
-  bucket: !secret influxdb_bucket
-  ssl: false
-  verify_ssl: false
-  precision: ms
-  max_retries: 3
-  default_measurement: state
-  tags:
-    source: homeassistant
-  tags_attributes:
-    - friendly_name
-    - device_class
-    - unit_of_measurement
-  include:
-    domains:
-      - sensor
-      - binary_sensor
-      - light
-      - switch
-      - climate
-      - automation
-      - input_number
-      - input_boolean
-    entity_globs:
-      - weather.*
-      - media_player.*
-  exclude:
-    domains:
-      - persistent_notification
-      - updater
-    entities:
-      - sensor.last_boot
-      - sensor.since_last_boot
-
 logger:
   default: warning
   logs:

@@ -78,21 +78,15 @@ jobs:
           done
 
           # Ensure common monitoring and recorder secrets exist (add safe placeholders when missing)
-          for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password recorder_include_entities; do
+          for key in grafana_health_endpoint grafana_rest_authorization grafana_admin_password recorder_include_entities; do
             # More robust check for existing secrets (handles different line endings and whitespace)
             if ! grep -P "^\s*${key}:" secrets.yaml >/dev/null 2>&1; then
               case "$key" in
-                influxdb_health_endpoint)
-                  echo "influxdb_health_endpoint: 'http://localhost:8086/health'" >> secrets.yaml
-                  ;;
                 grafana_health_endpoint)
                   echo "grafana_health_endpoint: 'http://localhost:3000/api/health'" >> secrets.yaml
                   ;;
                 grafana_rest_authorization)
                   echo "grafana_rest_authorization: 'Bearer placeholder'" >> secrets.yaml
-                  ;;
-                influxdb_token)
-                  echo "influxdb_token: 'replace-with-influxdb-token'" >> secrets.yaml
                   ;;
                 grafana_admin_password)
                   echo "grafana_admin_password: 'replace-with-strong-password'" >> secrets.yaml
