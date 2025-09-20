@@ -168,6 +168,14 @@ views:
           - entity: switch.tree_power_switch
             name: Tree Power
 
+  - title: Todos
+    path: todos
+    icon: mdi:check-circle-outline
+    cards:
+      - type: markdown
+        title: Running TODOs
+        content: |-
+          {{ state_attr('sensor.todo_repo_tracker','markdown') if has_value('sensor.todo_repo_tracker') else states('sensor.todo_repo_tracker') }}
   - title: Humidor
     path: humidor
     icon: mdi:cigar
