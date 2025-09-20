@@ -16,7 +16,7 @@
 - [ ] Add monitoring and alerting capabilities
   - Goal: Implement monitoring for Home Assistant metrics and historical trends
   - Currently: No metrics or dashboards for performance, sensor, or automation tracking
-  - Future considerations: 
+  - Future considerations:
     - Native Home Assistant history/recorder for metrics storage
     - Custom dashboards and cards for visualization
     - Automations for alerts and notifications
