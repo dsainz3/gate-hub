@@ -37,8 +37,8 @@ views:
                   color: var(--primary-text-color);
                   padding:20px;
                   border-radius:18px;
-                  border:3px solid var(--primary-color);
-                  box-shadow: var(--ha-card-box-shadow, 0 10px 20px rgba(0,0,0,0.15));
+                  border: var(--huskers-scoreboard-border);
+                  box-shadow: var(--huskers-scoreboard-shadow);
                 "
               >
                 <div
@@ -66,13 +66,13 @@ views:
                         object-fit:contain;
                       "
                     >
-                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-color);">
+                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--huskers-score-color);">
                       {{ huskers_name or 'Nebraska Cornhuskers' }}
                     </p>
-                    <p style="margin:0;color: var(--secondary-text-color);">
+                    <p style="margin:0;color: var(--huskers-text-secondary);">
                       {{ state_attr('sensor.husker_team', 'team_record') or 'Record TBA' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
                       Rank {{ state_attr('sensor.husker_team', 'team_rank') or 'N/A' }}
                       |
                       {{ state_attr('sensor.husker_team', 'team_homeaway') | title if state_attr('sensor.husker_team', 'team_homeaway') else 'Venue TBA' }}
@@ -85,19 +85,19 @@ views:
                       text-align:center;
                     "
                   >
-                    <p style="margin:0;font-size:3.4rem;font-weight:800;color: var(--primary-color);line-height:1;">
+                    <p style="margin:0;font-size:3.4rem;font-weight:800;color: var(--huskers-score-color);line-height:1;">
                       {{ team_score }}
-                      <span style="color: var(--primary-color);">-</span>
+                      <span style="color: var(--huskers-score-color);">-</span>
                       {{ opponent_score }}
                     </p>
-                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color: var(--secondary-text-color);">
+                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color: var(--huskers-text-secondary);">
                       {{ phase_label if phase_label not in invalid else phase }}
                     </p>
-                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
                       {{ clock or 'Clock TBA' }} |
                       Q{{ quarter or '-' }}
                     </p>
-                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
+                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
                       Possession: {{ possession or 'Unknown' }}
                     </p>
                     <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
