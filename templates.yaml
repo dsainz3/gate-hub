@@ -236,11 +236,18 @@
 
     - name: huskers_kickoff_time_ct
       unique_id: huskers_kickoff_time_ct_tt
-      state: >
+      state: >-
         {% set iso = state_attr('sensor.husker_team','date') %}
-        {% if iso not in [None,'','unknown','unavailable'] %}
-          {{ as_datetime(iso) | as_local | strftime('%-I:%M %p CT') }}
-        {% else %}unknown{% endif %}
+        {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+          {% set ts = as_timestamp(iso) %}
+          {% if ts is not none %}
+            {{ ts | timestamp_custom('%-I:%M %p CT', True) }}
+          {% else %}
+            unknown
+          {% endif %}
+        {% else %}
+          unknown
+        {% endif %}
 
     # Keep this alias so your recorder/dashboard references to sensor.huskers_kickoff_in keep working.
     # It’s always numeric to avoid the "non-numeric 'unknown'" error.
@@ -436,52 +443,44 @@
     - name: huskers_team_timeouts
       unique_id: huskers_team_timeouts_tt
       icon: mdi:timer-outline
-      availability: "{{ has_value('sensor.husker_team') }}"
+      availability: >-
+        {% set to = state_attr('sensor.husker_team','team_timeouts') %}
+        {{ to not in [None, '', 'unknown', 'unavailable'] }}
       state: >-
         {% set to = state_attr('sensor.husker_team','team_timeouts') %}
-        {% if to in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {{ to }}
-        {% endif %}
+        {{ to | int(0) }}
 
     - name: huskers_opponent_timeouts
       unique_id: huskers_opponent_timeouts_tt
       icon: mdi:timer-sand
-      availability: "{{ has_value('sensor.husker_team') }}"
+      availability: >-
+        {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
+        {{ to not in [None, '', 'unknown', 'unavailable'] }}
       state: >-
         {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
-        {% if to in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {{ to }}
-        {% endif %}
+        {{ to | int(0) }}
 
     - name: huskers_win_probability
       unique_id: huskers_win_probability_tt
       icon: mdi:percent
       unit_of_measurement: '%'
-      availability: "{{ has_value('sensor.husker_team') }}"
+      availability: >-
+        {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
+        {{ prob not in [None, '', 'unknown', 'unavailable'] }}
       state: >-
         {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
-        {% if prob in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {{ (prob | float(0) * 100) | round(1) }}
-        {% endif %}
+        {{ (prob | float(0) * 100) | round(1) }}
 
     - name: huskers_opponent_win_probability
       unique_id: huskers_opponent_win_probability_tt
       icon: mdi:percent-outline
       unit_of_measurement: '%'
-      availability: "{{ has_value('sensor.husker_team') }}"
+      availability: >-
+        {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
+        {{ prob not in [None, '', 'unknown', 'unavailable'] }}
       state: >-
         {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
-        {% if prob in [None,'','unknown','unavailable'] %}
-          unknown
-        {% else %}
-          {{ (prob | float(0) * 100) | round(1) }}
-        {% endif %}
+        {{ (prob | float(0) * 100) | round(1) }}
 
     - name: huskers_game_phase_label
       unique_id: huskers_game_phase_label_tt
@@ -562,39 +561,36 @@
       unique_id: huskers_fight_song_verse_tt
       icon: mdi:music-circle
       availability: '{{ True }}'
-      state: |
-        There is no place like Nebraska, dear old Nebraska U!
-        Where the girls are the fairest, the boys are the squarest,
-        Of any old place that I knew.
-        There is no place like Nebraska, where they're all true blue.
-        We'll all stick together, in all kinds of weather,
-        For dear old Nebraska U!
+      state: >-
+        There is no place like Nebraska—dear old Nebraska U! We'll all stick together, in all kinds of weather, for dear old Nebraska U!
     ########################################################################
     # HUMIDOR - derived metrics
     ########################################################################
     - name: Humidor Temp Range Today
       unique_id: humidor_temp_range_today
       unit_of_measurement: '°F'
+      availability: >-
+        {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
+        {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
+        {{ max_v is number and min_v is number }}
       state: >-
         {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
         {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
-        {% if max_v is number and min_v is number %}
-          {{ (max_v - min_v) | round(1) }}
-        {% else %}
-          unknown
-        {% endif %}
+        {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
+        {{ diff | round(1) }}
 
     - name: Humidor Humidity Range Today
       unique_id: humidor_humidity_range_today
       unit_of_measurement: '%'
+      availability: >-
+        {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
+        {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
+        {{ max_v is number and min_v is number }}
       state: >-
         {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
         {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
-        {% if max_v is number and min_v is number %}
-          {{ (max_v - min_v) | round(1) }}
-        {% else %}
-          unknown
-        {% endif %}
+        {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
+        {{ diff | round(1) }}
 
     - name: Humidor Temperature Trend
       unique_id: humidor_temperature_trend
@@ -664,6 +660,9 @@
     - name: Humidor System Health
       unique_id: humidor_system_health
       unit_of_measurement: '%'
+      availability: >-
+        {% set status = states('sensor.humidor_system_status') %}
+        {{ status not in ['unknown', 'unavailable', ''] }}
       state: >-
         {% set status = states('sensor.humidor_system_status') %}
         {% if status == 'Optimal' %}
@@ -673,7 +672,7 @@
         {% elif status == 'Attention' %}
           40
         {% else %}
-          unknown
+          0
         {% endif %}
       icon: >-
         {% set status = states('sensor.humidor_system_status') %}
