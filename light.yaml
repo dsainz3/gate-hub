@@ -19,6 +19,13 @@
     - light.light_front_left
     - light.light_front_right
 - platform: group
+  name: Permanent Outdoor Lights
+  unique_id: lg_permanent_outdoor_lights
+  entities:
+    - light.light_garage_left
+    - light.light_garage_center
+    - light.light_garage_right
+- platform: group
   name: All Exterior Lights
   unique_id: lg_all_exterior_lights
   entities:
