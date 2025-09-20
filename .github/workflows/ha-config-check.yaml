@@ -47,24 +47,23 @@ jobs:
           set -euo pipefail
           cd "${{ github.workspace }}"
 
+          # Verify .ci/fakesecrets.yaml exists and is readable
+          if [ ! -f .ci/fakesecrets.yaml ] || [ ! -r .ci/fakesecrets.yaml ]; then
+            echo "Error: .ci/fakesecrets.yaml is required but missing or not readable"
+            echo "Please ensure .ci/fakesecrets.yaml exists and contains required secrets"
+            exit 1
+          fi
+
           # Ensure we start with a clean secrets file
           rm -f secrets.yaml
 
-          if [ -f .ci/fakesecrets.yaml ]; then
-            # Copy and ensure Unix line endings
-            cat .ci/fakesecrets.yaml | tr -d '\r' > secrets.yaml
-            echo "Using .ci/fakesecrets.yaml for CI (with Unix line endings)"
-          elif [ -f fakesecrets.yaml ]; then
-            cat fakesecrets.yaml | tr -d '\r' > secrets.yaml
-            echo "Using fakesecrets.yaml for CI (with Unix line endings)"
-          else
-            echo "{}" > secrets.yaml
-            echo "No fakesecrets.yaml found; using empty secrets.yaml"
-          fi
+          # Copy with Unix line endings
+          cat .ci/fakesecrets.yaml | tr -d '\r' > secrets.yaml
+          echo "Using .ci/fakesecrets.yaml for CI (with Unix line endings)"
 
-          # Verify the file exists and is readable
+          # Double-check file creation succeeded
           if [ ! -f secrets.yaml ] || [ ! -r secrets.yaml ]; then
-            echo "Error: secrets.yaml is missing or not readable"
+            echo "Error: Failed to create secrets.yaml"
             exit 1
           fi
 
