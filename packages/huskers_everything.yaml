@@ -195,13 +195,6 @@ input_number:
 # CONNECTIVITY
 ################################################################################
 
-sensor:
-  - platform: ping
-    host: 1.1.1.1
-    name: Internet Reachable Latency
-    count: 5
-    scan_interval: 60
-
 input_text:
   huskers_last_score:
     name: Huskers Last Score Text
