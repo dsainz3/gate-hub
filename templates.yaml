@@ -20,7 +20,7 @@
       unit_of_measurement: 'W/m²'
       device_class: irradiance
       state_class: measurement
-
+      icon: mdi:weather-sunny
     - name: Temperature
       unique_id: kneplatt72_temperature_fixed
       state: "{{ states('sensor.kneplatt72_temperature') }}"

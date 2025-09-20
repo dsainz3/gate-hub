@@ -13,9 +13,17 @@ homeassistant:
 
   customize:
     sensor.kneplatt72_solar_radiation:
+      friendly_name: 'Solar Radiation (Raw)'
       unit_of_measurement: 'W/m²'
       device_class: irradiance
       state_class: measurement
+      icon: mdi:weather-sunny
+    sensor.kneplatt72_solar_radiation_fixed:
+      friendly_name: 'Solar Radiation'
+      unit_of_measurement: 'W/m²'
+      device_class: irradiance
+      state_class: measurement
+      icon: mdi:weather-sunny
 
 frontend:
   themes: !include themes.yaml   # or: !include_dir_merge_named themes/
