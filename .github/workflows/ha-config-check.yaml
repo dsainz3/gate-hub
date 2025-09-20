@@ -59,18 +59,17 @@ jobs:
           fi
 
           # Create common include files if referenced but missing
-            # Ensure common monitoring secrets exist (add safe placeholders when missing)
-            for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password recorder_include_entities; do
-                recorder_include_entities)
-                  echo "recorder_include_entities: []" >> secrets.yaml
-                  ;;
-              if ! grep -E "^[[:space:]]*$key:" secrets.yaml >/dev/null 2>&1; then
           for f in automations.yaml scripts.yaml customize.yaml; do
             if grep -Rql "$f" configuration.yaml 2>/dev/null || grep -Rql "$f" . 2>/dev/null; then
-              [[ -f "$f" ]] || touch "$f"
+              if [[ ! -f "$f" ]]; then
+                echo '{}' > "$f"
+              fi
             fi
           done
 
+          # Ensure common monitoring and recorder secrets exist (add safe placeholders when missing)
+          for key in influxdb_health_endpoint grafana_health_endpoint grafana_rest_authorization influxdb_token grafana_admin_password recorder_include_entities; do
+            if ! grep -E "^[[:space:]]*$key:" secrets.yaml >/dev/null 2>&1; then
               case "$key" in
                 influxdb_health_endpoint)
                   echo "influxdb_health_endpoint: 'http://localhost:8086/health'" >> secrets.yaml
@@ -86,6 +85,9 @@ jobs:
                   ;;
                 grafana_admin_password)
                   echo "grafana_admin_password: 'replace-with-strong-password'" >> secrets.yaml
+                  ;;
+                recorder_include_entities)
+                  echo "recorder_include_entities: []" >> secrets.yaml
                   ;;
               esac
               echo "Added placeholder for $key to secrets.yaml"
