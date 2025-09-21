@@ -28,9 +28,9 @@
           target:
             entity_id:
               - light.front_porch_lights
-              - light.light_garage_left
-              - light.garage_center
-              - light.light_garage_right
+              - light.light-garage-left
+              - light.light-garage-center
+              - light.light-garage-right
           data:
             color_temp: 500
             brightness_pct: 10
@@ -70,9 +70,9 @@
           target:
             entity_id:
               - light.front_porch_lights
-              - light.light_garage_left
-              - light.garage_center
-              - light.light_garage_right
+              - light.light-garage-left
+              - light.light-garage-center
+              - light.light-garage-right
           data:
             transition: 5
         - if:
@@ -110,10 +110,10 @@
         - service: light.turn_on
           target:
             entity_id:
-              - light.front_porch_lights
-              - light.light_garage_left
-              - light.garage_center
-              - light.light_garage_right
+              - light.front-porch-lights
+              - light.light-garage-left
+              - light.light-garage-center
+              - light.light-garage-right
           data:
             color_temp: 500
             brightness_pct: 10
