@@ -13,7 +13,7 @@ real = repo / "secrets.yaml"
 
 
 def run_local_py() -> None:
-    # Runs in pre-commit's venv where 'homeassistant' is installed via additional_dependencies
+    """Run HA check using the hook's Python venv (Linux/macOS)."""
     cmd = [
         sys.executable,
         "-m",
@@ -32,13 +32,15 @@ def run_local_py() -> None:
 
 
 def run_via_docker() -> None:
-    # Requires Docker Desktop on Windows; daemon must be running and drive shared.
+    """Run HA check inside the official HA container (Windows-friendly)."""
+    # Use POSIX path for Docker bind mount on Windows.
+    mount = repo.as_posix()
     cmd = [
         "docker",
         "run",
         "--rm",
         "-v",
-        f"{repo}:/workdir",
+        f"{mount}:/workdir",
         "-w",
         "/workdir",
         "ghcr.io/home-assistant/home-assistant:stable",
@@ -59,7 +61,7 @@ def run_via_docker() -> None:
 
 
 def run_via_wsl() -> None:
-    # Fallback if Docker not available. Assumes HA is installed in default WSL distro.
+    """Fallback: run HA check via WSL if Docker isn't available."""
     wsl_repo = subprocess.check_output(
         ["wsl", "wslpath", "-a", str(repo)], text=True
     ).strip()
@@ -89,14 +91,14 @@ try:
         if which("docker"):
             run_via_docker()
         elif which("wsl"):
-            # sanity check: is HA available in WSL?
+            # Sanity-check: is HA importable in the default WSL distro?
             try:
                 subprocess.check_call(
                     [
                         "wsl",
                         "python3",
                         "-c",
-                        "import homeassistant as _; print(_. __version__)",
+                        "import homeassistant as _; print(_.__version__)",
                     ],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
