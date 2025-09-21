@@ -395,7 +395,7 @@ views:
         entities:
           - entity: sensor.openweathermap_temperature
             name: Temperature
-          - entity: sensor.openweathermap_feels_like
+          - entity: sensor.openweathermap_feels_like_temperature
             name: Feels Like
           - entity: sensor.openweathermap_humidity
             name: Humidity
@@ -403,9 +403,9 @@ views:
             name: Dew Point
           - entity: sensor.openweathermap_pressure
             name: Pressure
-          - entity: sensor.openweathermap_clouds
+          - entity: sensor.openweathermap_cloud_coverage
             name: Cloud Cover
-          - entity: sensor.openweathermap_uvi
+          - entity: sensor.openweathermap_uv_index
             name: UV Index
           - entity: sensor.openweathermap_visibility
             name: Visibility
@@ -415,7 +415,7 @@ views:
             name: Wind Gust
           - entity: sensor.openweathermap_wind_bearing
             name: Wind Direction
-          - entity: sensor.openweathermap_precipitation
+          - entity: sensor.openweathermap_rain
             name: Precipitation (1h)
 
       # Trend charts (24h)
@@ -428,7 +428,7 @@ views:
         entities:
           - entity: sensor.openweathermap_temperature
             name: Temperature
-          - entity: sensor.openweathermap_feels_like
+          - entity: sensor.openweathermap_feels_like_temperature
             name: Feels Like
 
       - type: statistics-graph
@@ -453,5 +453,5 @@ views:
         entities:
           - entity: sensor.openweathermap_humidity
             name: Humidity
-          - entity: sensor.openweathermap_clouds
+          - entity: sensor.openweathermap_cloud_coverage
             name: Cloud Cover
