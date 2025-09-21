@@ -65,4 +65,4 @@ govee_learning.yaml
 make_fake_secrets.py
 
 /.entities/
-# custom_components/zigbee2mqtt/
+custom_components/zigbee2mqtt/
