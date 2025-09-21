@@ -67,3 +67,20 @@ devices:
     friendly_name: Sensor-office
   '0x282c02bfffeff7c5':
     friendly_name: Plug-bedroom-burner
+  '0x1c784ba10cbf0000':
+    friendly_name: light-garage-left
+  '0xc890a81ee8610000':
+    friendly_name: Light-garage-center
+  '0xc890a81ee1de0000':
+    friendly_name: Light-garage-right
+  '0x1c784ba0ecf80000':
+    friendly_name: Light-spare
+groups:
+  '1':
+    friendly_name: '1'
+  '2':
+    friendly_name: '2'
+  '3':
+    friendly_name: '3'
+  '4':
+    friendly_name: '4'
