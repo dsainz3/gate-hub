@@ -26,7 +26,7 @@ homeassistant:
       icon: mdi:weather-sunny
 
 frontend:
-  themes: !include themes.yaml   # or: !include_dir_merge_named themes/
+  themes: !include themes.yaml # or: !include_dir_merge_named themes/
 
 automation: !include automations.yaml
 scene: !include scenes.yaml
@@ -82,7 +82,7 @@ lovelace:
       show_in_sidebar: true
       filename: dashboards/huskers-teamtracker.yaml
 
-    weather-dashboard:              # must contain a hyphen
+    weather-dashboard: # must contain a hyphen
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
       title: Weather Package

@@ -2,7 +2,13 @@ minimum_pre_commit_version: '3.7.1'
 default_language_version:
   python: python3.11
 
-exclude: ^backup/
+exclude: |
+  (?x)^(
+    backup/|
+    custom_components/|
+    www/
+  )
+
 repos:
   # YAML formatting (fast) — keep
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -13,19 +19,6 @@ repos:
         files: '\.(ya?ml)$'
         args: [--write, --parser=yaml]
         additional_dependencies: [prettier@3.3.3]
-        exclude: |
-          (?x)(
-            ^configuration\.ya?ml$|
-            ^homeassistant/packages/[^/]+\.ya?ml$|
-            ^ui-lovelace/[^/]+\.ya?ml$|
-            ^ui-lovelace/resources\.ya?ml$|
-            ^lovelace/.*\.ya?ml$|
-            ^blueprints/.*\.ya?ml$|
-            ^custom_components/.*\.ya?ml$|
-            ^zigbee2mqtt/.*\.ya?ml$|
-            ^themes/.*\.ya?ml$|
-            ^node_modules/.*\.ya?ml$
-          )
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -36,17 +29,6 @@ repos:
       - id: trailing-whitespace
       - id: check-yaml
         args: ['--unsafe', '-m']
-        exclude: |
-          (?x)(
-            ^configuration\.ya?ml$|
-            ^homeassistant/packages/.*\.ya?ml$|
-            ^ui-lovelace/[^/]+\.ya?ml$|
-            ^ui-lovelace/resources\.ya?ml$|
-            ^lovelace/.*\.ya?ml$|
-            ^blueprints/.*\.ya?ml$|
-            ^custom_components/.*/services\.ya?ml$|
-            ^zigbee2mqtt/.*\.ya?ml$
-          )
 
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
@@ -60,13 +42,13 @@ repos:
     hooks:
       - id: ruff
         name: ruff (lint & fix)
-        args: ['--fix', '--exit-non-zero-on-fix'] # auto-fix locally; fail if edits
+        args: ['--fix', '--exit-non-zero-on-fix']
         types_or: [python]
       - id: ruff-format
         name: ruff-format
         types_or: [python]
 
-  # Home Assistant config check using Python
+  # Home Assistant config check using Python (your Python/WSL/Docker wrapper)
   - repo: local
     hooks:
       - id: hass-config-check
