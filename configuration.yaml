@@ -68,13 +68,6 @@ logger:
 
 lovelace:
   dashboards:
-    huskers-gameday:
-      mode: yaml
-      title: Huskers Game Day
-      icon: mdi:football-helmet
-      show_in_sidebar: true
-      filename: dashboards/huskers-all.yaml
-
     huskers-teamtracker:
       mode: yaml
       title: Huskers Team Tracker
