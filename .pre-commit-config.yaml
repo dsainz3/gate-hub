@@ -71,7 +71,7 @@ repos:
     hooks:
       - id: hass-config-check
         name: Home Assistant config check (Python)
-        entry: bash -c "cp .ci/fakesecrets.yaml secrets.yaml && hass --script check_config --config . --info all --files --secrets secrets.yaml && rm secrets.yaml"
         language: python
         additional_dependencies: ['homeassistant']
+        entry: python .ci/run_hass_check.py
         pass_filenames: false
