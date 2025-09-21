@@ -277,3 +277,181 @@ views:
         entities:
           - entity: group.weather_dashboard_all
             name: Expand all weather helpers
+  # Append these two views to your existing weather dashboard file
+  # (e.g., dashboards/weather.yaml or ui-lovelace.yaml)
+  # If your dashboard is split into multiple files with !include, add under the correct file.
+  # Two new views ready to paste into your Weather dashboard
+  # PWS (Live) + OpenWeather (sensors)
+  # --- VIEW 1: Personal Weather Station (PWS) ---
+  - title: PWS (Live)
+    path: weather-pws
+    icon: mdi:weather-partly-rainy
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Personal Weather Station — Live
+              Source: PWS sensors at KnePlatt72.
+          # Gauges
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                name: Temp (°F)
+                entity: sensor.outdoor_temperature_wx
+                min: -10
+                max: 110
+                needle: true
+                severity:
+                  green: 68
+                  yellow: 80
+                  red: 92
+              - type: gauge
+                name: Humidity (%)
+                entity: sensor.outdoor_humidity_wx
+                min: 0
+                max: 100
+                needle: true
+                severity:
+                  green: 30
+                  yellow: 60
+                  red: 85
+              - type: gauge
+                name: Wind (mph)
+                entity: sensor.outdoor_wind_speed_wx
+                min: 0
+                max: 40
+                needle: true
+                severity:
+                  green: 0
+                  yellow: 15
+                  red: 25
+          # Details
+          - type: entities
+            title: PWS Details
+            show_header_toggle: false
+            entities:
+              - entity: sensor.outdoor_dew_point_approx
+                name: Dew Point
+              - entity: sensor.outdoor_feels_like
+                name: Feels Like
+              - entity: sensor.wind_gust
+                name: Wind Gust
+              - entity: sensor.outdoor_pressure_wx
+                name: Sea-level Pressure (inHg)
+              - entity: sensor.wx_pressure_rate_1h
+                name: Pressure Rate 1h (inHg/h)
+              - entity: sensor.wx_pressure_change_3h
+                name: Pressure Change 3h (inHg)
+              - entity: binary_sensor.wx_storm_watch_pressure
+                name: Storm Watch (pressure)
+              - entity: binary_sensor.wx_storm_warning_pressure
+                name: Storm Warning (pressure)
+          # 24h charts
+          - type: statistics-graph
+            title: Temperature & Dew Point — last 24h
+            days_to_show: 1
+            stat_types:
+              - mean
+            chart_type: line
+            entities:
+              - entity: sensor.outdoor_temperature_wx
+                name: Temperature
+              - entity: sensor.outdoor_dew_point_approx
+                name: Dew Point
+          - type: statistics-graph
+            title: Wind — last 24h
+            days_to_show: 1
+            stat_types:
+              - mean
+              - max
+            chart_type: line
+            entities:
+              - entity: sensor.outdoor_wind_speed_wx
+                name: Wind Speed
+              - entity: sensor.wind_gust
+                name: Wind Gust
+
+  # --- VIEW 2: OpenWeather (API sensors) ---
+  - title: OpenWeather
+    path: weather-openweather
+    icon: mdi:weather-cloudy-clock
+    cards:
+      - type: markdown
+        content: |
+          ## OpenWeather — One Call / Forecast & Sensors
+          Uses your `sensor.openweathermap_*` entities and forecast entity.
+
+      # Forecast card (keep if this points at OpenWeather for you)
+      - type: weather-forecast
+        entity: weather.kneplatt72
+        show_current: true
+        show_forecast: true
+
+      # Current conditions from OpenWeather sensors
+      - type: entities
+        title: OpenWeather — Now
+        show_header_toggle: false
+        entities:
+          - entity: sensor.openweathermap_temperature
+            name: Temperature
+          - entity: sensor.openweathermap_feels_like
+            name: Feels Like
+          - entity: sensor.openweathermap_humidity
+            name: Humidity
+          - entity: sensor.openweathermap_dew_point
+            name: Dew Point
+          - entity: sensor.openweathermap_pressure
+            name: Pressure
+          - entity: sensor.openweathermap_clouds
+            name: Cloud Cover
+          - entity: sensor.openweathermap_uvi
+            name: UV Index
+          - entity: sensor.openweathermap_visibility
+            name: Visibility
+          - entity: sensor.openweathermap_wind_speed
+            name: Wind Speed
+          - entity: sensor.openweathermap_wind_gust
+            name: Wind Gust
+          - entity: sensor.openweathermap_wind_bearing
+            name: Wind Direction
+          - entity: sensor.openweathermap_precipitation
+            name: Precipitation (1h)
+
+      # Trend charts (24h)
+      - type: statistics-graph
+        title: OpenWeather — Temperature last 24h
+        days_to_show: 1
+        stat_types:
+          - mean
+        chart_type: line
+        entities:
+          - entity: sensor.openweathermap_temperature
+            name: Temperature
+          - entity: sensor.openweathermap_feels_like
+            name: Feels Like
+
+      - type: statistics-graph
+        title: OpenWeather — Wind last 24h
+        days_to_show: 1
+        stat_types:
+          - mean
+          - max
+        chart_type: line
+        entities:
+          - entity: sensor.openweathermap_wind_speed
+            name: Wind Speed
+          - entity: sensor.openweathermap_wind_gust
+            name: Wind Gust
+
+      - type: statistics-graph
+        title: OpenWeather — Humidity/Clouds last 24h
+        days_to_show: 1
+        stat_types:
+          - mean
+        chart_type: line
+        entities:
+          - entity: sensor.openweathermap_humidity
+            name: Humidity
+          - entity: sensor.openweathermap_clouds
+            name: Cloud Cover
