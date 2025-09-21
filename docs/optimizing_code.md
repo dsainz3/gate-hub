@@ -14,7 +14,7 @@ It is designed to serve as a **living document** in your repo (`HA_Optimization_
 - **Version control** – proper Git workflow with CI/CD.
 
 ### Code Quality
-- **Pre-commit hooks** – `yamllint`, `prettier`, `black`, `flake8`.
+- **Pre-commit hooks** – `ruff`, `prettier`, `yamllint`, plus helpers for whitespace and HA config checks.
 - **CI pipeline** – YAML config validation + pre-commit.
 - **Custom components** – documented integrations (BLE monitor, Govee, etc.).
 
@@ -58,53 +58,11 @@ Each PR will be small, focused, and deleted after merge.
 
 ## 🤖 GitHub CI/CD Plan
 
-### Updated Workflow (`.github/workflows/ci.yml`)
-Poetry is used for dependency management:
-
-```yaml
-name: Home Assistant CI
-
-on:
-  pull_request:
-    branches: [ main ]
-    paths:
-      - "**/*.yaml"
-      - "**/*.yml"
-      - ".pre-commit-config.yaml"
-      - "pyproject.toml"
-      - "poetry.lock"
-  push:
-    branches: [ main ]
-
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install Poetry
-        run: pipx install poetry
-      - name: Configure Poetry
-        run: poetry config virtualenvs.create false
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
-      - name: Run pre-commit
-        run: poetry run pre-commit run --all-files
-
-  ha-config-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Create secrets stub
-        run: cp secrets.example.yaml secrets.yaml || true
-      - name: YAML lint
-        run: poetry run yamllint -s .
-      - name: HA config check
-        run: |
-          docker run --rm -v "$PWD":/config ghcr.io/home-assistant/home-assistant:stable \
-            python -m homeassistant --script check_config --config /config
+### Current Workflows
+- **`.github/workflows/ci.yml`** runs two jobs:
+  - **`ruff`** installs Python 3.11 with pip caching enabled, restores a dedicated Ruff cache, installs Ruff via pip, and runs both `ruff check` and `ruff format --check` against the repository.
+  - **`precommit`** also uses Python 3.11 with pip caching and a pre-commit cache, installs `pre-commit`, skips Ruff hooks (handled earlier), and executes the remaining hooks for YAML formatting, whitespace hygiene, and the Home Assistant config check wrapper.
+- **`.github/workflows/ha-config-check.yaml`** focuses on validating the Home Assistant configuration: it checks out the repository, sets up Python 3.11 with pip caching, installs `homeassistant` and `pytest`, prepares a temporary `secrets.yaml` from `.ci/fakesecrets.yaml`, runs `hass --script check_config`, optionally executes pytest-based integration checks, uploads log artifacts, and cleans up generated files.
 🛠 Diff-Ready Patches
 Below are minimal diffs to apply per branch.
 
@@ -195,20 +153,9 @@ Edit
 +      data:
 +        title: "Backup Completed"
 +        message: "Daily backup completed successfully."
-P2 – Example Secrets
-diff
-Copy
-Edit
---- /dev/null
-+++ b/secrets.example.yaml
-@@
-+db_url: "postgresql://ha_user:ha_pass@192.168.1.10/homeassistant"
-+weather_api_key: "replace_me"
-+govee_api_key: "replace_me"
-+teamtracker_api_key: "replace_me"
-+mqtt_username: "mqtt_user"
-+mqtt_password: "replace_me"
-+mqtt_broker: "192.168.1.11"
+P2 – Secrets Hygiene
+- Keep `.ci/fakesecrets.yaml` aligned with the keys required by CI and local development.
+- Store real secrets only in `secrets.yaml` on your Home Assistant host; avoid adding template files to version control.
 P3 – Zigbee2MQTT Advanced
 diff
 Copy
@@ -225,59 +172,12 @@ Edit
 +  debounce: 0.5
 +  cache_state: true
 +  availability_timeout: 60
-P3 – Templates Split
-diff
-Copy
-Edit
---- a/configuration.yaml
-+++ b/configuration.yaml
-@@
-+template: !include_dir_merge_list templates/
-File: templates/huskers.yaml
-
-yaml
-Copy
-Edit
-template:
-  - trigger:
-      - platform: state
-        entity_id: sensor.huskers_next_game
-    sensor:
-      - name: "Huskers Game Countdown (hrs)"
-        unit_of_measurement: "hours"
-        state: >
-          {% set gt = as_timestamp(states('sensor.huskers_next_game')) %}
-          {% set nt = as_timestamp(now()) %}
-          {% if gt and gt > nt %}
-            {{ ((gt - nt) / 3600) | round(1) }}
-          {% else %}0{% endif %}
+P3 – Template Organization
+- Review `templates.yaml` and determine whether high-traffic sensors (e.g., Huskers game countdown) should move into dedicated include files.
+- If you adopt `!include_dir_merge_list` patterns, create the backing directories as part of the same change so CI and runtime both load the templates correctly.
 P4 – Performance Dashboard
-File: ui-lovelace/views/40_system_performance.yaml
-
-yaml
-Copy
-Edit
-title: System Performance
-icon: mdi:chip
-type: masonry
-cards:
-  - type: gauge
-    name: CPU
-    entity: sensor.processor_use
-    min: 0
-    max: 100
-    severity: { green: 0, yellow: 60, red: 80 }
-  - type: history-graph
-    hours_to_show: 24
-    entities:
-      - sensor.memory_use_percent
-      - sensor.processor_use
-  - type: entities
-    title: Uptime & Disk
-    entities:
-      - sensor.uptime
-      - sensor.disk_use_percent
-      - sensor.last_boot
+- Add a dedicated "System Performance" view under `ui-lovelace/` (create the file if it does not exist) highlighting CPU, memory, uptime, and disk usage from the sensors added in P1.
+- Combine gauges, history graphs, and entity cards to track trends and expose key metrics at a glance.
 P4 – Huskers Fade Script
 diff
 Copy
