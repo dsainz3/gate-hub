@@ -1,0 +1,11 @@
+[
+  {
+    "device_id": "example-device-123",
+    "name": "Front Yard Controller",
+    "timezone": "America/New_York",
+    "location": {
+      "city": "Exampleville",
+      "state": "NY"
+    }
+  }
+]

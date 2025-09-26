@@ -66,3 +66,9 @@ make_fake_secrets.py
 
 /.entities/
 # custom_components/zigbee2mqtt/
+custom_components/zigbee2mqtt/state.json
+custom_components/zigbee2mqtt/coordinator_backup.json
+custom_components/bhyve/pybhyve/devices.json
+custom_components/zigbee2mqtt/state.local.json
+custom_components/bhyve/pybhyve/devices.local.json
+custom_components/zigbee2mqtt/coordinator_backup.local.json
