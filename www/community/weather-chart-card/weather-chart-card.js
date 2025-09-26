@@ -68,7 +68,7 @@ const locale = {
     'sunny': 'Jasno',
     'windy': 'Veterno',
     'windy-variant': 'Veterno'
-  },  
+  },
   de: {
     'tempHi': 'Temperatur',
     'tempLo': 'Nachttemperatur',
@@ -934,7 +934,7 @@ class WeatherChartCardEditor extends s {
       this.hass.states[config.entity].attributes &&
       this.hass.states[config.entity].attributes.description !== undefined
     ) || config.description !== undefined;
-    this.fetchEntities();	  
+    this.fetchEntities();
     this.requestUpdate();
   }
 
@@ -17834,8 +17834,8 @@ static getStubConfig(hass, unusedEntities, allEntities) {
       condition_icons: true,
       round_temp: false,
       type: 'daily',
-      number_of_forecasts: '0', 
-      disable_animation: false, 
+      number_of_forecasts: '0',
+      disable_animation: false,
     },
   };
 }
@@ -18414,7 +18414,7 @@ drawChart({ config, language, weather, forecastItems } = this) {
               callback: function (value, index, values) {
                   var datetime = this.getLabelForValue(value);
                   var dateObj = new Date(datetime);
-        
+
                   var timeFormatOptions = {
                       hour12: config.use_12hour_format,
                       hour: 'numeric',

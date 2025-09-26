@@ -60,8 +60,9 @@ def run_via_docker() -> None:
 
 def run_via_wsl() -> None:
     # Fallback if Docker not available. Assumes HA is installed in default WSL distro.
+    repo_windows = str(repo).replace("\\", "\\\\")
     wsl_repo = subprocess.check_output(
-        ["wsl", "wslpath", "-a", str(repo)], text=True
+        ["wsl", "wslpath", "-a", repo_windows], text=True
     ).strip()
     cmd = [
         "wsl",
@@ -96,7 +97,7 @@ try:
                         "wsl",
                         "python3",
                         "-c",
-                        "import homeassistant as _; print(_. __version__)",
+                        "import importlib; importlib.import_module('homeassistant')",
                     ],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,

@@ -33,7 +33,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.programs: list[Any] | None = None
         self._reauth_username: str | None = None
 
-    async def async_auth(self, user_input: dict[str, str]) -> dict[str, str] | None:
+    async def async_auth(
+        self, user_input: dict[str, str]
+    ) -> dict[str, str] | None:
         """Reusable Auth Helper."""
         self.client = BHyveClient(
             user_input[CONF_USERNAME],
@@ -45,10 +47,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             result = await self.client.login()
             if result is False:
                 return {"base": "invalid_auth"}
-            return None  # noqa: TRY300
+            return None
         except AuthenticationError:
             return {"base": "invalid_auth"}
-        except Exception:  # pylint: disable=broad-except  # noqa: BLE001
+        except Exception:  # pylint: disable=broad-except
             return {"base": "cannot_connect"}
 
     async def async_step_user(
@@ -57,7 +59,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors: dict[str, str] | None = None
 
-        if user_input is not None and not (errors := await self.async_auth(user_input)):
+        if user_input is not None and not (
+            errors := await self.async_auth(user_input)
+        ):
             await self.async_set_unique_id(user_input[CONF_USERNAME].lower())
             self._abort_if_unique_id_configured()
 
@@ -84,7 +88,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the optional device selection step."""
         if user_input is not None:
             return self.async_create_entry(
-                title=self.data[CONF_USERNAME], data=self.data, options=user_input
+                title=self.data[CONF_USERNAME],
+                data=self.data,
+                options=user_input,
             )
 
         device_options = {
@@ -112,14 +118,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input and user_input.get(CONF_USERNAME):
             self._reauth_username = user_input[CONF_USERNAME]
 
-        elif self._reauth_username and user_input and user_input.get(CONF_PASSWORD):
+        elif (
+            self._reauth_username
+            and user_input
+            and user_input.get(CONF_PASSWORD)
+        ):
             data = {
                 CONF_USERNAME: self._reauth_username,
                 CONF_PASSWORD: user_input[CONF_PASSWORD],
             }
 
             if not (errors := await self.async_auth(data)):
-                entry = await self.async_set_unique_id(self._reauth_username.lower())
+                entry = await self.async_set_unique_id(
+                    self._reauth_username.lower()
+                )
                 if entry:
                     self.hass.config_entries.async_update_entry(
                         entry,
@@ -127,7 +139,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     )
                     await self.hass.config_entries.async_reload(entry.entry_id)
                     return self.async_abort(reason="reauth_successful")
-                return self.async_create_entry(title=self._reauth_username, data=data)
+                return self.async_create_entry(
+                    title=self._reauth_username, data=data
+                )
 
         return self.async_show_form(
             step_id="reauth",
@@ -160,9 +174,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.devices = await self.client.devices  # type: ignore[union-attr]
             self.programs = await self.client.timer_programs  # type: ignore[union-attr]
 
-            devices = [str(d["id"]) for d in self.devices if d["type"] != DEVICE_BRIDGE]
+            devices = [
+                str(d["id"])
+                for d in self.devices
+                if d["type"] != DEVICE_BRIDGE
+            ]
 
-            return await self.async_step_device(user_input={CONF_DEVICES: devices})
+            return await self.async_step_device(
+                user_input={CONF_DEVICES: devices}
+            )
 
         return self.async_abort(reason="cannot_connect")
 

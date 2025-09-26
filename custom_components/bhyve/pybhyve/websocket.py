@@ -86,11 +86,15 @@ class OrbitWebsocket:
             self.state = STATE_STARTING
         self._loop.create_task(self.running())
 
-    async def running(self) -> None:  # noqa: PLR0912
+    async def running(self) -> None:
         """Start websocket connection."""
         background_tasks = set()
         try:
-            if self._ws is None or self._ws.closed or self.state != STATE_RUNNING:
+            if (
+                self._ws is None
+                or self._ws.closed
+                or self.state != STATE_RUNNING
+            ):
                 async with self._session.ws_connect(self._url) as self._ws:
                     _LOGGER.info("Authenticating websocket")
                     await self._ws.send_str(
@@ -110,12 +114,14 @@ class OrbitWebsocket:
 
                     while True:
                         if self.state == STATE_STOPPED:
-                            _LOGGER.warning("Websocket is stopped, exiting loop")
+                            _LOGGER.warning(
+                                "Websocket is stopped, exiting loop"
+                            )
                             break
 
                         msg = await self._ws.receive()
                         self._reset_heartbeat()
-                        _LOGGER.debug(f"msg received {msg!s}")  # noqa: G004
+                        _LOGGER.debug(f"msg received {msg!s}")
 
                         if msg.type == WSMsgType.TEXT:
                             task = ensure_future(
@@ -130,7 +136,9 @@ class OrbitWebsocket:
                             await self._ws.pong()
 
                         elif msg.type == WSMsgType.CLOSE:
-                            _LOGGER.debug("Websocket received CLOSE message, ignoring")
+                            _LOGGER.debug(
+                                "Websocket received CLOSE message, ignoring"
+                            )
                             break
 
                         elif msg.type == WSMsgType.CLOSED:
@@ -139,7 +147,8 @@ class OrbitWebsocket:
 
                         elif msg.type == WSMsgType.ERROR:
                             _LOGGER.error(
-                                "websocket error: %s", self._ws.exception() or "Unknown"
+                                "websocket error: %s",
+                                self._ws.exception() or "Unknown",
                             )
                             break
 
@@ -149,18 +158,19 @@ class OrbitWebsocket:
 
                     if self._ws.exception():
                         _LOGGER.warning(
-                            "Websocket exception: %s", self._ws.exception() or "Unknown"
+                            "Websocket exception: %s",
+                            self._ws.exception() or "Unknown",
                         )
                         self.state = STATE_STOPPED
 
         except aiohttp.ClientConnectorError:
-            _LOGGER.error("Client connection error; state: %s", self.state)  # noqa: TRY400
+            _LOGGER.error("Client connection error; state: %s", self.state)
             self.state = STATE_STOPPED
             self.retry()
 
         # pylint: disable=broad-except
-        except Exception as err:  # noqa: BLE001
-            _LOGGER.error("Unexpected error %s", err)  # noqa: TRY400
+        except Exception as err:
+            _LOGGER.error("Unexpected error %s", err)
             self.state = STATE_STOPPED
             self.retry()
 
@@ -170,7 +180,9 @@ class OrbitWebsocket:
 
     async def stop(self) -> None:
         """Close websocket connection."""
-        _LOGGER.info("Closing websocket connection; state: %s --> STOPPED", self.state)
+        _LOGGER.info(
+            "Closing websocket connection; state: %s --> STOPPED", self.state
+        )
         self.state = STATE_STOPPED
         if self._ws is not None:
             await self._ws.close()
@@ -179,7 +191,9 @@ class OrbitWebsocket:
         """Retry to connect to Orbit."""
         if self.state != STATE_STARTING:
             _LOGGER.info(
-                "Reconnecting to Orbit in %i; state: %s", RECONNECT_DELAY, self.state
+                "Reconnecting to Orbit in %i; state: %s",
+                RECONNECT_DELAY,
+                self.state,
             )
             self.state = STATE_STARTING
             self._loop.call_later(RECONNECT_DELAY, self.start)
@@ -192,5 +206,6 @@ class OrbitWebsocket:
             await self._ws.send_str(json.dumps(payload))
         else:
             _LOGGER.warning(
-                "Tried to send message whilst websocket closed; state: %s", self.state
+                "Tried to send message whilst websocket closed; state: %s",
+                self.state,
             )

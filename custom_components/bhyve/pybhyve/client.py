@@ -29,7 +29,9 @@ _LOGGER = logging.getLogger(__name__)
 class BHyveClient:
     """Define the API object."""
 
-    def __init__(self, username: str, password: str, session: ClientSession) -> None:
+    def __init__(
+        self, username: str, password: str, session: ClientSession
+    ) -> None:
         """Initialize."""
         self._username: str = username
         self._password: str = password
@@ -99,7 +101,9 @@ class BHyveClient:
 
         self._last_poll_devices = now
 
-    async def _refresh_timer_programs(self, *, force_update: bool = False) -> None:
+    async def _refresh_timer_programs(
+        self, *, force_update: bool = False
+    ) -> None:
         now = time.time()
         if force_update:
             _LOGGER.debug("Forcing device refresh")
@@ -151,14 +155,18 @@ class BHyveClient:
 
         self._last_poll_landscapes = now
 
-    async def _async_ws_handler(self, async_callback: Callable, data: Any) -> None:
+    async def _async_ws_handler(
+        self, async_callback: Callable, data: Any
+    ) -> None:
         """Process incoming websocket message."""
         ensure_future(async_callback(data))  # noqa: RUF006
 
     async def login(self) -> bool:
         """Log in with username & password and save the token."""
         url: str = f"{API_HOST}{LOGIN_PATH}"
-        json = {"session": {"email": self._username, "password": self._password}}
+        json = {
+            "session": {"email": self._username, "password": self._password}
+        }
 
         async with self._session.request("post", url, json=json) as resp:
             try:
@@ -168,7 +176,7 @@ class BHyveClient:
                 self._token = response["orbit_session_token"]
 
             except ClientResponseError as response_err:
-                if response_err.status == 400:  # noqa: PLR2004
+                if response_err.status == 400:
                     raise AuthenticationError from response_err
                 raise RequestError from response_err
             except Exception as err:
@@ -177,7 +185,9 @@ class BHyveClient:
 
         return self._token is not None
 
-    def listen(self, loop: AbstractEventLoop, async_callback: Callable) -> None:
+    def listen(
+        self, loop: AbstractEventLoop, async_callback: Callable
+    ) -> None:
         """Start listening to the Orbit event stream."""
         if self._token is None:
             msg = "Client is not logged in"
@@ -192,7 +202,7 @@ class BHyveClient:
         )
         self._websocket.start()
 
-    async def stop(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003, ARG002
+    async def stop(self, *args, **kwargs) -> None:
         """Stop the websocket."""
         if self._websocket is not None:
             await self._websocket.stop()
@@ -223,7 +233,9 @@ class BHyveClient:
         self, device_id: str, *, force_update: bool = False
     ) -> dict | None:
         """Get device watering history by id."""
-        await self._refresh_device_history(device_id, force_update=force_update)
+        await self._refresh_device_history(
+            device_id, force_update=force_update
+        )
         return self._device_histories.get(device_id)
 
     async def get_landscape(
@@ -243,7 +255,9 @@ class BHyveClient:
         json = {"landscape_description": landscape}
         await self._request("put", path, json=json)
 
-    async def update_program(self, program_id: str, program: BHyveTimerProgram) -> None:
+    async def update_program(
+        self, program_id: str, program: BHyveTimerProgram
+    ) -> None:
         """Update the state of a program."""
         path = f"{TIMER_PROGRAMS_PATH}/{program_id}"
         json = {"sprinkler_timer_program": program}

@@ -1,3 +1,3 @@
 """Define module exports."""
 
-from .client import BHyveClient  # noqa: F401
+from .client import BHyveClient

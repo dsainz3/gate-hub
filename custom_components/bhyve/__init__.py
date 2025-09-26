@@ -57,7 +57,11 @@ CONFIG_SCHEMA: vol.Schema = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.SWITCH]
+PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
+    Platform.SENSOR,
+    Platform.SWITCH,
+]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -96,7 +100,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         if program_id is not None:
             async_dispatcher_send(
-                hass, SIGNAL_UPDATE_PROGRAM.format(program_id), program_id, data
+                hass,
+                SIGNAL_UPDATE_PROGRAM.format(program_id),
+                program_id,
+                data,
             )
 
     client = BHyveClient(
@@ -142,7 +149,9 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+    if unload_ok := await hass.config_entries.async_unload_platforms(
+        entry, PLATFORMS
+    ):
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
@@ -289,9 +298,13 @@ class BHyveDeviceEntity(BHyveWebsocketEntity):
             self._setup(device)
 
         except BHyveError as err:
-            _LOGGER.warning("Unable to retreive data for %s: %s", self.name, err)
+            _LOGGER.warning(
+                "Unable to retreive data for %s: %s", self.name, err
+            )
 
-    async def _fetch_device_history(self, *, force_update: bool = False) -> dict | None:
+    async def _fetch_device_history(
+        self, *, force_update: bool = False
+    ) -> dict | None:
         return await self._bhyve.get_device_history(
             self._device_id, force_update=force_update
         )
@@ -311,11 +324,14 @@ class BHyveDeviceEntity(BHyveWebsocketEntity):
             event = data.get("event", "")
             if event == "device_disconnected":
                 _LOGGER.warning(
-                    "Device %s disconnected and is no longer available", self.name
+                    "Device %s disconnected and is no longer available",
+                    self.name,
                 )
                 self._available = False
             elif event == "device_connected":
-                _LOGGER.info("Device %s reconnected and is now available", self.name)
+                _LOGGER.info(
+                    "Device %s reconnected and is now available", self.name
+                )
                 self._available = True
             if self._should_handle_event(event, data):
                 _LOGGER.info(
@@ -325,7 +341,7 @@ class BHyveDeviceEntity(BHyveWebsocketEntity):
                     str(data),
                 )
                 self._ws_unprocessed_events.append(data)
-                self.async_schedule_update_ha_state(True)  # noqa: FBT003
+                self.async_schedule_update_ha_state(True)
 
         self._async_unsub_dispatcher_connect = async_dispatcher_connect(
             self.hass, SIGNAL_UPDATE_DEVICE.format(self._device_id), update
@@ -372,5 +388,7 @@ class BHyveDeviceEntity(BHyveWebsocketEntity):
             await self._bhyve.send_message(payload)
 
         except BHyveError as err:
-            _LOGGER.warning("Failed to send to BHyve websocket message %s", err)
+            _LOGGER.warning(
+                "Failed to send to BHyve websocket message %s", err
+            )
             raise BHyveError(err) from err
