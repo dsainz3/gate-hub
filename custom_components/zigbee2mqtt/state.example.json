@@ -1,0 +1,12 @@
+{
+  "sample_light": {
+    "state": "ON",
+    "color_mode": "xy",
+    "color": { "x": 0.49, "y": 0.41 },
+    "brightness": 200
+  },
+  "sample_sensor": {
+    "state": "23.5",
+    "unit_of_measurement": "degC"
+  }
+}

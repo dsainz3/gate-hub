@@ -66,6 +66,27 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 2. Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
 3. Review `Fix-HAConfig.ps1` for optional one-time normalisation tasks.
 
+### Runtime data and local copies
+
+The repository keeps redacted JSON examples for Zigbee2MQTT and bhyve while the live files stay on your development machine. Copy an example to a personal variant and keep the real snapshot untracked:
+
+```bash
+cp custom_components/zigbee2mqtt/state.example.json custom_components/zigbee2mqtt/state.local.json
+cp custom_components/bhyve/pybhyve/devices.example.json custom_components/bhyve/pybhyve/devices.local.json
+```
+
+- `state.example.json` and `coordinator_backup.example.json` document the expected shape without leaking device data.
+- Add your own `state.local.json` or `devices.local.json`; Git ignores the local variants and runtime outputs such as `state.json` so HAOS deployments are never clobbered.
+- The live files can remain side-by-side on your workstation for reference, but they will not be pushed to Home Assistant.
+
+Need a dump of entity ids without staging `state.json`? Use the helper script:
+
+```bash
+poetry run python scripts/export_entities.py --token-file ~/.ha_token
+```
+
+By default the script writes `docs/entities.md`; override the path with `--output` when required.
+
 ### Local tooling
 
 ```bash
@@ -116,7 +137,9 @@ Each dashboard is defined under `dashboards/` and registered in `configuration.y
 - `ruff` handles Python linting and formatting (both locally and in CI).
 - `prettier`, `yamllint`, and `pre-commit-hooks` keep YAML and markdown tidy.
 - `scripts/ha_check_portable.py` optionally runs within GitHub Actions to emulate `ha core check` without mounting secrets.
+- `scripts/export_entities.py` creates an entity index without committing live Zigbee2MQTT state.
 - `.github/workflows/ci.yml` runs Ruff and the non-Python pre-commit hooks on every push and PR. Additional workflows (e.g., `ha-config-check.yaml`) can be toggled on as needed.
+
 
 ---
 

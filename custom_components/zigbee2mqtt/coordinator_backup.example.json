@@ -1,0 +1,12 @@
+{
+  "metadata": {
+    "format": "zigpy/open-coordinator-backup",
+    "version": 1,
+    "source": "zigbee-herdsman@6.x"
+  },
+  "stack_specific": {
+    "buffer": "<redacted>"
+  },
+  "coordinator_ieee": "00:11:22:33:44:55:66:77",
+  "network_key": "000102030405060708090a0b0c0d0e0f"
+}
