@@ -130,7 +130,10 @@ SERVICE_TO_METHOD = {
         "method": "start_watering",
         "schema": START_WATERING_SCHEMA,
     },
-    SERVICE_STOP_WATERING: {"method": "stop_watering", "schema": SERVICE_BASE_SCHEMA},
+    SERVICE_STOP_WATERING: {
+        "method": "stop_watering",
+        "schema": SERVICE_BASE_SCHEMA,
+    },
     SERVICE_SET_MANUAL_PRESET_RUNTIME: {
         "method": "set_manual_preset_runtime",
         "schema": SET_PRESET_RUNTIME_SCHEMA,
@@ -147,7 +150,9 @@ SERVICE_TO_METHOD = {
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the BHyve switch platform from a config entry."""
     bhyve = hass.data[DOMAIN][entry.entry_id][CONF_CLIENT]
@@ -164,14 +169,16 @@ async def async_setup_entry(
         if device.get("type") == DEVICE_SPRINKLER:
             if not device.get("status"):
                 _LOGGER.warning(
-                    "Unable to configure device %s: the 'status' attribute is missing. Has it been paired with the wifi hub?",  # noqa: E501
+                    "Unable to configure device %s: the 'status' attribute is missing. Has it been paired with the wifi hub?",
                     device.get("name"),
                 )
                 continue
 
             # Filter out any programs which are not for this device
             device_programs = [
-                program for program in programs if program.get("device_id") == device_id
+                program
+                for program in programs
+                if program.get("device_id") == device_id
             ]
 
             switches.append(
@@ -181,10 +188,12 @@ async def async_setup_entry(
             all_zones = device.get("zones")
             for zone in all_zones:
                 zone_name = zone.get("name")
-                # if the zone doesn't have a name, set it to the device's name if there is only one (eg a hose timer)  # noqa: E501
+                # if the zone doesn't have a name, set it to the device's name if there is only one (eg a hose timer)
                 if zone_name is None:
                     zone_name = (
-                        device.get("name") if len(all_zones) == 1 else "Unnamed Zone"
+                        device.get("name")
+                        if len(all_zones) == 1
+                        else "Unnamed Zone"
                     )
                 switches.append(
                     BHyveZoneSwitch(
@@ -209,7 +218,7 @@ async def async_setup_entry(
                 )
             )
 
-    async_add_entities(switches, True)  # noqa: FBT003
+    async_add_entities(switches, True)
 
     async def async_service_handler(service: Any) -> None:
         """Map services to method of BHyve devices."""
@@ -220,12 +229,16 @@ async def async_setup_entry(
             return
 
         params = {
-            key: value for key, value in service.data.items() if key != ATTR_ENTITY_ID
+            key: value
+            for key, value in service.data.items()
+            if key != ATTR_ENTITY_ID
         }
         entity_ids = service.data.get(ATTR_ENTITY_ID)
         component = hass.data.get(SWITCH_DOMAIN)
         if entity_ids and component is not None:
-            target_switches = [component.get_entity(entity) for entity in entity_ids]
+            target_switches = [
+                component.get_entity(entity) for entity in entity_ids
+            ]
         else:
             return
 
@@ -262,7 +275,9 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
 
         name = f"{device_name} {program_name} program"
 
-        super().__init__(hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH)
+        super().__init__(
+            hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH
+        )
 
         self._program = program
         self._device_id = program.get("device_id")
@@ -297,17 +312,17 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
         """Zone program is a configuration category."""
         return EntityCategory.CONFIG
 
-    async def _set_state(self, is_on: bool) -> None:  # noqa: FBT001
+    async def _set_state(self, is_on: bool) -> None:
         self._program.update({"enabled": is_on})
         await self._bhyve.update_program(self._program_id, self._program)
 
     async def async_turn_on(self) -> None:
         """Turn the switch on."""
-        await self._set_state(True)  # noqa: FBT003
+        await self._set_state(True)
 
     async def async_turn_off(self) -> None:
         """Turn the switch off."""
-        await self._set_state(False)  # noqa: FBT003
+        await self._set_state(False)
 
     async def start_program(self) -> None:
         """Begins running a program."""
@@ -316,7 +331,7 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
 
     async def _send_program_message(self, station_payload: Any) -> None:
         try:
-            now = datetime.datetime.now()  # noqa: DTZ005 - be timezone aware?
+            now = datetime.datetime.now()
             iso_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             payload = {
@@ -330,7 +345,9 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
             await self._bhyve.send_message(payload)
 
         except BHyveError as err:
-            _LOGGER.warning("Failed to send to BHyve websocket message %s", err)
+            _LOGGER.warning(
+                "Failed to send to BHyve websocket message %s", err
+            )
             raise
 
     async def async_added_to_hass(self) -> None:
@@ -340,12 +357,15 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
         def update(_device_id: str, data: dict) -> None:
             """Update the state."""
             _LOGGER.info(
-                "Program update: %s - %s - %s", self.name, self._program_id, str(data)
+                "Program update: %s - %s - %s",
+                self.name,
+                self._program_id,
+                str(data),
             )
             event = data.get("event")
             if event == EVENT_PROGRAM_CHANGED:
                 self._ws_unprocessed_events.append(data)
-                self.async_schedule_update_ha_state(True)  # noqa: FBT003
+                self.async_schedule_update_ha_state(True)
 
         self._async_unsub_dispatcher_connect = async_dispatcher_connect(
             self.hass, SIGNAL_UPDATE_PROGRAM.format(self._program_id), update
@@ -358,7 +378,7 @@ class BHyveProgramSwitch(BHyveWebsocketEntity, SwitchEntity):
 
     def _on_ws_data(self, data: dict) -> None:
         #
-        # {'event': 'program_changed' } # noqa: ERA001
+        # {'event': 'program_changed' }
         #
         _LOGGER.info("Received program data update %s", data)
 
@@ -395,7 +415,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         self._zone_id: str = zone.get("station", "")
         self._entity_picture: str | None = zone.get("image_url")
         self._zone_name: str = zone_name
-        self._smart_watering_enabled: bool = zone.get("smart_watering_enabled", False)
+        self._smart_watering_enabled: bool = zone.get(
+            "smart_watering_enabled", False
+        )
         self._manual_preset_runtime: int = device.get(
             "manual_preset_runtime_sec", DEFAULT_MANUAL_RUNTIME.seconds
         )
@@ -405,7 +427,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         name = f"{self._zone_name} zone"
         _LOGGER.info("Creating switch: %s", name)
 
-        super().__init__(hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH)
+        super().__init__(
+            hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH
+        )
 
     def _setup(self, device: BHyveDevice) -> None:
         self._is_on = False
@@ -425,7 +449,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
 
         zones = device.get("zones", [])
 
-        zone = next(filter(lambda z: z.get("station") == self._zone_id, zones), None)
+        zone = next(
+            filter(lambda z: z.get("station") == self._zone_id, zones), None
+        )
 
         if zone is not None:
             is_watering = (
@@ -435,7 +461,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
             self._is_on = is_watering
             self._attrs[ATTR_MANUAL_RUNTIME] = self._manual_preset_runtime
 
-            next_start_time = orbit_time_to_local_time(status.get("next_start_time"))
+            next_start_time = orbit_time_to_local_time(
+                status.get("next_start_time")
+            )
             if next_start_time is not None:
                 next_start_programs = status.get("next_start_programs")
                 self._attrs.update(
@@ -454,11 +482,15 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
                 self._attrs[ATTR_IMAGE_URL] = image_url
 
             if is_watering:
-                started_watering_at = watering_status.get("started_watering_station_at")
+                started_watering_at = watering_status.get(
+                    "started_watering_station_at"
+                )
                 current_station = watering_status.get("current_station")
                 current_program = watering_status.get("program", None)
                 stations = watering_status.get("stations")
-                current_runtime = stations[0].get("run_time") if stations else None
+                current_runtime = (
+                    stations[0].get("run_time") if stations else None
+                )
                 self._set_watering_started(
                     started_watering_at,
                     current_station,
@@ -480,7 +512,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         runtime: int | None,
     ) -> None:
         started_watering_at_timestamp = (
-            orbit_time_to_local_time(timestamp) if timestamp is not None else None
+            orbit_time_to_local_time(timestamp)
+            if timestamp is not None
+            else None
         )
 
         self._attrs.update(
@@ -546,13 +580,19 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
                 run_times = plan.get("run_times")
                 if run_times:
                     zone_times = list(
-                        filter(lambda x: (x.get("station") == self._zone_id), run_times)
+                        filter(
+                            lambda x: (x.get("station") == self._zone_id),
+                            run_times,
+                        )
                     )
                     if zone_times:
                         plan_date = orbit_time_to_local_time(plan.get("date"))
                         for time in plan.get("start_times", []):
                             upcoming_time = dt.parse_time(time)
-                            if upcoming_time is not None and plan_date is not None:
+                            if (
+                                upcoming_time is not None
+                                and plan_date is not None
+                            ):
                                 upcoming_run_times.append(
                                     plan_date
                                     + timedelta(
@@ -590,7 +630,7 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         # {'event': 'device_idle', 'device_id': 'id', 'timestamp': '2020-01-10T12:32:06.000Z'}
         # {'event': 'set_manual_preset_runtime', 'device_id': 'id', 'seconds': 480, 'timestamp': '2020-01-18T17:00:35.000Z'}
         # {'event': 'program_changed' }
-        """  # noqa: E501
+        """
         event = data.get("event")
         if event in (EVENT_DEVICE_IDLE, EVENT_WATERING_COMPLETE) or (
             event == EVENT_CHANGE_MODE and data.get("mode") in ("off", "auto")
@@ -620,7 +660,7 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
             elif current_station is not None and self._is_on:
                 if str(current_station) != str(self._zone_id):
                     _LOGGER.debug(
-                        "%s: Another station (%s) is watering, marking this zone (%s) off",  # noqa: E501
+                        "%s: Another station (%s) is watering, marking this zone (%s) off",
                         self.name,
                         current_station,
                         self._zone_id,
@@ -642,7 +682,7 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
 
     async def _send_station_message(self, station_payload: Any) -> None:
         try:
-            now = datetime.datetime.now()  # noqa: DTZ005 - be timezone aware?
+            now = datetime.datetime.now()
             iso_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             payload = {
@@ -656,7 +696,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
             await self._bhyve.send_message(payload)
 
         except BHyveError as err:
-            _LOGGER.warning("Failed to send to BHyve websocket message %s", err)
+            _LOGGER.warning(
+                "Failed to send to BHyve websocket message %s", err
+            )
             raise
 
     @property
@@ -674,7 +716,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         """Return the status of the sensor."""
         return self._is_on
 
-    async def set_smart_watering_soil_moisture(self, percentage: float) -> None:
+    async def set_smart_watering_soil_moisture(
+        self, percentage: float
+    ) -> None:
         """Set the soil moisture percentage for the zone."""
         if self._smart_watering_enabled:
             landscape = None
@@ -685,7 +729,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
 
             except BHyveError as err:
                 _LOGGER.warning(
-                    "Unable to retreive current soil data for %s: %s", self.name, err
+                    "Unable to retreive current soil data for %s: %s",
+                    self.name,
+                    err,
                 )
 
             if landscape is not None:
@@ -703,15 +749,23 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
                 landscape_moisture_level_0 = landscape["replenishment_point"]
 
                 # B-hyve computed value for 100% moisture
-                landscape_moisture_level_100 = landscape["field_capacity_depth"]
+                landscape_moisture_level_100 = landscape[
+                    "field_capacity_depth"
+                ]
 
                 # Set property to computed user desired soil moisture level
-                landscape_update["current_water_level"] = landscape_moisture_level_0 + (
-                    (
-                        percentage
-                        * (landscape_moisture_level_100 - landscape_moisture_level_0)
+                landscape_update["current_water_level"] = (
+                    landscape_moisture_level_0
+                    + (
+                        (
+                            percentage
+                            * (
+                                landscape_moisture_level_100
+                                - landscape_moisture_level_0
+                            )
+                        )
+                        / 100.0
                     )
-                    / 100.0
                 )
                 # Set remaining properties
                 landscape_update["device_id"] = self._device_id
@@ -724,7 +778,9 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
 
                 except BHyveError as err:
                     _LOGGER.warning(
-                        "Unable to set soil moisture level for %s: %s", self.name, err
+                        "Unable to set soil moisture level for %s: %s",
+                        self.name,
+                        err,
                     )
         else:
             _LOGGER.info(
@@ -749,7 +805,7 @@ class BHyveZoneSwitch(BHyveDeviceEntity, SwitchEntity):
         run_time = self._manual_preset_runtime / 60
         if run_time == 0:
             _LOGGER.warning(
-                "Switch %s manual preset runtime is 0, watering has defaulted to %s minutes. Set the manual run time on your device or please specify number of minutes using the bhyve.start_watering service",  # noqa: E501
+                "Switch %s manual preset runtime is 0, watering has defaulted to %s minutes. Set the manual run time on your device or please specify number of minutes using the bhyve.start_watering service",
                 self._device_name,
                 int(DEFAULT_MANUAL_RUNTIME.seconds / 60),
             )
@@ -766,7 +822,11 @@ class BHyveRainDelaySwitch(BHyveDeviceEntity, SwitchEntity):
     """Define a BHyve rain delay switch."""
 
     def __init__(
-        self, hass: HomeAssistant, bhyve: BHyveClient, device: BHyveDevice, icon: str
+        self,
+        hass: HomeAssistant,
+        bhyve: BHyveClient,
+        device: BHyveDevice,
+        icon: str,
     ) -> None:
         """Initialize the switch."""
         name = "{} rain delay".format(device.get("name"))
@@ -775,7 +835,9 @@ class BHyveRainDelaySwitch(BHyveDeviceEntity, SwitchEntity):
         self._update_device_cb = None
         self._is_on = False
 
-        super().__init__(hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH)
+        super().__init__(
+            hass, bhyve, device, name, icon, SwitchDeviceClass.SWITCH
+        )
 
     def _setup(self, device: BHyveDevice) -> None:
         self._is_on = False
@@ -795,7 +857,7 @@ class BHyveRainDelaySwitch(BHyveDeviceEntity, SwitchEntity):
         Handle websocket data.
 
         # {'event': 'rain_delay', 'device_id': 'id', 'delay': 0, 'timestamp': '2020-01-14T12:10:10.000Z'}
-        """  # noqa: E501
+        """
         event = data.get("event")
         if event is None:
             _LOGGER.warning("No event on ws data %s", data)
@@ -817,7 +879,9 @@ class BHyveRainDelaySwitch(BHyveDeviceEntity, SwitchEntity):
     def _update_device_soon(self) -> None:
         if self._update_device_cb is not None:
             self._update_device_cb()  # unsubscribe
-        self._update_device_cb = async_call_later(self._hass, 1, self._update_device)
+        self._update_device_cb = async_call_later(
+            self._hass, 1, self._update_device
+        )
 
     async def _update_device(self, _time: Any) -> None:
         await self._refetch_device(force_update=True)
@@ -832,7 +896,9 @@ class BHyveRainDelaySwitch(BHyveDeviceEntity, SwitchEntity):
             if device_status is not None:
                 self._attrs.update(
                     {
-                        ATTR_CAUSE: device_status.get("rain_delay_cause", "Unknown"),
+                        ATTR_CAUSE: device_status.get(
+                            "rain_delay_cause", "Unknown"
+                        ),
                         ATTR_WEATHER_TYPE: device_status.get(
                             "rain_delay_weather_type", "Unknown"
                         ),

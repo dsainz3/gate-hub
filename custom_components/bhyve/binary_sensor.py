@@ -17,7 +17,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the BHyve binary sensor platform from a config entry."""
     bhyve = hass.data[DOMAIN][entry.entry_id][CONF_CLIENT]
@@ -32,7 +34,7 @@ async def async_setup_entry(
             sensors.append(BHyveFloodSensor(hass, bhyve, device))
             sensors.append(BHyveTemperatureBinarySensor(hass, bhyve, device))
 
-    async_add_entities(sensors, True)  # noqa: FBT003
+    async_add_entities(sensors, True)
 
 
 class BHyveFloodSensor(BHyveDeviceEntity):
@@ -45,7 +47,12 @@ class BHyveFloodSensor(BHyveDeviceEntity):
         name = "{} flood sensor".format(device.get("name"))
         _LOGGER.info("Creating flood sensor: %s", name)
         super().__init__(
-            hass, bhyve, device, name, "water", BinarySensorDeviceClass.MOISTURE
+            hass,
+            bhyve,
+            device,
+            name,
+            "water",
+            BinarySensorDeviceClass.MOISTURE,
         )
 
     def _setup(self, device: BHyveDevice) -> None:
@@ -83,7 +90,7 @@ class BHyveFloodSensor(BHyveDeviceEntity):
         return self._state == "on"
 
     def _on_ws_data(self, data: dict) -> None:
-        """# {"last_flood_alarm_at":"2021-08-29T16:32:35.585Z","rssi":-60,"onboard_complete":true,"temp_f":75.2,"provisioned":true,"phy":"le_1m_1000","event":"fs_status_update","temp_alarm_status":"ok","status_updated_at":"2021-08-29T16:33:17.089Z","identify_enabled":false,"device_id":"612ad9134f0c6c9c9faddbba","timestamp":"2021-08-29T16:33:17.089Z","flood_alarm_status":"ok","last_temp_alarm_at":null}"""  # noqa: D400, D415, E501
+        """# {"last_flood_alarm_at":"2021-08-29T16:32:35.585Z","rssi":-60,"onboard_complete":true,"temp_f":75.2,"provisioned":true,"phy":"le_1m_1000","event":"fs_status_update","temp_alarm_status":"ok","status_updated_at":"2021-08-29T16:33:17.089Z","identify_enabled":false,"device_id":"612ad9134f0c6c9c9faddbba","timestamp":"2021-08-29T16:33:17.089Z","flood_alarm_status":"ok","last_temp_alarm_at":null}"""
         _LOGGER.info("Received program data update %s", data)
         event = data.get("event")
         if event == EVENT_FS_ALARM:
@@ -111,7 +118,9 @@ class BHyveTemperatureBinarySensor(BHyveDeviceEntity):
 
     def _parse_status(self, status: dict) -> str:
         """Convert BHyve alarm status to entity value."""
-        return "on" if "alarm" in status.get("temp_alarm_status", []) else "off"
+        return (
+            "on" if "alarm" in status.get("temp_alarm_status", []) else "off"
+        )
 
     @property
     def state(self) -> str:

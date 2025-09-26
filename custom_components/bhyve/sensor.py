@@ -5,7 +5,10 @@ from datetime import timedelta
 from typing import Any
 
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.components.sensor.const import SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor.const import (
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_BATTERY_LEVEL,
@@ -49,7 +52,9 @@ SCAN_INTERVAL = timedelta(minutes=5)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the BHyve sensor platform from a config entry."""
     bhyve = hass.data[DOMAIN][entry.entry_id][CONF_CLIENT]
@@ -67,10 +72,14 @@ async def async_setup_entry(
                 zone_name = zone.get("name", None)
                 if zone_name is None:
                     zone_name = (
-                        device.get("name") if len(all_zones) == 1 else "Unnamed Zone"
+                        device.get("name")
+                        if len(all_zones) == 1
+                        else "Unnamed Zone"
                     )
                 sensors.append(
-                    BHyveZoneHistorySensor(hass, bhyve, device, zone, zone_name)
+                    BHyveZoneHistorySensor(
+                        hass, bhyve, device, zone, zone_name
+                    )
                 )
 
             if device.get("battery", None) is not None:
@@ -187,9 +196,11 @@ class BHyveBatterySensor(BHyveDeviceEntity, SensorEntity):
         -------
         float: The battery level as a percentage.
 
-        """  # noqa: D401, E501
+        """
         if not isinstance(battery_data, dict):
-            _LOGGER.warning("Unexpected battery data, returning 0: %s", battery_data)
+            _LOGGER.warning(
+                "Unexpected battery data, returning 0: %s", battery_data
+            )
             return 0
 
         battery_level = battery_data.get("percent", 0)
@@ -260,7 +271,10 @@ class BHyveZoneHistorySensor(BHyveDeviceEntity):
         self._ws_unprocessed_events[:] = []  # We don't care about these
 
         try:
-            history = await self._fetch_device_history(force_update=force_update) or []
+            history = (
+                await self._fetch_device_history(force_update=force_update)
+                or []
+            )
             self._history = history
 
             for history_item in history:
@@ -284,17 +298,23 @@ class BHyveZoneHistorySensor(BHyveDeviceEntity):
                     self._attrs = {
                         ATTR_BUDGET: latest_irrigation.get(ATTR_BUDGET),
                         ATTR_PROGRAM: latest_irrigation.get(ATTR_PROGRAM),
-                        ATTR_PROGRAM_NAME: latest_irrigation.get(ATTR_PROGRAM_NAME),
+                        ATTR_PROGRAM_NAME: latest_irrigation.get(
+                            ATTR_PROGRAM_NAME
+                        ),
                         ATTR_RUN_TIME: latest_irrigation.get(ATTR_RUN_TIME),
                         ATTR_STATUS: latest_irrigation.get(ATTR_STATUS),
                         ATTR_CONSUMPTION_GALLONS: gallons,
                         ATTR_CONSUMPTION_LITRES: litres,
-                        ATTR_START_TIME: latest_irrigation.get(ATTR_START_TIME),
+                        ATTR_START_TIME: latest_irrigation.get(
+                            ATTR_START_TIME
+                        ),
                     }
                     break
 
         except BHyveError as err:
-            _LOGGER.warning("Unable to retreive data for %s: %s", self._name, err)
+            _LOGGER.warning(
+                "Unable to retreive data for %s: %s", self._name, err
+            )
 
 
 class BHyveStateSensor(BHyveDeviceEntity):
@@ -338,7 +358,7 @@ class BHyveStateSensor(BHyveDeviceEntity):
 
     def _on_ws_data(self, data: dict) -> None:
         #
-        # {'event': 'change_mode', 'mode': 'auto', 'device_id': 'id', 'timestamp': '2020-01-09T20:30:00.000Z'}  # noqa: E501, ERA001
+        # {'event': 'change_mode', 'mode': 'auto', 'device_id': 'id', 'timestamp': '2020-01-09T20:30:00.000Z'}
         #
         event = data.get("event")
         if event == EVENT_CHANGE_MODE:
@@ -358,7 +378,12 @@ class BHyveTemperatureSensor(BHyveDeviceEntity, SensorEntity):
         name = "{} temperature sensor".format(device.get("name"))
         _LOGGER.info("Creating temperature sensor: %s", name)
         super().__init__(
-            hass, bhyve, device, name, "thermometer", SensorDeviceClass.TEMPERATURE
+            hass,
+            bhyve,
+            device,
+            name,
+            "thermometer",
+            SensorDeviceClass.TEMPERATURE,
         )
 
     def _setup(self, device: BHyveDevice) -> None:
@@ -370,7 +395,9 @@ class BHyveTemperatureSensor(BHyveDeviceEntity, SensorEntity):
         self._attrs = {
             "location": device.get("location_name"),
             "rssi": device.get("status", {}).get("rssi"),
-            "temperature_alarm": device.get("status", {}).get("temp_alarm_status"),
+            "temperature_alarm": device.get("status", {}).get(
+                "temp_alarm_status"
+            ),
         }
         _LOGGER.debug(
             "Temperature sensor %s setup: Value: %s | Available: %s",
@@ -391,7 +418,7 @@ class BHyveTemperatureSensor(BHyveDeviceEntity, SensorEntity):
 
     def _on_ws_data(self, data: dict) -> None:
         #
-        # {"last_flood_alarm_at":"2021-08-29T16:32:35.585Z","rssi":-60,"onboard_complete":true,"temp_f":75.2,"provisioned":true,"phy":"le_1m_1000","event":"fs_status_update","temp_alarm_status":"ok","status_updated_at":"2021-08-29T16:33:17.089Z","identify_enabled":false,"device_id":"612ad9134f0c6c9c9faddbba","timestamp":"2021-08-29T16:33:17.089Z","flood_alarm_status":"ok","last_temp_alarm_at":null}  # noqa: E501, ERA001
+        # {"last_flood_alarm_at":"2021-08-29T16:32:35.585Z","rssi":-60,"onboard_complete":true,"temp_f":75.2,"provisioned":true,"phy":"le_1m_1000","event":"fs_status_update","temp_alarm_status":"ok","status_updated_at":"2021-08-29T16:33:17.089Z","identify_enabled":false,"device_id":"612ad9134f0c6c9c9faddbba","timestamp":"2021-08-29T16:33:17.089Z","flood_alarm_status":"ok","last_temp_alarm_at":null}
         #
         _LOGGER.info("Received program data update %s", data)
         event = data.get("event")

@@ -36,4 +36,6 @@ async def async_get_config_entry_diagnostics(
     devices = await bhyve.devices
     programs = await bhyve.timer_programs
 
-    return async_redact_data({"devices": devices, "programs": programs}, TO_REDACT)
+    return async_redact_data(
+        {"devices": devices, "programs": programs}, TO_REDACT
+    )
