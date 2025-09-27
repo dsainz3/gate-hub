@@ -1,3 +1,16 @@
+---
+title: Huskers Dashboard History
+summary: Rationale behind consolidating Huskers dashboards and related clean-up actions.
+status: active
+category: explanation
+updated: 2025-09-27
+owner: huskers-team
+tags:
+  - huskers
+  - dashboards
+  - history
+---
+
 # Huskers Dashboard Cleanup
 
 ## Overview

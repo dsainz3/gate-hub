@@ -1,0 +1,33 @@
+site_name: gate-hub Documentation
+site_description: Hypermodern documentation for the gate-hub Home Assistant deployment.
+repo_url: https://github.com/dsainz3/gate-hub
+nav:
+  - Home: docs/index.md
+  - How-to Guides:
+      - CI Pipeline Runbook: docs/how-to/ci.md
+      - Pre-commit Workflow: docs/how-to/pre-commit.md
+      - Mosquitto MQTT Add-on: docs/how-to/addons/mqtt.md
+      - Govee2MQTT Add-on: docs/how-to/addons/govee2mqtt.md
+      - Huskers Dashboard Guide: docs/how-to/huskers/dashboard.md
+      - Husker LED MQTT Controls: docs/how-to/lighting/husker-led-mqtt.md
+  - Reference:
+      - Documentation Style Guide: docs/README.md
+      - Automation Catalog: docs/reference/automations.md
+      - Infrastructure Overview: docs/reference/infrastructure.md
+  - Explanation:
+      - Optimization Plan: docs/explanation/optimization-plan.md
+      - Huskers Dashboard History: docs/explanation/huskers-dashboard-history.md
+  - Archive:
+      - AI Automation Builder (Archived): docs/archive/ai-automation-builder.md
+  - ADRs:
+      - Template: docs/adr/_template.md
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true

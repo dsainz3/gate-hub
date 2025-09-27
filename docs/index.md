@@ -1,60 +1,45 @@
-# Project Docs Index
-
-_Last updated: 2025-09-20_
-
-Welcome! This is the landing page for project documentation, ADRs, and operating notes.
-
-## Sections
-- [Architecture Decisions (ADR)](#architecture-decisions-adr)
-- [Setup & Tooling](#setup--tooling)
-- [Guides](#guides)
-- [Packages](#packages)
-- [CI & Quality](#ci--quality)
-- [Reference](#reference)
-
+---
+title: Documentation Index
+summary: Entry point for the gate-hub knowledge base organised with the Divio documentation model.
+status: active
+updated: 2025-09-27
+owner: ops-team
 ---
 
-## Architecture Decisions (ADR)
+# Documentation Home
 
-Start new ADRs from the template: [`adr/_template.md`](./adr/_template.md).
+Welcome to the hypermodern documentation set for the gate-hub Home Assistant deployment. Content is grouped using the Divio model so readers can quickly find the right depth:
 
-Existing ADRs:
-- _Pending — add ADRs as decisions are captured._
+- **Tutorials** – step-by-step project onboarding (coming soon; contribute via the docs style guide).
+- **How-to guides** – task-focused instructions to operate or extend the system.
+- **Reference** – authoritative facts, inventories, and API/service contracts.
+- **Explanation** – architectural rationale, historical context, and strategy.
+- **Archive** – retired experiments kept for institutional memory.
 
----
+Use the sections below or the navigation in `mkdocs.yml` (once rendered) to browse. See `README.md` in this directory for authoring conventions.
 
-## Setup & Tooling
-
-- [`pre-commit.md`](./pre-commit.md) — hook configuration and local workflows.
-- [`ci.md`](./ci.md) — GitHub Actions jobs and troubleshooting.
-- [`infrastructure.md`](./infrastructure.md) — HAOS host, backups, networking, and storage notes.
-- [`ai-automation-builder.md`](./ai-automation-builder.md) — notes on automation scaffolding experiments.
-
----
-
-## Guides
-
-- [`husker_package/husker_readme.md`](./husker_package/husker_readme.md) — Huskers dashboards and automations.
-- [`lighting/`](./lighting/) — lighting control integrations and MQTT details.
-
----
-
-## Packages
-
-- [`addons/`](./addons/) — add-on configuration snapshots and setup docs.
-- [`husker_package/`](./husker_package/) — comprehensive Huskers package documentation.
-
----
-
-## CI & Quality
-
-- [`ci.md`](./ci.md)
-- [`pre-commit.md`](./pre-commit.md)
-
----
+## How-to Guides
+- [CI Pipeline Runbook](how-to/ci.md)
+- [Pre-commit Hooks](how-to/pre-commit.md)
+- [Mosquitto MQTT Add-on](how-to/addons/mqtt.md)
+- [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
+- [Husker Dashboard Guide](how-to/huskers/dashboard.md)
+- [Husker LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
 
 ## Reference
+- [Automation Catalog](reference/automations.md)
+- [Infrastructure Overview](reference/infrastructure.md)
 
-- [`optimizing_code.md`](./optimizing_code.md) — historical tuning notes and automation ideas.
-- [`infrastructure.md`](./infrastructure.md) — hardware inventory, networking, and monitoring stack.
-- [`ai-automation-builder.md`](./ai-automation-builder.md) — quick reference for the automation builder prototype.
+## Explanation
+- [Optimization Plan](explanation/optimization-plan.md)
+- [Huskers Dashboard History](explanation/huskers-dashboard-history.md)
+
+## Archive
+- [AI Automation Builder Prototype](archive/ai-automation-builder.md)
+
+## Architecture Decisions
+- ADR template: [adr/_template.md](adr/_template.md)
+- Capture decisions for significant changes. Submit a PR adding a new ADR when the decision is accepted.
+
+## Contributing to the Docs
+See [README.md](README.md) in this directory for the docs style guide, workflow, and review checklist.
