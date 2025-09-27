@@ -57,6 +57,7 @@ group:
       - automation.night_mode_at_midnight
       - automation.early_morning_lights_0330
       - automation.interior_lights_sunrise_off
+      - automation.exterior_front_garage_on_sunset
       - automation.exterior_lights_sunrise_off
       - automation.exterior_led_monthly_effect
       - automation.humidor_plug_temp_control
@@ -113,6 +114,60 @@ group:
       - switch.scenic_dreamview_power_switch
       - switch.scenic_dreamview1_power_switch
       - switch.scenic_dreamview2_power_switch
+
+  # Snapshot quick reference bundles
+  kiosk_snapshot_weather:
+    name: Kiosk - Snapshot Weather
+    entities:
+      - weather.kneplatt72
+      - sensor.outdoor_temperature_wx
+      - sensor.outdoor_humidity_wx
+      - sensor.outdoor_wind_speed_wx
+      - sensor.outdoor_pressure_wx
+
+  kiosk_snapshot_huskers:
+    name: Kiosk - Snapshot Huskers
+    entities:
+      - sensor.huskers_next_game
+      - sensor.huskers_record_dashboard
+      - sensor.huskers_game_status_espn
+      - sensor.huskers_kickoff_in_effective
+      - binary_sensor.huskers_is_pregame_espn
+      - binary_sensor.huskers_is_live_espn
+      - binary_sensor.huskers_is_postgame_espn
+
+  kiosk_snapshot_lights:
+    name: Kiosk - Snapshot Lights
+    entities:
+      - light.all_lights
+      - light.all_exterior_lights
+      - group.kiosk_theater_lights
+      - group.kiosk_front_lights
+      - group.kiosk_garage_lights
+
+  kiosk_snapshot_auxiliary:
+    name: Kiosk - Snapshot Auxiliary
+    entities:
+      - switch.plug_humidor
+      - sensor.hygrometer_humidor_temperature
+      - sensor.hygrometer_humidor_humidity
+      - switch.plug_basement_burner
+      - switch.plug_mainfloor_burner
+      - switch.plug_bedroom_burner
+      - switch.tree_power_switch
+
+  kiosk_snapshot_automations:
+    name: Kiosk - Snapshot Automations
+    entities:
+      - automation.evening_lights_at_sunset
+      - automation.night_mode_at_midnight
+      - automation.early_morning_lights_0330
+      - automation.interior_lights_sunrise_off
+      - automation.exterior_front_garage_on_sunset
+      - automation.exterior_lights_sunrise_off
+      - automation.exterior_led_monthly_effect
+      - automation.humidor_plug_temp_control
+      - automation.burner_plugs_off_2300
 
 ###############################################################################
 # Scripts (mapping style; aliases quoted)
@@ -262,3 +317,43 @@ script:
       - service: switch.turn_off
         target:
           entity_id: group.kiosk_light_power_switches
+
+###############################################################################
+# Template sensors - snapshot metrics
+###############################################################################
+template:
+  - sensor:
+      - name: kiosk_snapshot_lights_on
+        unique_id: kiosk_snapshot_lights_on
+        unit_of_measurement: lights
+        icon: mdi:lightbulb-on
+        state: >-
+          {{ expand('group.kiosk_all_lights_core') | selectattr('state','eq','on') | list | length }}
+      - name: kiosk_snapshot_plugs_on
+        unique_id: kiosk_snapshot_plugs_on
+        unit_of_measurement: plugs
+        icon: mdi:power-plug
+        state: >-
+          {{ expand('group.kiosk_plugs') | selectattr('state','eq','on') | list | length }}
+      - name: kiosk_snapshot_aux_readout
+        unique_id: kiosk_snapshot_aux_readout
+        icon: mdi:thermometer-water
+        state: >-
+          {% set temp = states('sensor.hygrometer_humidor_temperature') %}
+          {% set humidity = states('sensor.hygrometer_humidor_humidity') %}
+          {% if temp in ['unknown', 'unavailable'] or humidity in ['unknown', 'unavailable'] %}
+            Data unavailable
+          {% else %}
+            {{ temp }} degF / {{ humidity }} %
+          {% endif %}
+        attributes:
+          humidor_plug: "{{ states('switch.plug_humidor') }}"
+  - binary_sensor:
+      - name: kiosk_snapshot_automation_issue
+        unique_id: kiosk_snapshot_automation_issue
+        device_class: problem
+        state: >-
+          {{ expand('group.kiosk_all_automations') | selectattr('state','ne','on') | list | length > 0 }}
+        attributes:
+          disabled_automations: >-
+            {{ expand('group.kiosk_all_automations') | selectattr('state','ne','on') | map(attribute='entity_id') | list }}

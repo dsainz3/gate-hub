@@ -1,5 +1,259 @@
 ﻿title: Kiosk
 views:
+  - title: Snapshot
+    path: snapshot
+    icon: mdi:view-dashboard-variant
+    badges: []
+    cards:
+      - type: grid
+        title: Conditions & Game Day
+        square: false
+        columns: 2
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: weather-forecast
+                entity: weather.kneplatt72
+              - type: entities
+                title: Weather Now
+                show_header_toggle: false
+                entities:
+                  - entity: sensor.outdoor_temperature_wx
+                    name: Temperature
+                  - entity: sensor.outdoor_humidity_wx
+                    name: Humidity
+                  - entity: sensor.outdoor_wind_speed_wx
+                    name: Wind Speed
+                  - entity: sensor.outdoor_pressure_wx
+                    name: Pressure
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                style: |
+                  ha-card {padding: 18px 20px;}
+                content: |
+                  {% set next_game = states('sensor.huskers_next_game') %}
+                  {% set record = states('sensor.huskers_record_dashboard') %}
+                  {% set status = states('sensor.huskers_game_status_espn') %}
+                  {% set kickoff = states('sensor.huskers_kickoff_in_effective') %}
+                  {% set invalid = ['unknown', 'unavailable', 'none', '', 'None'] %}
+                  {% set score_ok = has_value('sensor.husker_team') and state_attr('sensor.husker_team', 'team_score') is not none %}
+                  ### Huskers Snapshot
+                  **Next game:** {{ 'TBD' if next_game in invalid else next_game }}
+                  **Record:** {{ 'N/A' if record in invalid else record }}
+                  **Status:** {{ 'Unknown' if status in invalid else status | title }}
+                  **Kickoff in:** {{ 'TBD' if kickoff in invalid else kickoff ~ ' min' }}
+                  {% if score_ok %}
+                  **Score:** {{ state_attr('sensor.husker_team', 'team_score') }} - {{ state_attr('sensor.husker_team', 'opponent_score') }}
+                  {% endif %}
+              - type: entities
+                title: Game State
+                show_header_toggle: false
+                state_color: true
+                entities:
+                  - entity: binary_sensor.huskers_is_pregame_espn
+                    name: Pregame
+                  - entity: binary_sensor.huskers_is_live_espn
+                    name: Live Now
+                  - entity: binary_sensor.huskers_is_postgame_espn
+                    name: Postgame
+                  - entity: sensor.huskers_next_game
+                    name: Details
+                  - entity: sensor.huskers_kickoff_in_effective
+                    name: Kickoff Countdown (min)
+      - type: grid
+        title: Lights Overview
+        square: false
+        columns: 4
+        cards:
+          - type: tile
+            entity: sensor.kiosk_snapshot_lights_on
+            name: Lights On
+          - type: tile
+            entity: light.all_lights
+            name: All Lights
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: light.all_exterior_lights
+            name: Exterior Lights
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_theater_lights
+            name: Theater Group
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_front_lights
+            name: Front Group
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_garage_lights
+            name: Garage Group
+            tap_action:
+              action: toggle
+      - type: grid
+        title: Auxiliary & Humidor
+        square: false
+        columns: 3
+        cards:
+          - type: tile
+            entity: sensor.kiosk_snapshot_plugs_on
+            name: Plugs On
+          - type: tile
+            entity: sensor.kiosk_snapshot_aux_readout
+            name: Humidor Climate
+          - type: tile
+            entity: switch.plug_humidor
+            name: Humidor Power
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: sensor.hygrometer_humidor_temperature
+            name: Humidor Temp
+            features:
+              - type: graph
+                graph: line
+                hours_to_show: 24
+                detail: 2
+          - type: tile
+            entity: sensor.hygrometer_humidor_humidity
+            name: Humidor Humidity
+            features:
+              - type: graph
+                graph: line
+                hours_to_show: 24
+                detail: 2
+          - type: tile
+            entity: switch.plug_mainfloor_burner
+            name: Main Floor Burner
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: switch.plug_basement_burner
+            name: Basement Burner
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: switch.plug_bedroom_burner
+            name: Bedroom Burner
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: switch.tree_power_switch
+            name: Tree Power
+            tap_action:
+              action: toggle
+      - type: vertical-stack
+        cards:
+          - type: tile
+            entity: binary_sensor.kiosk_snapshot_automation_issue
+            name: Automation Health
+          - type: grid
+            title: Automations
+            square: false
+            columns: 4
+            cards:
+              - type: button
+                entity: automation.evening_lights_at_sunset
+                name: Evening Lights at Sunset
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.evening_lights_at_sunset
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.night_mode_at_midnight
+                name: Night Mode at Midnight
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.night_mode_at_midnight
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.early_morning_lights_0330
+                name: Early Morning Lights 0330
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.early_morning_lights_0330
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.interior_lights_sunrise_off
+                name: Interior Lights Sunrise Off
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.interior_lights_sunrise_off
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.exterior_lights_sunrise_off
+                name: Exterior Lights Sunrise Off
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.exterior_lights_sunrise_off
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.exterior_led_monthly_effect
+                name: Exterior LED Monthly Effect
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.exterior_led_monthly_effect
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.humidor_plug_temp_control
+                name: Humidor Plug Temp Control
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.humidor_plug_temp_control
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.burner_plugs_off_2300
+                name: Burner Plugs Off 2300
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.burner_plugs_off_2300
+                hold_action:
+                  action: toggle
+          - type: entities
+            title: Automation Details
+            show_header_toggle: false
+            entities:
+              - entity: group.kiosk_snapshot_automations
+                name: Snapshot Bundle
+              - entity: group.kiosk_all_automations
+                name: Core Bundle
+              - entity: sensor.kiosk_snapshot_plugs_on
+                name: Active Plugs Count
   - title: Control
     path: control
     icon: mdi:lightbulb-group

@@ -24,28 +24,43 @@
           data:
             brightness_pct: 60
             transition: 2
+
+- id: exterior_front_garage_on_sunset
+  alias: 'Lighting: Exterior Front & Garage On (Sunset)'
+  description: >
+    Turns on front porch and garage fixtures shortly after sunset unless Husker lighting hold is active.
+  mode: single
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: '00:05:00'
+  condition:
+    - condition: state
+      entity_id: binary_sensor.huskers_lighting_hold
+      state: 'off'
+  action:
+    - service: light.turn_on
+      target:
+        entity_id:
+          - light.front_porch_lights
+          - light.light_garage_left
+          - light.light_garage_center
+          - light.light_garage_right
+      data:
+        color_temp: 500
+        brightness_pct: 10
+        transition: 2
+    - if:
+        - condition: template
+          value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+      then:
         - service: light.turn_on
           target:
-            entity_id:
-              - light.front_porch_lights
-              - light.light-garage-left
-              - light.light-garage-center
-              - light.light-garage-right
+            entity_id: light.permanent_outdoor_lights
           data:
-            color_temp: 500
-            brightness_pct: 10
+            brightness_pct: 50
             transition: 2
-        - if:
-            - condition: template
-              value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-          then:
-            - service: light.turn_on
-              target:
-                entity_id: light.permanent_outdoor_lights
-              data:
-                brightness_pct: 50
-                transition: 2
-              continue_on_error: true
+          continue_on_error: true
 
 - id: night_mode_at_midnight
   alias: 'Lighting: Night Mode at Midnight'
@@ -70,9 +85,9 @@
           target:
             entity_id:
               - light.front_porch_lights
-              - light.light-garage-left
-              - light.light-garage-center
-              - light.light-garage-right
+              - light.light_garage_left
+              - light.light_garage_center
+              - light.light_garage_right
           data:
             transition: 5
         - if:
@@ -110,10 +125,10 @@
         - service: light.turn_on
           target:
             entity_id:
-              - light.front-porch-lights
-              - light.light-garage-left
-              - light.light-garage-center
-              - light.light-garage-right
+              - light.front_porch_lights
+              - light.light_garage_left
+              - light.light_garage_center
+              - light.light_garage_right
           data:
             color_temp: 500
             brightness_pct: 10
@@ -154,9 +169,9 @@
         transition: 10
 
 - id: exterior_lights_sunrise_off
-  alias: 'Lighting: Morning Lights Off (Sunrise)'
+  alias: 'Lighting: Exterior Front & Garage Off (Sunrise)'
   description: >
-    Turns off exterior lighting a few minutes after sunrise unless the Husker light show is running.
+    Turns off the front porch and garage lights a few minutes after sunrise unless the Husker light show is running.
   mode: single
   trigger:
     - platform: sun
