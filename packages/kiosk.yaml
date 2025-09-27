@@ -119,7 +119,7 @@ group:
   kiosk_snapshot_weather:
     name: Kiosk - Snapshot Weather
     entities:
-      - weather.kneplatt72
+      - !secret weather_primary_entity
       - sensor.outdoor_temperature_wx
       - sensor.outdoor_humidity_wx
       - sensor.outdoor_wind_speed_wx

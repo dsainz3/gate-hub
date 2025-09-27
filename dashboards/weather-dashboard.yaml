@@ -11,13 +11,13 @@ views:
         square: false
         cards:
           - type: weather-forecast
-            entity: weather.kneplatt72
+            entity: !secret weather_primary_entity
           - type: vertical-stack
             cards:
               - type: markdown
                 content: >-
                   ### Station Snapshot
-                  **Location:** KnePlatt72 personal weather station
+                  **Location:** {{ states('input_text.weather_station_label') }}
                   **Barometer:** {{ states('sensor.outdoor_pressure_wx') }} inHg
                   **Pressure tendency:** {{ states('sensor.wx_pressure_tendency_3h') }}
                   **Alerts:**
@@ -292,7 +292,7 @@ views:
           - type: markdown
             content: |
               ## Personal Weather Station — Live
-              Source: PWS sensors at KnePlatt72.
+              Source: PWS sensors at {{ states('input_text.weather_station_label') }}.
           # Gauges
           - type: horizontal-stack
             cards:
@@ -384,7 +384,7 @@ views:
 
       # Forecast card (keep if this points at OpenWeather for you)
       - type: weather-forecast
-        entity: weather.kneplatt72
+        entity: !secret weather_primary_entity
         show_current: true
         show_forecast: true
 
