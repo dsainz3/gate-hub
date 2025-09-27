@@ -60,40 +60,62 @@ views:
                 columns: 2
                 square: false
                 cards:
-                  - type: tile
-                    entity: sensor.outdoor_temperature_wx
-                    name: Temperature
-                    color: deep-orange
-                    features:
-                      - type: graph
-                        entity: sensor.outdoor_temperature_wx
-                        graph: line
-                        hours_to_show: 12
-                        detail: 2
-                  - type: tile
-                    entity: sensor.outdoor_humidity_wx
-                    name: Humidity
-                    color: indigo
-                    features:
-                      - type: graph
-                        entity: sensor.outdoor_humidity_wx
-                        graph: line
-                        hours_to_show: 12
-                        detail: 2
-                  - type: tile
-                    entity: sensor.outdoor_wind_speed_wx
-                    name: Wind Speed
-                    color: teal
-                    features:
-                      - type: graph
-                        entity: sensor.outdoor_wind_speed_wx
-                        graph: line
-                        hours_to_show: 12
-                        detail: 2
-                  - type: tile
-                    entity: sensor.outdoor_pressure_wx
-                    name: Pressure
-                    color: blue
+                  - type: custom:extended-gauge-card
+                    title: Temperature
+                    entity:
+                      entity: sensor.outdoor_temperature_wx
+                      settings:
+                        name: Temperature
+                        unit_of_measurement: degF
+                        decimals: 1
+                    main:
+                      min_value: -20
+                      max_value: 120
+                      show_needle: true
+                      show_entity_name: false
+                      show_min_max_values: true
+                  - type: custom:extended-gauge-card
+                    title: Humidity
+                    entity:
+                      entity: sensor.outdoor_humidity_wx
+                      settings:
+                        name: Humidity
+                        unit_of_measurement: '%'
+                        decimals: 0
+                    main:
+                      min_value: 0
+                      max_value: 100
+                      show_needle: true
+                      show_entity_name: false
+                      show_min_max_values: true
+                  - type: custom:extended-gauge-card
+                    title: Wind Speed
+                    entity:
+                      entity: sensor.outdoor_wind_speed_wx
+                      settings:
+                        name: Wind Speed
+                        unit_of_measurement: mph
+                        decimals: 1
+                    main:
+                      min_value: 0
+                      max_value: 40
+                      show_needle: true
+                      show_entity_name: false
+                      show_min_max_values: true
+                  - type: custom:extended-gauge-card
+                    title: Pressure
+                    entity:
+                      entity: sensor.outdoor_pressure_wx
+                      settings:
+                        name: Pressure
+                        unit_of_measurement: inHg
+                        decimals: 1
+                    main:
+                      min_value: 28
+                      max_value: 32
+                      show_needle: true
+                      show_entity_name: false
+                      show_min_max_values: true
           - type: vertical-stack
             cards:
               - type: markdown
@@ -250,26 +272,34 @@ views:
             color: teal
             tap_action:
               action: toggle
-          - type: tile
-            entity: sensor.hygrometer_humidor_temperature
-            name: Humidor Temp
-            color: deep-orange
-            features:
-              - type: graph
-                entity: sensor.hygrometer_humidor_temperature
-                graph: line
-                hours_to_show: 24
-                detail: 2
-          - type: tile
-            entity: sensor.hygrometer_humidor_humidity
-            name: Humidor Humidity
-            color: indigo
-            features:
-              - type: graph
-                entity: sensor.hygrometer_humidor_humidity
-                graph: line
-                hours_to_show: 24
-                detail: 2
+          - type: custom:extended-gauge-card
+            title: Humidor Temp
+            entity:
+              entity: sensor.hygrometer_humidor_temperature
+              settings:
+                name: Humidor Temp
+                unit_of_measurement: degF
+                decimals: 1
+            main:
+              min_value: 55
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+          - type: custom:extended-gauge-card
+            title: Humidor Humidity
+            entity:
+              entity: sensor.hygrometer_humidor_humidity
+              settings:
+                name: Humidor Humidity
+                unit_of_measurement: '%'
+                decimals: 0
+            main:
+              min_value: 50
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
       - type: grid
         title: Automations & Diagnostics
         column_span: 3
@@ -748,32 +778,40 @@ views:
               ha-card {padding: 16px 20px; font-size: 1.05rem;}
             content: |-
               ### Humidor Snapshot
-              Target comfort band: **68-72  degF** / **62-68 %RH**.
+              Target comfort band: **68-72 degF** / **62-68 %RH**.
               Tiles track live readings while the charts surface weekly trends and plug usage.
       - type: grid
         title: Live Readings
         column_span: 3
         cards:
-          - type: tile
-            entity: sensor.hygrometer_humidor_temperature
-            name: Temperature
-            color: deep-orange
-            features:
-              - type: graph
-                entity: sensor.hygrometer_humidor_temperature
-                graph: line
-                hours_to_show: 24
-                detail: 2
-          - type: tile
-            entity: sensor.hygrometer_humidor_humidity
-            name: Humidity
-            color: indigo
-            features:
-              - type: graph
-                entity: sensor.hygrometer_humidor_humidity
-                graph: line
-                hours_to_show: 24
-                detail: 2
+          - type: custom:extended-gauge-card
+            title: Temperature
+            entity:
+              entity: sensor.hygrometer_humidor_temperature
+              settings:
+                name: Temperature
+                unit_of_measurement: degF
+                decimals: 1
+            main:
+              min_value: 55
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+          - type: custom:extended-gauge-card
+            title: Humidity
+            entity:
+              entity: sensor.hygrometer_humidor_humidity
+              settings:
+                name: Humidity
+                unit_of_measurement: '%'
+                decimals: 0
+            main:
+              min_value: 50
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
           - type: tile
             entity: sensor.humidor_system_status
             name: System Status
@@ -786,16 +824,20 @@ views:
             entity: sensor.humidor_system_health
             name: System Health
             color: blue
-          - type: tile
-            entity: sensor.plug_humidor_power
-            name: Plug Power
-            color: teal
-            features:
-              - type: graph
-                entity: sensor.plug_humidor_power
-                graph: line
-                hours_to_show: 24
-                detail: 2
+          - type: custom:extended-gauge-card
+            title: Plug Power
+            entity:
+              entity: sensor.plug_humidor_power
+              settings:
+                name: Plug Power
+                unit_of_measurement: W
+                decimals: 0
+            main:
+              min_value: 0
+              max_value: 150
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
       - type: grid
         title: Trend Metrics
         column_span: 3

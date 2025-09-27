@@ -1,6 +1,6 @@
 name: Home Assistant - Config Check
 
-on:
+'on':
   pull_request:
     branches: [main]
     paths:
