@@ -251,7 +251,7 @@
 - id: humidor_plug_temp_control
   alias: 'Climate: Humidor Temperature Control'
   description: >
-    Hysteresis control for humidor: ON >74°F, OFF <68°F.
+    Hysteresis control for humidor: ON >74°F, OFF <70°F.
   mode: single
   trigger:
     - platform: numeric_state
@@ -260,14 +260,14 @@
       for: { minutes: 2 }
     - platform: numeric_state
       entity_id: sensor.hygrometer_humidor_temperature
-      below: 68
-      for: { minutes: 2 }
+      below: 70
+      for: { minutes: 1 }
   condition:
     - condition: template
       value_template: >-
         {% set temp = trigger.to_state.state | float(-999) %}
         {% set on = is_state('switch.plug_humidor','on') %}
-        {{ (temp > 74 and not on) or (temp < 68 and on) }}
+        {{ (temp > 74 and not on) or (temp < 70 and on) }}
   action:
     - choose:
         - conditions:
@@ -280,18 +280,18 @@
             - service: logbook.log
               data:
                 name: Humidor Control
-                message: 'Cooling ON - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F'
+                message: 'Cooling ON - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F - Humidity: {{ states("sensor.hygrometer_humidor_humidity") }}%'
         - conditions:
             - condition: numeric_state
               entity_id: sensor.hygrometer_humidor_temperature
-              below: 68
+              below: 70
           sequence:
             - service: switch.turn_off
               target: { entity_id: switch.plug_humidor }
             - service: logbook.log
               data:
                 name: Humidor Control
-                message: 'Cooling OFF - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F'
+                message: 'Cooling OFF - Temperature: {{ states("sensor.hygrometer_humidor_temperature") }}°F - Humidity: {{ states("sensor.hygrometer_humidor_humidity") }}%'
 
 - id: burner_plugs_off_2300
   alias: 'Safety: Nightly Burner Plug Shutoff'

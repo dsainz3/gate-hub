@@ -7,35 +7,37 @@ views:
     max_columns: 3
     badges: []
     sections:
-      - type: grid
+      - type: vertical-stack
         column_span: 3
         cards:
-          - type: chips
-            alignment: center
-            chips:
-              - type: weather
-                entity: weather.kneplatt72
-                name: Local Weather
-              - type: entity
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
                 entity: sensor.kiosk_snapshot_lights_on
                 name: Lights On
                 icon: mdi:lightbulb-group
-              - type: entity
+              - type: tile
                 entity: sensor.kiosk_snapshot_plugs_on
                 name: Plugs Active
                 icon: mdi:power-plug-outline
-              - type: entity
+              - type: tile
                 entity: binary_sensor.kiosk_snapshot_automation_issue
                 name: Automations
                 icon: mdi:robot
-              - type: entity
+              - type: tile
                 entity: sensor.hygrometer_humidor_temperature
-                name: Humidor  degF
+                name: Humidor degF
                 icon: mdi:thermometer
-              - type: entity
+              - type: tile
                 entity: sensor.hygrometer_humidor_humidity
                 name: Humidor %RH
                 icon: mdi:water-percent
+              - type: tile
+                entity: sensor.kiosk_snapshot_aux_readout
+                name: Humidor Climate
+                icon: mdi:coolant-temperature
           - type: markdown
             style: |
               ha-card {padding: 18px 20px;}
@@ -43,7 +45,7 @@ views:
               {% set today = now().strftime('%A, %B %d') %}
               {% set time = now().strftime('%I:%M %p') %}
               ### Welcome
-              {{ today }} · {{ time }}
+              {{ today }} - {{ time }}
               ---
               Snapshot keeps the kiosk focused on game day, climate, and quick actions. Tap any tile to control devices or jump into the detailed tabs below.
       - type: grid
@@ -61,34 +63,37 @@ views:
                   - type: tile
                     entity: sensor.outdoor_temperature_wx
                     name: Temperature
-                    color: '#ef5350'
+                    color: deep-orange
                     features:
                       - type: graph
+                        entity: sensor.outdoor_temperature_wx
                         graph: line
                         hours_to_show: 12
                         detail: 2
                   - type: tile
                     entity: sensor.outdoor_humidity_wx
                     name: Humidity
-                    color: '#42a5f5'
+                    color: indigo
                     features:
                       - type: graph
+                        entity: sensor.outdoor_humidity_wx
                         graph: line
                         hours_to_show: 12
                         detail: 2
                   - type: tile
                     entity: sensor.outdoor_wind_speed_wx
                     name: Wind Speed
-                    color: '#00796b'
+                    color: teal
                     features:
                       - type: graph
+                        entity: sensor.outdoor_wind_speed_wx
                         graph: line
                         hours_to_show: 12
                         detail: 2
                   - type: tile
                     entity: sensor.outdoor_pressure_wx
                     name: Pressure
-                    color: '#5c6bc0'
+                    color: blue
           - type: vertical-stack
             cards:
               - type: markdown
@@ -251,6 +256,7 @@ views:
             color: deep-orange
             features:
               - type: graph
+                entity: sensor.hygrometer_humidor_temperature
                 graph: line
                 hours_to_show: 24
                 detail: 2
@@ -260,6 +266,7 @@ views:
             color: indigo
             features:
               - type: graph
+                entity: sensor.hygrometer_humidor_humidity
                 graph: line
                 hours_to_show: 24
                 detail: 2
@@ -753,6 +760,7 @@ views:
             color: deep-orange
             features:
               - type: graph
+                entity: sensor.hygrometer_humidor_temperature
                 graph: line
                 hours_to_show: 24
                 detail: 2
@@ -762,6 +770,7 @@ views:
             color: indigo
             features:
               - type: graph
+                entity: sensor.hygrometer_humidor_humidity
                 graph: line
                 hours_to_show: 24
                 detail: 2
@@ -783,6 +792,7 @@ views:
             color: teal
             features:
               - type: graph
+                entity: sensor.plug_humidor_power
                 graph: line
                 hours_to_show: 24
                 detail: 2
