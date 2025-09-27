@@ -1,3 +1,15 @@
+---
+title: AI Automation Builder (Archived)
+summary: Historical record of the retired AI-driven automation generator.
+status: archived
+category: archive
+updated: 2025-09-27
+owner: platform-team
+tags:
+  - archive
+  - automation
+---
+
 # AI Automation Builder (Archived Prototype)
 
 The AI-driven automation workflow previously described here has been removed from the active

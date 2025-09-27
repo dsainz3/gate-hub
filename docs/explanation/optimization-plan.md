@@ -1,3 +1,16 @@
+---
+title: Optimization Plan
+summary: Strategy and roadmap for evolving the gate-hub Home Assistant deployment.
+status: active
+category: explanation
+updated: 2025-09-27
+owner: platform-team
+tags:
+  - roadmap
+  - optimization
+  - home-assistant
+---
+
 # Home Assistant Optimization Plan – gate-hub
 
 This document outlines the current repository strengths, identified optimization opportunities, and a step-by-step plan to implement improvements.

@@ -46,7 +46,7 @@ homeassistant:
   enabled: true
 devices:
   '0xb4e8429127eb0000':
-    friendly_name: Light-office
+    friendly_name: Light-Under-Stairs
   '0xc890a81f210a0000':
     friendly_name: Light-Theater-Right
   '0xc890a81f2eca0000':
@@ -74,7 +74,7 @@ devices:
   '0xc890a81ee1de0000':
     friendly_name: Light-garage-right
   '0x1c784ba0ecf80000':
-    friendly_name: Light-spare
+    friendly_name: Light-office
 groups:
   '1':
     friendly_name: '1'
