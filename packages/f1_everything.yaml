@@ -524,6 +524,9 @@ automation:
       - service: input_text.set_value
         target:
           entity_id: input_text.f1_last_flag_message
+        metadata:
+          render_as_template:
+            value: true
         data:
           value: >-
             {{ now() | as_local | strftime('%Y-%m-%d %H:%M') }} — Track status: {{ trigger.to_state.state | upper }}
@@ -533,6 +536,9 @@ automation:
             state: "off"
         then:
           - service: logbook.log
+            metadata:
+              render_as_template:
+                message: true
             data:
               name: F1 Race Control
               message: >-
