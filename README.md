@@ -35,7 +35,7 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 ## Primary Integrations
 
 - Zigbee2MQTT and MQTT bridges for lighting, contact sensors, and LED effects.
-- TP-Link Deco network automation, presence, and watchdog telemetry.
+- TP-Link mesh monitoring powered by the HACS TP-Link Router component and the ha-tplink-deco integration for node health, client telemetry, and watchdog automation.
 - BLE Monitor, Govee lighting, Wunderground PWS, TeamTracker sports feeds.
 - Nebraska Huskers game-day package automating lighting, dashboards, and score effects.
 

@@ -75,6 +75,12 @@ poetry run python scripts/ha_check_portable.py
 
 See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 
+
+## Network Monitoring Integrations
+
+- [TP-Link Router custom component](https://community.home-assistant.io/t/custom-component-tp-link-router-integration-supports-also-mercusys-router/638647) is installed via HACS to expose Deco node health, client rosters, and router controls.
+- [TP-Link Deco custom integration](https://github.com/amosyuen/ha-tplink-deco) is configured alongside it for expanded mesh telemetry and device tracking.
+
 ## Repository Layout
 
 ```

@@ -33,6 +33,11 @@
 - [ ] Move recorder include list from configuration.yaml into secrets file
   - Goal: isolate recorder entity list for easier sharing and secrets management.
   - Considerations: create entry in secrets.yaml (or package), update recorder config to reference secret, ensure reload succeeds.
+- [ ] Restore F1 sensor integration coverage
+  - Current dashboard and automations rely on core sensors that are not yet exposed (`sensor.f1_session_status`, `sensor.f1_track_weather`, `sensor.f1_weather`, `sensor.f1_race_lap_count`, `binary_sensor.f1_safety_car`).
+  - Re-enable the F1 Sensor config entry and ensure these entities are registered so the Network/F1 dashboards stop warning.
+  - Update `dashboards/f1-dashboard.yaml` once telemetry is back to include standings, weather, and race-control metrics.
+
 ## Completed Items
 - [x] Split Huskers Team Tracker dashboard into separate Game Day and Team & Data views for clarity.
 

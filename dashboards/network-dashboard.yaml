@@ -1,0 +1,150 @@
+title: Network Monitor
+views:
+  - title: Overview
+    path: network-overview
+    icon: mdi:access-point-network
+    cards:
+      - type: markdown
+        content: >-
+          {% set summary = state_attr('sensor.network_status_summary', 'last_speedtest') %}
+          ## Network Snapshot
+          **Status:** {{ states('sensor.network_status_summary') }}
+
+          **Ping:** {{ states('sensor.internet_latency') }} ms ({{ 'reachable' if is_state('binary_sensor.internet_reachability', 'on') else 'unreachable' }})
+
+          **Speedtest:** ↓ {{ states('sensor.speedtest_download') }} Mbps · ↑ {{ states('sensor.speedtest_upload') }} Mbps · Ping {{ states('sensor.speedtest_ping') }} ms
+
+          **Last speedtest:** {{ summary if summary not in ['unavailable', 'unknown', None] else 'pending runs' }}
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: tile
+            entity: binary_sensor.internet_reachability
+            name: Internet online
+            color: '#43a047'
+          - type: tile
+            entity: sensor.internet_latency
+            name: Latency (ms)
+            color: '#1e88e5'
+            features:
+              - type: graph
+                graph: line
+                detail: 2
+          - type: tile
+            entity: sensor.speedtest_download
+            name: Download Mbps
+            color: '#3949ab'
+          - type: tile
+            entity: sensor.speedtest_upload
+            name: Upload Mbps
+            color: '#8d6e63'
+          - type: tile
+            entity: sensor.speedtest_ping
+            name: Speedtest ping
+            color: '#ef6c00'
+          - type: tile
+            entity: sensor.network_status_summary
+            name: Summary
+            color: '#6a1b9a'
+      - type: custom:apexcharts-card
+        header:
+          title: Internet Latency – last hour
+        graph_span: 1h
+        span:
+          start: hour
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+        series:
+          - entity: sensor.internet_latency
+            name: Latency (ms)
+            color: '#1e88e5'
+      - type: custom:apexcharts-card
+        header:
+          title: Speedtest Results – last 14 days
+        graph_span: 14d
+        span:
+          end: day
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.speedtest_download
+            name: Download
+            color: '#3949ab'
+            type: line
+            float_precision: 1
+          - entity: sensor.speedtest_upload
+            name: Upload
+            color: '#8d6e63'
+            type: line
+            float_precision: 1
+      - type: entities
+        title: Network sensors
+        show_header_toggle: false
+        entities:
+          - binary_sensor.internet_reachability
+          - sensor.internet_latency
+          - sensor.speedtest_ping
+          - sensor.speedtest_download
+          - sensor.speedtest_upload
+          - sensor.speedtest_last_run
+          - sensor.network_status_summary
+      - type: button
+        name: Run Speedtest Now
+        icon: mdi:speedometer
+        tap_action:
+          action: call-service
+          service: speedtestdotnet.speedtest
+        hold_action:
+          action: none
+  - title: History
+    path: network-history
+    icon: mdi:chart-line
+    cards:
+      - type: custom:apexcharts-card
+        header:
+          title: Latency trend (24h)
+        graph_span: 24h
+        span:
+          start: hour
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+        series:
+          - entity: sensor.internet_latency
+            name: Ping (ms)
+            color: '#1e88e5'
+      - type: custom:apexcharts-card
+        header:
+          title: Speedtest history (60d)
+        graph_span: 60d
+        span:
+          end: day
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.speedtest_download
+            name: Download Mbps
+            color: '#3949ab'
+            type: line
+          - entity: sensor.speedtest_upload
+            name: Upload Mbps
+            color: '#8d6e63'
+            type: line
+          - entity: sensor.speedtest_ping
+            name: Speedtest ping
+            color: '#ef6c00'
+            type: line

@@ -65,6 +65,8 @@ logger:
     homeassistant.components.input_number: debug
     homeassistant.components.input_text: debug
     homeassistant.components.script: debug
+    custom_components.tplink_router: debug
+    tplinkrouterc6u: debug
 
 lovelace:
   resources:
@@ -73,6 +75,8 @@ lovelace:
     - url: /hacsfiles/lovelace-layout-card/layout-card.js
       type: module
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
+      type: module
+    - url: /hacsfiles/apexcharts-card/apexcharts-card.js
       type: module
   dashboards:
     huskers-teamtracker:
@@ -100,4 +104,18 @@ lovelace:
       filename: dashboards/kiosk-dashboard.yaml
       title: Kiosk Package
       icon: mdi:monitor-dashboard
+      show_in_sidebar: true
+
+    network-dashboard:
+      mode: yaml
+      filename: dashboards/network-dashboard.yaml
+      title: Network Monitor
+      icon: mdi:access-point-network
+      show_in_sidebar: true
+
+    f1-dashboard:
+      mode: yaml
+      filename: dashboards/f1-dashboard.yaml
+      title: F1
+      icon: mdi:racing-helmet
       show_in_sidebar: true
