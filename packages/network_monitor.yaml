@@ -4,13 +4,13 @@
 binary_sensor:
   - platform: ping
     name: Internet Reachability
-    host: !secret ping_target_host
+    host: 8.8.8.8
     count: 5
 
 sensor:
   - platform: ping
     name: Internet Latency
-    host: !secret ping_target_host
+    host: 8.8.8.8
     count: 5
     scan_interval: 60
 
