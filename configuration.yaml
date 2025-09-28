@@ -81,8 +81,13 @@ lovelace:
       icon: mdi:scoreboard-outline
       show_in_sidebar: true
       filename: dashboards/huskers-teamtracker.yaml
-
-    weather-dashboard:              # must contain a hyphen
+    f1-scheduler:
+      mode: yaml
+      title: F1
+      icon: mdi:racing-helmet
+      show_in_sidebar: true
+      filename: dashboards/f1-dashboard.yaml
+    weather-dashboard:
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
       title: Weather Package
