@@ -1,0 +1,11 @@
+weather_pws_entity:
+  name: Weather PWS Entity
+  icon: mdi:weather-partly-cloudy
+  initial: !secret weather_primary_entity
+  mode: text
+
+weather_station_label:
+  name: Weather Station Label
+  icon: mdi:sign-text
+  initial: !secret weather_station_label
+  mode: text
