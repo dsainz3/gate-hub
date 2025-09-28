@@ -3,7 +3,7 @@ title: Pre-commit Workflow
 summary: Install, run, and troubleshoot the repository pre-commit hooks.
 status: active
 category: how-to
-updated: 2025-09-27
+updated: 2025-09-28
 owner: dev-experience
 tags:
   - pre-commit
@@ -16,11 +16,11 @@ tags:
 Follow this guide to keep local commits aligned with CI enforcement. Hooks live in `.pre-commit-config.yaml` and run automatically after you install the git hook.
 
 ## Hook Inventory
-- `prettier` (YAML only) for deterministic formatting.
-- `trailing-whitespace`, `end-of-file-fixer`, `mixed-line-ending`, `check-yaml` from `pre-commit-hooks`.
-- `yamllint` using the repository ruleset.
-- `ruff` (lint + autofix) and `ruff-format` for Python code.
-- `hass-config-check` wrapper to surface Home Assistant validation issues during CI (run manually via `ha core check` when needed).
+- `yaml-format` local hook that uses `ruamel.yaml` for deterministic YAML formatting.
+- `trailing-whitespace`, `end-of-file-fixer`, `mixed-line-ending`, `check-yaml` from `pre-commit-hooks` keep whitespace, line endings, and schemas consistent.
+- `yamllint` enforces the style guide defined in `.yamllint.yml`.
+- `ruff` (lint + autofix) and `ruff-format` maintain Python quality.
+- `hass-config-check` wraps `.ci/run_hass_check.py` to mirror the Home Assistant validation performed in CI (rerun locally or via `ha core check` for deeper investigation).
 
 ## Setup
 
@@ -36,7 +36,9 @@ pre-commit run --all-files        # run everything once
 SKIP=ruff,ruff-format pre-commit run --all-files   # temporary skip (remember to re-run!)
 ```
 
-Hooks that auto-fix files (`ruff --fix`, `prettier`, etc.) require you to re-stage the changes before committing.
+Hooks that auto-fix files (`ruff --fix`, `yaml-format`, etc.) require you to re-stage the changes before committing.
+
+> ✅ **Keep PRs unblocked:** Run `pre-commit run --all-files` before pushing a branch. CI executes the same hooks, so a clean local run is the fastest way to avoid “red” pull requests and reviewer churn.
 
 ## Troubleshooting
 - Upgrade hooks with `pre-commit autoupdate` then re-run to repin versions.
