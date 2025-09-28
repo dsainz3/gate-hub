@@ -1,691 +1,691 @@
 # templates.yaml  (included via: template: !include templates.yaml)
 # Do NOT add a top-level "template:" key here. 9
 
-- sensor:
+  - sensor:
     ########################################################################
     # WEATHER & ENVIRONMENT — normalized copies with stable units/classes
     ########################################################################
-    - name: Relative Humidity
-      unique_id: kneplatt72_relative_humidity_fixed
-      state: "{{ states('sensor.kneplatt72_relative_humidity') }}"
-      unit_of_measurement: '%'
-      device_class: humidity
+      - name: Relative Humidity
+        unique_id: kneplatt72_relative_humidity_fixed
+        state: "{{ states('sensor.kneplatt72_relative_humidity') }}"
+        unit_of_measurement: '%'
+        device_class: humidity
 
-    - name: Solar Radiation
-      unique_id: kneplatt72_solar_radiation_fixed
-      availability: >-
-        {{ states('sensor.kneplatt72_solar_radiation') not in ['', 'unknown', 'unavailable', None] }}
-      state: >-
-        {{ states('sensor.kneplatt72_solar_radiation') | float(0) }}
-      unit_of_measurement: 'W/m²'
-      device_class: irradiance
-      state_class: measurement
-      icon: mdi:weather-sunny
-    - name: Temperature
-      unique_id: kneplatt72_temperature_fixed
-      state: "{{ states('sensor.kneplatt72_temperature') }}"
-      unit_of_measurement: '°F'
-      device_class: temperature
+      - name: Solar Radiation
+        unique_id: kneplatt72_solar_radiation_fixed
+        availability: >-
+          {{ states('sensor.kneplatt72_solar_radiation') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_solar_radiation') | float(0) }}
+        unit_of_measurement: 'W/m²'
+        device_class: irradiance
+        state_class: measurement
+        icon: mdi:weather-sunny
+      - name: Temperature
+        unique_id: kneplatt72_temperature_fixed
+        state: "{{ states('sensor.kneplatt72_temperature') }}"
+        unit_of_measurement: '°F'
+        device_class: temperature
 
-    - name: Heat Index
-      unique_id: kneplatt72_heat_index_fixed
-      state: "{{ states('sensor.kneplatt72_heat_index') }}"
-      unit_of_measurement: '°F'
-      device_class: temperature
+      - name: Heat Index
+        unique_id: kneplatt72_heat_index_fixed
+        state: "{{ states('sensor.kneplatt72_heat_index') }}"
+        unit_of_measurement: '°F'
+        device_class: temperature
 
-    - name: Wind Chill
-      unique_id: kneplatt72_wind_chill_fixed
-      state: "{{ states('sensor.kneplatt72_wind_chill') }}"
-      unit_of_measurement: '°F'
-      device_class: temperature
+      - name: Wind Chill
+        unique_id: kneplatt72_wind_chill_fixed
+        state: "{{ states('sensor.kneplatt72_wind_chill') }}"
+        unit_of_measurement: '°F'
+        device_class: temperature
 
-    - name: Dew Point
-      unique_id: kneplatt72_dewpoint_fixed
-      state: "{{ states('sensor.kneplatt72_dewpoint') }}"
-      unit_of_measurement: '°F'
-      device_class: temperature
+      - name: Dew Point
+        unique_id: kneplatt72_dewpoint_fixed
+        state: "{{ states('sensor.kneplatt72_dewpoint') }}"
+        unit_of_measurement: '°F'
+        device_class: temperature
 
-    - name: Wind Speed
-      unique_id: kneplatt72_wind_speed_fixed
-      state: "{{ states('sensor.kneplatt72_wind_speed') }}"
-      unit_of_measurement: 'mph'
-      device_class: wind_speed
+      - name: Wind Speed
+        unique_id: kneplatt72_wind_speed_fixed
+        state: "{{ states('sensor.kneplatt72_wind_speed') }}"
+        unit_of_measurement: 'mph'
+        device_class: wind_speed
 
-    - name: Wind Gust
-      unique_id: kneplatt72_wind_gust_fixed
-      state: "{{ states('sensor.kneplatt72_wind_gust') }}"
-      unit_of_measurement: 'mph'
-      device_class: wind_speed
+      - name: Wind Gust
+        unique_id: kneplatt72_wind_gust_fixed
+        state: "{{ states('sensor.kneplatt72_wind_gust') }}"
+        unit_of_measurement: 'mph'
+        device_class: wind_speed
 
     ########################################################################
     # WEATHER DERIVED — trends using existing WU change sensors
     ########################################################################
-    - name: KNEPLATT72 Pressure Trend
-      unique_id: kneplatt72_pressure_trend
-      device_class: enum
-      availability: >
-        {{ has_value('sensor.kneplatt72_pressure') and has_value('sensor.kneplatt72_pressure_24h_change') }}
-      state: >
-        {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
-        {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
-        {% set delta_inhg = change if unit == 'inHg'
-            else (change / 33.8638866667) if unit in ['hPa', 'mbar']
-            else change %}
-        {% set threshold = 0.02 %}
-        {% if delta_inhg >= threshold %}rising
-        {% elif delta_inhg <= -threshold %}falling
-        {% else %}steady
-        {% endif %}
-      icon: >
-        {% if this.state == 'rising' %}mdi:arrow-up-bold
-        {% elif this.state == 'falling' %}mdi:arrow-down-bold
-        {% elif this.state == 'steady' %}mdi:swap-horizontal-bold
-        {% else %}mdi:help-circle-outline
-        {% endif %}
-      attributes:
-        friendly_name: Pressure Trend (24h)
-        raw_change_value: "{{ states('sensor.kneplatt72_pressure_24h_change') }}"
-        current_pressure: "{{ states('sensor.kneplatt72_pressure') }}"
-        current_unit: "{{ state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') }}"
-        delta_hpa: >
+      - name: KNEPLATT72 Pressure Trend
+        unique_id: kneplatt72_pressure_trend
+        device_class: enum
+        availability: >
+          {{ has_value('sensor.kneplatt72_pressure') and has_value('sensor.kneplatt72_pressure_24h_change') }}
+        state: >
           {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
           {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
-          {{ (change if unit in ['hPa', 'mbar'] else (change * 33.8638866667))  | round(2) }}
-        delta_inhg: >
-          {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
-          {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
-          {{ (change if unit == 'inHg' else (change / 33.8638866667)) | round(3) }}
-        threshold_hpa: '0.68'
-        threshold_inhg: '0.02'
-
-    - name: KNEPLATT72 Temperature Trend
-      unique_id: kneplatt72_temperature_trend
-      device_class: enum
-      availability: "{{ has_value('sensor.kneplatt72_temperature_24h_change') }}"
-      state: >
-        {% set change = states('sensor.kneplatt72_temperature_24h_change') | float('nan') %}
-        {% if change == change %}
-          {% set threshold = 2.0 %}
-          {% if change > threshold %}rising
-          {% elif change < -threshold %}falling
+          {% set delta_inhg = change if unit == 'inHg'
+              else (change / 33.8638866667) if unit in ['hPa', 'mbar']
+              else change %}
+          {% set threshold = 0.02 %}
+          {% if delta_inhg >= threshold %}rising
+          {% elif delta_inhg <= -threshold %}falling
           {% else %}steady
           {% endif %}
-        {% else %}unknown
-        {% endif %}
-      icon: >
-        {% set change = states('sensor.kneplatt72_temperature_24h_change') | float(0) %}
-        {% if change > 2.0 %}mdi:thermometer-chevron-up
-        {% elif change < -2.0 %}mdi:thermometer-chevron-down
-        {% else %}mdi:thermometer
-        {% endif %}
-      attributes:
-        friendly_name: Temperature Trend (24h)
-        delta_degf: "{{ states('sensor.kneplatt72_temperature_24h_change') | float(0) | round(1) }}"
-        threshold_degf: '2.0'
-        current_temperature: "{{ states('sensor.kneplatt72_temperature') }}"
-
-    - name: KNEPLATT72 Humidity Trend
-      unique_id: kneplatt72_humidity_trend
-      device_class: enum
-      availability: "{{ has_value('sensor.kneplatt72_humidity_24h_change') }}"
-      state: >
-        {% set change = states('sensor.kneplatt72_humidity_24h_change') | float('nan') %}
-        {% if change == change %}
-          {% set threshold = 5.0 %}
-          {% if change > threshold %}rising
-          {% elif change < -threshold %}falling
-          {% else %}steady
+        icon: >
+          {% if this.state == 'rising' %}mdi:arrow-up-bold
+          {% elif this.state == 'falling' %}mdi:arrow-down-bold
+          {% elif this.state == 'steady' %}mdi:swap-horizontal-bold
+          {% else %}mdi:help-circle-outline
           {% endif %}
-        {% else %}unknown
-        {% endif %}
-      icon: >
-        {% set change = states('sensor.kneplatt72_humidity_24h_change') | float(0) %}
-        {% if change > 5.0 %}mdi:water-plus
-        {% elif change < -5.0 %}mdi:water-minus
-        {% else %}mdi:water-percent
-        {% endif %}
-      attributes:
-        friendly_name: Humidity Trend (24h)
-        delta_percent: "{{ states('sensor.kneplatt72_humidity_24h_change') | float(0) | round(1) }}"
-        threshold_percent: '5.0'
-        current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
+        attributes:
+          friendly_name: Pressure Trend (24h)
+          raw_change_value: "{{ states('sensor.kneplatt72_pressure_24h_change') }}"
+          current_pressure: "{{ states('sensor.kneplatt72_pressure') }}"
+          current_unit: "{{ state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') }}"
+          delta_hpa: >
+            {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
+            {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+            {{ (change if unit in ['hPa', 'mbar'] else (change * 33.8638866667))  | round(2) }}
+          delta_inhg: >
+            {% set unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('') %}
+            {% set change = states('sensor.kneplatt72_pressure_24h_change') | float(0) %}
+            {{ (change if unit == 'inHg' else (change / 33.8638866667)) | round(3) }}
+          threshold_hpa: '0.68'
+          threshold_inhg: '0.02'
+
+      - name: KNEPLATT72 Temperature Trend
+        unique_id: kneplatt72_temperature_trend
+        device_class: enum
+        availability: "{{ has_value('sensor.kneplatt72_temperature_24h_change') }}"
+        state: >
+          {% set change = states('sensor.kneplatt72_temperature_24h_change') | float('nan') %}
+          {% if change == change %}
+            {% set threshold = 2.0 %}
+            {% if change > threshold %}rising
+            {% elif change < -threshold %}falling
+            {% else %}steady
+            {% endif %}
+          {% else %}unknown
+          {% endif %}
+        icon: >
+          {% set change = states('sensor.kneplatt72_temperature_24h_change') | float(0) %}
+          {% if change > 2.0 %}mdi:thermometer-chevron-up
+          {% elif change < -2.0 %}mdi:thermometer-chevron-down
+          {% else %}mdi:thermometer
+          {% endif %}
+        attributes:
+          friendly_name: Temperature Trend (24h)
+          delta_degf: "{{ states('sensor.kneplatt72_temperature_24h_change') | float(0) | round(1) }}"
+          threshold_degf: '2.0'
+          current_temperature: "{{ states('sensor.kneplatt72_temperature') }}"
+
+      - name: KNEPLATT72 Humidity Trend
+        unique_id: kneplatt72_humidity_trend
+        device_class: enum
+        availability: "{{ has_value('sensor.kneplatt72_humidity_24h_change') }}"
+        state: >
+          {% set change = states('sensor.kneplatt72_humidity_24h_change') | float('nan') %}
+          {% if change == change %}
+            {% set threshold = 5.0 %}
+            {% if change > threshold %}rising
+            {% elif change < -threshold %}falling
+            {% else %}steady
+            {% endif %}
+          {% else %}unknown
+          {% endif %}
+        icon: >
+          {% set change = states('sensor.kneplatt72_humidity_24h_change') | float(0) %}
+          {% if change > 5.0 %}mdi:water-plus
+          {% elif change < -5.0 %}mdi:water-minus
+          {% else %}mdi:water-percent
+          {% endif %}
+        attributes:
+          friendly_name: Humidity Trend (24h)
+          delta_percent: "{{ states('sensor.kneplatt72_humidity_24h_change') | float(0) | round(1) }}"
+          threshold_percent: '5.0'
+          current_humidity: "{{ states('sensor.kneplatt72_relative_humidity') }}"
 
     ########################################################################
     # NETWORK / CONNECTIVITY
     ########################################################################
-    - name: Network Active Hosts (Nmap)
-      unique_id: network_nmap_active_hosts
-      icon: mdi:lan
-      availability: "{{ integration_entities('nmap_tracker') | length > 0 }}"
-      state: >
-        {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
-        {% set active_devices = expand(nmap_entities)
-            | selectattr('domain', 'equalto', 'device_tracker')
-            | selectattr('state', 'equalto', 'home')
-            | list %}
-        {{ active_devices | length }}
-      attributes:
-        friendly_name: Active Network Hosts
-        total_tracked: >
+      - name: Network Active Hosts (Nmap)
+        unique_id: network_nmap_active_hosts
+        icon: mdi:lan
+        availability: "{{ integration_entities('nmap_tracker') | length > 0 }}"
+        state: >
           {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
-          {{ expand(nmap_entities) | selectattr('domain', 'equalto', 'device_tracker') | list | length }}
-        integration: nmap_tracker
+          {% set active_devices = expand(nmap_entities)
+              | selectattr('domain', 'equalto', 'device_tracker')
+              | selectattr('state', 'equalto', 'home')
+              | list %}
+          {{ active_devices | length }}
+        attributes:
+          friendly_name: Active Network Hosts
+          total_tracked: >
+            {% set nmap_entities = integration_entities('nmap_tracker') | default([]) %}
+            {{ expand(nmap_entities) | selectattr('domain', 'equalto', 'device_tracker') | list | length }}
+          integration: nmap_tracker
 
-    - name: Network Clients Online (TP-Link)
-      unique_id: network_tplink_clients_online
-      icon: mdi:wifi
-      availability: "{{ integration_entities('tplink_router') | length > 0 }}"
-      state: >
-        {% set tplink_entities = integration_entities('tplink_router') | default([]) %}
-        {% set online_devices = expand(tplink_entities)
-            | selectattr('domain', 'equalto', 'device_tracker')
-            | selectattr('state', 'equalto', 'home')
-            | list %}
-        {{ online_devices | length }}
-      attributes:
-        friendly_name: TP-Link Clients Online
-        integration: tplink_router
+      - name: Network Clients Online (TP-Link)
+        unique_id: network_tplink_clients_online
+        icon: mdi:wifi
+        availability: "{{ integration_entities('tplink_router') | length > 0 }}"
+        state: >
+          {% set tplink_entities = integration_entities('tplink_router') | default([]) %}
+          {% set online_devices = expand(tplink_entities)
+              | selectattr('domain', 'equalto', 'device_tracker')
+              | selectattr('state', 'equalto', 'home')
+              | list %}
+          {{ online_devices | length }}
+        attributes:
+          friendly_name: TP-Link Clients Online
+          integration: tplink_router
 
-    - name: Internet Connectivity Status
-      unique_id: internet_connectivity_status
-      availability: "{{ has_value('binary_sensor.internet_reachable') }}"
-      state: >
-        {% if is_state('binary_sensor.internet_reachable', 'on') %}
-          {% set latency = states('sensor.internet_reachable_latency') | float(-1) %}
-          {% if latency >= 0 %}
-            Online ({{ latency | round(0) }}ms)
+      - name: Internet Connectivity Status
+        unique_id: internet_connectivity_status
+        availability: "{{ has_value('binary_sensor.internet_reachable') }}"
+        state: >
+          {% if is_state('binary_sensor.internet_reachable', 'on') %}
+            {% set latency = states('sensor.internet_reachable_latency') | float(-1) %}
+            {% if latency >= 0 %}
+              Online ({{ latency | round(0) }}ms)
+            {% else %}
+              Online
+            {% endif %}
           {% else %}
-            Online
+            Offline
           {% endif %}
-        {% else %}
-          Offline
-        {% endif %}
-      icon: >
-        {% if is_state('binary_sensor.internet_reachable', 'on') %}mdi:check-network
-        {% else %}mdi:close-network
-        {% endif %}
-      attributes:
-        friendly_name: Internet Status
-        is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
-        latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
+        icon: >
+          {% if is_state('binary_sensor.internet_reachable', 'on') %}mdi:check-network
+          {% else %}mdi:close-network
+          {% endif %}
+        attributes:
+          friendly_name: Internet Status
+          is_online: "{{ is_state('binary_sensor.internet_reachable', 'on') }}"
+          latency_ms: "{{ states('sensor.internet_reachable_latency') | float(-1) | round(0) }}"
 
     ########################################################################
     # HUSKERS — TeamTracker helpers (kept separate from ESPN package)
     ########################################################################
-    - name: huskers_team_name
-      unique_id: huskers_team_name_tt
-      state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
+      - name: huskers_team_name
+        unique_id: huskers_team_name_tt
+        state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
 
-    - name: huskers_opponent_name
-      unique_id: huskers_opponent_name_tt
-      state: "{{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}"
+      - name: huskers_opponent_name
+        unique_id: huskers_opponent_name_tt
+        state: "{{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}"
 
-    - name: huskers_team_score
-      unique_id: huskers_team_score_tt
-      state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
+      - name: huskers_team_score
+        unique_id: huskers_team_score_tt
+        state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
 
-    - name: huskers_opponent_score
-      unique_id: huskers_opponent_score_tt
-      state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
+      - name: huskers_opponent_score
+        unique_id: huskers_opponent_score_tt
+        state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
 
-    - name: Huskers Quarter
-      unique_id: huskers_quarter
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
-      icon: mdi:numeric
+      - name: Huskers Quarter
+        unique_id: huskers_quarter
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
+        icon: mdi:numeric
 
-    - name: huskers_game_clock_ct
-      unique_id: huskers_game_clock_ct_tt
-      state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
+      - name: huskers_game_clock_ct
+        unique_id: huskers_game_clock_ct_tt
+        state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
 
-    - name: huskers_kickoff_time_ct
-      unique_id: huskers_kickoff_time_ct_tt
-      state: >-
-        {% set iso = state_attr('sensor.husker_team','date') %}
-        {% if iso not in [None, '', 'unknown', 'unavailable'] %}
-          {% set ts = as_timestamp(iso) %}
-          {% if ts is not none %}
-            {{ ts | timestamp_custom('%-I:%M %p CT', True) }}
+      - name: huskers_kickoff_time_ct
+        unique_id: huskers_kickoff_time_ct_tt
+        state: >-
+          {% set iso = state_attr('sensor.husker_team','date') %}
+          {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+            {% set ts = as_timestamp(iso) %}
+            {% if ts is not none %}
+              {{ ts | timestamp_custom('%-I:%M %p CT', True) }}
+            {% else %}
+              unknown
+            {% endif %}
           {% else %}
             unknown
           {% endif %}
-        {% else %}
-          unknown
-        {% endif %}
 
     # Keep this alias so your recorder/dashboard references to sensor.huskers_kickoff_in keep working.
     # It’s always numeric to avoid the "non-numeric 'unknown'" error.
-    - name: huskers_kickoff_in
-      unique_id: huskers_kickoff_in_alias
-      unit_of_measurement: 'min'
-      state: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
-    - name: huskers_team_logo
-      unique_id: huskers_team_logo_tt
-      icon: mdi:shield-football
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: "{{ state_attr('sensor.husker_team','team_logo') or '' }}"
+      - name: huskers_kickoff_in
+        unique_id: huskers_kickoff_in_alias
+        unit_of_measurement: 'min'
+        state: "{{ states('sensor.huskers_kickoff_in_effective') | int(0) }}"
+      - name: huskers_team_logo
+        unique_id: huskers_team_logo_tt
+        icon: mdi:shield-football
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: "{{ state_attr('sensor.husker_team','team_logo') or '' }}"
 
-    - name: huskers_opponent_logo
-      unique_id: huskers_opponent_logo_tt
-      icon: mdi:shield-outline
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: "{{ state_attr('sensor.husker_team','opponent_logo') or '' }}"
+      - name: huskers_opponent_logo
+        unique_id: huskers_opponent_logo_tt
+        icon: mdi:shield-outline
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: "{{ state_attr('sensor.husker_team','opponent_logo') or '' }}"
 
-    - name: huskers_team_record
-      unique_id: huskers_team_record_tt
-      icon: mdi:clipboard-text
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set rec = state_attr('sensor.husker_team','team_record') %}
-        {% if rec in [None,'','unknown','unavailable'] %}
-          {% set fallback = states('sensor.huskers_record_dashboard') %}
-          {% if fallback in ['unknown','unavailable','None',''] %}
+      - name: huskers_team_record
+        unique_id: huskers_team_record_tt
+        icon: mdi:clipboard-text
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set rec = state_attr('sensor.husker_team','team_record') %}
+          {% if rec in [None,'','unknown','unavailable'] %}
+            {% set fallback = states('sensor.huskers_record_dashboard') %}
+            {% if fallback in ['unknown','unavailable','None',''] %}
+              N/A
+            {% else %}
+              {{ fallback }}
+            {% endif %}
+          {% else %}
+            {{ rec }}
+          {% endif %}
+
+      - name: huskers_opponent_record
+        unique_id: huskers_opponent_record_tt
+        icon: mdi:clipboard-text-outline
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set rec = state_attr('sensor.husker_team','opponent_record') %}
+          {% if rec in [None,'','unknown','unavailable'] %}
             N/A
           {% else %}
-            {{ fallback }}
+            {{ rec }}
           {% endif %}
-        {% else %}
-          {{ rec }}
-        {% endif %}
 
-    - name: huskers_opponent_record
-      unique_id: huskers_opponent_record_tt
-      icon: mdi:clipboard-text-outline
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set rec = state_attr('sensor.husker_team','opponent_record') %}
-        {% if rec in [None,'','unknown','unavailable'] %}
-          N/A
-        {% else %}
-          {{ rec }}
-        {% endif %}
+      - name: huskers_team_rank
+        unique_id: huskers_team_rank_tt
+        icon: mdi:numeric-1-box
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set rank = state_attr('sensor.husker_team','team_rank') %}
+          {% if rank in [None,'','unknown','unavailable'] %}
+            Unranked
+          {% else %}
+            #{{ rank }}
+          {% endif %}
 
-    - name: huskers_team_rank
-      unique_id: huskers_team_rank_tt
-      icon: mdi:numeric-1-box
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set rank = state_attr('sensor.husker_team','team_rank') %}
-        {% if rank in [None,'','unknown','unavailable'] %}
-          Unranked
-        {% else %}
-          #{{ rank }}
-        {% endif %}
+      - name: huskers_opponent_rank
+        unique_id: huskers_opponent_rank_tt
+        icon: mdi:numeric-1-box-multiple
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set rank = state_attr('sensor.husker_team','opponent_rank') %}
+          {% if rank in [None,'','unknown','unavailable'] %}
+            Unranked
+          {% else %}
+            #{{ rank }}
+          {% endif %}
 
-    - name: huskers_opponent_rank
-      unique_id: huskers_opponent_rank_tt
-      icon: mdi:numeric-1-box-multiple
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set rank = state_attr('sensor.husker_team','opponent_rank') %}
-        {% if rank in [None,'','unknown','unavailable'] %}
-          Unranked
-        {% else %}
-          #{{ rank }}
-        {% endif %}
+      - name: huskers_event_url
+        unique_id: huskers_event_url_tt
+        icon: mdi:link-variant
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: "{{ state_attr('sensor.husker_team','event_url') or 'https://www.espn.com/college-football/' }}"
 
-    - name: huskers_event_url
-      unique_id: huskers_event_url_tt
-      icon: mdi:link-variant
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: "{{ state_attr('sensor.husker_team','event_url') or 'https://www.espn.com/college-football/' }}"
+      - name: huskers_venue
+        unique_id: huskers_venue_tt
+        icon: mdi:stadium
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set venue = state_attr('sensor.husker_team','venue') %}
+          {% if venue in [None,'','unknown','unavailable'] %}
+            Venue TBA
+          {% else %}
+            {{ venue }}
+          {% endif %}
 
-    - name: huskers_venue
-      unique_id: huskers_venue_tt
-      icon: mdi:stadium
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set venue = state_attr('sensor.husker_team','venue') %}
-        {% if venue in [None,'','unknown','unavailable'] %}
-          Venue TBA
-        {% else %}
-          {{ venue }}
-        {% endif %}
+      - name: huskers_location
+        unique_id: huskers_location_tt
+        icon: mdi:map-marker
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set loc = state_attr('sensor.husker_team','location') %}
+          {% if loc in [None,'','unknown','unavailable'] %}
+            Location TBA
+          {% else %}
+            {{ loc }}
+          {% endif %}
 
-    - name: huskers_location
-      unique_id: huskers_location_tt
-      icon: mdi:map-marker
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set loc = state_attr('sensor.husker_team','location') %}
-        {% if loc in [None,'','unknown','unavailable'] %}
-          Location TBA
-        {% else %}
-          {{ loc }}
-        {% endif %}
+      - name: huskers_tv_network
+        unique_id: huskers_tv_network_tt
+        icon: mdi:television-play
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set tv = state_attr('sensor.husker_team','tv_network') %}
+          {% if tv in [None,'','unknown','unavailable'] %}
+            Network TBA
+          {% else %}
+            {{ tv }}
+          {% endif %}
 
-    - name: huskers_tv_network
-      unique_id: huskers_tv_network_tt
-      icon: mdi:television-play
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set tv = state_attr('sensor.husker_team','tv_network') %}
-        {% if tv in [None,'','unknown','unavailable'] %}
-          Network TBA
-        {% else %}
-          {{ tv }}
-        {% endif %}
+      - name: huskers_odds
+        unique_id: huskers_odds_tt
+        icon: mdi:chart-line
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set odds = state_attr('sensor.husker_team','odds') %}
+          {% if odds in [None,'','unknown','unavailable'] %}
+            Line TBA
+          {% else %}
+            {{ odds }}
+          {% endif %}
 
-    - name: huskers_odds
-      unique_id: huskers_odds_tt
-      icon: mdi:chart-line
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set odds = state_attr('sensor.husker_team','odds') %}
-        {% if odds in [None,'','unknown','unavailable'] %}
-          Line TBA
-        {% else %}
-          {{ odds }}
-        {% endif %}
+      - name: huskers_overunder
+        unique_id: huskers_overunder_tt
+        icon: mdi:scale-balance
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set ou = state_attr('sensor.husker_team','overunder') %}
+          {% if ou in [None,'','unknown','unavailable'] %}
+            O/U TBA
+          {% else %}
+            O/U {{ ou }}
+          {% endif %}
 
-    - name: huskers_overunder
-      unique_id: huskers_overunder_tt
-      icon: mdi:scale-balance
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set ou = state_attr('sensor.husker_team','overunder') %}
-        {% if ou in [None,'','unknown','unavailable'] %}
-          O/U TBA
-        {% else %}
-          O/U {{ ou }}
-        {% endif %}
+      - name: huskers_series_summary
+        unique_id: huskers_series_summary_tt
+        icon: mdi:history
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set summary = state_attr('sensor.husker_team','series_summary') %}
+          {% if summary in [None,'','unknown','unavailable'] %}
+            Series history unavailable
+          {% else %}
+            {{ summary }}
+          {% endif %}
 
-    - name: huskers_series_summary
-      unique_id: huskers_series_summary_tt
-      icon: mdi:history
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set summary = state_attr('sensor.husker_team','series_summary') %}
-        {% if summary in [None,'','unknown','unavailable'] %}
-          Series history unavailable
-        {% else %}
-          {{ summary }}
-        {% endif %}
+      - name: huskers_last_play
+        unique_id: huskers_last_play_tt
+        icon: mdi:football
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set play = state_attr('sensor.husker_team','last_play') %}
+          {% if play in [None,'','unknown','unavailable'] %}
+            No recent play
+          {% else %}
+            {{ play }}
+          {% endif %}
 
-    - name: huskers_last_play
-      unique_id: huskers_last_play_tt
-      icon: mdi:football
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set play = state_attr('sensor.husker_team','last_play') %}
-        {% if play in [None,'','unknown','unavailable'] %}
-          No recent play
-        {% else %}
-          {{ play }}
-        {% endif %}
+      - name: huskers_down_distance
+        unique_id: huskers_down_distance_tt
+        icon: mdi:numeric
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set info = state_attr('sensor.husker_team','down_distance_text') %}
+          {% if info in [None,'','unknown','unavailable'] %}
+            N/A
+          {% else %}
+            {{ info }}
+          {% endif %}
 
-    - name: huskers_down_distance
-      unique_id: huskers_down_distance_tt
-      icon: mdi:numeric
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set info = state_attr('sensor.husker_team','down_distance_text') %}
-        {% if info in [None,'','unknown','unavailable'] %}
-          N/A
-        {% else %}
-          {{ info }}
-        {% endif %}
+      - name: huskers_possession
+        unique_id: huskers_possession_tt
+        icon: mdi:football-helmet
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set pos = state_attr('sensor.husker_team','possession') %}
+          {% set huskers_id = state_attr('sensor.husker_team','team_id') %}
+          {% set opp_id = state_attr('sensor.husker_team','opponent_id') %}
+          {% if pos in [None,'','unknown','unavailable'] %}
+            None
+          {% elif pos|string == huskers_id|string %}
+            Nebraska
+          {% elif pos|string == opp_id|string %}
+            {{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}
+          {% else %}
+            {{ pos }}
+          {% endif %}
 
-    - name: huskers_possession
-      unique_id: huskers_possession_tt
-      icon: mdi:football-helmet
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set pos = state_attr('sensor.husker_team','possession') %}
-        {% set huskers_id = state_attr('sensor.husker_team','team_id') %}
-        {% set opp_id = state_attr('sensor.husker_team','opponent_id') %}
-        {% if pos in [None,'','unknown','unavailable'] %}
-          None
-        {% elif pos|string == huskers_id|string %}
-          Nebraska
-        {% elif pos|string == opp_id|string %}
-          {{ state_attr('sensor.husker_team','opponent_long_name') or 'Opponent' }}
-        {% else %}
-          {{ pos }}
-        {% endif %}
+      - name: huskers_team_timeouts
+        unique_id: huskers_team_timeouts_tt
+        icon: mdi:timer-outline
+        availability: >-
+          {% set to = state_attr('sensor.husker_team','team_timeouts') %}
+          {{ to not in [None, '', 'unknown', 'unavailable'] }}
+        state: >-
+          {% set to = state_attr('sensor.husker_team','team_timeouts') %}
+          {{ to | int(0) }}
 
-    - name: huskers_team_timeouts
-      unique_id: huskers_team_timeouts_tt
-      icon: mdi:timer-outline
-      availability: >-
-        {% set to = state_attr('sensor.husker_team','team_timeouts') %}
-        {{ to not in [None, '', 'unknown', 'unavailable'] }}
-      state: >-
-        {% set to = state_attr('sensor.husker_team','team_timeouts') %}
-        {{ to | int(0) }}
+      - name: huskers_opponent_timeouts
+        unique_id: huskers_opponent_timeouts_tt
+        icon: mdi:timer-sand
+        availability: >-
+          {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
+          {{ to not in [None, '', 'unknown', 'unavailable'] }}
+        state: >-
+          {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
+          {{ to | int(0) }}
 
-    - name: huskers_opponent_timeouts
-      unique_id: huskers_opponent_timeouts_tt
-      icon: mdi:timer-sand
-      availability: >-
-        {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
-        {{ to not in [None, '', 'unknown', 'unavailable'] }}
-      state: >-
-        {% set to = state_attr('sensor.husker_team','opponent_timeouts') %}
-        {{ to | int(0) }}
+      - name: huskers_win_probability
+        unique_id: huskers_win_probability_tt
+        icon: mdi:percent
+        unit_of_measurement: '%'
+        availability: >-
+          {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
+          {{ prob not in [None, '', 'unknown', 'unavailable'] }}
+        state: >-
+          {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
+          {{ (prob | float(0) * 100) | round(1) }}
 
-    - name: huskers_win_probability
-      unique_id: huskers_win_probability_tt
-      icon: mdi:percent
-      unit_of_measurement: '%'
-      availability: >-
-        {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
-        {{ prob not in [None, '', 'unknown', 'unavailable'] }}
-      state: >-
-        {% set prob = state_attr('sensor.husker_team','team_win_probability') %}
-        {{ (prob | float(0) * 100) | round(1) }}
+      - name: huskers_opponent_win_probability
+        unique_id: huskers_opponent_win_probability_tt
+        icon: mdi:percent-outline
+        unit_of_measurement: '%'
+        availability: >-
+          {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
+          {{ prob not in [None, '', 'unknown', 'unavailable'] }}
+        state: >-
+          {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
+          {{ (prob | float(0) * 100) | round(1) }}
 
-    - name: huskers_opponent_win_probability
-      unique_id: huskers_opponent_win_probability_tt
-      icon: mdi:percent-outline
-      unit_of_measurement: '%'
-      availability: >-
-        {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
-        {{ prob not in [None, '', 'unknown', 'unavailable'] }}
-      state: >-
-        {% set prob = state_attr('sensor.husker_team','opponent_win_probability') %}
-        {{ (prob | float(0) * 100) | round(1) }}
+      - name: huskers_game_phase_label
+        unique_id: huskers_game_phase_label_tt
+        icon: mdi:timeline-clock
+        availability: '{{ True }}'
+        state: >-
+          {% set phase = states('sensor.husker_team') %}
+          {% set status = states('sensor.huskers_game_status_espn') %}
+          {% set mapping = {'PRE':'Pregame','IN':'Live Game','POST':'Final'} %}
+          {% if phase in mapping %}
+            {{ mapping[phase] }}
+          {% elif status not in ['unknown','unavailable',''] %}
+            {{ status }}
+          {% else %}
+            Game status unavailable
+          {% endif %}
 
-    - name: huskers_game_phase_label
-      unique_id: huskers_game_phase_label_tt
-      icon: mdi:timeline-clock
-      availability: '{{ True }}'
-      state: >-
-        {% set phase = states('sensor.husker_team') %}
-        {% set status = states('sensor.huskers_game_status_espn') %}
-        {% set mapping = {'PRE':'Pregame','IN':'Live Game','POST':'Final'} %}
-        {% if phase in mapping %}
-          {{ mapping[phase] }}
-        {% elif status not in ['unknown','unavailable',''] %}
-          {{ status }}
-        {% else %}
-          Game status unavailable
-        {% endif %}
+      - name: huskers_game_detail
+        unique_id: huskers_game_detail_tt
+        icon: mdi:information-outline
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set kickoff = states('sensor.huskers_kickoff_time_ct') %}
+          {% set tv = state_attr('sensor.husker_team','tv_network') %}
+          {% set odds = state_attr('sensor.husker_team','odds') %}
+          {% set loc = state_attr('sensor.husker_team','location') %}
+          {% set parts = [] %}
+          {% if kickoff not in ['unknown','unavailable',''] %}
+            {% set parts = parts + [kickoff] %}
+          {% endif %}
+          {% if tv not in [None,'','unknown','unavailable'] %}
+            {% set parts = parts + [tv] %}
+          {% endif %}
+          {% if odds not in [None,'','unknown','unavailable'] %}
+            {% set parts = parts + [odds] %}
+          {% endif %}
+          {% if loc not in [None,'','unknown','unavailable'] %}
+            {% set parts = parts + [loc] %}
+          {% endif %}
+          {% if parts %}
+            {{ parts | join(' | ') }}
+          {% else %}
+            Details unavailable
+          {% endif %}
+      - name: huskers_tailgate_countdown
+        unique_id: huskers_tailgate_countdown_tt
+        icon: mdi:party-popper
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
+          {% if minutes <= 0 %}
+            It's game time!
+          {% elif minutes < 60 %}
+            {{ minutes }} minutes to kickoff
+          {% elif minutes < 1440 %}
+            {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
+          {% else %}
+            {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
+          {% endif %}
 
-    - name: huskers_game_detail
-      unique_id: huskers_game_detail_tt
-      icon: mdi:information-outline
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set kickoff = states('sensor.huskers_kickoff_time_ct') %}
-        {% set tv = state_attr('sensor.husker_team','tv_network') %}
-        {% set odds = state_attr('sensor.husker_team','odds') %}
-        {% set loc = state_attr('sensor.husker_team','location') %}
-        {% set parts = [] %}
-        {% if kickoff not in ['unknown','unavailable',''] %}
-          {% set parts = parts + [kickoff] %}
-        {% endif %}
-        {% if tv not in [None,'','unknown','unavailable'] %}
-          {% set parts = parts + [tv] %}
-        {% endif %}
-        {% if odds not in [None,'','unknown','unavailable'] %}
-          {% set parts = parts + [odds] %}
-        {% endif %}
-        {% if loc not in [None,'','unknown','unavailable'] %}
-          {% set parts = parts + [loc] %}
-        {% endif %}
-        {% if parts %}
-          {{ parts | join(' | ') }}
-        {% else %}
-          Details unavailable
-        {% endif %}
-    - name: huskers_tailgate_countdown
-      unique_id: huskers_tailgate_countdown_tt
-      icon: mdi:party-popper
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
-        {% if minutes <= 0 %}
-          It's game time!
-        {% elif minutes < 60 %}
-          {{ minutes }} minutes to kickoff
-        {% elif minutes < 1440 %}
-          {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
-        {% else %}
-          {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
-        {% endif %}
+      - name: huskers_hype_message
+        unique_id: huskers_hype_message_tt
+        icon: mdi:bullhorn
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set phase = states('sensor.husker_team') %}
+          {% if phase == 'IN' %}
+            On your feet—make Memorial Stadium shake!
+          {% elif phase == 'PRE' %}
+            Tailgate mode: get the speakers blasting and paint the town scarlet.
+          {% elif phase == 'POST' %}
+            Celebrate the result and light the victory lights!
+          {% else %}
+            Forever Huskers. GO BIG RED!
+          {% endif %}
 
-    - name: huskers_hype_message
-      unique_id: huskers_hype_message_tt
-      icon: mdi:bullhorn
-      availability: "{{ has_value('sensor.husker_team') }}"
-      state: >-
-        {% set phase = states('sensor.husker_team') %}
-        {% if phase == 'IN' %}
-          On your feet—make Memorial Stadium shake!
-        {% elif phase == 'PRE' %}
-          Tailgate mode: get the speakers blasting and paint the town scarlet.
-        {% elif phase == 'POST' %}
-          Celebrate the result and light the victory lights!
-        {% else %}
-          Forever Huskers. GO BIG RED!
-        {% endif %}
-
-    - name: huskers_fight_song_verse
-      unique_id: huskers_fight_song_verse_tt
-      icon: mdi:music-circle
-      availability: '{{ True }}'
-      state: >-
-        There is no place like Nebraska—dear old Nebraska U! We'll all stick together, in all kinds of weather, for dear old Nebraska U!
+      - name: huskers_fight_song_verse
+        unique_id: huskers_fight_song_verse_tt
+        icon: mdi:music-circle
+        availability: '{{ True }}'
+        state: >-
+          There is no place like Nebraska—dear old Nebraska U! We'll all stick together, in all kinds of weather, for dear old Nebraska U!
     ########################################################################
     # HUMIDOR - derived metrics
     ########################################################################
-    - name: Humidor Temp Range Today
-      unique_id: humidor_temp_range_today
-      unit_of_measurement: '°F'
-      availability: >-
-        {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
-        {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
-        {{ max_v is number and min_v is number }}
-      state: >-
-        {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
-        {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
-        {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
-        {{ diff | round(1) }}
+      - name: Humidor Temp Range Today
+        unique_id: humidor_temp_range_today
+        unit_of_measurement: '°F'
+        availability: >-
+          {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
+          {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
+          {{ max_v is number and min_v is number }}
+        state: >-
+          {% set max_v = state_attr('sensor.humidor_temp_stats_24h','max_value') %}
+          {% set min_v = state_attr('sensor.humidor_temp_stats_24h','min_value') %}
+          {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
+          {{ diff | round(1) }}
 
-    - name: Humidor Humidity Range Today
-      unique_id: humidor_humidity_range_today
-      unit_of_measurement: '%'
-      availability: >-
-        {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
-        {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
-        {{ max_v is number and min_v is number }}
-      state: >-
-        {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
-        {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
-        {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
-        {{ diff | round(1) }}
+      - name: Humidor Humidity Range Today
+        unique_id: humidor_humidity_range_today
+        unit_of_measurement: '%'
+        availability: >-
+          {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
+          {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
+          {{ max_v is number and min_v is number }}
+        state: >-
+          {% set max_v = state_attr('sensor.humidor_humidity_stats_24h','max_value') %}
+          {% set min_v = state_attr('sensor.humidor_humidity_stats_24h','min_value') %}
+          {% set diff = (max_v | float(0)) - (min_v | float(0)) %}
+          {{ diff | round(1) }}
 
-    - name: Humidor Temperature Trend
-      unique_id: humidor_temperature_trend
-      state: >-
-        {% set raw = states('sensor.humidor_temp_change_1h') %}
-        {% if raw in ['unknown', 'unavailable', ''] %}
-          Unknown
-        {% else %}
-          {% set delta = raw | float(0) %}
+      - name: Humidor Temperature Trend
+        unique_id: humidor_temperature_trend
+        state: >-
+          {% set raw = states('sensor.humidor_temp_change_1h') %}
+          {% if raw in ['unknown', 'unavailable', ''] %}
+            Unknown
+          {% else %}
+            {% set delta = raw | float(0) %}
+            {% if delta > 0.6 %}
+              Rising
+            {% elif delta < -0.6 %}
+              Falling
+            {% else %}
+              Stable
+            {% endif %}
+          {% endif %}
+        icon: >-
+          {% set delta = states('sensor.humidor_temp_change_1h') | float(0) %}
           {% if delta > 0.6 %}
-            Rising
+            mdi:trending-up
           {% elif delta < -0.6 %}
-            Falling
+            mdi:trending-down
           {% else %}
-            Stable
+            mdi:trending-neutral
           {% endif %}
-        {% endif %}
-      icon: >-
-        {% set delta = states('sensor.humidor_temp_change_1h') | float(0) %}
-        {% if delta > 0.6 %}
-          mdi:trending-up
-        {% elif delta < -0.6 %}
-          mdi:trending-down
-        {% else %}
-          mdi:trending-neutral
-        {% endif %}
 
-    - name: Humidor System Status
-      unique_id: humidor_system_status
-      state: >-
-        {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
-        {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
-        {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
-          Data Pending
-        {% else %}
-          {% set temp = temp_state | float(0) %}
-          {% set hum = hum_state | float(0) %}
-          {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
-            Optimal
-          {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
-            Acceptable
+      - name: Humidor System Status
+        unique_id: humidor_system_status
+        state: >-
+          {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
+          {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
+          {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
+            Data Pending
           {% else %}
-            Attention
+            {% set temp = temp_state | float(0) %}
+            {% set hum = hum_state | float(0) %}
+            {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
+              Optimal
+            {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
+              Acceptable
+            {% else %}
+              Attention
+            {% endif %}
           {% endif %}
-        {% endif %}
-      icon: >-
-        {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
-        {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
-        {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
-          mdi:help-circle
-        {% else %}
-          {% set temp = temp_state | float(0) %}
-          {% set hum = hum_state | float(0) %}
-          {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
-            mdi:checkbox-marked-circle
-          {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
-            mdi:alert-circle-check
+        icon: >-
+          {% set temp_state = states('sensor.hygrometer_humidor_temperature') %}
+          {% set hum_state = states('sensor.hygrometer_humidor_humidity') %}
+          {% if temp_state in ['unknown','unavailable',''] or hum_state in ['unknown','unavailable',''] %}
+            mdi:help-circle
           {% else %}
-            mdi:alert
+            {% set temp = temp_state | float(0) %}
+            {% set hum = hum_state | float(0) %}
+            {% if 68 <= temp <= 72 and 62 <= hum <= 68 %}
+              mdi:checkbox-marked-circle
+            {% elif 66 <= temp <= 74 and 58 <= hum <= 70 %}
+              mdi:alert-circle-check
+            {% else %}
+              mdi:alert
+            {% endif %}
           {% endif %}
-        {% endif %}
-      attributes:
-        temperature_f: "{{ states('sensor.hygrometer_humidor_temperature') }}"
-        humidity_percent: "{{ states('sensor.hygrometer_humidor_humidity') }}"
-        temperature_trend: "{{ states('sensor.humidor_temperature_trend') }}"
+        attributes:
+          temperature_f: "{{ states('sensor.hygrometer_humidor_temperature') }}"
+          humidity_percent: "{{ states('sensor.hygrometer_humidor_humidity') }}"
+          temperature_trend: "{{ states('sensor.humidor_temperature_trend') }}"
 
-    - name: Humidor System Health
-      unique_id: humidor_system_health
-      unit_of_measurement: '%'
-      availability: >-
-        {% set status = states('sensor.humidor_system_status') %}
-        {{ status not in ['unknown', 'unavailable', ''] }}
-      state: >-
-        {% set status = states('sensor.humidor_system_status') %}
-        {% if status == 'Optimal' %}
-          100
-        {% elif status == 'Acceptable' %}
-          75
-        {% elif status == 'Attention' %}
-          40
-        {% else %}
-          0
-        {% endif %}
-      icon: >-
-        {% set status = states('sensor.humidor_system_status') %}
-        {% if status == 'Optimal' %}
-          mdi:emoticon-happy
-        {% elif status == 'Acceptable' %}
-          mdi:emoticon-neutral
-        {% elif status == 'Attention' %}
-          mdi:emoticon-sad
-        {% else %}
-          mdi:emoticon-question
-        {% endif %}
+      - name: Humidor System Health
+        unique_id: humidor_system_health
+        unit_of_measurement: '%'
+        availability: >-
+          {% set status = states('sensor.humidor_system_status') %}
+          {{ status not in ['unknown', 'unavailable', ''] }}
+        state: >-
+          {% set status = states('sensor.humidor_system_status') %}
+          {% if status == 'Optimal' %}
+            100
+          {% elif status == 'Acceptable' %}
+            75
+          {% elif status == 'Attention' %}
+            40
+          {% else %}
+            0
+          {% endif %}
+        icon: >-
+          {% set status = states('sensor.humidor_system_status') %}
+          {% if status == 'Optimal' %}
+            mdi:emoticon-happy
+          {% elif status == 'Acceptable' %}
+            mdi:emoticon-neutral
+          {% elif status == 'Attention' %}
+            mdi:emoticon-sad
+          {% else %}
+            mdi:emoticon-question
+          {% endif %}

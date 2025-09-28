@@ -1,0 +1,545 @@
+# packages/f1_everything.yaml
+# Core package for Formula 1 automations, sensors, and lighting shows.
+
+################################################################################
+# HELPERS
+################################################################################
+input_boolean:
+  f1_automations_enabled:
+    name: F1 Automations Enabled
+    icon: mdi:robot
+    initial: true
+
+  f1_race_mode:
+    name: F1 Race Mode
+    icon: mdi:formula-1
+    initial: false
+
+  f1_test_mode:
+    name: F1 Test Mode
+    icon: mdi:beaker
+    initial: false
+
+  f1_use_manual_lights_out:
+    name: F1 Use Manual Lights Out
+    icon: mdi:timer-cog
+    initial: false
+
+  f1_safety_car_quiet_hours:
+    name: F1 Safety Car Quiet Hours
+    icon: mdi:bell-cancel
+    initial: false
+
+input_number:
+  f1_lights_out_manual_minutes:
+    name: Lights Out In (Manual)
+    icon: mdi:timer
+    min: -720
+    max: 1440
+    step: 1
+    unit_of_measurement: min
+    initial: 90
+
+  f1_chequered_hold_minutes:
+    name: Chequered Flag Hold
+    icon: mdi:flag-checkered
+    min: 1
+    max: 30
+    step: 1
+    unit_of_measurement: min
+    initial: 10
+
+input_text:
+  f1_last_flag_message:
+    name: F1 Last Flag Message
+    icon: mdi:flag-outline
+
+################################################################################
+# GROUPS
+################################################################################
+group:
+  f1_show_lights:
+    name: F1 – Show Lights
+    entities:
+      - light.light_theater_left
+      - light.light_theater_right
+      - light.light_front_left
+      - light.light_front_right
+      - light.light_garage_left
+      - light.light_garage_center
+      - light.light_garage_right
+      - light.spare_light
+
+################################################################################
+# SCENES
+################################################################################
+scene:
+  - id: f1_grid_all_red
+    name: F1 – Grid All Red
+    entities:
+      light.light_theater_left:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_theater_right:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_front_left:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_front_right:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_garage_left:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_garage_center:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.light_garage_right:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+      light.spare_light:
+        state: "on"
+        hs_color: [0, 95]
+        brightness: 255
+
+  - id: f1_lights_out_green
+    name: F1 – Lights Out Green
+    entities:
+      light.light_theater_left:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_theater_right:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_front_left:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_front_right:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_garage_left:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_garage_center:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.light_garage_right:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+      light.spare_light:
+        state: "on"
+        hs_color: [120, 90]
+        brightness: 255
+
+  - id: f1_chequered_flag
+    name: F1 – Chequered Flag
+    entities:
+      light.light_theater_left:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_theater_right:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_front_left:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_front_right:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_garage_left:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_garage_center:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.light_garage_right:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+      light.spare_light:
+        state: "on"
+        color_temp_kelvin: 6000
+        brightness: 255
+
+################################################################################
+# SCRIPTS
+################################################################################
+script:
+  f1_lights_out_sequence:
+    alias: "F1: Five Lights Out"
+    mode: restart
+    sequence:
+      - service: scene.create
+        data:
+          scene_id: f1_lights_snapshot
+          snapshot_entities: "{{ expand('group.f1_show_lights') | map(attribute='entity_id') | list }}"
+      - service: scene.turn_on
+        target:
+          entity_id: scene.f1_grid_all_red
+      - repeat:
+          count: 5
+          sequence:
+            - service: light.toggle
+              target:
+                entity_id: group.f1_show_lights
+              data:
+                transition: 0.2
+            - delay:
+                seconds: 0.4
+            - service: light.toggle
+              target:
+                entity_id: group.f1_show_lights
+              data:
+                transition: 0.2
+            - delay:
+                seconds: 0.6
+      - service: scene.turn_on
+        target:
+          entity_id: scene.f1_lights_out_green
+
+  f1_chequered_flag_show:
+    alias: "F1: Chequered Flag Show"
+    mode: restart
+    sequence:
+      - service: scene.create
+        data:
+          scene_id: f1_finish_snapshot
+          snapshot_entities: "{{ expand('group.f1_show_lights') | map(attribute='entity_id') | list }}"
+      - service: scene.turn_on
+        target:
+          entity_id: scene.f1_chequered_flag
+      - delay:
+          minutes: "{{ states('input_number.f1_chequered_hold_minutes') | int(10) }}"
+      - service: scene.turn_on
+        target:
+          entity_id: scene.f1_finish_snapshot
+        continue_on_error: true
+
+  f1_stop_all_shows:
+    alias: "F1: Stop All Shows"
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target:
+          entity_id:
+            - script.f1_lights_out_sequence
+            - script.f1_chequered_flag_show
+      - delay:
+          seconds: 1
+      - service: scene.turn_on
+        target:
+          entity_id: scene.f1_lights_snapshot
+        continue_on_error: true
+
+################################################################################
+# TEMPLATES
+################################################################################
+template:
+  - sensor:
+      - name: f1_next_race_name
+        unique_id: f1_next_race_name
+        state: >-
+          {{ state_attr('sensor.f1_next_race', 'race_name') or 'TBD' }}
+
+      - name: f1_next_race_round
+        unique_id: f1_next_race_round
+        state: >-
+          {{ state_attr('sensor.f1_next_race', 'round') or '0' }}
+
+      - name: f1_next_race_location
+        unique_id: f1_next_race_location
+        state: >-
+          {% set locality = state_attr('sensor.f1_next_race', 'circuit_locality') %}
+          {% set country = state_attr('sensor.f1_next_race', 'circuit_country') %}
+          {% if locality and country %}
+            {{ locality }}, {{ country }}
+          {% else %}
+            {{ country or locality or 'TBD' }}
+          {% endif %}
+
+      - name: f1_lights_out_utc
+        unique_id: f1_lights_out_utc
+        device_class: timestamp
+        state: >-
+          {{ state_attr('sensor.f1_next_race', 'race_start') or states('sensor.f1_next_race') }}
+
+      - name: f1_lights_out_local
+        unique_id: f1_lights_out_local
+        device_class: timestamp
+        state: >-
+          {% set local = state_attr('sensor.f1_next_race', 'race_start_local') %}
+          {% if local not in ['', None, 'unknown', 'unavailable'] %}
+            {{ local }}
+          {% else %}
+            {{ states('sensor.f1_next_race') }}
+          {% endif %}
+
+      - name: f1_lights_out_minutes_auto
+        unique_id: f1_lights_out_minutes_auto
+        unit_of_measurement: min
+        state: >-
+          {% set iso = states('sensor.f1_next_race') %}
+          {% if iso in ['', 'unknown', 'unavailable', None] %}
+            10000
+          {% else %}
+            {% set kickoff = as_datetime(iso) %}
+            {% if kickoff %}
+              {{ ((kickoff - now()).total_seconds() / 60) | round(0) | int }}
+            {% else %}10000{% endif %}
+          {% endif %}
+        attributes:
+          has_next_race: >-
+            {% set iso = states('sensor.f1_next_race') %}
+            {{ iso not in ['', 'unknown', 'unavailable', None] }}
+
+      - name: f1_lights_out_minutes_effective
+        unique_id: f1_lights_out_minutes_effective
+        unit_of_measurement: min
+        state: >-
+          {% if is_state('input_boolean.f1_use_manual_lights_out', 'on') %}
+            {{ states('input_number.f1_lights_out_manual_minutes') | int(0) }}
+          {% else %}
+            {{ states('sensor.f1_lights_out_minutes_auto') | int(0) }}
+          {% endif %}
+
+      - name: f1_race_phase_label
+        unique_id: f1_race_phase_label
+        state: >-
+          {% set status = states('sensor.f1_session_status') %}
+          {% if status in ['unknown', 'unavailable', '', None] %}
+            {% set minutes = states('sensor.f1_lights_out_minutes_effective') | int(9999) %}
+            {% if minutes > 180 %}Off Week{% elif minutes > 0 %}Pre-Race{% else %}Race Window{% endif %}
+          {% elif status == 'pre' %}
+            Pre-Race
+          {% elif status == 'live' %}
+            Lights Out
+          {% elif status == 'suspended' %}
+            Red Flag
+          {% elif status in ['finished', 'finalised'] %}
+            Post Race
+          {% elif status == 'ended' %}
+            Closed
+          {% else %}
+            {{ status | title }}
+          {% endif %}
+
+      - name: f1_track_status_label
+        unique_id: f1_track_status_label
+        state: >-
+          {% set status = states('sensor.f1_track_status') %}
+          {% if status in ['', 'unknown', 'unavailable', None] %}
+            Clear
+          {% else %}
+            {{ status | upper }}
+          {% endif %}
+
+  - binary_sensor:
+      - name: f1_is_race_week
+        unique_id: f1_is_race_week
+        state: >-
+          {% set minutes = states('sensor.f1_lights_out_minutes_auto') | int(10000) %}
+          {{ minutes <= (7 * 24 * 60) }}
+
+      - name: f1_is_pre_race_window
+        unique_id: f1_is_pre_race_window
+        state: >-
+          {% set minutes = states('sensor.f1_lights_out_minutes_effective') | int(10000) %}
+          {{ minutes >= 0 and minutes <= 180 }}
+
+      - name: f1_is_race_live
+        unique_id: f1_is_race_live
+        state: >-
+          {% set status = states('sensor.f1_session_status') %}
+          {{ status in ['live'] }}
+
+      - name: f1_is_race_wrap
+        unique_id: f1_is_race_wrap
+        state: >-
+          {% set status = states('sensor.f1_session_status') %}
+          {{ status in ['finished', 'finalised', 'ended'] }}
+
+################################################################################
+# AUTOMATIONS
+################################################################################
+automation:
+  - id: f1_race_mode_enable
+    alias: "F1: Enable Race Mode"
+    description: Enables race mode when the countdown reaches the pre-race window or a live session starts.
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.f1_lights_out_minutes_effective
+        below: 181
+        for:
+          minutes: 1
+      - platform: state
+        entity_id: binary_sensor.f1_is_race_live
+        to: "on"
+    condition:
+      - condition: state
+        entity_id: input_boolean.f1_race_mode
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.f1_automations_enabled
+        state: "on"
+    action:
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.f1_race_mode
+      - service: logbook.log
+        data:
+          name: F1 Race Mode
+          message: >-
+            Race mode enabled (T-{{ states('sensor.f1_lights_out_minutes_effective') }} min).
+
+  - id: f1_race_mode_disable
+    alias: "F1: Disable Race Mode"
+    description: Disables race mode once the post-race window closes or no race is scheduled.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.f1_is_race_wrap
+        to: "on"
+        for:
+          minutes: 60
+      - platform: numeric_state
+        entity_id: sensor.f1_lights_out_minutes_effective
+        above: 720
+        for:
+          minutes: 5
+    condition:
+      - condition: state
+        entity_id: input_boolean.f1_race_mode
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.f1_automations_enabled
+        state: "on"
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.f1_race_mode
+      - service: script.turn_on
+        target:
+          entity_id: script.f1_stop_all_shows
+      - service: logbook.log
+        data:
+          name: F1 Race Mode
+          message: Race mode disabled after post race window.
+
+  - id: f1_lights_out_showtime
+    alias: "F1: Lights Out Showtime"
+    description: Plays the five-light sequence five minutes before lights out.
+    mode: single
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.f1_lights_out_minutes_effective
+        above: 4
+        below: 6
+        for:
+          seconds: 10
+    condition:
+      - condition: state
+        entity_id: input_boolean.f1_automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.f1_race_mode
+        state: "on"
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.f1_is_pre_race_window
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.f1_test_mode
+            state: "on"
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.f1_lights_out_sequence
+      - service: logbook.log
+        data:
+          name: F1 Automation
+          message: "Lights out show fired (T-{{ states('sensor.f1_lights_out_minutes_effective') }} min)"
+
+  - id: f1_chequered_flag_celeb
+    alias: "F1: Chequered Flag Celebration"
+    description: Fires when the session finishes.
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.f1_is_race_wrap
+        to: "on"
+    condition:
+      - condition: state
+        entity_id: input_boolean.f1_automations_enabled
+        state: "on"
+      - condition: state
+        entity_id: input_boolean.f1_race_mode
+        state: "on"
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.f1_chequered_flag_show
+      - service: logbook.log
+        data:
+          name: F1 Automation
+          message: Chequered flag celebration started.
+
+  - id: f1_track_status_watch
+    alias: "F1: Track Status Watch"
+    description: Captures live race control updates for later display.
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.f1_track_status
+    condition:
+      - condition: state
+        entity_id: input_boolean.f1_automations_enabled
+        state: "on"
+      - condition: template
+        value_template: >-
+          {{ trigger.to_state.state not in ['', 'unknown', 'unavailable', None] }}
+    action:
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.f1_last_flag_message
+        metadata:
+          render_as_template:
+            value: true
+        data:
+          value: >-
+            {{ now() | as_local | strftime('%Y-%m-%d %H:%M') }} — Track status: {{ trigger.to_state.state | upper }}
+      - if:
+          - condition: state
+            entity_id: input_boolean.f1_safety_car_quiet_hours
+            state: "off"
+        then:
+          - service: logbook.log
+            metadata:
+              render_as_template:
+                message: true
+            data:
+              name: F1 Race Control
+              message: >-
+                {{ trigger.to_state.state | upper }} flag update captured.

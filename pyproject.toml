@@ -26,11 +26,7 @@ line-length = 79
 extend-exclude = [
   ".venv", "venv", "node_modules", "backup",
   "zigbee2mqtt", "themes", "blueprints",
-  "custom_components/ble_monitor",
-  "custom_components/hacs",
-  "custom_components/teamtracker",
-  "custom_components/wundergroundpws",
-  "custom_components/tplink_router",
+  "custom_components",
 ]
 
 [tool.ruff.lint]

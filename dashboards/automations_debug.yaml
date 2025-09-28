@@ -86,28 +86,28 @@ views:
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.huskers_pregame_tminus20_showtime }
+              target: {entity_id: automation.huskers_pregame_tminus20_showtime}
           - type: button
             name: Trigger TD Burst on Score
             icon: mdi:football
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.huskers_td_burst_on_score }
+              target: {entity_id: automation.huskers_td_burst_on_score}
           - type: button
             name: Trigger Postgame Cleanup
             icon: mdi:broom
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.huskers_postgame_cleanup }
+              target: {entity_id: automation.huskers_postgame_cleanup}
           - type: button
             name: Trigger Monthly Effect (20m)
             icon: mdi:calendar-month
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.huskers_postgame_monthly_effect_after_20m }
+              target: {entity_id: automation.huskers_postgame_monthly_effect_after_20m}
 
       # =========================
       # NIGHT / DAILY SCHEDULES
@@ -155,28 +155,28 @@ views:
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.evening_lights_at_sunset }
+              target: {entity_id: automation.evening_lights_at_sunset}
           - type: button
             name: Trigger Midnight Lights
             icon: mdi:weather-night
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.night_lights_at_midnight }
+              target: {entity_id: automation.night_lights_at_midnight}
           - type: button
             name: Trigger 03:30 Lights
             icon: mdi:clock-time-three
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.early_morning_lights_0330 }
+              target: {entity_id: automation.early_morning_lights_0330}
           - type: button
             name: Trigger Monthly Effect
             icon: mdi:calendar-star
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.exterior_led_monthly_effect }
+              target: {entity_id: automation.exterior_led_monthly_effect}
 
       # =========================
       # SAFETY / ENVIRONMENT
@@ -219,21 +219,21 @@ views:
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.burner_plugs_off_2300 }
+              target: {entity_id: automation.burner_plugs_off_2300}
           - type: button
             name: Trigger 00:15 Burner Off
             icon: mdi:camera-timer
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.burner_plugs_off_after_midnight }
+              target: {entity_id: automation.burner_plugs_off_after_midnight}
           - type: button
             name: Trigger Humidor Control
             icon: mdi:thermometer
             tap_action:
               action: call-service
               service: automation.trigger
-              target: { entity_id: automation.humidor_plug_temp_control }
+              target: {entity_id: automation.humidor_plug_temp_control}
 
       # =========================
       # Logbook focused on these automations

@@ -1,4 +1,3 @@
----
 name: 'Bug report'
 description: Report a problem in config or docs
 labels: ['bug']
