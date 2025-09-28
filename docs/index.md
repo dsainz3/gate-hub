@@ -2,7 +2,7 @@
 title: Documentation Index
 summary: Entry point for the gate-hub knowledge base organised with the Divio documentation model.
 status: active
-updated: 2025-09-27
+updated: 2025-09-28
 owner: ops-team
 ---
 
@@ -25,6 +25,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
 - [Husker Dashboard Guide](how-to/huskers/dashboard.md)
 - [Husker LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
+- [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)
 
 ## Reference
@@ -34,6 +35,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 ## Explanation
 - [Optimization Plan](explanation/optimization-plan.md)
 - [Huskers Dashboard History](explanation/huskers-dashboard-history.md)
+- [Pre-commit Quality Strategy](explanation/pre-commit-strategy.md)
 
 ## Archive
 - [AI Automation Builder Prototype](archive/ai-automation-builder.md)

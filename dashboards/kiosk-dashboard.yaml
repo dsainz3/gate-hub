@@ -595,206 +595,167 @@ views:
     badges: []
     sections:
       - type: grid
-        title: Core Lighting
+        title: Light Groups
         cards:
-          - type: tile
+          - type: custom:hue-like-light-card
             entity: light.all_lights
             name: All Lights
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:hue-like-light-card
+            entity: light.mainfloor_lights
+            name: Main Floor
+          - type: custom:hue-like-light-card
             entity: light.all_exterior_lights
             name: Exterior Lights
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:hue-like-light-card
             entity: light.permanent_outdoor_lights
             name: Permanent Strip
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:hue-like-light-card
             entity: light.theater_lights
             name: Theater
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:hue-like-light-card
             entity: light.office_lights
             name: Office
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:hue-like-light-card
             entity: light.front_porch_lights
             name: Front Porch
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+          - type: custom:hue-like-light-card
+            entity: light.garage_lights
+            name: Garage
       - type: grid
-        title: Theater & Front Detail
+        title: Main Floor Lights
+        columns: 3
         cards:
-          - type: tile
-            entity: light.light_theater_left
-            name: Theater Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_theater_right
-            name: Theater Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_front_left
-            name: Front Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_front_right
-            name: Front Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Living Room"
+              - type: custom:compact-light-card
+                entity: light.livingroom_light
+                name: Living Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Dining Room"
+              - type: custom:compact-light-card
+                entity: light.diningroom_light
+                name: Dining Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Sunroom"
+              - type: custom:compact-light-card
+                entity: light.sunroom_light
+                name: Sunroom
       - type: grid
-        title: Garage
+        title: Upper Floor Lights
+        columns: 3
         cards:
-          - type: tile
-            entity: light.light_garage_center
-            name: Garage Center
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_garage_left
-            name: Garage Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_garage_right
-            name: Garage Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Parents Suite"
+              - type: custom:compact-light-card
+                entity: light.light_parents
+                name: Parents Suite
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Guest Room"
+              - type: custom:compact-light-card
+                entity: light.light_guest_room
+                name: Guest Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Ari Room"
+              - type: custom:compact-light-card
+                entity: light.light_ari
+                name: Ari Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Attic"
+              - type: custom:compact-light-card
+                entity: light.light_attic
+                name: Attic
       - type: grid
-        title: Interior Rooms
+        title: Basement & Office Lights
+        columns: 3
         cards:
-          - type: tile
-            entity: light.light_parents
-            name: Parents
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_guest_room
-            name: Guest Room
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_attic
-            name: Attic
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.sunroom_light
-            name: Sunroom
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.livingroom_light
-            name: Living Room
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.diningroom_light
-            name: Dining Room
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_office
-            name: Light-Office
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.spare_light
-            name: Spare
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Theater Left"
+              - type: custom:compact-light-card
+                entity: light.light_theater_left
+                name: Theater Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Theater Right"
+              - type: custom:compact-light-card
+                entity: light.light_theater_right
+                name: Theater Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Office"
+              - type: custom:compact-light-card
+                entity: light.light_office
+                name: Office
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Spare Room"
+              - type: custom:compact-light-card
+                entity: light.spare_light
+                name: Spare Room
+      - type: grid
+        title: Exterior & Seasonal Lights
+        columns: 3
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Front Left"
+              - type: custom:compact-light-card
+                entity: light.light_front_left
+                name: Front Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Front Right"
+              - type: custom:compact-light-card
+                entity: light.light_front_right
+                name: Front Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Left"
+              - type: custom:compact-light-card
+                entity: light.light_garage_left
+                name: Garage Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Center"
+              - type: custom:compact-light-card
+                entity: light.light_garage_center
+                name: Garage Center
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Right"
+              - type: custom:compact-light-card
+                entity: light.light_garage_right
+                name: Garage Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Tree"
+              - type: custom:compact-light-card
+                entity: light.tree
+                name: Tree
       - type: entities
         title: Groups & Toggles
         state_color: true
