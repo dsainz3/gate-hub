@@ -54,7 +54,7 @@ views:
           {% set local_ts = states('sensor.f1_lights_out_local') %}
           {% set track_status = states('sensor.f1_track_status_label') %}
           {% if local_ts not in invalid %}
-            {% set formatted = as_datetime(local_ts) | as_local | strftime('%A, %B %-d · %-I:%M %p %Z') %}
+            {% set formatted = as_datetime(local_ts) | as_local | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', False) %}
           {% else %}
             {% set formatted = 'TBD' %}
           {% endif %}
@@ -99,7 +99,7 @@ views:
             <li><strong>Race:</strong> {{ race }} ({{ location }})</li>
             {% if has_schedule %}
               <li><strong>Lights out:</strong>
-                {{ as_datetime(local_ts) | as_local | strftime('%a %b %-d · %-I:%M %p %Z') }}
+                {{ as_datetime(local_ts) | as_local | timestamp_custom('%a %b %-d · %-I:%M %p %Z', False) }}
               </li>
             {% else %}
               <li><strong>Lights out:</strong> TBD – enable the F1 sensor integration for timetable data.</li>
