@@ -17,6 +17,7 @@ nav:
   - Explanation:
       - Optimization Plan: docs/explanation/optimization-plan.md
       - Huskers Dashboard History: docs/explanation/huskers-dashboard-history.md
+      - Pre-commit Quality Strategy: docs/explanation/pre-commit-strategy.md
   - Archive:
       - AI Automation Builder (Archived): docs/archive/ai-automation-builder.md
   - ADRs:
