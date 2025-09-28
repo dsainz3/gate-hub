@@ -113,7 +113,36 @@ Follow the [Govee2MQTT add-on playbook](../addons/govee2mqtt.md) with these proj
 
 The configuration data is stored in `.storage/core.config_entries` under the `domain: "govee"` entry. Changing the API key later re-runs the auth step.
 
-## Step 5 – Verify Unified Entities
+## Step 5 – Wire the Kiosk Dashboard
+
+The `dashboards/kiosk-dashboard.yaml` control tab presents two layers of lighting control:
+
+1. **Light groups** rendered with the [Hue-like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) for a Philips Hue-style colour wheel.
+2. **Individual fixtures** grouped per area, each stack using a markdown heading followed by the [Compact Light Card](http://192.168.0.104:8123/hacs/repository/1035084461) (HACS repo ID `1035084461`).
+
+Usage notes:
+
+```yaml
+# Example fragment from dashboards/kiosk-dashboard.yaml
+- type: grid
+  title: Main Floor Lights
+  columns: 3
+  cards:
+    - type: vertical-stack
+      cards:
+        - type: markdown
+          content: "### Living Room"
+        - type: custom:compact-light-card
+          entity: light.livingroom_light
+          name: Living Room
+```
+
+- Ensure both custom cards are installed via HACS and that Lovelace resources include:
+  - `/hacsfiles/lovelace-hue-like-light-card/hue-like-light-card.js`
+  - `/hacsfiles/compact-light-card/compact-light-card.js`
+- After updating the dashboard YAML, clear browser cache or use **Settings → Dashboards → … → Refresh resources** so Lovelace loads the new assets.
+
+## Step 6 – Verify Unified Entities
 
 Use this `jq` command (from `/config`) to list every entity tied to the Govee config entry `01K684EHN5KW6ED0GDXBZFF0J9` plus its device metadata:
 
@@ -138,13 +167,15 @@ If entities are missing, restart the add-on and re-run the command. Clearing ret
 ## Troubleshooting
 
 - **Entities duplicated** – Delete old `light.*` entries tied to legacy integrations, then reload MQTT discovery.
-- **Color controls missing in the UI** – Ensure the kiosk dashboard uses `custom:mushroom-light-card` with `show_color_control: true` (see `dashboards/kiosk-dashboard.yaml`).
+- **Color controls missing in the UI** – Confirm the Hue-like and Compact cards are installed/enabled in Lovelace resources and that the YAML references `custom:hue-like-light-card` / `custom:compact-light-card`.
 - **MQTT auth failures** – Re-enter credentials in the add-on UI and the MQTT integration; inspect the Mosquitto log for `Connection Refused` codes.
 - **API quota exceeded** – Increase the poll `delay` in the Govee integration configuration or temporarily disable the cloud path and rely on the LAN bridge.
 
 ## References
 
 - HACS repository: <https://github.com/LaggAt/hacs-govee>
+- Hue-like Light Card: <https://github.com/Gh61/lovelace-hue-like-light-card>
+- Compact Light Card: <http://192.168.0.104:8123/hacs/repository/1035084461>
 - Govee2MQTT project: <https://github.com/wez/govee2mqtt>
 - Mosquitto add-on docs: [docs/how-to/addons/mqtt.md](../addons/mqtt.md)
 - Govee2MQTT add-on guide: [docs/how-to/addons/govee2mqtt.md](../addons/govee2mqtt.md)
