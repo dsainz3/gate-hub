@@ -15,6 +15,12 @@ views:
             name: Race Mode
           - entity: input_boolean.f1_test_mode
             name: Test Mode
+          - entity: input_boolean.f1_use_manual_lights_out
+            name: Manual Countdown Override
+          - entity: input_number.f1_lights_out_manual_minutes
+            name: Manual Countdown (min)
+          - entity: input_number.f1_chequered_hold_minutes
+            name: Chequered Hold (min)
           - type: call-service
             name: Lights Out Show
             icon: mdi:play-speed
@@ -36,17 +42,6 @@ views:
             service: script.turn_on
             target:
               entity_id: script.f1_stop_all_shows
-          - type: call-service
-            name: Refresh F1 Data
-            icon: mdi:refresh-circle
-            action_name: Update
-            service: homeassistant.update_entity
-            target:
-              entity_id:
-                - sensor.f1_next_race
-                - sensor.f1_driver_standings
-                - sensor.f1_constructor_standings
-                - sensor.f1_weather
 
       - type: markdown
         title: Race Countdown
@@ -78,8 +73,14 @@ views:
             name: Lights Out (min)
             state_content: state
           - type: tile
-            entity: sensor.f1_session_status
-            name: Session Status
+            entity: sensor.f1_track_status_label
+            name: Track Status
+          - type: tile
+            entity: binary_sensor.f1_is_race_week
+            name: Race Week
+          - type: tile
+            entity: binary_sensor.f1_is_pre_race_window
+            name: Pre-Race Window
           - type: tile
             entity: binary_sensor.f1_is_race_live
             name: Live
@@ -88,77 +89,48 @@ views:
             name: Post Race
 
       - type: markdown
-        title: Weekend Schedule
+        title: Weekend Notes
         content: |-
-          {% set invalid = ['unknown', 'unavailable', '', None] %}
-          {% set sessions = [
-            ('Practice 1', state_attr('sensor.f1_next_race', 'first_practice_start_local')),
-            ('Practice 2', state_attr('sensor.f1_next_race', 'second_practice_start_local')),
-            ('Practice 3', state_attr('sensor.f1_next_race', 'third_practice_start_local')),
-            ('Sprint Qualifying', state_attr('sensor.f1_next_race', 'sprint_qualifying_start_local')),
-            ('Sprint', state_attr('sensor.f1_next_race', 'sprint_start_local')),
-            ('Qualifying', state_attr('sensor.f1_next_race', 'qualifying_start_local')),
-            ('Race', state_attr('sensor.f1_next_race', 'race_start_local'))
-          ] %}
-          <table style="width:100%;border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid var(--divider-color);">Session</th>
-                <th style="text-align:left;padding:8px;border-bottom:1px solid var(--divider-color);">Local Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for label, ts in sessions %}
-                {% if ts not in invalid %}
-                  <tr>
-                    <td style="padding:8px;border-bottom:1px solid var(--divider-color);">{{ label }}</td>
-                    <td style="padding:8px;border-bottom:1px solid var(--divider-color);">{{ as_datetime(ts) | as_local | strftime('%a %b %-d · %-I:%M %p %Z') }}</td>
-                  </tr>
-                {% endif %}
-              {% endfor %}
-            </tbody>
-          </table>
+          {% set race = states('sensor.f1_next_race_name') %}
+          {% set location = states('sensor.f1_next_race_location') %}
+          {% set local_ts = states('sensor.f1_lights_out_local') %}
+          {% set has_schedule = local_ts not in ['unknown', 'unavailable', '', None] %}
+          <ul>
+            <li><strong>Race:</strong> {{ race }} ({{ location }})</li>
+            {% if has_schedule %}
+              <li><strong>Lights out:</strong>
+                {{ as_datetime(local_ts) | as_local | strftime('%a %b %-d · %-I:%M %p %Z') }}
+              </li>
+            {% else %}
+              <li><strong>Lights out:</strong> TBD – enable the F1 sensor integration for timetable data.</li>
+            {% endif %}
+            <li><strong>Countdown mode:</strong>
+              {% if is_state('input_boolean.f1_use_manual_lights_out','on') %}
+                Manual ({{ states('input_number.f1_lights_out_manual_minutes') | int(0) }} min)
+              {% else %}
+                Automatic
+              {% endif %}
+            </li>
+          </ul>
 
-      - type: vertical-stack
-        cards:
-          - type: markdown
-            title: Standings Snapshot
-            content: |-
-              {% set drivers = state_attr('sensor.f1_driver_standings', 'driver_standings') or [] %}
-              {% set constructors = state_attr('sensor.f1_constructor_standings', 'constructor_standings') or [] %}
-              <h3>Drivers</h3>
-              {% if drivers %}
-                <ol>
-                  {% for entry in drivers[:5] %}
-                    <li>{{ entry.Driver.code }} – {{ entry.points }} pts</li>
-                  {% endfor %}
-                </ol>
-              {% else %}
-                <p style="color:var(--secondary-text-color);">Driver standings unavailable.</p>
-              {% endif %}
-              <h3>Constructors</h3>
-              {% if constructors %}
-                <ol>
-                  {% for entry in constructors[:5] %}
-                    <li>{{ entry.Constructor.name }} – {{ entry.points }} pts</li>
-                  {% endfor %}
-                </ol>
-              {% else %}
-                <p style="color:var(--secondary-text-color);">Constructor standings unavailable.</p>
-              {% endif %}
-          - type: entities
-            title: Race Telemetry
-            entities:
-              - entity: sensor.f1_track_weather
-                name: Track Weather (Live)
-              - entity: sensor.f1_weather
-                name: Weekend Weather
-              - entity: sensor.f1_race_lap_count
-                name: Race Lap Count
-              - entity: binary_sensor.f1_safety_car
-                name: Safety Car Active
-              - entity: input_text.f1_last_flag_message
-                name: Last Flag Message
+      - type: markdown
+        title: Standings Snapshot
+        content: |-
+          F1 standings sensors are not currently enabled. Open <em>Settings → Devices & Services → F1 Sensor</em> and enable the driver & constructor standings to populate this section.
+
+      - type: entities
+        title: Race Telemetry
+        entities:
+          - entity: sensor.f1_lights_out_local
+            name: Lights Out (Local)
+          - entity: sensor.f1_lights_out_minutes_auto
+            name: Auto Countdown (min)
+          - entity: sensor.f1_race_phase_label
+            name: Race Phase
+          - entity: sensor.f1_track_status_label
+            name: Track Status
+          - entity: input_text.f1_last_flag_message
+            name: Last Flag Message
 
       - type: markdown
         title: Automation States
@@ -168,6 +140,7 @@ views:
           | Automations enabled | {{ states('input_boolean.f1_automations_enabled') }} |
           | Race mode | {{ states('input_boolean.f1_race_mode') }} |
           | Test mode | {{ states('input_boolean.f1_test_mode') }} |
+          | Manual countdown | {{ states('input_boolean.f1_use_manual_lights_out') }} |
           | Pre-race window | {{ states('binary_sensor.f1_is_pre_race_window') }} |
           | Race live | {{ states('binary_sensor.f1_is_race_live') }} |
           | Race wrap | {{ states('binary_sensor.f1_is_race_wrap') }} |

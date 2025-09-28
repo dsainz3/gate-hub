@@ -1,0 +1,63 @@
+# packages/network_monitor.yaml
+# Lightweight network monitoring focused on ping latency and Speedtest data.
+
+binary_sensor:
+  - platform: ping
+    name: Internet Reachability
+    host: !secret ping_target_host
+    count: 5
+
+sensor:
+  - platform: ping
+    name: Internet Latency
+    host: !secret ping_target_host
+    count: 5
+    scan_interval: 60
+
+speedtestdotnet:
+  scan_interval:
+    hours: 6
+  monitored_conditions:
+    - ping
+    - download
+    - upload
+
+template:
+  - sensor:
+      - name: Network Status Summary
+        unique_id: network_status_summary
+        icon: mdi:lan-check
+        state: >-
+          {% if is_state('binary_sensor.internet_reachability', 'on') %}
+            Online
+          {% elif is_state('binary_sensor.internet_reachability', 'off') %}
+            Offline
+          {% else %}
+            Unknown
+          {% endif %}
+        attributes:
+          latency_ms: >-
+            {{ states('sensor.internet_latency') | float(default=0) | round(1) }}
+          speedtest_ping_ms: >-
+            {{ states('sensor.speedtest_ping') | float(default=0) | round(1) }}
+          speedtest_download_mbps: >-
+            {{ states('sensor.speedtest_download') | float(default=0) | round(1) }}
+          speedtest_upload_mbps: >-
+            {{ states('sensor.speedtest_upload') | float(default=0) | round(1) }}
+          last_speedtest: >-
+            {% set entity = states.sensor.speedtest_download %}
+            {% if entity is not none and entity.last_changed %}
+              {{ entity.last_changed | as_local | isoformat }}
+            {% else %}
+              unavailable
+            {% endif %}
+      - name: Speedtest Last Run
+        unique_id: network_speedtest_last_run
+        device_class: timestamp
+        state: >-
+          {% set entity = states.sensor.speedtest_download %}
+          {% if entity is not none and entity.last_changed %}
+            {{ entity.last_changed | as_local | isoformat }}
+          {% else %}
+            unknown
+          {% endif %}
