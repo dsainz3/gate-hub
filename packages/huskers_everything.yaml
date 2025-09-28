@@ -445,20 +445,20 @@ script:
           total_ms: 8000
           beats: '{{ (total_ms / beat_ms) | round(0) | int }}'
           patterns:
-            - - light.light_theater_left
-              - light.light_front_right
-            - - light.light_theater_right
-              - light.light_front_left
-            - - light.light_garage_left
-              - light.spare_light
-            - - light.light_garage_center
-              - light.light_garage_right
-            - - light.light_theater_left
-              - light.light_garage_left
-              - light.spare_light
-            - - light.light_theater_right
-              - light.light_garage_right
-              - light.light_front_right
+            -   - light.light_theater_left
+                - light.light_front_right
+            -   - light.light_theater_right
+                - light.light_front_left
+            -   - light.light_garage_left
+                - light.spare_light
+            -   - light.light_garage_center
+                - light.light_garage_right
+            -   - light.light_theater_left
+                - light.light_garage_left
+                - light.spare_light
+            -   - light.light_theater_right
+                - light.light_garage_right
+                - light.light_front_right
       - service: scene.create
         data:
           scene_id: huskers_before_burst

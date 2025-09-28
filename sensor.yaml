@@ -3,101 +3,101 @@
 # =========================================================
 
 # --- Averages ---
-- platform: statistics
-  name: KNEPLATT72 Wind Speed (24h Avg)
-  unique_id: kneplatt72_wind_speed_24h_avg
-  entity_id: sensor.kneplatt72_wind_speed
-  state_characteristic: mean
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: KNEPLATT72 Wind Speed (24h Avg)
+    unique_id: kneplatt72_wind_speed_24h_avg
+    entity_id: sensor.kneplatt72_wind_speed
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    precision: 1
 
-- platform: statistics
-  name: KNEPLATT72 Temperature (24h Mean)
-  unique_id: kneplatt72_temperature_24h_mean
-  entity_id: sensor.kneplatt72_temperature
-  state_characteristic: mean
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: KNEPLATT72 Temperature (24h Mean)
+    unique_id: kneplatt72_temperature_24h_mean
+    entity_id: sensor.kneplatt72_temperature
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    precision: 1
 
-- platform: statistics
-  name: KNEPLATT72 Humidity (24h Mean)
-  unique_id: kneplatt72_humidity_24h_mean
-  entity_id: sensor.kneplatt72_relative_humidity
-  state_characteristic: mean
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: KNEPLATT72 Humidity (24h Mean)
+    unique_id: kneplatt72_humidity_24h_mean
+    entity_id: sensor.kneplatt72_relative_humidity
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    precision: 1
 
 # --- Changes ---
-- platform: statistics
-  name: KNEPLATT72 Pressure (24h Change)
-  unique_id: kneplatt72_pressure_24h_change
-  entity_id: sensor.kneplatt72_pressure
-  state_characteristic: change
-  max_age:
-    hours: 24
-  precision: 3
+  - platform: statistics
+    name: KNEPLATT72 Pressure (24h Change)
+    unique_id: kneplatt72_pressure_24h_change
+    entity_id: sensor.kneplatt72_pressure
+    state_characteristic: change
+    max_age:
+      hours: 24
+    precision: 3
 
-- platform: statistics
-  name: KNEPLATT72 Temperature (24h Change)
-  unique_id: kneplatt72_temperature_24h_change
-  entity_id: sensor.kneplatt72_temperature
-  state_characteristic: change
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: KNEPLATT72 Temperature (24h Change)
+    unique_id: kneplatt72_temperature_24h_change
+    entity_id: sensor.kneplatt72_temperature
+    state_characteristic: change
+    max_age:
+      hours: 24
+    precision: 1
 
-- platform: statistics
-  name: KNEPLATT72 Humidity (24h Change)
-  unique_id: kneplatt72_humidity_24h_change
-  entity_id: sensor.kneplatt72_relative_humidity
-  state_characteristic: change
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: KNEPLATT72 Humidity (24h Change)
+    unique_id: kneplatt72_humidity_24h_change
+    entity_id: sensor.kneplatt72_relative_humidity
+    state_characteristic: change
+    max_age:
+      hours: 24
+    precision: 1
 # =========================================================
 # HUMIDOR - STATISTICS & TRENDS
 # =========================================================
 
-- platform: statistics
-  name: Humidor Temp Stats (24h)
-  unique_id: humidor_temp_stats_24h
-  entity_id: sensor.hygrometer_humidor_temperature
-  state_characteristic: mean
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: Humidor Temp Stats (24h)
+    unique_id: humidor_temp_stats_24h
+    entity_id: sensor.hygrometer_humidor_temperature
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    precision: 1
 
-- platform: statistics
-  name: Humidor Temp Change (1h)
-  unique_id: humidor_temp_change_1h
-  entity_id: sensor.hygrometer_humidor_temperature
-  state_characteristic: change
-  max_age:
-    hours: 1
-  precision: 2
+  - platform: statistics
+    name: Humidor Temp Change (1h)
+    unique_id: humidor_temp_change_1h
+    entity_id: sensor.hygrometer_humidor_temperature
+    state_characteristic: change
+    max_age:
+      hours: 1
+    precision: 2
 
-- platform: statistics
-  name: Humidor Humidity Stats (24h)
-  unique_id: humidor_humidity_stats_24h
-  entity_id: sensor.hygrometer_humidor_humidity
-  state_characteristic: mean
-  max_age:
-    hours: 24
-  precision: 1
+  - platform: statistics
+    name: Humidor Humidity Stats (24h)
+    unique_id: humidor_humidity_stats_24h
+    entity_id: sensor.hygrometer_humidor_humidity
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    precision: 1
 
-- platform: statistics
-  name: Humidor Humidity Change (1h)
-  unique_id: humidor_humidity_change_1h
-  entity_id: sensor.hygrometer_humidor_humidity
-  state_characteristic: change
-  max_age:
-    hours: 1
-  precision: 2
+  - platform: statistics
+    name: Humidor Humidity Change (1h)
+    unique_id: humidor_humidity_change_1h
+    entity_id: sensor.hygrometer_humidor_humidity
+    state_characteristic: change
+    max_age:
+      hours: 1
+    precision: 2
 # Repository TODO tracker
-- platform: command_line
-  name: Todo Repo Tracker
-  command: 'cat /config/TODO.md'
-  scan_interval: 120
+  - platform: command_line
+    name: Todo Repo Tracker
+    command: 'cat /config/TODO.md'
+    scan_interval: 120

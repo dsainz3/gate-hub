@@ -1,4 +1,3 @@
----
 input_boolean:
   weather_notifications_enabled:
     name: Weather Notifications Enabled

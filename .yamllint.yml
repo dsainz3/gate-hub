@@ -1,20 +1,22 @@
 extends: default
+
 rules:
-  braces: disable
-  document-start: disable
+  line-length:
+    max: 220
+  indentation: disable
+  hyphens: disable
   comments:
     min-spaces-from-content: 1
-    level: warning
-  line-length:
-    max: 200
-    level: warning
-  new-line-at-end-of-file: enable
-ignore: |
-  node_modules/
-  .git/
-  .venv/
-  .cache/
-  zigbee2mqtt/**
-  docs/addons/**
-  themes/**
-  blueprints/**
+  document-start: disable
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+  brackets:
+    max-spaces-inside: 1
+  braces:
+    max-spaces-inside: 1
+  comments-indentation: disable
+  key-duplicates: enable
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1

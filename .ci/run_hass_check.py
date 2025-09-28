@@ -1,5 +1,6 @@
 # .ci/run_hass_check.py
 import contextlib
+import importlib.util
 import platform
 import shutil
 import subprocess
@@ -7,13 +8,17 @@ import sys
 from pathlib import Path
 from shutil import which
 
-repo = Path(__file__).resolve().parents[1]
+repo = Path.cwd().resolve()
 fake = repo / ".ci" / "fakesecrets.yaml"
 real = repo / "secrets.yaml"
 
 
+def _module_available(name: str) -> bool:
+    return importlib.util.find_spec(name) is not None
+
+
 def run_local_py() -> None:
-    # Runs in pre-commit's venv where 'homeassistant' is installed via additional_dependencies
+    # Reuses the current interpreter where the Home Assistant package is available
     cmd = [
         sys.executable,
         "-m",
@@ -25,36 +30,50 @@ def run_local_py() -> None:
         "--info",
         "all",
         "--files",
-        "--secrets",
-        "secrets.yaml",
     ]
     subprocess.check_call(cmd, cwd=repo)
 
 
 def run_via_docker() -> None:
-    # Requires Docker Desktop on Windows; daemon must be running and drive shared.
-    cmd = [
-        "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{repo}:/workdir",
-        "-w",
-        "/workdir",
-        "ghcr.io/home-assistant/home-assistant:stable",
-        "python",
-        "-m",
-        "homeassistant",
-        "--script",
-        "check_config",
-        "--config",
-        "/workdir",
-        "--info",
-        "all",
-        "--files",
-        "--secrets",
-        "/workdir/secrets.yaml",
-    ]
+    # Prefer using the running Supervisor container when inside HA OS.
+    if Path("/.dockerenv").exists() and Path("/config").resolve() == repo:
+        cmd = [
+            "docker",
+            "exec",
+            "homeassistant",
+            "python",
+            "-m",
+            "homeassistant",
+            "--script",
+            "check_config",
+            "--config",
+            "/config",
+            "--info",
+            "all",
+            "--files",
+        ]
+    else:
+        # Requires Docker Desktop on Windows; daemon must be running and drive shared.
+        cmd = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{repo}:/workdir",
+            "-w",
+            "/workdir",
+            "ghcr.io/home-assistant/home-assistant:stable",
+            "python",
+            "-m",
+            "homeassistant",
+            "--script",
+            "check_config",
+            "--config",
+            "/workdir",
+            "--info",
+            "all",
+            "--files",
+        ]
     subprocess.check_call(cmd)
 
 
@@ -76,14 +95,16 @@ def run_via_wsl() -> None:
         "--info",
         "all",
         "--files",
-        "--secrets",
-        f"{wsl_repo}/secrets.yaml",
     ]
     subprocess.check_call(cmd)
 
 
 # --- main ---
-shutil.copyfile(fake, real)
+created_secrets = False
+if not real.exists():
+    shutil.copyfile(fake, real)
+    created_secrets = True
+
 try:
     system = platform.system().lower()
     if system.startswith("win"):
@@ -116,7 +137,17 @@ try:
             )
     else:
         # Linux/macOS
-        run_local_py()
+        if _module_available("homeassistant"):
+            run_local_py()
+        elif which("docker"):
+            run_via_docker()
+        else:
+            raise SystemExit(
+                "Home Assistant Python package not available and Docker not found. "
+                "Install the package (e.g. `python3 -m pip install homeassistant`) or "
+                "install Docker to run the config check."
+            )
 finally:
-    with contextlib.suppress(FileNotFoundError):
-        real.unlink()
+    if created_secrets:
+        with contextlib.suppress(FileNotFoundError):
+            real.unlink()
