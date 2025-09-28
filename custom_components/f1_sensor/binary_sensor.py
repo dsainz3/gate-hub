@@ -134,7 +134,7 @@ class F1SafetyCarBinarySensor(F1BaseEntity, RestoreEntity, BinarySensorEntity):
         await super().async_added_to_hass()
         self.coordinator.async_add_listener(self._handle_coordinator_update)
         # Prefer coordinator's latest if present
-        payload, ts = self._extract_payload()
+        payload, _ = self._extract_payload()
         if payload is not None:
             self._update_from_track_status()
         else:

@@ -16,7 +16,7 @@ def parse_racecontrol(text: str):
         if isinstance(msgs, list) and msgs:
             last = msgs[-1]
         elif isinstance(msgs, dict) and msgs:
-            numeric_keys = [k for k in msgs.keys() if str(k).isdigit()]
+            numeric_keys = [k for k in msgs if str(k).isdigit()]
             if numeric_keys:
                 key = max(numeric_keys, key=lambda x: int(x))
                 last = msgs[key]
@@ -63,7 +63,7 @@ def normalize_track_status(raw: dict | None) -> str | None:
         "6": "VSC",
         "7": "VSC_ENDING",
         "8": "CLEAR",  # Fallback, observerad som CLEAR i praktiken
-        # "3": okänd/kontextberoende – logga och validera mot Race Control
+        # "3": okänd/kontextberoende - logga och validera mot Race Control
     }
 
     # Prefer explicit message aliases when present to avoid wrong numeric overrides
