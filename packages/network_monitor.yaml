@@ -2,16 +2,25 @@
 # Lightweight network monitoring focused on ping latency and Speedtest data.
 
 binary_sensor:
-  - platform: ping
+  - platform: command_line
     name: Internet Reachability
-    host: 8.8.8.8
-    count: 5
+    unique_id: network_monitor_internet_reachability
+    command: >-
+      ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1 && echo online || echo offline
+    payload_on: online
+    payload_off: offline
+    device_class: connectivity
+    scan_interval: 30
 
 sensor:
-  - platform: ping
+  - platform: command_line
     name: Internet Latency
-    host: 8.8.8.8
-    count: 5
+    unique_id: network_monitor_internet_latency
+    command: >-
+      ping -c 1 -W 2 8.8.8.8 | awk -F'/' 'END { if (NR>0) print $5; else print "nan" }'
+    unit_of_measurement: ms
+    value_template: "{{ value | float(default=0) | round(1) }}"
+    availability_template: "{{ value not in ['', 'nan'] }}"
     scan_interval: 60
 
 speedtestdotnet:

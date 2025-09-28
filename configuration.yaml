@@ -65,8 +65,6 @@ logger:
     homeassistant.components.input_number: debug
     homeassistant.components.input_text: debug
     homeassistant.components.script: debug
-    custom_components.tplink_router: debug
-    tplinkrouterc6u: debug
 
 lovelace:
   resources:

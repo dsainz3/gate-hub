@@ -525,7 +525,7 @@ automation:
         target:
           entity_id: input_text.f1_last_flag_message
         data:
-          value: "{{ now() | as_local | strftime('%Y-%m-%d %H:%M') }} — Track status: {{ trigger.to_state.state | upper }}"
+          value: "{{ now() | as_local | timestamp_custom('%Y-%m-%d %H:%M', False) }} — Track status: {{ trigger.to_state.state | upper }}"
       - if:
           - condition: state
             entity_id: input_boolean.f1_safety_car_quiet_hours
