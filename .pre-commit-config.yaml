@@ -2,7 +2,11 @@ minimum_pre_commit_version: '3.7.1'
 default_language_version:
   python: python3.12
 
-exclude: ^backup/
+exclude: |
+  (?x)(
+    ^backup/|
+    ^custom_components/
+  )
 repos:
   # YAML formatting with Python (replaces prettier)
   - repo: local

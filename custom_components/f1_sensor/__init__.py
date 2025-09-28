@@ -159,7 +159,7 @@ class WeatherDataCoordinator(DataUpdateCoordinator):
                     if msg:
                         # Skip duplicate snapshots without timestamp to avoid heartbeat churn
                         if self._should_skip_duplicate(msg):
-                            try:
+                            with contextlib.suppress(Exception):
                                 _LOGGER.debug(
                                     "WeatherData duplicate without timestamp ignored at %s: %s",
                                     dt_util.utcnow().isoformat(
@@ -167,20 +167,16 @@ class WeatherDataCoordinator(DataUpdateCoordinator):
                                     ),
                                     msg,
                                 )
-                            except Exception:
-                                pass
                             continue
-                        try:
+                        with contextlib.suppress(Exception):
                             _LOGGER.debug(
                                 "WeatherData received at %s, delay=%ss, message=%s",
                                 dt_util.utcnow().isoformat(timespec="seconds"),
                                 self._delay,
                                 msg,
                             )
-                        except Exception:
-                            pass
                         if self._delay > 0:
-                            try:
+                            with contextlib.suppress(Exception):
                                 scheduled = (
                                     dt_util.utcnow()
                                     + timedelta(seconds=self._delay)
@@ -190,8 +186,6 @@ class WeatherDataCoordinator(DataUpdateCoordinator):
                                     scheduled,
                                     self._delay,
                                 )
-                            except Exception:
-                                pass
                             self.hass.loop.call_later(
                                 self._delay,
                                 lambda m=msg: self._deliver(m),
@@ -240,13 +234,9 @@ class WeatherDataCoordinator(DataUpdateCoordinator):
             "WindDirection",
             "WindSpeed",
         )
-        try:
-            for k in keys:
-                if str(last.get(k)) != str(msg.get(k)):
-                    return False
-            return True
-        except Exception:
-            return False
+        with contextlib.suppress(Exception):
+            return all(str(last.get(k)) == str(msg.get(k)) for k in keys)
+        return False
 
     @staticmethod
     def _parse_message(data):
@@ -268,14 +258,12 @@ class WeatherDataCoordinator(DataUpdateCoordinator):
         self._last_message = msg
         self.data_list = [msg]
         self.async_set_updated_data(msg)
-        try:
+        with contextlib.suppress(Exception):
             _LOGGER.debug(
                 "WeatherData delivered at %s: %s",
                 dt_util.utcnow().isoformat(timespec="seconds"),
                 msg,
             )
-        except Exception:
-            pass
 
     async def async_config_entry_first_refresh(self):
         await super().async_config_entry_first_refresh()
@@ -395,19 +383,17 @@ class RaceControlCoordinator(DataUpdateCoordinator):
                     items = self._extract_items(msg)
                     if not items:
                         continue
-                    try:
+                    with contextlib.suppress(Exception):
                         _LOGGER.debug(
                             "RaceControl received at %s, delay=%ss, items=%s",
                             dt_util.utcnow().isoformat(timespec="seconds"),
                             self._delay,
                             items,
                         )
-                    except Exception:
-                        pass
 
                     def schedule_delivery(item: dict):
                         if self._delay > 0:
-                            try:
+                            with contextlib.suppress(Exception):
                                 scheduled = (
                                     dt_util.utcnow()
                                     + timedelta(seconds=self._delay)
@@ -418,8 +404,6 @@ class RaceControlCoordinator(DataUpdateCoordinator):
                                     self._delay,
                                     item,
                                 )
-                            except Exception:
-                                pass
                             self.hass.loop.call_later(
                                 self._delay,
                                 lambda m=item: self._deliver(m),
@@ -436,14 +420,12 @@ class RaceControlCoordinator(DataUpdateCoordinator):
                             or item.get("processedAt")
                             or item.get("timestamp")
                         )
-                        try:
+                        with contextlib.suppress(Exception):
                             if ts_raw and self._startup_cutoff:
                                 ts = datetime.fromisoformat(
                                     str(ts_raw).replace("Z", "+00:00")
                                 )
                                 if ts.tzinfo is None:
-                                    from datetime import timezone as _tz
-
                                     ts = ts.replace(tzinfo=UTC)
                                 if ts < self._startup_cutoff:
                                     _LOGGER.debug(
@@ -451,8 +433,6 @@ class RaceControlCoordinator(DataUpdateCoordinator):
                                         item,
                                     )
                                     continue
-                        except Exception:
-                            pass
 
                         ident = self._message_id(item)
                         if ident in self._seen_ids:
@@ -475,16 +455,14 @@ class RaceControlCoordinator(DataUpdateCoordinator):
         self._last_message = item
         self.data_list = [item]
         self.async_set_updated_data(item)
-        try:
+        with contextlib.suppress(Exception):
             _LOGGER.debug(
                 "RaceControl delivered at %s: %s",
                 dt_util.utcnow().isoformat(timespec="seconds"),
                 item,
             )
-        except Exception:
-            pass
         # Publish on HA event bus with a consistent event name
-        try:
+        with contextlib.suppress(Exception):
             self.hass.bus.async_fire(
                 f"{DOMAIN}_race_control_event",
                 {
@@ -494,8 +472,6 @@ class RaceControlCoordinator(DataUpdateCoordinator):
                     ),
                 },
             )
-        except Exception:
-            _LOGGER.debug("RaceControl: Failed to publish event for item")
 
     async def async_config_entry_first_refresh(self):
         await super().async_config_entry_first_refresh()
@@ -562,17 +538,15 @@ class LapCountCoordinator(DataUpdateCoordinator):
                 async for payload in self._client.messages():
                     msg = self._parse_message(payload)
                     if msg:
-                        try:
+                        with contextlib.suppress(Exception):
                             _LOGGER.debug(
                                 "LapCount received at %s, delay=%ss, message=%s",
                                 dt_util.utcnow().isoformat(timespec="seconds"),
                                 self._delay,
                                 msg,
                             )
-                        except Exception:
-                            pass
                         if self._delay > 0:
-                            try:
+                            with contextlib.suppress(Exception):
                                 scheduled = (
                                     dt_util.utcnow()
                                     + timedelta(seconds=self._delay)
@@ -582,8 +556,6 @@ class LapCountCoordinator(DataUpdateCoordinator):
                                     scheduled,
                                     self._delay,
                                 )
-                            except Exception:
-                                pass
                             self.hass.loop.call_later(
                                 self._delay,
                                 lambda m=msg: self._deliver(m),
@@ -602,14 +574,12 @@ class LapCountCoordinator(DataUpdateCoordinator):
         self._last_message = msg
         self.data_list = [msg]
         self.async_set_updated_data(msg)
-        try:
+        with contextlib.suppress(Exception):
             _LOGGER.debug(
                 "LapCount delivered at %s: %s",
                 dt_util.utcnow().isoformat(timespec="seconds"),
                 msg,
             )
-        except Exception:
-            pass
 
     async def async_config_entry_first_refresh(self):
         await super().async_config_entry_first_refresh()
@@ -647,14 +617,15 @@ class F1DataCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Fetch data from the F1 API."""
         try:
-            async with async_timeout.timeout(10):
-                async with self._session.get(self._url) as response:
-                    if response.status != 200:
-                        raise UpdateFailed(
-                            f"Error fetching data: {response.status}"
-                        )
-                    text = await response.text()
-                    return json.loads(text.lstrip("\ufeff"))
+            async with async_timeout.timeout(10), self._session.get(
+                self._url
+            ) as response:
+                if response.status != 200:
+                    raise UpdateFailed(
+                        f"Error fetching data: {response.status}"
+                    )
+                text = await response.text()
+                return json.loads(text.lstrip("\ufeff"))
         except Exception as err:
             raise UpdateFailed(f"Error fetching data: {err}") from err
 
@@ -683,14 +654,13 @@ class F1SeasonResultsCoordinator(DataUpdateCoordinator):
                 {"limit": str(limit), "offset": str(offset)}
             )
         )
-        async with async_timeout.timeout(10):
-            async with self._session.get(url) as response:
-                if response.status != 200:
-                    raise UpdateFailed(
-                        f"Error fetching data: {response.status}"
-                    )
-                text = await response.text()
-                return json.loads(text.lstrip("\ufeff"))
+        async with async_timeout.timeout(10), self._session.get(
+            url
+        ) as response:
+            if response.status != 200:
+                raise UpdateFailed(f"Error fetching data: {response.status}")
+            text = await response.text()
+            return json.loads(text.lstrip("\ufeff"))
 
     @staticmethod
     def _race_key(r: dict) -> tuple:
@@ -756,12 +726,10 @@ class F1SeasonResultsCoordinator(DataUpdateCoordinator):
                     "Races", []
                 ) or []
                 merge_page(praces)
-                try:
+                with contextlib.suppress(Exception):
                     limit_used = int(pmr.get("limit") or limit_used)
                     offset_used = int(pmr.get("offset") or next_offset)
                     total = int(pmr.get("total") or total)
-                except Exception:
-                    pass
                 next_offset = offset_used + limit_used
                 safety += 1
 
@@ -805,19 +773,20 @@ class LiveSessionCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         url = LIVETIMING_INDEX_URL.format(year=self.year)
         try:
-            async with async_timeout.timeout(10):
-                async with self._session.get(url) as response:
-                    if response.status in (403, 404):
-                        _LOGGER.warning(
-                            "Index unavailable: %s", response.status
-                        )
-                        return self.data
-                    if response.status != 200:
-                        raise UpdateFailed(
-                            f"Error fetching data: {response.status}"
-                        )
-                    text = await response.text()
-                    return json.loads(text.lstrip("\ufeff"))
+            async with async_timeout.timeout(10), self._session.get(
+                url
+            ) as response:
+                if response.status in (403, 404):
+                    _LOGGER.warning(
+                        "Index unavailable: %s", response.status
+                    )
+                    return self.data
+                if response.status != 200:
+                    raise UpdateFailed(
+                        f"Error fetching data: {response.status}"
+                    )
+                text = await response.text()
+                return json.loads(text.lstrip("\ufeff"))
         except Exception as err:
             _LOGGER.warning("Error fetching index: %s", err)
             return self.data
@@ -882,14 +851,12 @@ class TrackStatusCoordinator(DataUpdateCoordinator):
                             or msg.get("processedAt")
                             or msg.get("timestamp")
                         )
-                        try:
+                        with contextlib.suppress(Exception):
                             if utc_str:
                                 ts = datetime.fromisoformat(
                                     utc_str.replace("Z", "+00:00")
                                 )
                                 if ts.tzinfo is None:
-                                    from datetime import timezone as _tz
-
                                     ts = ts.replace(tzinfo=UTC)
                                 if (
                                     self._startup_cutoff
@@ -900,8 +867,6 @@ class TrackStatusCoordinator(DataUpdateCoordinator):
                                         msg,
                                     )
                                     continue
-                        except Exception:
-                            pass
 
                         _LOGGER.debug(
                             "TrackStatus received at %s, status=%s, message=%s, delay=%ss",
@@ -919,7 +884,7 @@ class TrackStatusCoordinator(DataUpdateCoordinator):
                             self._delay,
                         )
                         if self._delay > 0:
-                            try:
+                            with contextlib.suppress(Exception):
                                 scheduled = (
                                     dt_util.utcnow()
                                     + timedelta(seconds=self._delay)
@@ -929,8 +894,6 @@ class TrackStatusCoordinator(DataUpdateCoordinator):
                                     scheduled,
                                     self._delay,
                                 )
-                            except Exception:
-                                pass
                             self.hass.loop.call_later(
                                 self._delay,
                                 lambda m=msg: self._deliver(m),
@@ -966,18 +929,14 @@ class TrackStatusCoordinator(DataUpdateCoordinator):
         self._last_message = msg
         self.data_list = [msg]
         self.async_set_updated_data(msg)
-        try:
+        with contextlib.suppress(Exception):
             self.hass.data[LATEST_TRACK_STATUS] = msg
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(Exception):
             _LOGGER.debug(
                 "TrackStatus delivered at %s: %s",
                 dt_util.utcnow().isoformat(timespec="seconds"),
                 msg,
             )
-        except Exception:
-            pass
 
     async def async_config_entry_first_refresh(self):
         await super().async_config_entry_first_refresh()
@@ -1045,7 +1004,7 @@ class SessionStatusCoordinator(DataUpdateCoordinator):
                             self._delay,
                         )
                         if self._delay > 0:
-                            try:
+                            with contextlib.suppress(Exception):
                                 scheduled = (
                                     dt_util.utcnow()
                                     + timedelta(seconds=self._delay)
@@ -1055,8 +1014,6 @@ class SessionStatusCoordinator(DataUpdateCoordinator):
                                     scheduled,
                                     self._delay,
                                 )
-                            except Exception:
-                                pass
                             self.hass.loop.call_later(
                                 self._delay,
                                 lambda m=msg: self._deliver(m),
@@ -1094,15 +1051,9 @@ class SessionStatusCoordinator(DataUpdateCoordinator):
         self._last_message = msg
         self.data_list = [msg]
         self.async_set_updated_data(msg)
-        try:
+        with contextlib.suppress(Exception):
             _LOGGER.debug(
                 "SessionStatus delivered at %s: %s",
                 dt_util.utcnow().isoformat(timespec="seconds"),
                 msg,
             )
-        except Exception:
-            pass
-
-    async def async_config_entry_first_refresh(self):
-        await super().async_config_entry_first_refresh()
-        self._task = self.hass.loop.create_task(self._listen())
