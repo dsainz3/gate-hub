@@ -595,206 +595,295 @@ views:
     badges: []
     sections:
       - type: grid
-        title: Core Lighting
+        title: Light Groups
         cards:
-          - type: tile
+          - type: custom:mushroom-light-card
             entity: light.all_lights
             name: All Lights
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.mainfloor_lights
+            name: Main Floor
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.all_exterior_lights
             name: Exterior Lights
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.permanent_outdoor_lights
             name: Permanent Strip
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.theater_lights
             name: Theater
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.office_lights
             name: Office
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.front_porch_lights
             name: Front Porch
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.garage_lights
+            name: Garage
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
       - type: grid
-        title: Theater & Front Detail
+        title: Main Floor Lights
         cards:
-          - type: tile
-            entity: light.light_theater_left
-            name: Theater Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_theater_right
-            name: Theater Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_front_left
-            name: Front Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_front_right
-            name: Front Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-      - type: grid
-        title: Garage
-        cards:
-          - type: tile
-            entity: light.light_garage_center
-            name: Garage Center
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_garage_left
-            name: Garage Left
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_garage_right
-            name: Garage Right
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-      - type: grid
-        title: Interior Rooms
-        cards:
-          - type: tile
-            entity: light.light_parents
-            name: Parents
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_guest_room
-            name: Guest Room
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.light_attic
-            name: Attic
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
-            entity: light.sunroom_light
-            name: Sunroom
-            color: amber
-            tap_action:
-              action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+          - type: custom:mushroom-light-card
             entity: light.livingroom_light
             name: Living Room
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.diningroom_light
             name: Dining Room
-            color: amber
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.sunroom_light
+            name: Sunroom
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+      - type: grid
+        title: Upper Floor Lights
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.light_parents
+            name: Parents Suite
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_guest_room
+            name: Guest Room
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_ari
+            name: Ari Room
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_attic
+            name: Attic
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+      - type: grid
+        title: Basement & Office Lights
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.light_theater_left
+            name: Theater Left
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_theater_right
+            name: Theater Right
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.light_office
-            name: Light-Office
-            color: amber
+            name: Office
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
-          - type: tile
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
             entity: light.spare_light
-            name: Spare
-            color: amber
+            name: Spare Room
             tap_action:
               action: toggle
-            features:
-              - type: light-brightness
-                show_percentage: true
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+      - type: grid
+        title: Exterior & Seasonal Lights
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.light_front_left
+            name: Front Left
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_front_right
+            name: Front Right
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_garage_left
+            name: Garage Left
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_garage_center
+            name: Garage Center
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.light_garage_right
+            name: Garage Right
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
+          - type: custom:mushroom-light-card
+            entity: light.tree
+            name: Tree
+            tap_action:
+              action: toggle
+            use_light_color: true
+            show_brightness_control: true
+            show_color_control: true
+            show_color_temp_control: true
+            show_effect_control: false
+            fill_container: true
       - type: entities
         title: Groups & Toggles
         state_color: true

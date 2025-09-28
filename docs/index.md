@@ -25,6 +25,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
 - [Husker Dashboard Guide](how-to/huskers/dashboard.md)
 - [Husker LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
+- [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)
 
 ## Reference
