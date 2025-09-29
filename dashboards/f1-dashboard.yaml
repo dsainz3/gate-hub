@@ -26,26 +26,26 @@ views:
             icon: mdi:play-speed
             action_name: Run
             service: script.turn_on
-            target:
+            service_data:
               entity_id: script.f1_lights_out_sequence
           - type: call-service
             name: Chequered Flag Show
             icon: mdi:flag-checkered
             action_name: Run
             service: script.turn_on
-            target:
+            service_data:
               entity_id: script.f1_chequered_flag_show
           - type: call-service
             name: Reset Lights
             icon: mdi:restart
             action_name: Run
             service: script.turn_on
-            target:
+            service_data:
               entity_id: script.f1_stop_all_shows
 
       - type: markdown
         title: Race Countdown
-        content: |-
+        content: |
           {% set invalid = ['unknown', 'unavailable', '', None] %}
           {% set minutes = states('sensor.f1_lights_out_minutes_effective') | int(9999) %}
           {% set phase = states('sensor.f1_race_phase_label') %}
@@ -54,7 +54,12 @@ views:
           {% set local_ts = states('sensor.f1_lights_out_local') %}
           {% set track_status = states('sensor.f1_track_status_label') %}
           {% if local_ts not in invalid %}
-            {% set formatted = as_datetime(local_ts) | as_local | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', False) %}
+            {% set ts = as_timestamp(local_ts, default=None) %}
+            {% if ts is not none %}
+              {% set formatted = ts | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', True) %}
+            {% else %}
+              {% set formatted = 'TBD' %}
+            {% endif %}
           {% else %}
             {% set formatted = 'TBD' %}
           {% endif %}
@@ -90,7 +95,7 @@ views:
 
       - type: markdown
         title: Weekend Notes
-        content: |-
+        content: |
           {% set race = states('sensor.f1_next_race_name') %}
           {% set location = states('sensor.f1_next_race_location') %}
           {% set local_ts = states('sensor.f1_lights_out_local') %}
@@ -99,7 +104,12 @@ views:
             <li><strong>Race:</strong> {{ race }} ({{ location }})</li>
             {% if has_schedule %}
               <li><strong>Lights out:</strong>
-                {{ as_datetime(local_ts) | as_local | timestamp_custom('%a %b %-d · %-I:%M %p %Z', False) }}
+          {% set ts = as_timestamp(local_ts, default=None) %}
+          {% if ts is not none %}
+            {{ ts | timestamp_custom('%a %b %-d · %-I:%M %p %Z', True) }}
+          {% else %}
+            TBD
+          {% endif %}
               </li>
             {% else %}
               <li><strong>Lights out:</strong> TBD – enable the F1 sensor integration for timetable data.</li>
@@ -115,7 +125,7 @@ views:
 
       - type: markdown
         title: Standings Snapshot
-        content: |-
+        content: |
           F1 standings sensors are not currently enabled. Open <em>Settings → Devices & Services → F1 Sensor</em> and enable the driver & constructor standings to populate this section.
 
       - type: entities

@@ -537,7 +537,8 @@ template:
               {%- set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {%- set h_score = (home.score.value if home and home.score is mapping and home.score.value is defined else (home.score if home and home.score is defined else '?')) %}
               {%- set a_score = (away.score.value if away and away.score is mapping and away.score.value is defined else (away.score if away and away.score is defined else '?')) %}
-              {%- set date_text = date.strftime('%b %-d, %-I:%M %p') if date else 'TBD' %}
+              {%- set date_ts = as_timestamp(date, default=None) if date else none %}
+              {%- set date_text = date_ts | timestamp_custom('%b %-d, %-I:%M %p', True) if date_ts is not none else 'TBD' %}
               {%- set h_fmt = h_score if h_score in score_unknown else (h_score | float(0) | round(0) | int) %}
               {%- set a_fmt = a_score if a_score in score_unknown else (a_score | float(0) | round(0) | int) %}
               {%- if done %}
@@ -573,11 +574,12 @@ template:
           {% endfor %}
           {% if next.dt %}
             {% set local = next.dt | as_local %}
+            {% set local_ts = as_timestamp(local, default=None) %}
             {% set our_team = next.comp.competitors | selectattr('team.id','equalto','158') | list | first %}
             {% set opponent = next.comp.competitors | rejectattr('team.id','equalto','158') | list | first %}
             {% set is_home = our_team.homeAway == 'home' if our_team is defined and our_team.homeAway is defined else false %}
             {% set opp_name = opponent.team.displayName if opponent and opponent.team is defined else 'TBD' %}
-            {{ local.strftime('%b %-d, %Y %-I:%M %p %Z') if local else 'TBD' }} — {% if is_home %}vs{% else %}@{% endif %} {{ opp_name }}
+            {{ local_ts | timestamp_custom('%b %-d, %Y %-I:%M %p %Z', True) if local_ts is not none else 'TBD' }} — {% if is_home %}vs{% else %}@{% endif %} {{ opp_name }}
           {% else %}No upcoming game{% endif %}
         attributes:
           date: >-
@@ -597,7 +599,8 @@ template:
             {% endfor %}
             {% if next.dt %}
               {% set local = next.dt | as_local %}
-              {{ local.strftime('%b %-d, %Y') if local else 'TBD' }}
+              {% set local_ts = as_timestamp(local, default=None) %}
+              {{ local_ts | timestamp_custom('%b %-d, %Y', True) if local_ts is not none else 'TBD' }}
             {% else %}No upcoming game{% endif %}
           time: >-
             {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
@@ -616,7 +619,8 @@ template:
             {% endfor %}
             {% if next.dt %}
               {% set local = next.dt | as_local %}
-              {{ local.strftime('%-I:%M %p %Z') if local else 'TBD' }}
+              {% set local_ts = as_timestamp(local, default=None) %}
+              {{ local_ts | timestamp_custom('%-I:%M %p %Z', True) if local_ts is not none else 'TBD' }}
             {% else %}No upcoming game{% endif %}
           location: >-
             {% set events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}

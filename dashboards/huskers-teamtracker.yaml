@@ -188,7 +188,10 @@ views:
                   {% set kickoff_iso = state_attr('sensor.husker_team', 'date') %}
                   {% set kickoff_local = '' %}
                   {% if kickoff_iso not in [None, '', 'unknown', 'unavailable'] %}
-                    {% set kickoff_local = as_datetime(kickoff_iso) | as_local | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', False) %}
+                    {% set ts = as_timestamp(kickoff_iso, default=None) %}
+                    {% if ts is not none %}
+                      {% set kickoff_local = ts | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', True) %}
+                    {% endif %}
                   {% endif %}
                   {% set kickoff_in = state_attr('sensor.husker_team', 'kickoff_in') %}
                   {% set venue = state_attr('sensor.husker_team', 'venue') %}

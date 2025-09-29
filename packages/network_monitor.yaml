@@ -6,30 +6,31 @@ binary_sensor:
     name: Internet Reachability
     unique_id: network_monitor_internet_reachability
     command: >-
-      ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1 && echo online || echo offline
+      curl -o /dev/null -s --max-time 5 https://1.1.1.1 && echo online || echo offline
     payload_on: online
     payload_off: offline
     device_class: connectivity
-    scan_interval: 30
+    scan_interval: 60
 
 sensor:
   - platform: command_line
     name: Internet Latency
     unique_id: network_monitor_internet_latency
     command: >-
-      ping -c 1 -W 2 8.8.8.8 | awk -F'/' 'END { if (NR>0) print $5; else print "nan" }'
+      curl -o /dev/null -s -w '%{time_connect}' --max-time 5 https://1.1.1.1 || echo nan
     unit_of_measurement: ms
-    value_template: "{{ value | float(default=0) | round(1) }}"
-    availability_template: "{{ value not in ['', 'nan'] }}"
-    scan_interval: 60
-
-speedtestdotnet:
-  scan_interval:
-    hours: 6
-  monitored_conditions:
-    - ping
-    - download
-    - upload
+    device_class: duration
+    state_class: measurement
+    value_template: >-
+      {% set invalid = ['nan', '', 'None'] %}
+      {% if value not in invalid %}
+        {{ (value | float(default=0) * 1000) | round(1) }}
+      {% else %}
+        unknown
+      {% endif %}
+    availability_template: >-
+      {{ value not in ['nan', '', 'None'] }}
+    scan_interval: 120
 
 template:
   - sensor:
@@ -56,7 +57,10 @@ template:
           last_speedtest: >-
             {% set entity = states.sensor.speedtest_download %}
             {% if entity is not none and entity.last_changed %}
-              {{ entity.last_changed | as_local | isoformat }}
+              {% set ts = as_timestamp(entity.last_changed) %}
+              {% set date = ts | timestamp_custom('%Y-%m-%dT%H:%M:%S', True) %}
+              {% set offset = ts | timestamp_custom('%z', True) %}
+              {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
             {% else %}
               unavailable
             {% endif %}
@@ -66,7 +70,10 @@ template:
         state: >-
           {% set entity = states.sensor.speedtest_download %}
           {% if entity is not none and entity.last_changed %}
-            {{ entity.last_changed | as_local | isoformat }}
+            {% set ts = as_timestamp(entity.last_changed) %}
+            {% set date = ts | timestamp_custom('%Y-%m-%dT%H:%M:%S', True) %}
+            {% set offset = ts | timestamp_custom('%z', True) %}
+            {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
           {% else %}
             unknown
           {% endif %}
