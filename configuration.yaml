@@ -25,8 +25,6 @@ homeassistant:
       state_class: measurement
       icon: mdi:weather-sunny
 
-frontend:
-  themes: !include themes.yaml   # or: !include_dir_merge_named themes/
 
 automation: !include automations.yaml
 scene: !include scenes.yaml

@@ -17,12 +17,12 @@ views:
           {% endif %}
           {% set speedtest_ping = states('sensor.speedtest_ping') %}
           {% set ping_text = speedtest_ping if speedtest_ping not in ['unknown', 'unavailable'] else 'pending' %}
-          {% set latency = states('sensor.internet_latency') %}
+          {% set latency = states('sensor.internet_latency_2') %}
           {% set latency_text = latency if latency not in ['unknown', 'unavailable'] else 'pending' %}
           ## Network Snapshot
           **Status:** {{ states('sensor.network_status_summary') }}
 
-          **Ping:** {{ latency_text }} ms ({{ 'reachable' if is_state('binary_sensor.internet_reachability', 'on') else 'unreachable' }})
+          **Ping:** {{ latency_text }} ms ({{ 'reachable' if is_state('binary_sensor.internet_reachability_2', 'on') else 'unreachable' }})
 
           **Speedtest:** ↓ {{ states('sensor.speedtest_download') }} Mbps · ↑ {{ states('sensor.speedtest_upload') }} Mbps · Ping {{ ping_text }} ms
 
@@ -32,7 +32,7 @@ views:
         square: false
         cards:
           - type: tile
-            entity: binary_sensor.internet_reachability
+            entity: binary_sensor.internet_reachability_2
             name: Internet online
             color: '#43a047'
           - type: custom:apexcharts-card
@@ -50,7 +50,7 @@ views:
               stroke:
                 width: 2
             series:
-              - entity: sensor.internet_latency
+              - entity: sensor.internet_latency_2
                 name: Latency
                 color: '#1e88e5'
                 float_precision: 1
@@ -84,7 +84,7 @@ views:
           stroke:
             width: 2
         series:
-          - entity: sensor.internet_latency
+          - entity: sensor.internet_latency_2
             name: Latency (ms)
             color: '#1e88e5'
       - type: custom:apexcharts-card
@@ -113,8 +113,8 @@ views:
         title: Network sensors
         show_header_toggle: false
         entities:
-          - binary_sensor.internet_reachability
-          - sensor.internet_latency
+          - binary_sensor.internet_reachability_2
+          - sensor.internet_latency_2
           - sensor.speedtest_ping
           - sensor.speedtest_download
           - sensor.speedtest_upload
@@ -149,7 +149,7 @@ views:
           stroke:
             width: 2
         series:
-          - entity: sensor.internet_latency
+          - entity: sensor.internet_latency_2
             name: Ping (ms)
             color: '#1e88e5'
       - type: custom:apexcharts-card
