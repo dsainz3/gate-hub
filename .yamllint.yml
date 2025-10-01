@@ -1,5 +1,5 @@
 extends: default
-
+#
 ignore: |
   configuration.yaml
   homeassistant/packages/**/*.yml
