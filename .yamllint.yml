@@ -1,5 +1,22 @@
 extends: default
 
+ignore: |
+  configuration.yaml
+  homeassistant/packages/**/*.yml
+  homeassistant/packages/**/*.yaml
+  ui-lovelace/*.yml
+  ui-lovelace/*.yaml
+  ui-lovelace/resources.yml
+  lovelace/**/*.yml
+  lovelace/**/*.yaml
+  blueprints/**/*.yml
+  blueprints/**/*.yaml
+  custom_components/**/services.yml
+  custom_components/**/services.yaml
+  zigbee2mqtt/**/*.yml
+  zigbee2mqtt/**/*.yaml
+
+
 rules:
   line-length:
     max: 220

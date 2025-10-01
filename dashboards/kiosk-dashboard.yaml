@@ -1,402 +1,1049 @@
-title: Huskers Team Tracker
-theme: Huskers Cream
+title: Kiosk
 views:
-  - title: Game Day
-    path: huskers-game-day
-    icon: mdi:football-helmet
-    badges: []
-    cards:
-      - type: custom:teamtracker-card
-        entity: sensor.husker_team
-        name: Huskers Snapshot
-
-      - type: entities
-        title: "🔄 Quick Actions"
-        show_header_toggle: false
-        entities:
-          - type: call-service
-            name: Refresh Game Data
-            icon: mdi:refresh-circle
-            action_name: Update
-            service: homeassistant.update_entity
-            target:
-              entity_id:
-                - sensor.husker_team
-                - sensor.espn_cfb_scoreboard
-                - sensor.espn_nebraska_schedule
-
-      - type: horizontal-stack
+  - title: Snapshot
+    path: snapshot
+    icon: mdi:view-dashboard-variant
+    type: sections
+    max_columns: 3
+    badges:
+      - entity: sensor.kiosk_snapshot_lights_on
+        name: Lights On
+      - entity: binary_sensor.kiosk_snapshot_automation_issue
+        name: Automation Health
+      - entity: sensor.hygrometer_humidor_temperature
+        name: Humidor °F
+      - entity: sensor.huskers_next_game
+        name: Next Huskers Game
+    sections:
+      - type: vertical-stack
+        column_span: 3
         cards:
-          - type: button
-            name: Start 30s Chase
-            icon: mdi:play-speed
+          - type: custom:mushroom-chips-card
+            alignment: justify
+            chips:
+              - type: template
+                entity: sensor.kiosk_snapshot_lights_on
+                content: "{{ states('sensor.kiosk_snapshot_lights_on') }} lights"
+                icon: mdi:lightbulb-group
+                icon_color: >-
+                  {% set lights = states('sensor.kiosk_snapshot_lights_on') | int(0) %}
+                  {% if lights == 0 %}
+                    disabled
+                  {% elif lights < 5 %}
+                    amber
+                  {% else %}
+                    yellow
+                  {% endif %}
+              - type: template
+                entity: binary_sensor.kiosk_snapshot_automation_issue
+                content: >-
+                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
+                    Automations check
+                  {% else %}
+                    Automations healthy
+                  {% endif %}
+                icon: mdi:robot
+                icon_color: >-
+                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
+                    red
+                  {% else %}
+                    green
+                  {% endif %}
+              - type: template
+                entity: sensor.hygrometer_humidor_temperature
+                content: "{{ states('sensor.hygrometer_humidor_temperature') }}°F humidor"
+                icon: mdi:cigar
+                icon_color: >-
+                  {% set temp = states('sensor.hygrometer_humidor_temperature') | float(0) %}
+                  {% if temp < 60 %}
+                    blue
+                  {% elif temp > 75 %}
+                    deep-orange
+                  {% else %}
+                    teal
+                  {% endif %}
+              - type: entity
+                entity: !secret weather_primary_entity
+                content_info: state
+                icon_color: indigo
+              - type: template
+                entity: sensor.huskers_kickoff_in_effective
+                content: >-
+                  {% set kickoff = states('sensor.huskers_kickoff_in_effective') %}
+                  {% if kickoff in ['unknown', 'unavailable', 'none', '', 'None'] %}
+                    Kickoff TBD
+                  {% else %}
+                    {{ kickoff }} min to kickoff
+                  {% endif %}
+                icon: mdi:football-helmet
+                icon_color: >-
+                  {% set kickoff = states('sensor.huskers_kickoff_in_effective') | int(0) %}
+                  {% if kickoff <= 60 %}
+                    red
+                  {% elif kickoff <= 180 %}
+                    orange
+                  {% else %}
+                    green
+                  {% endif %}
+          - type: custom:mushroom-template-card
+            primary: >-
+              {{ now().strftime('%A, %B %d') }}
+            secondary: >-
+              {{ now().strftime('%I:%M %p') }} · Snapshot keeps the kiosk focused on game day, climate, and quick actions. Tap any tile to control devices or jump into the detailed tabs below.
+            icon: mdi:monitor-dashboard
+            layout: vertical
+            multiline_secondary: true
             tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_chase30_start
-          - type: button
-            name: Hail Burst
-            icon: mdi:music-note
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.huskers_hail_burst_8s
-          - type: button
-            name: All Scarlet
-            icon: mdi:palette
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet
-
+              action: none
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
+              grid-auto-flow: row dense
+              grid-gap: 12px
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.kiosk_snapshot_lights_on
+                primary: Lights On
+                secondary: >-
+                  {{ states('sensor.kiosk_snapshot_lights_on') | int(0) }} active fixtures
+                icon: mdi:lightbulb-group
+                icon_color: >-
+                  {% set value = states('sensor.kiosk_snapshot_lights_on') | int(0) %}
+                  {% if value == 0 %}
+                    disabled
+                  {% elif value < 5 %}
+                    amber
+                  {% else %}
+                    yellow
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.kiosk_snapshot_plugs_on
+                primary: Plugs Active
+                secondary: >-
+                  {{ states('sensor.kiosk_snapshot_plugs_on') | int(0) }} running loads
+                icon: mdi:power-plug-outline
+                icon_color: teal
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.kiosk_snapshot_automation_issue
+                primary: Automation Health
+                secondary: >-
+                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
+                    Requires attention
+                  {% else %}
+                    All key flows healthy
+                  {% endif %}
+                icon: mdi:robot
+                icon_color: >-
+                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
+                    red
+                  {% else %}
+                    green
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.kiosk_snapshot_aux_readout
+                primary: Humidor Climate
+                secondary: >-
+                  {% set temp = states('sensor.hygrometer_humidor_temperature') %}
+                  {% set humid_read = states('sensor.hygrometer_humidor_humidity') %}
+                  {{ 'n/a' if temp in ['unknown', 'unavailable', ''] else temp ~ '°F' }} · {{ 'n/a' if humid_read in ['unknown', 'unavailable', ''] else humid_read ~ '% RH' }}
+                icon: mdi:coolant-temperature
+                icon_color: >-
+                  {% set humid = states('sensor.hygrometer_humidor_humidity') | float(0) %}
+                  {% if humid < 60 %}
+                    blue
+                  {% elif humid > 75 %}
+                    deep-orange
+                  {% else %}
+                    teal
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.husker_team
+                primary: Huskers Status
+                secondary: >-
+                  {% set status = states('sensor.huskers_game_status_espn') %}
+                  {% set record = states('sensor.huskers_record_dashboard') %}
+                  {% if status in ['unknown', 'unavailable', 'none', '', 'None'] %}
+                    Waiting on schedule · {{ 'Record TBD' if record in ['unknown', 'unavailable', '', 'None', 'none'] else record }}
+                  {% else %}
+                    {{ status | title }} · {{ 'Record TBD' if record in ['unknown', 'unavailable', '', 'None', 'none'] else record }}
+                  {% endif %}
+                icon: mdi:football
+                icon_color: red
+                tap_action:
+                  action: more-info
+              - type: statistics-graph
+                title: Lights & Plugs (24h)
+                days_to_show: 1
+                period: hour
+                chart_type: line
+                stat_types:
+                  - mean
+                  - max
+                entities:
+                  - entity: sensor.kiosk_snapshot_lights_on
+                    name: Lights On
+                  - entity: sensor.kiosk_snapshot_plugs_on
+                    name: Plugs On
+          - type: history-graph
+            title: Automation Health
+            hours_to_show: 24
+            refresh_interval: 0
+            entities:
+              - binary_sensor.kiosk_snapshot_automation_issue
+              - automation.evening_lights_at_sunset
+              - automation.night_mode_at_midnight
       - type: grid
-        columns: 2
+        title: Environment & Game Day
+        column_span: 3
+        cards:
+          - type: custom:layout-card
+            layout_type: custom:grid-layout
+            layout:
+              grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
+              grid-auto-flow: row dense
+              grid-gap: 12px
+            cards:
+              - type: weather-forecast
+                entity: !secret weather_primary_entity
+              - type: custom:mushroom-template-card
+                entity: sensor.outdoor_temperature_wx
+                primary: Outdoor Temperature
+                secondary: >-
+                  {% set weather_entity = states('input_text.weather_pws_entity') %}
+                  {% set actual = states('sensor.outdoor_temperature_wx') %}
+                  {% set feels = state_attr(weather_entity, 'temperature') %}
+                  {{ 'n/a' if actual in ['unknown', 'unavailable', ''] else actual ~ '°F' }} · Feels like {{ 'n/a' if feels is none else (feels | round(0)) ~ '°F' }}
+                icon: mdi:thermometer
+                icon_color: >-
+                  {% set temp = states('sensor.outdoor_temperature_wx') | float(0) %}
+                  {% if temp <= 32 %}
+                    blue
+                  {% elif temp >= 85 %}
+                    deep-orange
+                  {% else %}
+                    amber
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.outdoor_humidity_wx
+                primary: Humidity & Pressure
+                secondary: >-
+                  {% set humidity = states('sensor.outdoor_humidity_wx') %}
+                  {% set pressure = states('sensor.outdoor_pressure_wx') %}
+                  {{ 'n/a' if humidity in ['unknown', 'unavailable', ''] else humidity ~ '% RH' }} · {{ 'n/a' if pressure in ['unknown', 'unavailable', ''] else pressure ~ ' inHg' }}
+                icon: mdi:water-percent
+                icon_color: indigo
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.outdoor_wind_speed_wx
+                primary: Wind & Gusts
+                secondary: >-
+                  {% set weather_entity = states('input_text.weather_pws_entity') %}
+                  {% set wind = states('sensor.outdoor_wind_speed_wx') %}
+                  {% set gust = state_attr(weather_entity, 'wind_speed') %}
+                  {{ 'n/a' if wind in ['unknown', 'unavailable', ''] else wind ~ ' mph winds' }} · Gusting {{ 'n/a' if gust is none else gust ~ ' mph' }}
+                icon: mdi:weather-windy
+                icon_color: blue
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.huskers_next_game
+                primary: Next Huskers Game
+                secondary: >-
+                  {{ states('sensor.huskers_next_game') if states('sensor.huskers_next_game') not in ['unknown', 'unavailable', '', 'None', 'none'] else 'Awaiting schedule' }}
+                icon: mdi:calendar-clock
+                icon_color: red
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.huskers_game_status_espn
+                primary: Game Status
+                secondary: >-
+                  {% set status = states('sensor.huskers_game_status_espn') %}
+                  {% if status in ['unknown', 'unavailable', '', 'none', 'None'] %}
+                    Monitoring ESPN feed for updates
+                  {% else %}
+                    {% set kickoff = states('sensor.huskers_kickoff_in_effective') %}
+                    {% if kickoff in ['unknown', 'unavailable', '', 'none', 'None'] %}
+                      {{ status | title }} · Kickoff TBD
+                    {% else %}
+                      {{ status | title }} · Kickoff in {{ kickoff }} min
+                    {% endif %}
+                  {% endif %}
+                icon: mdi:football-helmet
+                icon_color: >-
+                  {% if is_state('binary_sensor.huskers_is_live_espn', 'on') %}
+                    red
+                  {% elif is_state('binary_sensor.huskers_is_pregame_espn', 'on') %}
+                    orange
+                  {% else %}
+                    teal
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.husker_team
+                primary: Scoreboard Snapshot
+                secondary: >-
+                  {% set team = state_attr('sensor.husker_team', 'team_score') %}
+                  {% set opponent = state_attr('sensor.husker_team', 'opponent_score') %}
+                  {% if team is not none and opponent is not none %}
+                    {{ team }} - {{ opponent }}
+                  {% else %}
+                    Score pending
+                  {% endif %}
+                icon: mdi:scoreboard
+                icon_color: >-
+                  {% if is_state('binary_sensor.huskers_is_live_espn', 'on') %}
+                    red
+                  {% else %}
+                    indigo
+                  {% endif %}
+                tap_action:
+                  action: more-info
+              - type: entities
+                title: Game State
+                show_header_toggle: false
+                state_color: true
+                entities:
+                  - entity: binary_sensor.huskers_is_pregame_espn
+                    name: Pregame
+                  - entity: binary_sensor.huskers_is_live_espn
+                    name: Live Now
+                  - entity: binary_sensor.huskers_is_postgame_espn
+                    name: Postgame
+                  - entity: sensor.huskers_next_game
+                    name: Details
+                  - entity: sensor.huskers_kickoff_in_effective
+                    name: Kickoff Countdown (min)
+      - type: grid
+        title: Quick Controls
+        column_span: 3
+        columns: 4
         square: false
         cards:
-          - type: markdown
-            title: Game Day Scoreboard
-            content: |-
-              {% set invalid = ['unknown', 'unavailable', '', 'None', 'none'] %}
-              {% set team_logo = state_attr('sensor.husker_team', 'team_logo') %}
-              {% set opponent_logo = state_attr('sensor.husker_team', 'opponent_logo') %}
-              {% set team_score = state_attr('sensor.husker_team', 'team_score') | int(0) %}
-              {% set opponent_score = state_attr('sensor.husker_team', 'opponent_score') | int(0) %}
-              {% set phase = states('sensor.husker_team') %}
-              {% set phase_label = states('sensor.huskers_game_phase_label') %}
-              {% set clock = state_attr('sensor.husker_team', 'clock') %}
-              {% set quarter = state_attr('sensor.husker_team', 'quarter') %}
-              {% set possession = state_attr('sensor.husker_team', 'possession') %}
-              {% set huskers_name = state_attr('sensor.husker_team', 'team_long_name') or state_attr('sensor.husker_team', 'team_name') %}
-              {% set opponent_name = state_attr('sensor.husker_team', 'opponent_long_name') or state_attr('sensor.husker_team', 'opponent_name') %}
-              {% set detail = states('sensor.huskers_game_detail') %}
-              {% set team_prob = (state_attr('sensor.husker_team', 'team_win_probability') | float(0) * 100) | round(1) %}
-              {% set opp_prob = (state_attr('sensor.husker_team', 'opponent_win_probability') | float(0) * 100) | round(1) %}
-              <div
-                style="
-                  background: var(--card-background-color);
-                  color: var(--primary-text-color);
-                  padding:20px;
-                  border-radius:18px;
-                  border: var(--huskers-scoreboard-border);
-                  box-shadow: var(--huskers-scoreboard-shadow);
-                "
-              >
-                <div
-                  style="
-                    display:flex;
-                    flex-wrap:wrap;
-                    align-items:center;
-                    justify-content:space-between;
-                    gap:24px;
-                  "
-                >
-                  <div
-                    style="
-                      flex:1;
-                      min-width:210px;
-                      text-align:center;
-                    "
-                  >
-                    <img
-                      src="{{ '/local/huskers_logo.svg' if team_logo in invalid else team_logo }}"
-                      alt="Nebraska"
-                      style="
-                        height:85px;
-                        max-width:100%;
-                        object-fit:contain;
-                      "
-                    >
-                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--huskers-score-color);">
-                      {{ huskers_name or 'Nebraska Cornhuskers' }}
-                    </p>
-                    <p style="margin:0;color: var(--huskers-text-secondary);">
-                      {{ state_attr('sensor.husker_team', 'team_record') or 'Record TBA' }}
-                    </p>
-                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
-                      Rank {{ state_attr('sensor.husker_team', 'team_rank') or 'N/A' }}
-                      |
-                      {{ state_attr('sensor.husker_team', 'team_homeaway') | title if state_attr('sensor.husker_team', 'team_homeaway') else 'Venue TBA' }}
-                    </p>
-                  </div>
-                  <div
-                    style="
-                      flex:1.2;
-                      min-width:230px;
-                      text-align:center;
-                    "
-                  >
-                    <p style="margin:0;font-size:3.4rem;font-weight:800;color: var(--huskers-score-color);line-height:1;">
-                      {{ team_score }}
-                      <span style="color: var(--huskers-score-color);">-</span>
-                      {{ opponent_score }}
-                    </p>
-                    <p style="margin:8px 0 0 0;font-size:1.1rem;font-weight:600;color: var(--huskers-text-secondary);">
-                      {{ phase_label if phase_label not in invalid else phase }}
-                    </p>
-                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
-                      {{ clock or 'Clock TBA' }} |
-                      Q{{ quarter or '-' }}
-                    </p>
-                    <p style="margin:4px 0 0 0;color: var(--huskers-text-secondary);">
-                      Possession: {{ possession or 'Unknown' }}
-                    </p>
-                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
-                      Win Prob: {{ team_prob }}% / {{ opp_prob }}%
-                    </p>
-                  </div>
-                  <div
-                    style="
-                      flex:1;
-                      min-width:210px;
-                      text-align:center;
-                    "
-                  >
-                    <img
-                      src="{{ '/local/huskers_logo.svg' if opponent_logo in invalid else opponent_logo }}"
-                      alt="Opponent"
-                      style="
-                        height:85px;
-                        max-width:100%;
-                        object-fit:contain;
-                      "
-                    >
-                    <p style="margin:10px 0 6px 0;font-size:1.4rem;font-weight:700;color: var(--primary-text-color);">
-                      {{ opponent_name or 'Opponent' }}
-                    </p>
-                    <p style="margin:0;color: var(--secondary-text-color);">
-                      {{ state_attr('sensor.husker_team', 'opponent_record') or 'Record TBA' }}
-                    </p>
-                    <p style="margin:4px 0 0 0;color: var(--secondary-text-color);">
-                      Rank {{ state_attr('sensor.husker_team', 'opponent_rank') or 'N/A' }}
-                      |
-                      {{ state_attr('sensor.husker_team', 'opponent_homeaway') | title if state_attr('sensor.husker_team', 'opponent_homeaway') else 'Venue TBA' }}
-                    </p>
-                  </div>
-                </div>
-                <p style="margin:16px 0 0 0;text-align:center;font-weight:600;color: var(--secondary-text-color);">
-                  {{ detail if detail not in invalid else 'Game details will appear when available.' }}
-                </p>
-              </div>
+          - type: tile
+            entity: sensor.kiosk_snapshot_lights_on
+            name: Lights On
+            color: amber
+          - type: tile
+            entity: sensor.kiosk_snapshot_plugs_on
+            name: Plugs Active
+            color: teal
+          - type: tile
+            entity: binary_sensor.kiosk_snapshot_automation_issue
+            name: Automation Health
+            color: red
+          - type: tile
+            entity: sensor.kiosk_snapshot_aux_readout
+            name: Humidor Climate
+            icon: mdi:coolant-temperature
+          - type: tile
+            entity: light.all_lights
+            name: All Lights
+            color: amber
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: light.all_exterior_lights
+            name: Exterior Lights
+            color: amber
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_theater_lights
+            name: Theater Group
+            color: amber
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_front_lights
+            name: Front Group
+            color: amber
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: group.kiosk_garage_lights
+            name: Garage Group
+            color: amber
+            tap_action:
+              action: toggle
+          - type: tile
+            entity: switch.plug_humidor
+            name: Humidor Power
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_humidor_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_mainfloor_burner
+            name: Main Floor Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_mainfloor_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_basement_burner
+            name: Basement Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_basement_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_bedroom_burner
+            name: Bedroom Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_bedroom_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.tree_power_switch
+            name: Tree Power
+            color: teal
+            tap_action:
+              action: toggle
+          - type: custom:extended-gauge-card
+            title: Humidor Temp
+            entity:
+              entity: sensor.hygrometer_humidor_temperature
+              settings:
+                name: Humidor Temp
+                unit_of_measurement: degF
+                decimals: 1
+            main:
+              min_value: 55
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+          - type: custom:extended-gauge-card
+            title: Humidor Humidity
+            entity:
+              entity: sensor.hygrometer_humidor_humidity
+              settings:
+                name: Humidor Humidity
+                unit_of_measurement: '%'
+                decimals: 0
+            main:
+              min_value: 50
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+      - type: grid
+        title: Automations & Diagnostics
+        column_span: 3
+        cards:
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: button
+                entity: automation.evening_lights_at_sunset
+                name: Evening Lights
+                icon: mdi:weather-sunset-down
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.evening_lights_at_sunset
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.night_mode_at_midnight
+                name: Night Mode
+                icon: mdi:weather-night
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.night_mode_at_midnight
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.early_morning_lights_0330
+                name: Early Morning
+                icon: mdi:alarm
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.early_morning_lights_0330
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.interior_lights_sunrise_off
+                name: Interior Sunrise Off
+                icon: mdi:weather-sunset-up
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.interior_lights_sunrise_off
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.exterior_lights_sunrise_off
+                name: Exterior Sunrise Off
+                icon: mdi:weather-sunny-off
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.exterior_lights_sunrise_off
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.exterior_led_monthly_effect
+                name: Exterior LED Effect
+                icon: mdi:led-strip-variant
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.exterior_led_monthly_effect
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.humidor_plug_temp_control
+                name: Humidor Plug Control
+                icon: mdi:cigar
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.humidor_plug_temp_control
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.burner_plugs_off_2300
+                name: Burners Off 23:00
+                icon: mdi:fire-off
+                show_state: true
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.burner_plugs_off_2300
+                hold_action:
+                  action: toggle
+          - type: entities
+            title: Automation Bundles
+            show_header_toggle: false
+            entities:
+              - entity: group.kiosk_snapshot_automations
+                name: Snapshot Bundle
+              - entity: group.kiosk_all_automations
+                name: Core Bundle
+              - entity: sensor.kiosk_snapshot_plugs_on
+                name: Active Plugs Count
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Automations With Issues
+              show_header_toggle: false
+            filter:
+              include:
+                - domain: automation
+                  state: unavailable
+                  options:
+                    name: "{{ state_attr(entity, 'friendly_name') }}"
+                - domain: automation
+                  state: unknown
+                  options:
+                    name: "{{ state_attr(entity, 'friendly_name') }}"
+              exclude:
+                - entity_id: automation.*test*
+            sort:
+              method: friendly_name
+            show_empty: false
+  - title: Control
+    path: control
+    icon: mdi:lightbulb-group
+    type: sections
+    max_columns: 3
+    badges: []
+    sections:
+      - type: grid
+        title: Light Groups
+        cards:
+          - type: custom:hue-like-light-card
+            entity: light.all_lights
+            name: All Lights
+          - type: custom:hue-like-light-card
+            entity: light.mainfloor_lights
+            name: Main Floor
+          - type: custom:hue-like-light-card
+            entity: light.all_exterior_lights
+            name: Exterior Lights
+          - type: custom:hue-like-light-card
+            entity: light.permanent_outdoor_lights
+            name: Permanent Strip
+          - type: custom:hue-like-light-card
+            entity: light.theater_lights
+            name: Theater
+          - type: custom:hue-like-light-card
+            entity: light.office_lights
+            name: Office
+          - type: custom:hue-like-light-card
+            entity: light.front_porch_lights
+            name: Front Porch
+          - type: custom:hue-like-light-card
+            entity: light.garage_lights
+            name: Garage
+      - type: grid
+        title: Main Floor Lights
+        columns: 3
+        cards:
           - type: vertical-stack
             cards:
               - type: markdown
-                title: Game Essentials
-                content: |-
-                  {% set event = state_attr('sensor.husker_team', 'event_name') %}
-                  {% set kickoff_iso = state_attr('sensor.husker_team', 'date') %}
-                  {% set kickoff_local = '' %}
-                  {% if kickoff_iso not in [None, '', 'unknown', 'unavailable'] %}
-                    {% set ts = as_timestamp(kickoff_iso, default=None) %}
-                    {% if ts is not none %}
-                      {% set kickoff_local = ts | timestamp_custom('%A, %B %-d · %-I:%M %p %Z', True) %}
-                    {% endif %}
-                  {% endif %}
-                  {% set kickoff_in = state_attr('sensor.husker_team', 'kickoff_in') %}
-                  {% set venue = state_attr('sensor.husker_team', 'venue') %}
-                  {% set location = state_attr('sensor.husker_team', 'location') %}
-                  {% set tv = state_attr('sensor.husker_team', 'tv_network') %}
-                  {% set odds = state_attr('sensor.husker_team', 'odds') %}
-                  {% set overunder = state_attr('sensor.husker_team', 'overunder') %}
-                  ### Kickoff & Broadcast
-                  - **Event:** {{ event or 'Nebraska Football' }}
-                  - **Kickoff:** {{ kickoff_local or 'TBA' }} ({{ kickoff_in or '-' }})
-                  - **Venue:** {{ venue or 'TBA' }} — {{ location or 'Location TBA' }}
-                  - **Watch:** {{ tv or 'Network TBA' }}
-                  - **Line:** {{ odds or 'Line TBA' }} | O/U {{ overunder or 'TBA' }}
+                content: "### Living Room"
+              - type: custom:compact-light-card
+                entity: light.livingroom_light
+                name: Living Room
+          - type: vertical-stack
+            cards:
               - type: markdown
-                title: Tailgate Countdown
-                content: |-
-                  {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
-                  {% if minutes <= 0 %}
-                    ### It's game time!
-                  {% elif minutes < 60 %}
-                    ### {{ minutes }} minutes to kickoff
-                  {% elif minutes < 1440 %}
-                    ### {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
-                  {% else %}
-                    ### {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
-                  {% endif %}
-                  {{ states('sensor.huskers_tailgate_countdown') }}
-
-      - type: markdown
-        title: In-Game Situation
-        content: |-
-          {% set down_distance = state_attr('sensor.husker_team', 'down_distance_text') %}
-          {% set last_play = state_attr('sensor.husker_team', 'last_play') %}
-          {% set outs = state_attr('sensor.husker_team', 'outs') %}
-          {% set balls = state_attr('sensor.husker_team', 'balls') %}
-          {% set strikes = state_attr('sensor.husker_team', 'strikes') %}
-          {% set on_first = state_attr('sensor.husker_team', 'on_first') %}
-          {% set on_second = state_attr('sensor.husker_team', 'on_second') %}
-          {% set on_third = state_attr('sensor.husker_team', 'on_third') %}
-          {% set shots_team = state_attr('sensor.husker_team', 'team_shots_on_target') %}
-          {% set shots_team_total = state_attr('sensor.husker_team', 'team_total_shots') %}
-          {% set shots_opp = state_attr('sensor.husker_team', 'opponent_shots_on_target') %}
-          {% set shots_opp_total = state_attr('sensor.husker_team', 'opponent_total_shots') %}
-          {% set team_sets = state_attr('sensor.husker_team', 'team_sets_won') %}
-          {% set opp_sets = state_attr('sensor.husker_team', 'opponent_sets_won') %}
-          ### Situation Snapshot
-          - **Down & Distance:** {{ down_distance or '-' }}
-          - **Last Play:** {{ last_play or 'Waiting for the next play...' }}
-          - **Base Runners:**
-            - 1B: {{ on_first if on_first is not none else '-' }}
-            - 2B: {{ on_second if on_second is not none else '-' }}
-            - 3B: {{ on_third if on_third is not none else '-' }}
-          - **Count:** Balls {{ balls if balls is not none else '-' }} |
-            Strikes {{ strikes if strikes is not none else '-' }} |
-            Outs {{ outs if outs is not none else '-' }}
-          - **Shots:** Nebraska {{ shots_team or '-' }}/{{ shots_team_total or '-' }} |
-            Opponent {{ shots_opp or '-' }}/{{ shots_opp_total or '-' }}
-          - **Sets Won:** Nebraska {{ team_sets if team_sets is not none else '-' }} |
-            Opponent {{ opp_sets if opp_sets is not none else '-' }}
-
-      - type: markdown
-        title: Hype Message
-        content: |-
-          ### GO BIG RED!
-          {{ states('sensor.huskers_hype_message') }}
-
-  - title: Team & Data
-    path: huskers-team-data
-    icon: mdi:chart-box
-    badges: []
-    cards:
+                content: "### Dining Room"
+              - type: custom:compact-light-card
+                entity: light.diningroom_light
+                name: Dining Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Sunroom"
+              - type: custom:compact-light-card
+                entity: light.sunroom_light
+                name: Sunroom
       - type: grid
+        title: Upper Floor Lights
         columns: 3
-        square: false
         cards:
-          - type: markdown
-            title: Huskers Profile
-            content: |-
-              ### Huskers Profile
-              - **Name:** {{ state_attr('sensor.husker_team', 'team_long_name') or 'Nebraska Cornhuskers' }}
-              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'team_abbr') or 'NEB' }}
-              - **Team ID:** {{ state_attr('sensor.husker_team', 'team_id') or '158' }}
-              - **Conference:** {{ state_attr('sensor.husker_team', 'team_conference_id') or 'Big Ten' }}
-              - **Record:** {{ state_attr('sensor.husker_team', 'team_record') or 'TBA' }}
-              - **Rank:** {{ state_attr('sensor.husker_team', 'team_rank') or 'Unranked' }}
-              - **Colors:** {{ state_attr('sensor.husker_team', 'team_colors') or 'Scarlet & Cream' }}
-              - **Timeouts:** {{ state_attr('sensor.husker_team', 'team_timeouts') if state_attr('sensor.husker_team', 'team_timeouts') is not none else 'TBA' }}
-              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'team_winner') }}
-              - **Website:** {{ state_attr('sensor.husker_team', 'team_url') or 'https://huskers.com' }}
-          - type: markdown
-            title: Opponent Profile
-            content: |-
-              ### Opponent Profile
-              - **Name:** {{ state_attr('sensor.husker_team', 'opponent_long_name') or 'Opponent' }}
-              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'opponent_abbr') or '-' }}
-              - **Team ID:** {{ state_attr('sensor.husker_team', 'opponent_id') or '-' }}
-              - **Conference:** {{ state_attr('sensor.husker_team', 'opponent_conference_id') or '-' }}
-              - **Record:** {{ state_attr('sensor.husker_team', 'opponent_record') or 'TBA' }}
-              - **Rank:** {{ state_attr('sensor.husker_team', 'opponent_rank') or 'Unranked' }}
-              - **Colors:** {{ state_attr('sensor.husker_team', 'opponent_colors') or 'TBA' }}
-              - **Timeouts:** {{ state_attr('sensor.husker_team', 'opponent_timeouts') if state_attr('sensor.husker_team', 'opponent_timeouts') is not none else 'TBA' }}
-              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'opponent_winner') }}
-              - **Website:** {{ state_attr('sensor.husker_team', 'opponent_url') or '#' }}
-          - type: markdown
-            title: League & API
-            content: |-
-              ### League & API
-              - **Sport:** {{ state_attr('sensor.husker_team', 'sport') or 'Football' }}
-                ({{ state_attr('sensor.husker_team', 'sport_path') or 'college-football' }})
-              - **League:** {{ state_attr('sensor.husker_team', 'league') or 'NCAAF' }}
-                ({{ state_attr('sensor.husker_team', 'league_path') or 'college-football' }})
-              - **Season:** {{ state_attr('sensor.husker_team', 'season') or 'Current' }}
-              - **API Status:** {{ state_attr('sensor.husker_team', 'api_message') or 'OK' }}
-              - **API URL:** {{ state_attr('sensor.husker_team', 'api_url') or 'n/a' }}
-              - **Last Update:** {{ state_attr('sensor.husker_team', 'last_update') or '-' }}
-              - **Rapid Refresh:** {{ 'Yes' if state_attr('sensor.husker_team', 'private_fast_refresh') else 'No' }}
-
-      - type: markdown
-        title: Series Summary
-        content: |-
-          {{ state_attr('sensor.husker_team', 'series_summary') or 'Series history will appear here.' }}
-
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Parents Suite"
+              - type: custom:compact-light-card
+                entity: light.light_parents
+                name: Parents Suite
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Guest Room"
+              - type: custom:compact-light-card
+                entity: light.light_guest_room
+                name: Guest Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Ari Room"
+              - type: custom:compact-light-card
+                entity: light.light_ari
+                name: Ari Room
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Attic"
+              - type: custom:compact-light-card
+                entity: light.light_attic
+                name: Attic
+      - type: grid
+        title: Basement & Office Lights
+        columns: 3
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Theater Left"
+              - type: custom:compact-light-card
+                entity: light.light_theater_left
+                name: Theater Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Theater Right"
+              - type: custom:compact-light-card
+                entity: light.light_theater_right
+                name: Theater Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Office"
+              - type: custom:compact-light-card
+                entity: light.light_office
+                name: Office
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Spare Room"
+              - type: custom:compact-light-card
+                entity: light.spare_light
+                name: Spare Room
+      - type: grid
+        title: Exterior & Seasonal Lights
+        columns: 3
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Front Left"
+              - type: custom:compact-light-card
+                entity: light.light_front_left
+                name: Front Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Front Right"
+              - type: custom:compact-light-card
+                entity: light.light_front_right
+                name: Front Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Left"
+              - type: custom:compact-light-card
+                entity: light.light_garage_left
+                name: Garage Left
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Center"
+              - type: custom:compact-light-card
+                entity: light.light_garage_center
+                name: Garage Center
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Garage Right"
+              - type: custom:compact-light-card
+                entity: light.light_garage_right
+                name: Garage Right
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Tree"
+              - type: custom:compact-light-card
+                entity: light.tree
+                name: Tree
       - type: entities
-        title: Raw Sensor Reference
+        title: Groups & Toggles
+        state_color: true
         show_header_toggle: false
         entities:
-          - entity: sensor.husker_team
-            name: TeamTracker Raw Sensor
-            secondary_info: last-changed
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: team_score
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: opponent_score
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: team_win_probability
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: opponent_win_probability
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: team_timeouts
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: opponent_timeouts
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: team_winner
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: opponent_winner
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: api_message
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: api_url
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: last_update
-          - type: attribute
-            entity: sensor.husker_team
-            attribute: private_fast_refresh
-
-  - title: Lighting & Scenes
-    path: huskers-lighting
-    icon: mdi:lightbulb-group
-    badges: []
-    cards:
-      - type: markdown
-        title: Huskers Lighting Controls
-        content: |-
-          ### Husker Lighting Control Center
-          Use these automations and scenes to set the mood around the house for every Huskers moment.
-          - **Automations** handle the daily schedule so lighting always matches the time of day.
-          - **Scenes** instantly trigger game day looks like Scarlet, Chase, or Burst.
-          Tap any item below to enable or activate it.
-
+          - entity: group.huskers_eight_lights
+            name: Huskers - All Eight Lights
+          - entity: group.kiosk_theater_lights
+            name: Kiosk Theater Lights
+          - entity: group.kiosk_front_lights
+            name: Kiosk Front Lights
+          - entity: group.kiosk_garage_lights
+            name: Kiosk Garage Lights
+          - entity: group.kiosk_all_automations
+            name: Kiosk All Automations
+          - entity: group.weather_dashboard_all
+            name: Weather Dashboard - All
+      - type: entities
+        title: Purifiers
+        state_color: true
+        show_header_toggle: false
+        entities:
+          - entity: switch.bedroom_purifier_power_switch
+            name: Bedroom Purifier Power
+          - entity: select.bedroom_purifier_mode
+            name: Bedroom Mode
+          - entity: number.bedroom_purifier_gearmode
+            name: Bedroom Gear
+          - type: divider
+          - entity: switch.guest_room_purifier_power_switch
+            name: Guest Room Purifier Power
+          - entity: select.guest_room_purifier_mode
+            name: Guest Room Mode
+          - entity: number.guest_room_purifier_gearmode
+            name: Guest Room Gear
+          - type: divider
+          - entity: switch.garage_air_purifier_power_switch
+            name: Garage Purifier Power
+          - entity: select.garage_air_purifier_mode
+            name: Garage Mode
+          - entity: number.garage_air_purifier_gearmode
+            name: Garage Gear
       - type: grid
-        columns: 2
-        square: false
+        title: Plugs & Power
         cards:
-          - type: entities
-            title: Lighting Automations
-            show_header_toggle: false
+          - type: tile
+            entity: switch.plug_basement_burner
+            name: Basement Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_basement_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_mainfloor_burner
+            name: Main Floor Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_mainfloor_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_bedroom_burner
+            name: Bedroom Burner
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_bedroom_burner_power
+                name: Power (W)
+          - type: tile
+            entity: switch.plug_humidor
+            name: Humidor Plug
+            color: teal
+            tap_action:
+              action: toggle
+            features:
+              - type: target-entity
+                entity: sensor.plug_humidor_power
+                name: Power (W)
+          - type: tile
+            entity: switch.tree_power_switch
+            name: Tree Power
+            color: teal
+            tap_action:
+              action: toggle
+  - title: Todos
+    path: todos
+    icon: mdi:check-circle-outline
+    type: sections
+    max_columns: 2
+    badges: []
+    sections:
+      - type: grid
+        column_span: 2
+        cards:
+          - type: markdown
+            title: Running TODOs
+            style: |
+              ha-card {padding: 16px 20px;}
+            content: |-
+              {% set todo = states('sensor.todo_repo_tracker') %}
+              {% if todo not in ['unknown', 'unavailable', ''] %}
+                ```markdown
+                {{ todo }}
+                ```
+              {% else %}
+                TODO list not available.
+              {% endif %}
+      - type: grid
+        cards:
+          - type: history-graph
+            title: Automation Health (72h)
+            hours_to_show: 72
+            refresh_interval: 0
             entities:
-              - entity: automation.evening_lights_at_sunset
-                secondary_info: last-triggered
-              - entity: automation.night_mode_at_midnight
-                secondary_info: last-triggered
-              - entity: automation.early_morning_lights_0330
-                secondary_info: last-triggered
-              - entity: automation.interior_lights_sunrise_off
-                secondary_info: last-triggered
-              - entity: automation.exterior_lights_sunrise_off
-                secondary_info: last-triggered
-              - entity: automation.exterior_led_monthly_effect
-                secondary_info: last-triggered
-          - type: entities
-            title: Huskers Scenes
-            show_header_toggle: false
+              - binary_sensor.kiosk_snapshot_automation_issue
+  - title: Humidor
+    path: humidor
+    icon: mdi:cigar
+    type: sections
+    max_columns: 3
+    badges: []
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: chips
+            alignment: center
+            chips:
+              - type: entity
+                entity: sensor.hygrometer_humidor_temperature
+                name: Temperature
+                icon: mdi:thermometer
+              - type: entity
+                entity: sensor.hygrometer_humidor_humidity
+                name: Humidity
+                icon: mdi:water-percent
+              - type: entity
+                entity: sensor.humidor_system_status
+                name: System Status
+                icon: mdi:cigar
+              - type: entity
+                entity: switch.plug_humidor
+                name: Humidor Power
+                icon: mdi:power-plug
+          - type: markdown
+            style: |
+              ha-card {padding: 16px 20px; font-size: 1.05rem;}
+            content: |-
+              ### Humidor Snapshot
+              Target comfort band: **68-72 degF** / **62-68 %RH**.
+              Tiles track live readings while the charts surface weekly trends and plug usage.
+      - type: grid
+        title: Live Readings
+        column_span: 3
+        cards:
+          - type: custom:extended-gauge-card
+            title: Temperature
+            entity:
+              entity: sensor.hygrometer_humidor_temperature
+              settings:
+                name: Temperature
+                unit_of_measurement: degF
+                decimals: 1
+            main:
+              min_value: 55
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+          - type: custom:extended-gauge-card
+            title: Humidity
+            entity:
+              entity: sensor.hygrometer_humidor_humidity
+              settings:
+                name: Humidity
+                unit_of_measurement: '%'
+                decimals: 0
+            main:
+              min_value: 50
+              max_value: 80
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+          - type: tile
+            entity: sensor.humidor_system_status
+            name: System Status
+            color: green
+            features:
+              - type: target-entity
+                entity: switch.plug_humidor
+                name: Plug
+          - type: tile
+            entity: sensor.humidor_system_health
+            name: System Health
+            color: blue
+          - type: custom:extended-gauge-card
+            title: Plug Power
+            entity:
+              entity: sensor.plug_humidor_power
+              settings:
+                name: Plug Power
+                unit_of_measurement: W
+                decimals: 0
+            main:
+              min_value: 0
+              max_value: 150
+              show_needle: true
+              show_entity_name: false
+              show_min_max_values: true
+      - type: grid
+        title: Trend Metrics
+        column_span: 3
+        cards:
+          - type: tile
+            entity: sensor.humidor_temp_stats_24h
+            name: Temp Mean (24h)
+          - type: tile
+            entity: sensor.humidor_temp_range_today
+            name: Temp Range (24h)
+          - type: tile
+            entity: sensor.humidor_temp_change_1h
+            name: Temp Change (1h)
+          - type: tile
+            entity: sensor.humidor_temperature_trend
+            name: Temp Trend
+          - type: tile
+            entity: sensor.humidor_humidity_stats_24h
+            name: Humidity Mean (24h)
+          - type: tile
+            entity: sensor.humidor_humidity_range_today
+            name: Humidity Range (24h)
+          - type: tile
+            entity: sensor.humidor_humidity_change_1h
+            name: Humidity Change (1h)
+      - type: grid
+        column_span: 3
+        cards:
+          - type: statistics-graph
+            title: Temperature & Humidity (7d)
+            days_to_show: 7
+            period: hour
+            chart_type: line
+            stat_types:
+              - mean
+              - min
+              - max
             entities:
-              - entity: scene.huskers_seven_all_scarlet
-              - entity: scene.huskers_before_chase
-              - entity: scene.huskers_before_burst
+              - entity: sensor.hygrometer_humidor_temperature
+                name: Temperature
+              - entity: sensor.hygrometer_humidor_humidity
+                name: Humidity
+          - type: history-graph
+            title: Power & Delta (48h)
+            hours_to_show: 48
+            refresh_interval: 0
+            entities:
+              - sensor.plug_humidor_power
+              - sensor.humidor_temp_change_1h
+              - sensor.humidor_humidity_change_1h
+      - type: entities
+        title: Controls & Diagnostics
+        state_color: true
+        show_header_toggle: false
+        entities:
+          - entity: switch.plug_humidor
+            name: Humidor Power
+          - entity: select.plug_humidor_power_on_behavior
+            name: Power-on Behavior
+          - entity: sensor.plug_humidor_energy
+            name: Energy (kWh)
+          - entity: sensor.plug_humidor_current
+            name: Current (A)
+          - entity: sensor.plug_humidor_voltage
+            name: Voltage (V)
+          - entity: sensor.hygrometer_humidor_battery
+            name: Sensor Battery
+      - type: logbook
+        column_span: 3
+        title: Humidor Activity Log
+        hours_to_show: 72
+        entities:
+          - switch.plug_humidor
+          - sensor.hygrometer_humidor_temperature
+          - sensor.hygrometer_humidor_humidity

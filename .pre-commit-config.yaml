@@ -68,6 +68,17 @@ repos:
     hooks:
       - id: yamllint
         args: ['-c', '.yamllint.yml', '.']
+        exclude: |
+          (?x)(
+            ^configuration\.ya?ml$|
+            ^homeassistant/packages/.*\.ya?ml$|
+            ^ui-lovelace/[^/]+\.ya?ml$|
+            ^ui-lovelace/resources\.ya?ml$|
+            ^lovelace/.*\.ya?ml$|
+            ^blueprints/.*\.ya?ml$|
+            ^custom_components/.*/services\.ya?ml$|
+            ^zigbee2mqtt/.*\.ya?ml$
+          )
 
   # Python: Ruff does everything (lint + auto-fix + format)
   - repo: https://github.com/astral-sh/ruff-pre-commit

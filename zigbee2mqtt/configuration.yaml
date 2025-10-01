@@ -77,10 +77,6 @@ devices:
     friendly_name: Light-office
 groups:
   '1':
-    friendly_name: '1'
-  '2':
-    friendly_name: '2'
+    friendly_name: ZB Group External Lights
   '3':
-    friendly_name: '3'
-  '4':
-    friendly_name: '4'
+    friendly_name: ZB Group Basement Lights
