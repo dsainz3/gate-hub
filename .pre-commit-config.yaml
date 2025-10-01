@@ -51,17 +51,7 @@ repos:
       - id: trailing-whitespace
       - id: check-yaml
         args: ['--unsafe', '-m']
-        exclude: |
-          (?x)(
-            ^configuration\.ya?ml$|
-            ^homeassistant/packages/.*\.ya?ml$|
-            ^ui-lovelace/[^/]+\.ya?ml$|
-            ^ui-lovelace/resources\.ya?ml$|
-            ^lovelace/.*\.ya?ml$|
-            ^blueprints/.*\.ya?ml$|
-            ^custom_components/.*/services\.ya?ml$|
-            ^zigbee2mqtt/.*\.ya?ml$
-          )
+
 
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
