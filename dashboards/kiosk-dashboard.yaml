@@ -27,6 +27,10 @@ views:
       - type: vertical-stack
         column_span: 3
         cards:
+          # Section title
+          - type: markdown
+            content: "## Snapshot — Overview"
+
           - type: custom:mushroom-chips-card
             alignment: justify
             chips:
@@ -34,23 +38,23 @@ views:
                 entity: sensor.kiosk_snapshot_lights_on
                 content: "{{ states('sensor.kiosk_snapshot_lights_on') }} lights"
                 icon: mdi:lightbulb-group
-                icon_color: >-
+                icon_color: >
                   {% set n = states('sensor.kiosk_snapshot_lights_on')|int(0) %}
                   {% if n == 0 %} disabled {% elif n < 5 %} amber {% else %} yellow {% endif %}
               - type: template
                 entity: binary_sensor.kiosk_automations_have_issues
-                content: >-
+                content: >
                   {% if is_state('binary_sensor.kiosk_automations_have_issues','on') %}
                     Automations need attention
                   {% else %} Automations healthy {% endif %}
                 icon: mdi:robot
-                icon_color: >-
+                icon_color: >
                   {% if is_state('binary_sensor.kiosk_automations_have_issues','on') %} red {% else %} green {% endif %}
               - type: template
                 entity: sensor.hygrometer_humidor_temperature
                 content: "{{ states('sensor.hygrometer_humidor_temperature') }}°F humidor"
                 icon: mdi:cigar
-                icon_color: >-
+                icon_color: >
                   {% set t = states('sensor.hygrometer_humidor_temperature')|float(0) %}
                   {% if t < 60 %} blue {% elif t > 75 %} deep-orange {% else %} teal {% endif %}
               - type: entity
@@ -59,18 +63,17 @@ views:
                 icon_color: indigo
               - type: template
                 entity: sensor.huskers_kickoff_in_effective
-                content: >-
+                content: >
                   {% set k = states('sensor.huskers_kickoff_in_effective') %}
                   {{ 'Kickoff TBD' if k in ['unknown','unavailable','','None','none'] else k ~ ' min to kickoff' }}
                 icon: mdi:football-helmet
-                icon_color: >-
+                icon_color: >
                   {% set k = states('sensor.huskers_kickoff_in_effective')|int(9999) %}
                   {% if k <= 60 %} red {% elif k <= 180 %} orange {% else %} green {% endif %}
 
           - type: custom:mushroom-template-card
             primary: "{{ now().strftime('%A, %B %d') }}"
-            secondary: >-
-              {{ now().strftime('%I:%M %p') }} · Snapshot: game day, climate, and quick actions.
+            secondary: "{{ now().strftime('%I:%M %p') }} · Snapshot: game day, climate, and quick actions."
             icon: mdi:monitor-dashboard
             layout: vertical
             multiline_secondary: true
@@ -78,6 +81,9 @@ views:
               action: none
 
           # --- Responsive tile grid (key items) ---
+          - type: markdown
+            content: "### Snapshot — Key Items"
+
           - type: custom:layout-card
             layout_type: custom:grid-layout
             layout:
@@ -90,7 +96,7 @@ views:
                 primary: Lights On
                 secondary: "{{ states('sensor.kiosk_snapshot_lights_on')|int(0) }} active fixtures"
                 icon: mdi:lightbulb-group
-                icon_color: >-
+                icon_color: >
                   {% set v = states('sensor.kiosk_snapshot_lights_on')|int(0) %}
                   {% if v == 0 %} disabled {% elif v < 5 %} amber {% else %} yellow {% endif %}
                 tap_action:
@@ -108,12 +114,12 @@ views:
               - type: custom:mushroom-template-card
                 entity: binary_sensor.kiosk_automations_have_issues
                 primary: Automation Health
-                secondary: >-
+                secondary: >
                   {% if is_state('binary_sensor.kiosk_automations_have_issues','on') %}
                     Issues detected
                   {% else %} All good {% endif %}
                 icon: mdi:robot
-                icon_color: >-
+                icon_color: >
                   {% if is_state('binary_sensor.kiosk_automations_have_issues','on') %} red {% else %} green {% endif %}
                 tap_action:
                   action: more-info
@@ -121,13 +127,13 @@ views:
               - type: custom:mushroom-template-card
                 entity: sensor.kiosk_snapshot_aux_readout
                 primary: Humidor Climate
-                secondary: >-
+                secondary: >
                   {% set t = states('sensor.hygrometer_humidor_temperature') %}
                   {% set h = states('sensor.hygrometer_humidor_humidity') %}
                   {{ 'n/a' if t in ['unknown','unavailable',''] else t ~ '°F' }} ·
                   {{ 'n/a' if h in ['unknown','unavailable',''] else h ~ '% RH' }}
                 icon: mdi:coolant-temperature
-                icon_color: >-
+                icon_color: >
                   {% set r = states('sensor.hygrometer_humidor_humidity')|float(0) %}
                   {% if r < 60 %} blue {% elif r > 75 %} deep-orange {% else %} teal {% endif %}
                 tap_action:
@@ -147,6 +153,9 @@ views:
                   - entity: sensor.kiosk_snapshot_plugs_on
                     name: Plugs On
 
+          - type: markdown
+            content: "### Snapshot — Automation Health"
+
           - type: history-graph
             title: Automation Health (24h)
             hours_to_show: 24
@@ -157,9 +166,11 @@ views:
 
       # --- Automations & Diagnostics (buttons) ---
       - type: grid
-        title: Automations & Diagnostics
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Automations & Diagnostics"
+
           - type: grid
             columns: 4
             square: false
@@ -176,6 +187,7 @@ views:
                     entity_id: automation.evening_lights_at_sunset
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.lighting_night_mode_at_midnight
                 name: Night Mode
@@ -188,6 +200,7 @@ views:
                     entity_id: automation.lighting_night_mode_at_midnight
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.early_morning_lights_03_30
                 name: Early Morning
@@ -200,6 +213,7 @@ views:
                     entity_id: automation.early_morning_lights_03_30
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.interior_lights_off_15_minutes_after_sunrise
                 name: Interior Sunrise Off
@@ -212,6 +226,7 @@ views:
                     entity_id: automation.interior_lights_off_15_minutes_after_sunrise
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.outdoor_lights_control_sunrise_sunset
                 name: Exterior Sunrise/Sunset
@@ -224,6 +239,7 @@ views:
                     entity_id: automation.outdoor_lights_control_sunrise_sunset
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.exterior_led_monthly_effect
                 name: Exterior LED Effect
@@ -236,6 +252,7 @@ views:
                     entity_id: automation.exterior_led_monthly_effect
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.humidor_plug_temperature_control
                 name: Humidor Plug Control
@@ -248,6 +265,7 @@ views:
                     entity_id: automation.humidor_plug_temperature_control
                 hold_action:
                   action: toggle
+
               - type: button
                 entity: automation.safety_turn_off_burner_plugs_at_11_00_pm
                 name: Burners Off 23:00
@@ -260,6 +278,7 @@ views:
                     entity_id: automation.safety_turn_off_burner_plugs_at_11_00_pm
                 hold_action:
                   action: toggle
+
           - type: entities
             title: Automation Bundles
             show_header_toggle: false
@@ -270,6 +289,7 @@ views:
                 name: Core Bundle
               - entity: sensor.kiosk_snapshot_plugs_on
                 name: Active Plugs Count
+
           - type: custom:auto-entities
             card:
               type: entities
@@ -300,8 +320,10 @@ views:
     sections:
       # --- Status row (today runtimes + issues) ---
       - type: grid
-        title: Status Today
         cards:
+          - type: markdown
+            content: "## Status Today"
+
           - type: tile
             entity: sensor.kiosk_all_lights_runtime_today
             name: Lights Runtime (min)
@@ -329,8 +351,10 @@ views:
 
       # --- Eight big light groups ---
       - type: grid
-        title: Light Groups
         cards:
+          - type: markdown
+            content: "## Light Groups"
+
           - type: custom:hue-like-light-card
             entity: light.all_lights
             name: All Lights
@@ -358,9 +382,11 @@ views:
 
       # --- Main floor individuals ---
       - type: grid
-        title: Main Floor Lights
         columns: 3
         cards:
+          - type: markdown
+            content: "## Main Floor Lights"
+
           - type: custom:compact-light-card
             entity: light.livingroom_light
             name: Living Room
@@ -373,9 +399,11 @@ views:
 
       # --- Upper floor individuals ---
       - type: grid
-        title: Upper Floor Lights
         columns: 3
         cards:
+          - type: markdown
+            content: "## Upper Floor Lights"
+
           - type: custom:compact-light-card
             entity: light.light_parents
             name: Primary
@@ -388,9 +416,11 @@ views:
 
       # --- Theater / Front / Garage individuals ---
       - type: grid
-        title: Theater / Front / Garage
         columns: 3
         cards:
+          - type: markdown
+            content: "## Theater / Front / Garage"
+
           - type: custom:compact-light-card
             entity: light.light_theater_left
             name: Theater Left
@@ -415,12 +445,13 @@ views:
           - type: custom:compact-light-card
             entity: light.light_office
             name: Office
-          # spare light removed (no such entity)
 
-      # --- Plugs & relays (distinct) ---
+      # --- Plugs & relays ---
       - type: grid
-        title: Plugs & Power
         cards:
+          - type: markdown
+            content: "## Plugs & Power"
+
           - type: tile
             entity: switch.plug_basement_burner
             name: Basement Burner
@@ -431,6 +462,7 @@ views:
               - type: target-entity
                 entity: sensor.plug_basement_burner_power
                 name: Power (W)
+
           - type: tile
             entity: switch.plug_mainfloor_burner
             name: Main Floor Burner
@@ -441,6 +473,7 @@ views:
               - type: target-entity
                 entity: sensor.plug_mainfloor_burner_power
                 name: Power (W)
+
           - type: tile
             entity: switch.plug_bedroom_burner
             name: Bedroom Burner
@@ -451,6 +484,7 @@ views:
               - type: target-entity
                 entity: sensor.plug_bedroom_burner_power
                 name: Power (W)
+
           - type: tile
             entity: switch.plug_humidor
             name: Humidor Plug
@@ -461,6 +495,7 @@ views:
               - type: target-entity
                 entity: sensor.plug_humidor_power
                 name: Power (W)
+
           - type: entities
             title: Light Power Relays
             show_header_toggle: false
@@ -486,7 +521,7 @@ views:
               - switch.scenic_dreamview2_power_switch
 
   ###########################################################################
-  # 3) HUMIDOR — live gauges + trends (kiosk_* trend sensors)
+  # 3) HUMIDOR — live gauges + trends
   ###########################################################################
   - title: Humidor
     path: humidor
@@ -499,6 +534,9 @@ views:
       - type: grid
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Humidor — Snapshot"
+
           - type: chips
             alignment: center
             chips:
@@ -521,9 +559,11 @@ views:
               Target band: **68–72°F** / **62–68% RH**.
 
       - type: grid
-        title: Live Readings
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Humidor — Live Readings"
+
           - type: custom:extended-gauge-card
             title: Temperature
             entity:
@@ -570,9 +610,11 @@ views:
               show_min_max_values: true
 
       - type: grid
-        title: Trend Metrics
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Humidor — Trend Metrics"
+
           - type: tile
             entity: sensor.kiosk_humidor_temp_delta_1h
             name: Temp Δ (1h)
@@ -586,6 +628,9 @@ views:
       - type: grid
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Humidor — Charts"
+
           - type: statistics-graph
             title: Temperature & Humidity (7d)
             days_to_show: 7
@@ -600,6 +645,7 @@ views:
                 name: Temperature
               - entity: sensor.hygrometer_humidor_humidity
                 name: Humidity
+
           - type: history-graph
             title: Plug Power & Deltas (48h)
             hours_to_show: 48
@@ -610,7 +656,7 @@ views:
               - sensor.kiosk_humidor_humidity_delta_1h
 
   ###########################################################################
-  # 4) SPRINKLERS — programs, zones, daily runtime & 7-day trends
+  # 4) SPRINKLERS — programs, zones, runtime & trends
   ###########################################################################
   - title: Sprinklers
     path: sprinklers
@@ -625,6 +671,9 @@ views:
       - type: vertical-stack
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Sprinklers — Programs & Rain Delay"
+
           - type: entities
             title: Programs & Rain Delay
             show_header_toggle: false
@@ -636,38 +685,52 @@ views:
               - switch.sprinkler_smart_watering_program
 
       - type: grid
-        title: Zones
         columns: 3
         cards:
+          - type: markdown
+            content: "## Sprinklers — Zones"
+
           - type: button
             entity: switch.sprinkler_south_side_zone
             name: South Side
-            tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
           - type: button
             entity: switch.sprinkler_back_south_zone
             name: Back South
-            tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
           - type: button
             entity: switch.sprinkler_back_north_zone
             name: Back North
-            tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
           - type: button
             entity: switch.sprinkler_front_zone
             name: Front
-            tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
           - type: button
             entity: switch.sprinkler_zone_5_zone
             name: Zone 5
-            tap_action: {action: toggle}
-            hold_action: {action: more-info}
+            tap_action:
+              action: toggle
+            hold_action:
+              action: more-info
 
       - type: grid
-        title: Today's Runtime (minutes)
         cards:
+          - type: markdown
+            content: "## Sprinklers — Today's Runtime (minutes)"
+
           - type: tile
             entity: sensor.kiosk_sprinklers_south_side_runtime_today
             name: South Side
@@ -685,8 +748,10 @@ views:
             name: Zone 5
 
       - type: grid
-        title: Recent History
         cards:
+          - type: markdown
+            content: "## Sprinklers — Recent History"
+
           - type: entities
             show_header_toggle: false
             entities:
@@ -697,9 +762,11 @@ views:
               - sensor.zone_5_zone_history
 
       - type: grid
-        title: Trends (7 days)
         column_span: 3
         cards:
+          - type: markdown
+            content: "## Sprinklers — Trends (7 days)"
+
           - type: history-graph
             hours_to_show: 168
             entities:
@@ -710,7 +777,7 @@ views:
               - sensor.kiosk_sprinklers_zone5_runtime_today
 
   ###########################################################################
-  # 5) KIOSK ENTITIES — everything defined/tracked in the kiosk package
+  # 5) KIOSK ENTITIES — everything tracked in the kiosk package
   ###########################################################################
   - title: Kiosk Entities
     path: kiosk-entities
@@ -720,46 +787,66 @@ views:
     badges: []
 
     sections:
-      - type: custom:auto-entities
-        card:
-          type: entities
-          title: Kiosk Sensors
-          show_header_toggle: false
-        filter:
-          include:
-            - entity_id: sensor.kiosk_*
-        sort:
-          method: entity_id
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Entities — Sensors"
 
-      - type: custom:auto-entities
-        card:
-          type: entities
-          title: Kiosk Binary Sensors
-          show_header_toggle: false
-        filter:
-          include:
-            - entity_id: binary_sensor.kiosk_*
-        sort:
-          method: entity_id
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Kiosk Sensors
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: sensor.kiosk_*
+            sort:
+              method: entity_id
 
-      - type: custom:auto-entities
-        card:
-          type: entities
-          title: Kiosk Groups
-          show_header_toggle: false
-        filter:
-          include:
-            - entity_id: group.kiosk_*
-        sort:
-          method: entity_id
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Entities — Binary Sensors"
 
-      - type: custom:auto-entities
-        card:
-          type: entities
-          title: Kiosk Scripts
-          show_header_toggle: false
-        filter:
-          include:
-            - entity_id: script.kiosk_*
-        sort:
-          method: entity_id
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Kiosk Binary Sensors
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: binary_sensor.kiosk_*
+            sort:
+              method: entity_id
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Entities — Groups"
+
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Kiosk Groups
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: group.kiosk_*
+            sort:
+              method: entity_id
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Entities — Scripts"
+
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Kiosk Scripts
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: script.kiosk_*
+            sort:
+              method: entity_id

@@ -1,0 +1,23 @@
+title: Test Resources
+views:
+  - title: Test
+    path: test
+    cards:
+      - type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-columns: repeat(2, 1fr)
+        cards:
+          - type: markdown
+            content: "✅ layout-card.js loaded"
+          - type: markdown
+            content: "✅ grid-layout.js loaded"
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: "✅ auto-entities loaded"
+        filter:
+          include:
+            - entity_id: sensor.*
+          exclude:
+            - domain: weather

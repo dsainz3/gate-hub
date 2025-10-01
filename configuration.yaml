@@ -68,10 +68,10 @@ lovelace:
   mode: yaml
   resources:
     # Mushroom
-    - url: /hacsfiles/mushroom-cards/mushroom.js
+    - url: /hacsfiles/lovelace-mushroom/mushroom.js
       type: module
 
-    # Layout-card (both files required when using grid layout)
+    # Layout card (needs BOTH files)
     - url: /hacsfiles/lovelace-layout-card/layout-card.js
       type: module
     - url: /hacsfiles/lovelace-layout-card/grid-layout.js
@@ -81,17 +81,25 @@ lovelace:
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
       type: module
 
-    # (Optional, you already had this)
+    # ApexCharts
     - url: /hacsfiles/apexcharts-card/apexcharts-card.js
       type: module
 
-    # Cards used elsewhere in the Kiosk dashboard
-    - url: /hacsfiles/hue-like-light-card/hue-like-light-card.js
+    # Hue-like Light Card
+    - url: /hacsfiles/lovelace-hue-like-light-card/hue-like-light-card.js
       type: module
+
+    # Compact Light Card (already loading per your console)
     - url: /hacsfiles/compact-light-card/compact-light-card.js
       type: module
-    - url: /hacsfiles/extended-gauge-card/extended-gauge-card.js
+
+    # Extended Gauge  ⟵ folder is "extended-gauge". One of these filenames will exist:
+    - url: /hacsfiles/extended-gauge/extended-gauge.js
       type: module
+    # If you still get a 404 for the line above, comment it out and try this one instead:
+    # - url: /hacsfiles/extended-gauge/extended-gauge-card.js
+    #   type: module
+
 
   dashboards:
     huskers-teamtracker:
@@ -100,33 +108,46 @@ lovelace:
       icon: mdi:scoreboard-outline
       show_in_sidebar: true
       filename: dashboards/huskers-teamtracker.yaml
+
     f1-scheduler:
       mode: yaml
       title: F1
       icon: mdi:racing-helmet
       show_in_sidebar: true
       filename: dashboards/f1-dashboard.yaml
+
     weather-dashboard:
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
       title: Weather Package
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
+
     kiosk-dashboard:
       mode: yaml
       filename: dashboards/kiosk-dashboard.yaml
       title: Kiosk Package
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
+
     network-dashboard:
       mode: yaml
       filename: dashboards/network-dashboard.yaml
       title: Network Monitor
       icon: mdi:access-point-network
       show_in_sidebar: true
+
     f1-dashboard:
       mode: yaml
       filename: dashboards/f1-dashboard.yaml
       title: F1
       icon: mdi:racing-helmet
       show_in_sidebar: true
+
+    # ✅ Test dashboard to verify custom card resources load
+    test-resources:
+      mode: yaml
+      title: Test Resources
+      icon: mdi:test-tube
+      show_in_sidebar: true
+      filename: dashboards/test-resources.yaml
