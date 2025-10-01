@@ -65,15 +65,34 @@ logger:
     homeassistant.components.script: debug
 
 lovelace:
+  mode: yaml
   resources:
-    - url: /hacsfiles/lovelace-mushroom/mushroom.js
+    # Mushroom
+    - url: /hacsfiles/mushroom-cards/mushroom.js
       type: module
+
+    # Layout-card (both files required when using grid layout)
     - url: /hacsfiles/lovelace-layout-card/layout-card.js
       type: module
+    - url: /hacsfiles/lovelace-layout-card/grid-layout.js
+      type: module
+
+    # Auto-entities
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
       type: module
+
+    # (Optional, you already had this)
     - url: /hacsfiles/apexcharts-card/apexcharts-card.js
       type: module
+
+    # Cards used elsewhere in the Kiosk dashboard
+    - url: /hacsfiles/hue-like-light-card/hue-like-light-card.js
+      type: module
+    - url: /hacsfiles/compact-light-card/compact-light-card.js
+      type: module
+    - url: /hacsfiles/extended-gauge-card/extended-gauge-card.js
+      type: module
+
   dashboards:
     huskers-teamtracker:
       mode: yaml
@@ -93,22 +112,18 @@ lovelace:
       title: Weather Package
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
-      # require_admin: false
-
     kiosk-dashboard:
       mode: yaml
       filename: dashboards/kiosk-dashboard.yaml
       title: Kiosk Package
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
-
     network-dashboard:
       mode: yaml
       filename: dashboards/network-dashboard.yaml
       title: Network Monitor
       icon: mdi:access-point-network
       show_in_sidebar: true
-
     f1-dashboard:
       mode: yaml
       filename: dashboards/f1-dashboard.yaml
