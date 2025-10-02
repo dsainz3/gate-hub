@@ -1,462 +1,113 @@
 title: Kiosk
 views:
+  ###########################################################################
+  # 1) SNAPSHOT — high-level overview with built-in cards
+  ###########################################################################
   - title: Snapshot
     path: snapshot
-    icon: mdi:view-dashboard-variant
-    type: sections
-    max_columns: 3
+    icon: mdi:view-dashboard
     badges:
       - entity: sensor.kiosk_snapshot_lights_on
         name: Lights On
-      - entity: binary_sensor.kiosk_snapshot_automation_issue
-        name: Automation Health
+      - entity: binary_sensor.kiosk_automations_have_issues
+        name: Automations Issues?
       - entity: sensor.hygrometer_humidor_temperature
         name: Humidor °F
       - entity: sensor.huskers_next_game
         name: Next Huskers Game
-    sections:
+
+    cards:
       - type: vertical-stack
-        column_span: 3
         cards:
-          - type: custom:mushroom-chips-card
-            alignment: justify
-            chips:
-              - type: template
-                entity: sensor.kiosk_snapshot_lights_on
-                content: "{{ states('sensor.kiosk_snapshot_lights_on') }} lights"
-                icon: mdi:lightbulb-group
-                icon_color: >-
-                  {% set lights = states('sensor.kiosk_snapshot_lights_on') | int(0) %}
-                  {% if lights == 0 %}
-                    disabled
-                  {% elif lights < 5 %}
-                    amber
-                  {% else %}
-                    yellow
-                  {% endif %}
-              - type: template
-                entity: binary_sensor.kiosk_snapshot_automation_issue
-                content: >-
-                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
-                    Automations check
-                  {% else %}
-                    Automations healthy
-                  {% endif %}
-                icon: mdi:robot
-                icon_color: >-
-                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
-                    red
-                  {% else %}
-                    green
-                  {% endif %}
-              - type: template
-                entity: sensor.hygrometer_humidor_temperature
-                content: "{{ states('sensor.hygrometer_humidor_temperature') }}°F humidor"
-                icon: mdi:cigar
-                icon_color: >-
-                  {% set temp = states('sensor.hygrometer_humidor_temperature') | float(0) %}
-                  {% if temp < 60 %}
-                    blue
-                  {% elif temp > 75 %}
-                    deep-orange
-                  {% else %}
-                    teal
-                  {% endif %}
-              - type: entity
-                entity: !secret weather_primary_entity
-                content_info: state
-                icon_color: indigo
-              - type: template
-                entity: sensor.huskers_kickoff_in_effective
-                content: >-
-                  {% set kickoff = states('sensor.huskers_kickoff_in_effective') %}
-                  {% if kickoff in ['unknown', 'unavailable', 'none', '', 'None'] %}
-                    Kickoff TBD
-                  {% else %}
-                    {{ kickoff }} min to kickoff
-                  {% endif %}
-                icon: mdi:football-helmet
-                icon_color: >-
-                  {% set kickoff = states('sensor.huskers_kickoff_in_effective') | int(0) %}
-                  {% if kickoff <= 60 %}
-                    red
-                  {% elif kickoff <= 180 %}
-                    orange
-                  {% else %}
-                    green
-                  {% endif %}
-          - type: custom:mushroom-template-card
-            primary: >-
-              {{ now().strftime('%A, %B %d') }}
-            secondary: >-
-              {{ now().strftime('%I:%M %p') }} · Snapshot keeps the kiosk focused on game day, climate, and quick actions. Tap any tile to control devices or jump into the detailed tabs below.
-            icon: mdi:monitor-dashboard
-            layout: vertical
-            multiline_secondary: true
-            tap_action:
-              action: none
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
-              grid-auto-flow: row dense
-              grid-gap: 12px
+          - type: markdown
+            content: |
+              ## Snapshot Overview
+              Quick status tiles using core kiosk sensors.
+
+          - type: grid
+            columns: 3
+            square: false
             cards:
-              - type: custom:mushroom-template-card
+              - type: tile
                 entity: sensor.kiosk_snapshot_lights_on
-                primary: Lights On
-                secondary: >-
-                  {{ states('sensor.kiosk_snapshot_lights_on') | int(0) }} active fixtures
-                icon: mdi:lightbulb-group
-                icon_color: >-
-                  {% set value = states('sensor.kiosk_snapshot_lights_on') | int(0) %}
-                  {% if value == 0 %}
-                    disabled
-                  {% elif value < 5 %}
-                    amber
-                  {% else %}
-                    yellow
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
+                name: Lights On
+                color: amber
+              - type: tile
                 entity: sensor.kiosk_snapshot_plugs_on
-                primary: Plugs Active
-                secondary: >-
-                  {{ states('sensor.kiosk_snapshot_plugs_on') | int(0) }} running loads
-                icon: mdi:power-plug-outline
-                icon_color: teal
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: binary_sensor.kiosk_snapshot_automation_issue
-                primary: Automation Health
-                secondary: >-
-                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
-                    Requires attention
-                  {% else %}
-                    All key flows healthy
-                  {% endif %}
-                icon: mdi:robot
-                icon_color: >-
-                  {% if is_state('binary_sensor.kiosk_snapshot_automation_issue', 'on') %}
-                    red
-                  {% else %}
-                    green
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.kiosk_snapshot_aux_readout
-                primary: Humidor Climate
-                secondary: >-
-                  {% set temp = states('sensor.hygrometer_humidor_temperature') %}
-                  {% set humid_read = states('sensor.hygrometer_humidor_humidity') %}
-                  {{ 'n/a' if temp in ['unknown', 'unavailable', ''] else temp ~ '°F' }} · {{ 'n/a' if humid_read in ['unknown', 'unavailable', ''] else humid_read ~ '% RH' }}
-                icon: mdi:coolant-temperature
-                icon_color: >-
-                  {% set humid = states('sensor.hygrometer_humidor_humidity') | float(0) %}
-                  {% if humid < 60 %}
-                    blue
-                  {% elif humid > 75 %}
-                    deep-orange
-                  {% else %}
-                    teal
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.husker_team
-                primary: Huskers Status
-                secondary: >-
-                  {% set status = states('sensor.huskers_game_status_espn') %}
-                  {% set record = states('sensor.huskers_record_dashboard') %}
-                  {% if status in ['unknown', 'unavailable', 'none', '', 'None'] %}
-                    Waiting on schedule · {{ 'Record TBD' if record in ['unknown', 'unavailable', '', 'None', 'none'] else record }}
-                  {% else %}
-                    {{ status | title }} · {{ 'Record TBD' if record in ['unknown', 'unavailable', '', 'None', 'none'] else record }}
-                  {% endif %}
-                icon: mdi:football
-                icon_color: red
-                tap_action:
-                  action: more-info
-              - type: statistics-graph
-                title: Lights & Plugs (24h)
-                days_to_show: 1
-                period: hour
-                chart_type: line
-                stat_types:
-                  - mean
-                  - max
-                entities:
-                  - entity: sensor.kiosk_snapshot_lights_on
-                    name: Lights On
-                  - entity: sensor.kiosk_snapshot_plugs_on
-                    name: Plugs On
-          - type: history-graph
-            title: Automation Health
-            hours_to_show: 24
-            refresh_interval: 0
-            entities:
-              - binary_sensor.kiosk_snapshot_automation_issue
-              - automation.evening_lights_at_sunset
-              - automation.night_mode_at_midnight
-      - type: grid
-        title: Environment & Game Day
-        column_span: 3
-        cards:
-          - type: custom:layout-card
-            layout_type: custom:grid-layout
-            layout:
-              grid-template-columns: repeat(auto-fit, minmax(260px, 1fr))
-              grid-auto-flow: row dense
-              grid-gap: 12px
-            cards:
-              - type: weather-forecast
-                entity: !secret weather_primary_entity
-              - type: custom:mushroom-template-card
-                entity: sensor.outdoor_temperature_wx
-                primary: Outdoor Temperature
-                secondary: >-
-                  {% set weather_entity = states('input_text.weather_pws_entity') %}
-                  {% set actual = states('sensor.outdoor_temperature_wx') %}
-                  {% set feels = state_attr(weather_entity, 'temperature') %}
-                  {{ 'n/a' if actual in ['unknown', 'unavailable', ''] else actual ~ '°F' }} · Feels like {{ 'n/a' if feels is none else (feels | round(0)) ~ '°F' }}
-                icon: mdi:thermometer
-                icon_color: >-
-                  {% set temp = states('sensor.outdoor_temperature_wx') | float(0) %}
-                  {% if temp <= 32 %}
-                    blue
-                  {% elif temp >= 85 %}
-                    deep-orange
-                  {% else %}
-                    amber
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.outdoor_humidity_wx
-                primary: Humidity & Pressure
-                secondary: >-
-                  {% set humidity = states('sensor.outdoor_humidity_wx') %}
-                  {% set pressure = states('sensor.outdoor_pressure_wx') %}
-                  {{ 'n/a' if humidity in ['unknown', 'unavailable', ''] else humidity ~ '% RH' }} · {{ 'n/a' if pressure in ['unknown', 'unavailable', ''] else pressure ~ ' inHg' }}
-                icon: mdi:water-percent
-                icon_color: indigo
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.outdoor_wind_speed_wx
-                primary: Wind & Gusts
-                secondary: >-
-                  {% set weather_entity = states('input_text.weather_pws_entity') %}
-                  {% set wind = states('sensor.outdoor_wind_speed_wx') %}
-                  {% set gust = state_attr(weather_entity, 'wind_speed') %}
-                  {{ 'n/a' if wind in ['unknown', 'unavailable', ''] else wind ~ ' mph winds' }} · Gusting {{ 'n/a' if gust is none else gust ~ ' mph' }}
-                icon: mdi:weather-windy
-                icon_color: blue
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.huskers_next_game
-                primary: Next Huskers Game
-                secondary: >-
-                  {{ states('sensor.huskers_next_game') if states('sensor.huskers_next_game') not in ['unknown', 'unavailable', '', 'None', 'none'] else 'Awaiting schedule' }}
-                icon: mdi:calendar-clock
-                icon_color: red
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.huskers_game_status_espn
-                primary: Game Status
-                secondary: >-
-                  {% set status = states('sensor.huskers_game_status_espn') %}
-                  {% if status in ['unknown', 'unavailable', '', 'none', 'None'] %}
-                    Monitoring ESPN feed for updates
-                  {% else %}
-                    {% set kickoff = states('sensor.huskers_kickoff_in_effective') %}
-                    {% if kickoff in ['unknown', 'unavailable', '', 'none', 'None'] %}
-                      {{ status | title }} · Kickoff TBD
-                    {% else %}
-                      {{ status | title }} · Kickoff in {{ kickoff }} min
-                    {% endif %}
-                  {% endif %}
-                icon: mdi:football-helmet
-                icon_color: >-
-                  {% if is_state('binary_sensor.huskers_is_live_espn', 'on') %}
-                    red
-                  {% elif is_state('binary_sensor.huskers_is_pregame_espn', 'on') %}
-                    orange
-                  {% else %}
-                    teal
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: sensor.husker_team
-                primary: Scoreboard Snapshot
-                secondary: >-
-                  {% set team = state_attr('sensor.husker_team', 'team_score') %}
-                  {% set opponent = state_attr('sensor.husker_team', 'opponent_score') %}
-                  {% if team is not none and opponent is not none %}
-                    {{ team }} - {{ opponent }}
-                  {% else %}
-                    Score pending
-                  {% endif %}
-                icon: mdi:scoreboard
-                icon_color: >-
-                  {% if is_state('binary_sensor.huskers_is_live_espn', 'on') %}
-                    red
-                  {% else %}
-                    indigo
-                  {% endif %}
-                tap_action:
-                  action: more-info
-              - type: entities
-                title: Game State
-                show_header_toggle: false
-                state_color: true
-                entities:
-                  - entity: binary_sensor.huskers_is_pregame_espn
-                    name: Pregame
-                  - entity: binary_sensor.huskers_is_live_espn
-                    name: Live Now
-                  - entity: binary_sensor.huskers_is_postgame_espn
-                    name: Postgame
-                  - entity: sensor.huskers_next_game
-                    name: Details
-                  - entity: sensor.huskers_kickoff_in_effective
-                    name: Kickoff Countdown (min)
-      - type: grid
-        title: Quick Controls
-        column_span: 3
-        columns: 4
-        square: false
-        cards:
-          - type: tile
-            entity: sensor.kiosk_snapshot_lights_on
-            name: Lights On
-            color: amber
-          - type: tile
-            entity: sensor.kiosk_snapshot_plugs_on
-            name: Plugs Active
-            color: teal
-          - type: tile
-            entity: binary_sensor.kiosk_snapshot_automation_issue
-            name: Automation Health
-            color: red
-          - type: tile
-            entity: sensor.kiosk_snapshot_aux_readout
-            name: Humidor Climate
-            icon: mdi:coolant-temperature
-          - type: tile
-            entity: light.all_lights
-            name: All Lights
-            color: amber
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: light.all_exterior_lights
-            name: Exterior Lights
-            color: amber
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: group.kiosk_theater_lights
-            name: Theater Group
-            color: amber
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: group.kiosk_front_lights
-            name: Front Group
-            color: amber
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: group.kiosk_garage_lights
-            name: Garage Group
-            color: amber
-            tap_action:
-              action: toggle
-          - type: tile
-            entity: switch.plug_humidor
-            name: Humidor Power
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_humidor_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_mainfloor_burner
-            name: Main Floor Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_mainfloor_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_basement_burner
-            name: Basement Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_basement_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_bedroom_burner
-            name: Bedroom Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_bedroom_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.tree_power_switch
-            name: Tree Power
-            color: teal
-            tap_action:
-              action: toggle
-          - type: custom:extended-gauge-card
-            title: Humidor Temp
-            entity:
-              entity: sensor.hygrometer_humidor_temperature
-              settings:
-                name: Humidor Temp
-                unit_of_measurement: degF
-                decimals: 1
-            main:
-              min_value: 55
-              max_value: 80
-              show_needle: true
-              show_entity_name: false
-              show_min_max_values: true
-          - type: custom:extended-gauge-card
-            title: Humidor Humidity
-            entity:
-              entity: sensor.hygrometer_humidor_humidity
-              settings:
+                name: Plugs On
+                color: teal
+              - type: tile
+                entity: binary_sensor.kiosk_automations_have_issues
+                name: Automations Issues
+                color: red
+              - type: tile
+                entity: sensor.hygrometer_humidor_temperature
+                name: Humidor Temperature
+                color: blue
+              - type: tile
+                entity: sensor.hygrometer_humidor_humidity
                 name: Humidor Humidity
-                unit_of_measurement: '%'
-                decimals: 0
-            main:
-              min_value: 50
-              max_value: 80
-              show_needle: true
-              show_entity_name: false
-              show_min_max_values: true
-      - type: grid
-        title: Automations & Diagnostics
-        column_span: 3
+                color: indigo
+              - type: tile
+                entity: sensor.huskers_kickoff_in_effective
+                name: Huskers Kickoff (min)
+                color: green
+              - type: tile
+                entity: sensor.kiosk_automations_problem_count
+                name: Automation Problems
+                color: orange
+              - type: tile
+                entity: binary_sensor.kiosk_snapshot_automation_issue
+                name: Disabled Automations
+                color: purple
+              - type: tile
+                entity: binary_sensor.kiosk_humidor_out_of_band
+                name: Humidor Out of Band
+                color: deep-orange
+
+          - type: entities
+            title: Snapshot Bundles
+            show_header_toggle: false
+            entities:
+              - entity: group.kiosk_snapshot_weather
+                name: Weather Bundle
+              - entity: group.kiosk_snapshot_huskers
+                name: Huskers Bundle
+              - entity: group.kiosk_snapshot_lights
+                name: Lights Bundle
+              - entity: group.kiosk_snapshot_auxiliary
+                name: Auxiliary Bundle
+              - entity: group.kiosk_snapshot_automations
+                name: Automation Bundle
+
+          - type: statistics-graph
+            title: Lights & Plugs (24h)
+            days_to_show: 1
+            period: hour
+            chart_type: line
+            stat_types:
+              - mean
+              - max
+            entities:
+              - entity: sensor.kiosk_snapshot_lights_on
+                name: Lights On
+              - entity: sensor.kiosk_snapshot_plugs_on
+                name: Plugs On
+
+          - type: history-graph
+            title: Automation Health (24h)
+            hours_to_show: 24
+            entities:
+              - binary_sensor.kiosk_automations_have_issues
+              - sensor.kiosk_automations_problem_count
+
+      - type: vertical-stack
         cards:
+          - type: markdown
+            content: |
+              ## Automations & Diagnostics
+              Trigger key automations and monitor health with built-in cards.
+
           - type: grid
             columns: 4
             square: false
@@ -465,7 +116,6 @@ views:
                 entity: automation.evening_lights_at_sunset
                 name: Evening Lights
                 icon: mdi:weather-sunset-down
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
@@ -474,58 +124,53 @@ views:
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.night_mode_at_midnight
+                entity: automation.lighting_night_mode_at_midnight
                 name: Night Mode
                 icon: mdi:weather-night
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.night_mode_at_midnight
+                    entity_id: automation.lighting_night_mode_at_midnight
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.early_morning_lights_0330
+                entity: automation.early_morning_lights_03_30
                 name: Early Morning
                 icon: mdi:alarm
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.early_morning_lights_0330
+                    entity_id: automation.early_morning_lights_03_30
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.interior_lights_sunrise_off
+                entity: automation.interior_lights_off_15_minutes_after_sunrise
                 name: Interior Sunrise Off
                 icon: mdi:weather-sunset-up
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.interior_lights_sunrise_off
+                    entity_id: automation.interior_lights_off_15_minutes_after_sunrise
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.exterior_lights_sunrise_off
-                name: Exterior Sunrise Off
+                entity: automation.outdoor_lights_control_sunrise_sunset
+                name: Exterior Sunrise/Sunset
                 icon: mdi:weather-sunny-off
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.exterior_lights_sunrise_off
+                    entity_id: automation.outdoor_lights_control_sunrise_sunset
                 hold_action:
                   action: toggle
               - type: button
                 entity: automation.exterior_led_monthly_effect
                 name: Exterior LED Effect
                 icon: mdi:led-strip-variant
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
@@ -534,29 +179,28 @@ views:
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.humidor_plug_temp_control
+                entity: automation.humidor_plug_temperature_control
                 name: Humidor Plug Control
                 icon: mdi:cigar
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.humidor_plug_temp_control
+                    entity_id: automation.humidor_plug_temperature_control
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.burner_plugs_off_2300
+                entity: automation.safety_turn_off_burner_plugs_at_11_00_pm
                 name: Burners Off 23:00
                 icon: mdi:fire-off
-                show_state: true
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.burner_plugs_off_2300
+                    entity_id: automation.safety_turn_off_burner_plugs_at_11_00_pm
                 hold_action:
                   action: toggle
+
           - type: entities
             title: Automation Bundles
             show_header_toggle: false
@@ -567,439 +211,419 @@ views:
                 name: Core Bundle
               - entity: sensor.kiosk_snapshot_plugs_on
                 name: Active Plugs Count
-          - type: custom:auto-entities
+
+          - type: entity-filter
             card:
               type: entities
               title: Automations With Issues
               show_header_toggle: false
-            filter:
-              include:
-                - domain: automation
-                  state: unavailable
-                  options:
-                    name: "{{ state_attr(entity, 'friendly_name') }}"
-                - domain: automation
-                  state: unknown
-                  options:
-                    name: "{{ state_attr(entity, 'friendly_name') }}"
-              exclude:
-                - entity_id: automation.*test*
-            sort:
-              method: friendly_name
+            state_filter:
+              - unavailable
+              - unknown
+            entities:
+              - automation.evening_lights_at_sunset
+              - automation.lighting_night_mode_at_midnight
+              - automation.early_morning_lights_03_30
+              - automation.interior_lights_off_15_minutes_after_sunrise
+              - automation.outdoor_lights_control_sunrise_sunset
+              - automation.exterior_led_monthly_effect
+              - automation.humidor_plug_temperature_control
+              - automation.safety_turn_off_burner_plugs_at_11_00_pm
             show_empty: false
+
+  ###########################################################################
+  # 2) CONTROL — lights, plugs, relays using standard cards
+  ###########################################################################
   - title: Control
     path: control
     icon: mdi:lightbulb-group
-    type: sections
-    max_columns: 3
-    badges: []
-    sections:
-      - type: grid
-        title: Light Groups
-        cards:
-          - type: custom:hue-like-light-card
-            entity: light.all_lights
-            name: All Lights
-          - type: custom:hue-like-light-card
-            entity: light.mainfloor_lights
-            name: Main Floor
-          - type: custom:hue-like-light-card
-            entity: light.all_exterior_lights
-            name: Exterior Lights
-          - type: custom:hue-like-light-card
-            entity: light.permanent_outdoor_lights
-            name: Permanent Strip
-          - type: custom:hue-like-light-card
-            entity: light.theater_lights
-            name: Theater
-          - type: custom:hue-like-light-card
-            entity: light.office_lights
-            name: Office
-          - type: custom:hue-like-light-card
-            entity: light.front_porch_lights
-            name: Front Porch
-          - type: custom:hue-like-light-card
-            entity: light.garage_lights
-            name: Garage
-      - type: grid
-        title: Main Floor Lights
-        columns: 3
-        cards:
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Living Room"
-              - type: custom:compact-light-card
-                entity: light.livingroom_light
-                name: Living Room
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Dining Room"
-              - type: custom:compact-light-card
-                entity: light.diningroom_light
-                name: Dining Room
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Sunroom"
-              - type: custom:compact-light-card
-                entity: light.sunroom_light
-                name: Sunroom
-      - type: grid
-        title: Upper Floor Lights
-        columns: 3
-        cards:
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Parents Suite"
-              - type: custom:compact-light-card
-                entity: light.light_parents
-                name: Parents Suite
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Guest Room"
-              - type: custom:compact-light-card
-                entity: light.light_guest_room
-                name: Guest Room
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Ari Room"
-              - type: custom:compact-light-card
-                entity: light.light_ari
-                name: Ari Room
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Attic"
-              - type: custom:compact-light-card
-                entity: light.light_attic
-                name: Attic
-      - type: grid
-        title: Basement & Office Lights
-        columns: 3
-        cards:
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Theater Left"
-              - type: custom:compact-light-card
-                entity: light.light_theater_left
-                name: Theater Left
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Theater Right"
-              - type: custom:compact-light-card
-                entity: light.light_theater_right
-                name: Theater Right
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Office"
-              - type: custom:compact-light-card
-                entity: light.light_office
-                name: Office
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Spare Room"
-              - type: custom:compact-light-card
-                entity: light.spare_light
-                name: Spare Room
-      - type: grid
-        title: Exterior & Seasonal Lights
-        columns: 3
-        cards:
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Front Left"
-              - type: custom:compact-light-card
-                entity: light.light_front_left
-                name: Front Left
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Front Right"
-              - type: custom:compact-light-card
-                entity: light.light_front_right
-                name: Front Right
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Garage Left"
-              - type: custom:compact-light-card
-                entity: light.light_garage_left
-                name: Garage Left
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Garage Center"
-              - type: custom:compact-light-card
-                entity: light.light_garage_center
-                name: Garage Center
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Garage Right"
-              - type: custom:compact-light-card
-                entity: light.light_garage_right
-                name: Garage Right
-          - type: vertical-stack
-            cards:
-              - type: markdown
-                content: "### Tree"
-              - type: custom:compact-light-card
-                entity: light.tree
-                name: Tree
-      - type: entities
-        title: Groups & Toggles
-        state_color: true
-        show_header_toggle: false
-        entities:
-          - entity: group.huskers_eight_lights
-            name: Huskers - All Eight Lights
-          - entity: group.kiosk_theater_lights
-            name: Kiosk Theater Lights
-          - entity: group.kiosk_front_lights
-            name: Kiosk Front Lights
-          - entity: group.kiosk_garage_lights
-            name: Kiosk Garage Lights
-          - entity: group.kiosk_all_automations
-            name: Kiosk All Automations
-          - entity: group.weather_dashboard_all
-            name: Weather Dashboard - All
-      - type: entities
-        title: Purifiers
-        state_color: true
-        show_header_toggle: false
-        entities:
-          - entity: switch.bedroom_purifier_power_switch
-            name: Bedroom Purifier Power
-          - entity: select.bedroom_purifier_mode
-            name: Bedroom Mode
-          - entity: number.bedroom_purifier_gearmode
-            name: Bedroom Gear
-          - type: divider
-          - entity: switch.guest_room_purifier_power_switch
-            name: Guest Room Purifier Power
-          - entity: select.guest_room_purifier_mode
-            name: Guest Room Mode
-          - entity: number.guest_room_purifier_gearmode
-            name: Guest Room Gear
-          - type: divider
-          - entity: switch.garage_air_purifier_power_switch
-            name: Garage Purifier Power
-          - entity: select.garage_air_purifier_mode
-            name: Garage Mode
-          - entity: number.garage_air_purifier_gearmode
-            name: Garage Gear
-      - type: grid
-        title: Plugs & Power
-        cards:
-          - type: tile
-            entity: switch.plug_basement_burner
-            name: Basement Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_basement_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_mainfloor_burner
-            name: Main Floor Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_mainfloor_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_bedroom_burner
-            name: Bedroom Burner
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_bedroom_burner_power
-                name: Power (W)
-          - type: tile
-            entity: switch.plug_humidor
-            name: Humidor Plug
-            color: teal
-            tap_action:
-              action: toggle
-            features:
-              - type: target-entity
-                entity: sensor.plug_humidor_power
-                name: Power (W)
-          - type: tile
-            entity: switch.tree_power_switch
-            name: Tree Power
-            color: teal
-            tap_action:
-              action: toggle
-  - title: Todos
-    path: todos
-    icon: mdi:check-circle-outline
-    type: sections
-    max_columns: 2
-    badges: []
-    sections:
-      - type: grid
-        column_span: 2
+
+    cards:
+      - type: vertical-stack
         cards:
           - type: markdown
-            title: Running TODOs
-            style: |
-              ha-card {padding: 16px 20px;}
-            content: |-
-              {% set todo = states('sensor.todo_repo_tracker') %}
-              {% if todo not in ['unknown', 'unavailable', ''] %}
-                ```markdown
-                {{ todo }}
-                ```
-              {% else %}
-                TODO list not available.
-              {% endif %}
-      - type: grid
+            content: |
+              ## Status Today
+              Daily runtimes and current automation status.
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.kiosk_all_lights_runtime_today
+                name: Lights Runtime (min)
+                color: amber
+              - type: tile
+                entity: sensor.kiosk_plug_humidor_on_today
+                name: Humidor On (min)
+                color: teal
+              - type: tile
+                entity: sensor.kiosk_plug_mainfloor_burner_on_today
+                name: Mainfloor Burner On (min)
+                color: teal
+              - type: tile
+                entity: sensor.kiosk_plug_basement_burner_on_today
+                name: Basement Burner On (min)
+                color: teal
+              - type: tile
+                entity: sensor.kiosk_plug_bedroom_burner_on_today
+                name: Bedroom Burner On (min)
+                color: teal
+              - type: tile
+                entity: binary_sensor.kiosk_automations_have_issues
+                name: Automations Issues?
+                color: red
+
+      - type: vertical-stack
         cards:
-          - type: history-graph
-            title: Automation Health (72h)
-            hours_to_show: 72
-            refresh_interval: 0
+          - type: markdown
+            content: "## Light Groups"
+
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: tile
+                entity: light.all_lights
+                name: All Lights
+                color: amber
+              - type: tile
+                entity: light.mainfloor_lights
+                name: Main Floor
+                color: amber
+              - type: tile
+                entity: light.all_exterior_lights
+                name: Exterior Lights
+                color: orange
+              - type: tile
+                entity: light.permanent_outdoor_lights
+                name: Permanent Strip
+                color: orange
+              - type: tile
+                entity: light.theater_lights
+                name: Theater
+                color: purple
+              - type: tile
+                entity: light.office_lights
+                name: Office
+                color: blue
+              - type: tile
+                entity: light.front_porch_lights
+                name: Front Porch
+                color: yellow
+              - type: tile
+                entity: light.garage_lights
+                name: Garage
+                color: blue
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Main Floor Lights"
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: light.livingroom_light
+                name: Living Room
+              - type: tile
+                entity: light.diningroom_light
+                name: Dining Room
+              - type: tile
+                entity: light.sunroom_light
+                name: Sunroom
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Upper Floor Lights"
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: light.light_parents
+                name: Primary
+              - type: tile
+                entity: light.light_guest_room
+                name: Guest
+              - type: tile
+                entity: light.light_attic
+                name: Attic
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Theater / Front / Garage"
+
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: tile
+                entity: light.light_theater_left
+                name: Theater Left
+              - type: tile
+                entity: light.light_theater_right
+                name: Theater Right
+              - type: tile
+                entity: light.light_front_left
+                name: Front Left
+              - type: tile
+                entity: light.light_front_right
+                name: Front Right
+              - type: tile
+                entity: light.light_garage_left
+                name: Garage Left
+              - type: tile
+                entity: light.light_garage_center
+                name: Garage Center
+              - type: tile
+                entity: light.light_garage_right
+                name: Garage Right
+              - type: tile
+                entity: light.light_office
+                name: Office Accent
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Plugs & Power"
+
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.plug_basement_burner
+                name: Basement Burner Plug
+                color: teal
+                tap_action:
+                  action: toggle
+                features:
+                  - type: target-entity
+                    entity: sensor.plug_basement_burner_power
+                    name: Power (W)
+              - type: tile
+                entity: switch.plug_mainfloor_burner
+                name: Main Floor Burner Plug
+                color: teal
+                tap_action:
+                  action: toggle
+                features:
+                  - type: target-entity
+                    entity: sensor.plug_mainfloor_burner_power
+                    name: Power (W)
+              - type: tile
+                entity: switch.plug_bedroom_burner
+                name: Bedroom Burner Plug
+                color: teal
+                tap_action:
+                  action: toggle
+                features:
+                  - type: target-entity
+                    entity: sensor.plug_bedroom_burner_power
+                    name: Power (W)
+              - type: tile
+                entity: switch.plug_humidor
+                name: Humidor Plug
+                color: teal
+                tap_action:
+                  action: toggle
+                features:
+                  - type: target-entity
+                    entity: sensor.plug_humidor_power
+                    name: Power (W)
+
+          - type: entities
+            title: Light Power Relays
+            show_header_toggle: false
             entities:
-              - binary_sensor.kiosk_snapshot_automation_issue
+              - switch.bar_light_power_switch
+              - switch.diningroom_light_power_switch
+              - switch.livingroom_light_power_switch
+              - switch.light_parents_power_switch
+              - switch.light_guest_room_power_switch
+              - switch.sunroom_light_power_switch
+              - switch.light_attic_power_switch
+              - switch.permanent_outdoor_lights_power_switch
+              - switch.exterior_lights_power_switch
+              - switch.outside_power_switch
+              - switch.main_power_switch
+              - switch.mainfloor_power_switch
+              - switch.main_floor_power_switch
+              - switch.light_ari_power_switch
+              - switch.christmas_tree_lights_power_switch
+              - switch.tv_lights_power_switch
+              - switch.scenic_dreamview_power_switch
+              - switch.scenic_dreamview1_power_switch
+              - switch.scenic_dreamview2_power_switch
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Quick Scripts"
+
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: button
+                entity: script.kiosk_all_lights_on
+                name: All Lights On
+                icon: mdi:lightbulb-on
+              - type: button
+                entity: script.kiosk_all_lights_off
+                name: All Lights Off
+                icon: mdi:lightbulb-off
+              - type: button
+                entity: script.kiosk_exterior_on
+                name: Exterior On
+                icon: mdi:weather-sunset-up
+              - type: button
+                entity: script.kiosk_exterior_off
+                name: Exterior Off
+                icon: mdi:weather-sunset-down
+              - type: button
+                entity: script.kiosk_theater_on
+                name: Theater On
+                icon: mdi:filmstrip
+              - type: button
+                entity: script.kiosk_theater_off
+                name: Theater Off
+                icon: mdi:filmstrip-off
+              - type: button
+                entity: script.kiosk_front_on
+                name: Front On
+                icon: mdi:spotlight-beam
+              - type: button
+                entity: script.kiosk_front_off
+                name: Front Off
+                icon: mdi:spotlight-beam-off
+              - type: button
+                entity: script.kiosk_garage_on
+                name: Garage On
+                icon: mdi:garage
+              - type: button
+                entity: script.kiosk_garage_off
+                name: Garage Off
+                icon: mdi:garage-off
+              - type: button
+                entity: script.kiosk_purifiers_on
+                name: Purifiers On
+                icon: mdi:air-purifier
+              - type: button
+                entity: script.kiosk_purifiers_off
+                name: Purifiers Off
+                icon: mdi:air-purifier-off
+              - type: button
+                entity: script.kiosk_plugs_on
+                name: Plugs On
+                icon: mdi:power-plug
+              - type: button
+                entity: script.kiosk_plugs_off
+                name: Plugs Off
+                icon: mdi:power-plug-off
+              - type: button
+                entity: script.kiosk_light_relays_on
+                name: Relays On
+                icon: mdi:toggle-switch
+              - type: button
+                entity: script.kiosk_light_relays_off
+                name: Relays Off
+                icon: mdi:toggle-switch-off
+
+  ###########################################################################
+  # 3) HUMIDOR — live gauges + trends using built-in cards
+  ###########################################################################
   - title: Humidor
     path: humidor
     icon: mdi:cigar
-    type: sections
-    max_columns: 3
-    badges: []
-    sections:
-      - type: grid
-        column_span: 3
+
+    cards:
+      - type: vertical-stack
         cards:
-          - type: chips
-            alignment: center
-            chips:
-              - type: entity
+          - type: markdown
+            content: |
+              ## Humidor Snapshot
+              Target band: **68–72°F** and **62–68% RH**.
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
                 entity: sensor.hygrometer_humidor_temperature
                 name: Temperature
-                icon: mdi:thermometer
-              - type: entity
+                color: blue
+              - type: tile
                 entity: sensor.hygrometer_humidor_humidity
                 name: Humidity
-                icon: mdi:water-percent
-              - type: entity
-                entity: sensor.humidor_system_status
-                name: System Status
-                icon: mdi:cigar
-              - type: entity
+                color: indigo
+              - type: tile
                 entity: switch.plug_humidor
                 name: Humidor Power
-                icon: mdi:power-plug
+                color: teal
+
+      - type: vertical-stack
+        cards:
           - type: markdown
-            style: |
-              ha-card {padding: 16px 20px; font-size: 1.05rem;}
-            content: |-
-              ### Humidor Snapshot
-              Target comfort band: **68-72 degF** / **62-68 %RH**.
-              Tiles track live readings while the charts surface weekly trends and plug usage.
-      - type: grid
-        title: Live Readings
-        column_span: 3
+            content: "## Humidor — Live Gauges"
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: gauge
+                entity: sensor.hygrometer_humidor_temperature
+                name: Temperature °F
+                min: 55
+                max: 80
+                severity:
+                  green: 68
+                  yellow: 72
+                  red: 75
+              - type: gauge
+                entity: sensor.hygrometer_humidor_humidity
+                name: Humidity %
+                min: 50
+                max: 80
+                severity:
+                  green: 62
+                  yellow: 68
+                  red: 75
+              - type: gauge
+                entity: sensor.plug_humidor_power
+                name: Plug Power W
+                min: 0
+                max: 150
+
+      - type: vertical-stack
         cards:
-          - type: custom:extended-gauge-card
-            title: Temperature
-            entity:
-              entity: sensor.hygrometer_humidor_temperature
-              settings:
-                name: Temperature
-                unit_of_measurement: degF
-                decimals: 1
-            main:
-              min_value: 55
-              max_value: 80
-              show_needle: true
-              show_entity_name: false
-              show_min_max_values: true
-          - type: custom:extended-gauge-card
-            title: Humidity
-            entity:
-              entity: sensor.hygrometer_humidor_humidity
-              settings:
-                name: Humidity
-                unit_of_measurement: '%'
-                decimals: 0
-            main:
-              min_value: 50
-              max_value: 80
-              show_needle: true
-              show_entity_name: false
-              show_min_max_values: true
-          - type: tile
-            entity: sensor.humidor_system_status
-            name: System Status
-            color: green
-            features:
-              - type: target-entity
-                entity: switch.plug_humidor
-                name: Plug
-          - type: tile
-            entity: sensor.humidor_system_health
-            name: System Health
-            color: blue
-          - type: custom:extended-gauge-card
-            title: Plug Power
-            entity:
-              entity: sensor.plug_humidor_power
-              settings:
-                name: Plug Power
-                unit_of_measurement: W
-                decimals: 0
-            main:
-              min_value: 0
-              max_value: 150
-              show_needle: true
-              show_entity_name: false
-              show_min_max_values: true
-      - type: grid
-        title: Trend Metrics
-        column_span: 3
+          - type: markdown
+            content: "## Humidor — Diagnostics"
+
+          - type: entities
+            title: Diagnostic Sensors
+            show_header_toggle: false
+            entities:
+              - sensor.kiosk_snapshot_aux_readout
+              - binary_sensor.kiosk_humidor_out_of_band
+              - sensor.kiosk_humidor_temp_delta_1h
+              - sensor.kiosk_humidor_humidity_delta_1h
+              - sensor.kiosk_humidor_in_band_pct_24h
+              - sensor.kiosk_humidor_temp_stats_1h
+              - sensor.kiosk_humidor_humidity_stats_1h
+
+      - type: vertical-stack
         cards:
-          - type: tile
-            entity: sensor.humidor_temp_stats_24h
-            name: Temp Mean (24h)
-          - type: tile
-            entity: sensor.humidor_temp_range_today
-            name: Temp Range (24h)
-          - type: tile
-            entity: sensor.humidor_temp_change_1h
-            name: Temp Change (1h)
-          - type: tile
-            entity: sensor.humidor_temperature_trend
-            name: Temp Trend
-          - type: tile
-            entity: sensor.humidor_humidity_stats_24h
-            name: Humidity Mean (24h)
-          - type: tile
-            entity: sensor.humidor_humidity_range_today
-            name: Humidity Range (24h)
-          - type: tile
-            entity: sensor.humidor_humidity_change_1h
-            name: Humidity Change (1h)
-      - type: grid
-        column_span: 3
-        cards:
+          - type: markdown
+            content: "## Humidor — Charts"
+
           - type: statistics-graph
             title: Temperature & Humidity (7d)
             days_to_show: 7
@@ -1014,36 +638,238 @@ views:
                 name: Temperature
               - entity: sensor.hygrometer_humidor_humidity
                 name: Humidity
+
           - type: history-graph
-            title: Power & Delta (48h)
+            title: Plug Power & Deltas (48h)
             hours_to_show: 48
-            refresh_interval: 0
             entities:
               - sensor.plug_humidor_power
-              - sensor.humidor_temp_change_1h
-              - sensor.humidor_humidity_change_1h
-      - type: entities
-        title: Controls & Diagnostics
-        state_color: true
-        show_header_toggle: false
-        entities:
-          - entity: switch.plug_humidor
-            name: Humidor Power
-          - entity: select.plug_humidor_power_on_behavior
-            name: Power-on Behavior
-          - entity: sensor.plug_humidor_energy
-            name: Energy (kWh)
-          - entity: sensor.plug_humidor_current
-            name: Current (A)
-          - entity: sensor.plug_humidor_voltage
-            name: Voltage (V)
-          - entity: sensor.hygrometer_humidor_battery
-            name: Sensor Battery
-      - type: logbook
-        column_span: 3
-        title: Humidor Activity Log
-        hours_to_show: 72
-        entities:
-          - switch.plug_humidor
-          - sensor.hygrometer_humidor_temperature
-          - sensor.hygrometer_humidor_humidity
+              - sensor.kiosk_humidor_temp_delta_1h
+              - sensor.kiosk_humidor_humidity_delta_1h
+
+  ###########################################################################
+  # 4) SPRINKLERS — programs, zones, runtime & trends
+  ###########################################################################
+  - title: Sprinklers
+    path: sprinklers
+    icon: mdi:sprinkler-variant
+    badges:
+      - switch.sprinkler_rain_delay
+      - sensor.sprinkler_state
+
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Sprinklers — Programs & Rain Delay"
+
+          - type: entities
+            title: Programs & Rain Delay
+            show_header_toggle: false
+            entities:
+              - switch.sprinkler_rain_delay
+              - switch.sprinkler_scheduled_program
+              - switch.sprinkler_midday_program
+              - switch.sprinkler_evening_program
+              - switch.sprinkler_smart_watering_program
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Sprinklers — Zones"
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: switch.sprinkler_south_side_zone
+                name: South Side
+                tap_action:
+                  action: toggle
+              - type: button
+                entity: switch.sprinkler_back_south_zone
+                name: Back South
+                tap_action:
+                  action: toggle
+              - type: button
+                entity: switch.sprinkler_back_north_zone
+                name: Back North
+                tap_action:
+                  action: toggle
+              - type: button
+                entity: switch.sprinkler_front_zone
+                name: Front
+                tap_action:
+                  action: toggle
+              - type: button
+                entity: switch.sprinkler_zone_5_zone
+                name: Zone 5
+                tap_action:
+                  action: toggle
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Sprinklers — Today's Runtime (minutes)"
+
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.kiosk_sprinklers_south_side_runtime_today
+                name: South Side
+              - type: tile
+                entity: sensor.kiosk_sprinklers_back_south_runtime_today
+                name: Back South
+              - type: tile
+                entity: sensor.kiosk_sprinklers_back_north_runtime_today
+                name: Back North
+              - type: tile
+                entity: sensor.kiosk_sprinklers_front_runtime_today
+                name: Front
+              - type: tile
+                entity: sensor.kiosk_sprinklers_zone5_runtime_today
+                name: Zone 5
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Sprinklers — Recent History"
+
+          - type: entities
+            title: Zone History
+            show_header_toggle: false
+            entities:
+              - sensor.south_side_zone_history
+              - sensor.back_south_zone_history
+              - sensor.back_north_zone_history
+              - sensor.front_zone_history
+              - sensor.zone_5_zone_history
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Sprinklers — Trends (7 days)"
+
+          - type: history-graph
+            hours_to_show: 168
+            entities:
+              - sensor.kiosk_sprinklers_south_side_runtime_today
+              - sensor.kiosk_sprinklers_back_south_runtime_today
+              - sensor.kiosk_sprinklers_back_north_runtime_today
+              - sensor.kiosk_sprinklers_front_runtime_today
+              - sensor.kiosk_sprinklers_zone5_runtime_today
+
+  ###########################################################################
+  # 5) KIOSK ENTITIES — reference cards using built-in components
+  ###########################################################################
+  - title: Kiosk Entities
+    path: kiosk-entities
+    icon: mdi:database-eye
+
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Sensors"
+
+          - type: entities
+            title: Snapshot Sensors
+            show_header_toggle: false
+            entities:
+              - sensor.kiosk_snapshot_lights_on
+              - sensor.kiosk_snapshot_plugs_on
+              - sensor.kiosk_snapshot_aux_readout
+              - sensor.kiosk_automations_problem_count
+              - sensor.kiosk_humidor_temp_delta_1h
+              - sensor.kiosk_humidor_humidity_delta_1h
+              - sensor.kiosk_humidor_in_band_pct_24h
+
+          - type: entities
+            title: Runtime Sensors
+            show_header_toggle: false
+            entities:
+              - sensor.kiosk_all_lights_runtime_today
+              - sensor.kiosk_exterior_lights_runtime_today
+              - sensor.kiosk_theater_lights_runtime_today
+              - sensor.kiosk_plug_basement_burner_on_today
+              - sensor.kiosk_plug_mainfloor_burner_on_today
+              - sensor.kiosk_plug_bedroom_burner_on_today
+              - sensor.kiosk_plug_humidor_on_today
+              - sensor.kiosk_sprinklers_south_side_runtime_today
+              - sensor.kiosk_sprinklers_back_south_runtime_today
+              - sensor.kiosk_sprinklers_back_north_runtime_today
+              - sensor.kiosk_sprinklers_front_runtime_today
+              - sensor.kiosk_sprinklers_zone5_runtime_today
+
+          - type: entities
+            title: Statistics Helpers
+            show_header_toggle: false
+            entities:
+              - sensor.kiosk_humidor_temp_stats_1h
+              - sensor.kiosk_humidor_humidity_stats_1h
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Binary Sensors"
+
+          - type: entities
+            title: Binary Sensors
+            show_header_toggle: false
+            entities:
+              - binary_sensor.kiosk_snapshot_automation_issue
+              - binary_sensor.kiosk_automations_have_issues
+              - binary_sensor.kiosk_humidor_out_of_band
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Groups"
+
+          - type: entities
+            title: Groups
+            show_header_toggle: false
+            entities:
+              - group.kiosk_all_lights_core
+              - group.kiosk_theater_lights
+              - group.kiosk_front_lights
+              - group.kiosk_garage_lights
+              - group.kiosk_all_automations
+              - group.kiosk_exterior_lights
+              - group.kiosk_purifiers
+              - group.kiosk_plugs
+              - group.kiosk_light_power_switches
+              - group.kiosk_snapshot_weather
+              - group.kiosk_snapshot_huskers
+              - group.kiosk_snapshot_lights
+              - group.kiosk_snapshot_auxiliary
+              - group.kiosk_snapshot_automations
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Kiosk Scripts"
+
+          - type: entities
+            title: Scripts
+            show_header_toggle: false
+            entities:
+              - script.kiosk_all_lights_on
+              - script.kiosk_all_lights_off
+              - script.kiosk_exterior_on
+              - script.kiosk_exterior_off
+              - script.kiosk_theater_on
+              - script.kiosk_theater_off
+              - script.kiosk_front_on
+              - script.kiosk_front_off
+              - script.kiosk_garage_on
+              - script.kiosk_garage_off
+              - script.kiosk_purifiers_on
+              - script.kiosk_purifiers_off
+              - script.kiosk_plugs_on
+              - script.kiosk_plugs_off
+              - script.kiosk_light_relays_on
+              - script.kiosk_light_relays_off

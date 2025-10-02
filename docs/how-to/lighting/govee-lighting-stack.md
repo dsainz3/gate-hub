@@ -115,32 +115,37 @@ The configuration data is stored in `.storage/core.config_entries` under the `do
 
 ## Step 5 – Wire the Kiosk Dashboard
 
-The `dashboards/kiosk-dashboard.yaml` control tab presents two layers of lighting control:
+The refreshed `dashboards/kiosk-dashboard.yaml` relies entirely on stock Lovelace cards so it works out of the box on a clean Home Assistant install. The Control tab is organised as:
 
-1. **Light groups** rendered with the [Hue-like Light Card](https://github.com/Gh61/lovelace-hue-like-light-card) for a Philips Hue-style colour wheel.
-2. **Individual fixtures** grouped per area, each stack using a markdown heading followed by the [Compact Light Card](http://192.168.0.104:8123/hacs/repository/1035084461) (HACS repo ID `1035084461`).
+1. **Status stacks** built from `markdown`, `grid`, and `tile` cards for quick counts (lights on, runtimes, automations).
+2. **Group and individual controls** using `tile` cards so every light or switch can be toggled without third-party components.
+3. **Automation buttons** created with the core `button` card to trigger scenes and scripts.
 
-Usage notes:
+Example fragment:
 
 ```yaml
-# Example fragment from dashboards/kiosk-dashboard.yaml
-- type: grid
-  title: Main Floor Lights
-  columns: 3
+# Main Floor lights in dashboards/kiosk-dashboard.yaml
+- type: vertical-stack
   cards:
-    - type: vertical-stack
+    - type: markdown
+      content: "## Main Floor Lights"
+    - type: grid
+      columns: 3
+      square: false
       cards:
-        - type: markdown
-          content: "### Living Room"
-        - type: custom:compact-light-card
+        - type: tile
           entity: light.livingroom_light
           name: Living Room
+        - type: tile
+          entity: light.diningroom_light
+          name: Dining Room
+        - type: tile
+          entity: light.sunroom_light
+          name: Sunroom
 ```
 
-- Ensure both custom cards are installed via HACS and that Lovelace resources include:
-  - `/hacsfiles/lovelace-hue-like-light-card/hue-like-light-card.js`
-  - `/hacsfiles/compact-light-card/compact-light-card.js`
-- After updating the dashboard YAML, clear browser cache or use **Settings → Dashboards → … → Refresh resources** so Lovelace loads the new assets.
+- Because only built-in cards are used, there are no Lovelace resource entries to manage for the kiosk dashboard.
+- After editing the YAML, a normal browser refresh is enough—no cache purge is typically required.
 
 ## Step 6 – Verify Unified Entities
 
@@ -167,15 +172,14 @@ If entities are missing, restart the add-on and re-run the command. Clearing ret
 ## Troubleshooting
 
 - **Entities duplicated** – Delete old `light.*` entries tied to legacy integrations, then reload MQTT discovery.
-- **Color controls missing in the UI** – Confirm the Hue-like and Compact cards are installed/enabled in Lovelace resources and that the YAML references `custom:hue-like-light-card` / `custom:compact-light-card`.
+- **Color controls missing in the UI** – Tile cards expose on/off, brightness, and colour temperature by default. For RGB colour pickers, expose the entity through the standard light more-info dialog or layer in a custom card if needed.
 - **MQTT auth failures** – Re-enter credentials in the add-on UI and the MQTT integration; inspect the Mosquitto log for `Connection Refused` codes.
 - **API quota exceeded** – Increase the poll `delay` in the Govee integration configuration or temporarily disable the cloud path and rely on the LAN bridge.
 
 ## References
 
 - HACS repository: <https://github.com/LaggAt/hacs-govee>
-- Hue-like Light Card: <https://github.com/Gh61/lovelace-hue-like-light-card>
-- Compact Light Card: <http://192.168.0.104:8123/hacs/repository/1035084461>
+- Lovelace tile reference: <https://www.home-assistant.io/dashboards/tile/>
 - Govee2MQTT project: <https://github.com/wez/govee2mqtt>
 - Mosquitto add-on docs: [docs/how-to/addons/mqtt.md](../addons/mqtt.md)
 - Govee2MQTT add-on guide: [docs/how-to/addons/govee2mqtt.md](../addons/govee2mqtt.md)

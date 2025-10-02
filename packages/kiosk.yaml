@@ -27,7 +27,7 @@ group:
       - light.livingroom_light
       - light.diningroom_light
       - light.light_office
-      - light.spare_light
+      # - light.spare_light  # Commented out - entity doesn't exist
 
   kiosk_theater_lights:
     name: Kiosk — Theater Lights
@@ -54,14 +54,14 @@ group:
     name: Kiosk — Core Automations
     entities:
       - automation.evening_lights_at_sunset
-      - automation.night_mode_at_midnight
-      - automation.early_morning_lights_0330
-      - automation.interior_lights_sunrise_off
-      - automation.exterior_front_garage_on_sunset
-      - automation.exterior_lights_sunrise_off
+      # - automation.night_mode_at_midnight  # Commented out - entity doesn't exist
+      # - automation.early_morning_lights_0330  # Commented out - entity doesn't exist
+      # - automation.interior_lights_sunrise_off  # Commented out - entity doesn't exist
+      # - automation.exterior_front_garage_on_sunset  # Commented out - entity doesn't exist
+      # - automation.exterior_lights_sunrise_off  # Commented out - entity doesn't exist
       - automation.exterior_led_monthly_effect
-      - automation.humidor_plug_temp_control
-      - automation.burner_plugs_off_2300
+      # - automation.humidor_plug_temp_control  # Commented out - entity doesn't exist
+      # - automation.burner_plugs_off_2300  # Commented out - entity doesn't exist
 
   # Exterior-only (no segments)
   kiosk_exterior_lights:
@@ -70,8 +70,6 @@ group:
       - light.all_exterior_lights
       - light.permanent_outdoor_lights
       - light.front_porch_lights
-      # keep this commented if it doesn’t behave like a real group for you
-      # - light.lights_exterior
 
   # Purifier power switches
   kiosk_purifiers:
@@ -91,7 +89,7 @@ group:
       - switch.plug_humidor
       - switch.tree_power_switch
 
-  # Light “power switch” relays (for Govee/relays/etc) — no segments
+  # Light "power switch" relays (for Govee/relays/etc) — no segments
   kiosk_light_power_switches:
     name: Kiosk — Light Power Switches
     entities:
@@ -160,14 +158,14 @@ group:
     name: Kiosk - Snapshot Automations
     entities:
       - automation.evening_lights_at_sunset
-      - automation.night_mode_at_midnight
-      - automation.early_morning_lights_0330
-      - automation.interior_lights_sunrise_off
-      - automation.exterior_front_garage_on_sunset
-      - automation.exterior_lights_sunrise_off
+      # - automation.night_mode_at_midnight  # Commented out - entity doesn't exist
+      # - automation.early_morning_lights_0330  # Commented out - entity doesn't exist
+      # - automation.interior_lights_sunrise_off  # Commented out - entity doesn't exist
+      # - automation.exterior_front_garage_on_sunset  # Commented out - entity doesn't exist
+      # - automation.exterior_lights_sunrise_off  # Commented out - entity doesn't exist
       - automation.exterior_led_monthly_effect
-      - automation.humidor_plug_temp_control
-      - automation.burner_plugs_off_2300
+      # - automation.humidor_plug_temp_control  # Commented out - entity doesn't exist
+      # - automation.burner_plugs_off_2300  # Commented out - entity doesn't exist
 
 ###############################################################################
 # Scripts (mapping style; aliases quoted)
@@ -205,7 +203,6 @@ script:
         target:
           entity_id: group.kiosk_exterior_lights
 
-  # Uses your existing kiosk_* scene groups if you prefer; otherwise the core group above
   kiosk_theater_on:
     alias: 'Kiosk: Theater — ON'
     mode: single
@@ -223,7 +220,6 @@ script:
       - service: light.turn_off
         target:
           entity_id:
-            - group.kiosk_theater_lights
             - light.theater_lights
 
   kiosk_front_on:
@@ -234,7 +230,6 @@ script:
         target:
           entity_id:
             - group.kiosk_front_lights
-            - light.front_porch_lights
 
   kiosk_front_off:
     alias: 'Kiosk: Front — OFF'
@@ -244,7 +239,6 @@ script:
         target:
           entity_id:
             - group.kiosk_front_lights
-            - light.front_porch_lights
 
   kiosk_garage_on:
     alias: 'Kiosk: Garage — ON'
@@ -253,10 +247,7 @@ script:
       - service: light.turn_on
         target:
           entity_id:
-            - group.kiosk_garage_lights
-            - light.garage_center
-            - light.light_garage_left
-            - light.light_garage_right
+            - light.garage_lights
 
   kiosk_garage_off:
     alias: 'Kiosk: Garage — OFF'
@@ -265,10 +256,7 @@ script:
       - service: light.turn_off
         target:
           entity_id:
-            - group.kiosk_garage_lights
-            - light.garage_center
-            - light.light_garage_left
-            - light.light_garage_right
+            - light.garage_lights
 
   kiosk_purifiers_on:
     alias: 'Kiosk: Purifiers — ON'
@@ -319,7 +307,7 @@ script:
           entity_id: group.kiosk_light_power_switches
 
 ###############################################################################
-# Template sensors - snapshot metrics
+# Template sensors - snapshot metrics & humidor monitoring (SINGLE SECTION)
 ###############################################################################
 template:
   - sensor:
@@ -329,12 +317,14 @@ template:
         icon: mdi:lightbulb-on
         state: >-
           {{ expand('group.kiosk_all_lights_core') | selectattr('state','eq','on') | list | length }}
+
       - name: kiosk_snapshot_plugs_on
         unique_id: kiosk_snapshot_plugs_on
         unit_of_measurement: plugs
         icon: mdi:power-plug
         state: >-
           {{ expand('group.kiosk_plugs') | selectattr('state','eq','on') | list | length }}
+
       - name: kiosk_snapshot_aux_readout
         unique_id: kiosk_snapshot_aux_readout
         icon: mdi:thermometer-water
@@ -348,6 +338,49 @@ template:
           {% endif %}
         attributes:
           humidor_plug: "{{ states('switch.plug_humidor') }}"
+
+      - name: kiosk_automations_problem_count
+        unique_id: kiosk_automations_problem_count
+        icon: mdi:alert-circle
+        unit_of_measurement: automations
+        state: >-
+          {% set bad = expand('group.kiosk_all_automations')
+                        | selectattr('state','in',['unavailable','unknown'])
+                        | list %}
+          {{ bad | length }}
+        attributes:
+          problem_automations: >-
+            {{ expand('group.kiosk_all_automations')
+               | selectattr('state','in',['unavailable','unknown'])
+               | map(attribute='entity_id') | list }}
+          ok_automations: >-
+            {{ expand('group.kiosk_all_automations')
+               | rejectattr('state','in',['unavailable','unknown'])
+               | map(attribute='entity_id') | list }}
+
+      - name: kiosk_humidor_temp_delta_1h
+        unique_id: kiosk_humidor_temp_delta_1h
+        unit_of_measurement: "°F"
+        icon: mdi:thermometer-chevron-up
+        state: >-
+          {{ (state_attr('sensor.kiosk_humidor_temp_stats_1h','change') | float(0)) | round(2) }}
+
+      - name: kiosk_humidor_humidity_delta_1h
+        unique_id: kiosk_humidor_humidity_delta_1h
+        unit_of_measurement: "%"
+        icon: mdi:water-percent
+        state: >-
+          {{ (state_attr('sensor.kiosk_humidor_humidity_stats_1h','change') | float(0)) | round(1) }}
+
+      - name: kiosk_humidor_in_band_pct_24h
+        unique_id: kiosk_humidor_in_band_pct_24h
+        unit_of_measurement: "%"
+        icon: mdi:target-variant
+        state: >-
+          {% set t = states('sensor.hygrometer_humidor_temperature') | float(0) %}
+          {% set h = states('sensor.hygrometer_humidor_humidity') | float(0) %}
+          {{ 100 if (68 <= t <= 72 and 62 <= h <= 68) else 0 }}
+
   - binary_sensor:
       - name: kiosk_snapshot_automation_issue
         unique_id: kiosk_snapshot_automation_issue
@@ -357,3 +390,141 @@ template:
         attributes:
           disabled_automations: >-
             {{ expand('group.kiosk_all_automations') | selectattr('state','ne','on') | map(attribute='entity_id') | list }}
+
+      - name: kiosk_automations_have_issues
+        unique_id: kiosk_automations_have_issues
+        device_class: problem
+        state: >-
+          {{ expand('group.kiosk_all_automations')
+             | selectattr('state','in',['unavailable','unknown'])
+             | list | length > 0 }}
+
+      - name: kiosk_humidor_out_of_band
+        unique_id: kiosk_humidor_out_of_band
+        device_class: problem
+        state: >-
+          {% set t = states('sensor.hygrometer_humidor_temperature')|float(0) %}
+          {% set h = states('sensor.hygrometer_humidor_humidity')|float(0) %}
+          {{ not (68 <= t <= 72 and 62 <= h <= 68) }}
+
+###############################################################################
+# KIOSK MEASUREMENTS & TRENDS
+# - Daily ON-time runtime (history_stats)
+# - Statistics windows for humidor deltas
+###############################################################################
+sensor:
+  # --- Daily runtime: LIGHT GROUPS (minutes) ---
+  - platform: history_stats
+    name: kiosk_all_lights_runtime_today
+    entity_id: light.all_lights
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_exterior_lights_runtime_today
+    entity_id: light.all_exterior_lights
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_theater_lights_runtime_today
+    entity_id: light.theater_lights
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  # --- Daily runtime: PLUGS (minutes) ---
+  - platform: history_stats
+    name: kiosk_plug_basement_burner_on_today
+    entity_id: switch.plug_basement_burner
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_plug_mainfloor_burner_on_today
+    entity_id: switch.plug_mainfloor_burner
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_plug_bedroom_burner_on_today
+    entity_id: switch.plug_bedroom_burner
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_plug_humidor_on_today
+    entity_id: switch.plug_humidor
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  # --- Daily runtime: SPRINKLERS (minutes per zone) ---
+  - platform: history_stats
+    name: kiosk_sprinklers_south_side_runtime_today
+    entity_id: switch.sprinkler_south_side_zone
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_sprinklers_back_south_runtime_today
+    entity_id: switch.sprinkler_back_south_zone
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_sprinklers_back_north_runtime_today
+    entity_id: switch.sprinkler_back_north_zone
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_sprinklers_front_runtime_today
+    entity_id: switch.sprinkler_front_zone
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: kiosk_sprinklers_zone5_runtime_today
+    entity_id: switch.sprinkler_zone_5_zone
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+
+# --- Statistics windows for HUMIDOR (1h rolling) ---
+  - platform: statistics
+    name: kiosk_humidor_temp_stats_1h
+    entity_id: sensor.hygrometer_humidor_temperature
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 500
+
+  - platform: statistics
+    name: kiosk_humidor_humidity_stats_1h
+    entity_id: sensor.hygrometer_humidor_humidity
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 500

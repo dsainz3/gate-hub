@@ -1176,6 +1176,138 @@ automation:
           message: 'Postgame cleanup completed (loops stopped, state restored)'
           entity_id: automation.huskers_postgame_cleanup
 
+  # ===== HUSKERS DEBUG (append under existing `automation:` key) =====
+
+  - id: huskers_debug_exterior_brightness
+    alias: "[Huskers Debug] Exterior brightness check"
+    description: "Manual test: compute brightness from cloud cover (safe defaults)."
+    mode: single
+    trigger: []     # run manually from UI
+    variables:
+      cloud_cover: "{{ states('sensor.openweathermap_cloud_coverage') | int(50) }}"
+      calc_pct: >
+        {% set pct = 100 - (cloud_cover * 0.6) %}
+        {{ [10, [pct|round(0), 100]|min]|max }}
+    action:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.front_porch_lights
+            - light.light_garage_left
+            - light.light_garage_center
+            - light.light_garage_right
+        data:
+          brightness_pct: "{{ calc_pct }}"
+          transition: 2
+      - if:
+          - condition: template
+            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+        then:
+          - service: light.turn_on
+            target:
+              entity_id: light.permanent_outdoor_lights
+            data:
+              brightness_pct: "{{ calc_pct }}"
+              transition: 2
+            continue_on_error: true
+      - service: logbook.log
+        data:
+          name: Huskers Debug
+          message: "Exterior brightness test → {{ calc_pct }}% (cloud: {{ cloud_cover }}%)"
+
+  - id: huskers_debug_scene_activated
+    alias: "[Huskers Debug] Scene activated"
+    description: "Turn on a test scene if it exists; otherwise just logs."
+    mode: single
+    trigger: []
+    variables:
+      test_scene: "scene.huskers_seven_all_scarlet"  # existing scene in this package
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(test_scene) }}"
+            sequence:
+              - service: scene.turn_on
+                target: {entity_id: "{{ test_scene }}"}
+              - service: logbook.log
+                data: {name: Huskers Debug, message: "Scene turned on: {{ test_scene }}"}
+        default:
+          - service: logbook.log
+            data: {name: Huskers Debug, message: "Scene not found: {{ test_scene }} (skipped)"}
+
+  - id: huskers_debug_script_start
+    alias: "[Huskers Debug] Script start"
+    description: "Kick off a Huskers start script if present."
+    mode: single
+    trigger: []
+    variables:
+      start_script: "script.huskers_chase30_start"
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(start_script) }}"
+            sequence:
+              - service: script.turn_on
+                target: {entity_id: "{{ start_script }}"}
+              - service: logbook.log
+                data: {name: Huskers Debug, message: "Started script: {{ start_script }}"}
+        default:
+          - service: logbook.log
+            data: {name: Huskers Debug, message: "Script not found: {{ start_script }} (skipped)"}
+
+  - id: huskers_debug_script_stop
+    alias: "[Huskers Debug] Script stop"
+    description: "Stop any running Huskers loop scripts (guarded)."
+    mode: single
+    trigger: []
+    variables:
+      loops:
+        - script.huskers_chase30_loop
+        - script.huskers_chase_speed_loop
+    action:
+      - repeat:
+          for_each: "{{ loops }}"
+          sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ has_value(repeat.item) }}"
+              then:
+                - service: script.turn_off
+                  target: {entity_id: "{{ repeat.item }}"}
+                - service: logbook.log
+                  data: {name: Huskers Debug, message: "Stopped {{ repeat.item }}"}
+      - service: logbook.log
+        data: {name: Huskers Debug, message: "Loop-stop sweep completed"}
+
+  - id: huskers_debug_theater_color_change
+    alias: "[Huskers Debug] Theater color change"
+    description: "Flash theater lights through a quick warm→cool test; guarded."
+    mode: single
+    trigger: []
+    variables:
+      test_ct: 370          # ≈2700K
+      test_brightness: 60
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value('light.theater_lights') }}"
+            sequence:
+              - service: light.turn_on
+                target: {entity_id: light.theater_lights}
+                data: {brightness_pct: "{{ test_brightness }}", color_temp: "{{ test_ct }}", transition: 1}
+              - delay: "00:00:02"
+              - service: light.turn_on
+                target: {entity_id: light.theater_lights}
+                data: {brightness_pct: 30, color_temp: 454, transition: 1}
+              - service: logbook.log
+                data: {name: Huskers Debug, message: "Theater color debug complete"}
+        default:
+          - service: logbook.log
+            data: {name: Huskers Debug, message: "Theater lights entity not found (skipped)"}
+
 # packages/huskers_everything.yaml
 # …your existing content above…
 

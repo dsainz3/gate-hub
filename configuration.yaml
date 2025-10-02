@@ -65,15 +65,42 @@ logger:
     homeassistant.components.script: debug
 
 lovelace:
+  mode: yaml
   resources:
+    # Mushroom
     - url: /hacsfiles/lovelace-mushroom/mushroom.js
       type: module
+
+    # Layout card (needs BOTH files)
     - url: /hacsfiles/lovelace-layout-card/layout-card.js
       type: module
+    - url: /hacsfiles/lovelace-layout-card/grid-layout.js
+      type: module
+
+    # Auto-entities
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
       type: module
+
+    # ApexCharts
     - url: /hacsfiles/apexcharts-card/apexcharts-card.js
       type: module
+
+    # Hue-like Light Card
+    - url: /hacsfiles/lovelace-hue-like-light-card/hue-like-light-card.js
+      type: module
+
+    # Compact Light Card (already loading per your console)
+    - url: /hacsfiles/compact-light-card/compact-light-card.js
+      type: module
+
+    # Extended Gauge  ⟵ folder is "extended-gauge". One of these filenames will exist:
+    - url: /hacsfiles/extended-gauge/extended-gauge.js
+      type: module
+    # If you still get a 404 for the line above, comment it out and try this one instead:
+    # - url: /hacsfiles/extended-gauge/extended-gauge-card.js
+    #   type: module
+
+
   dashboards:
     huskers-teamtracker:
       mode: yaml
@@ -81,19 +108,20 @@ lovelace:
       icon: mdi:scoreboard-outline
       show_in_sidebar: true
       filename: dashboards/huskers-teamtracker.yaml
+
     f1-scheduler:
       mode: yaml
       title: F1
       icon: mdi:racing-helmet
       show_in_sidebar: true
       filename: dashboards/f1-dashboard.yaml
+
     weather-dashboard:
       mode: yaml
       filename: dashboards/weather-dashboard.yaml
       title: Weather Package
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
-      # require_admin: false
 
     kiosk-dashboard:
       mode: yaml
@@ -115,3 +143,11 @@ lovelace:
       title: F1
       icon: mdi:racing-helmet
       show_in_sidebar: true
+
+    # ✅ Test dashboard to verify custom card resources load
+    test-resources:
+      mode: yaml
+      title: Test Resources
+      icon: mdi:test-tube
+      show_in_sidebar: true
+      filename: dashboards/test-resources.yaml

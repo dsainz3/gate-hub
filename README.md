@@ -24,7 +24,7 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 ## Key Highlights
 
 - Modular `packages/` layout keeps automations, helpers, and dashboards scoped by feature.
-- Lovelace dashboards are YAML-driven and stored in the repo so UI state matches commits.
+- Lovelace dashboards are YAML-driven and stored in the repo so UI state matches commits; the kiosk dashboard now relies exclusively on built-in cards for zero-dependency deployments.
 - Custom Huskers theme in `themes.yaml` exposes `--huskers-*` variables for consistent Scarlet & Cream styling across dashboards.
 - Pre-commit and GitHub Actions enforce formatting, linting, and Home Assistant config checks.
 - Helper scripts normalise secrets and run containerised validation for local or CI usage.
@@ -127,6 +127,7 @@ The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant
 - **Rooms & Areas:** light, climate, and occupancy controls by space.
 - **Networking & System:** Deco mesh insight, supervisor health, backup status.
 - **Weather:** AccuWeather + Wunderground summaries, forecasts, and warnings.
+- **Kiosk:** wall-mounted interface that exposes lighting, automations, humidor, and sprinkler controls with stock tile/button cards.
 
 Each dashboard is defined under `dashboards/` and registered in `configuration.yaml` for deterministic UI state.
 
@@ -162,7 +163,7 @@ All supporting docs live under `docs/`:
 - Enhance Huskers dashboards with standings, records, and auto-updating schedules.
 - Add local AI/LLM helpers to scaffold automations from entity state snapshots.
 - Strengthen backup, watchdog, and security alerting coverage.
-- Build a kiosk package for secure shared displays with limited controls.
+- Continue iterating on the kiosk package with presence-aware views and guest-friendly shortcuts.
 
 ---
 
