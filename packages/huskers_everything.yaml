@@ -71,7 +71,21 @@ rest:
         availability: >-
           {{ value_json is defined }}
 
-  - resource: 'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?group=4'
+  - resource_template: >-
+      {% set season = state_attr('sensor.espn_nebraska_schedule', 'requestedSeason') %}
+      {% if season is mapping %}
+        {% set season_year = season['year'] if 'year' in season else now().year %}
+        {% set season_type = season['type'] if 'type' in season else 2 %}
+      {% else %}
+        {% set season_year = now().year %}
+        {% set season_type = 2 %}
+      {% endif %}
+      {% set current_year = now().year %}
+      {% set adjusted_year = season_year if season_year <= current_year else current_year %}
+      {% if adjusted_year == current_year and now().month < 6 %}
+        {% set adjusted_year = adjusted_year - 1 %}
+      {% endif %}
+      https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/seasons/{{ adjusted_year }}/types/{{ season_type }}/groups/5/standings/0?lang=en&region=us
     method: GET
     scan_interval: 1800
     timeout: 30
@@ -79,15 +93,14 @@ rest:
       - name: espn_big_ten_teams
         unique_id: espn_big_ten_teams
         value_template: >-
-          {% if value_json is defined and value_json.sports is defined and value_json.sports|length > 0
-                and value_json.sports[0].leagues is defined and value_json.sports[0].leagues|length > 0
-                and value_json.sports[0].leagues[0].teams is defined %}
-            {{ value_json.sports[0].leagues[0].teams | length }}
+          {% if value_json is defined and value_json.standings is defined %}
+            {{ value_json.standings | length }}
           {% else %}0{% endif %}
         json_attributes:
-          - sports
+          - standings
+          - displayName
         availability: >-
-          {{ value_json is defined }}
+          {{ value_json is defined and value_json.standings is defined and value_json.standings | length > 0 }}
 
 ################################################################################
 # HELPERS
@@ -914,42 +927,85 @@ template:
         unique_id: big_ten_standings_espn
         icon: mdi:trophy
         state: >-
-          {% set entries = state_attr('sensor.espn_big_ten_teams', 'entries') or [] %}
-          {% if entries %}
-            {{ entries | length }} teams
+          {% set standings = state_attr('sensor.espn_big_ten_teams', 'standings') or [] %}
+          {% if standings %}
+            {{ standings | length }} teams
           {% else %}
             unavailable
           {% endif %}
         attributes:
           markdown: >-
-            {% set entries = state_attr('sensor.espn_big_ten_teams', 'entries') or [] %}
-            {% set season = state_attr('sensor.espn_big_ten_teams', 'seasonDisplayName') or now().year %}
-            {% if entries %}
-              ## Big Ten Standings ({{ season }})
-              | Rank | Team | Overall | Conf | Streak |
-              | --- | --- | --- | --- | --- |
+            {% set standings = state_attr('sensor.espn_big_ten_teams', 'standings') or [] %}
+            {% set season_meta = state_attr('sensor.espn_nebraska_schedule', 'requestedSeason') %}
+            {% if season_meta is mapping and 'year' in season_meta %}
+              {% set season_year = season_meta['year'] %}
+            {% else %}
+              {% set season_year = now().year %}
+            {% endif %}
+            {% if now().month < 6 %}
+              {% set season_year = season_year - 1 %}
+            {% endif %}
+            {% set team_names = {
+              '2483': 'Oregon Ducks',
+              '84': 'Indiana Hoosiers',
+              '213': 'Penn State Nittany Lions',
+              '194': 'Ohio State Buckeyes',
+              '356': 'Illinois Fighting Illini',
+              '2294': 'Iowa Hawkeyes',
+              '130': 'Michigan Wolverines',
+              '135': 'Minnesota Golden Gophers',
+              '164': 'Rutgers Scarlet Knights',
+              '264': 'Washington Huskies',
+              '30': 'USC Trojans',
+              '158': 'Nebraska Cornhuskers',
+              '26': 'UCLA Bruins',
+              '127': 'Michigan State Spartans',
+              '275': 'Wisconsin Badgers',
+              '77': 'Northwestern Wildcats',
+              '120': 'Maryland Terrapins',
+              '2509': 'Purdue Boilermakers'
+            } %}
+            {% if standings %}
               {% set ns = namespace(rows=[]) %}
-              {%- for entry in entries %}
-                {% set team = entry.get('team', {}) %}
-                {% set stats = entry.get('stats', []) %}
-                {% set wins_stat = (stats | selectattr('name','equalto','wins') | list | first) %}
-                {% set losses_stat = (stats | selectattr('name','equalto','losses') | list | first) %}
-                {% set overall_stat = (stats | selectattr('name','equalto','overall') | list | first) %}
-                {% set conf_stat = (stats | selectattr('name','equalto','vs. Conf.') | list | first) %}
-                {% set streak_stat = (stats | selectattr('name','equalto','streak') | list | first) %}
-                {% set row = {
-                  'team': team.get('displayName', 'Unknown'),
-                  'wins': wins_stat.value | default(0, true) if wins_stat is defined else 0,
-                  'losses': losses_stat.value | default(0, true) if losses_stat is defined else 0,
-                  'overall': overall_stat.displayValue | default('0-0', true) if overall_stat is defined else '0-0',
-                  'conf': conf_stat.displayValue | default('0-0', true) if conf_stat is defined else '0-0',
-                  'streak': streak_stat.displayValue | default('-', true) if streak_stat is defined else '-'
-                } %}
-                {% set ns.rows = ns.rows + [row] %}
+              {%- for entry in standings %}
+                {% set team_ref = entry.team['$ref'] if entry.team is mapping and '$ref' in entry.team else '' %}
+                {% set team_href = team_ref.split('?')[0] if team_ref else '' %}
+                {% set team_id = team_href.rsplit('/', 1)[-1] if team_href else '' %}
+                {% set overall_record = (entry.records | selectattr('name','equalto','overall') | list | first) if entry.records is defined else none %}
+                {% set conf_record = (entry.records | selectattr('name','equalto','vs. Conf.') | list | first) if entry.records is defined else none %}
+                {% set overall_text = '-' %}
+                {% if overall_record is mapping %}
+                  {% if overall_record.summary is defined %}
+                    {% set overall_text = overall_record.summary %}
+                  {% elif overall_record.displayValue is defined %}
+                    {% set overall_text = overall_record.displayValue %}
+                  {% endif %}
+                {% endif %}
+                {% set conf_text = '-' %}
+                {% if conf_record is mapping %}
+                  {% if conf_record.summary is defined %}
+                    {% set conf_text = conf_record.summary %}
+                  {% elif conf_record.displayValue is defined %}
+                    {% set conf_text = conf_record.displayValue %}
+                  {% endif %}
+                {% endif %}
+                {% set parts = overall_text.split('-') if overall_text not in ['-', ''] else [] %}
+                {% set wins = parts[0] | int(0) if parts | length > 0 else 0 %}
+                {% set losses = parts[1] | int(0) if parts | length > 1 else 0 %}
+                {% set ns.rows = ns.rows + [{
+                  'team': team_names.get(team_id, 'Team ' ~ team_id),
+                  'overall': overall_text,
+                  'conf': conf_text,
+                  'wins': wins,
+                  'losses': losses
+                }] %}
               {%- endfor %}
               {% set rows = ns.rows | sort(attribute='losses') | sort(attribute='wins', reverse=True) %}
+              ## Big Ten Standings ({{ season_year }})
+              | Rank | Team | Overall | Conf |
+              | --- | --- | --- | --- |
               {%- for row in rows %}
-              | {{ loop.index }} | {{ row.team }} | {{ row.overall }} | {{ row.conf }} | {{ row.streak }} |
+              | {{ loop.index }} | {{ row.team }} | {{ row.overall }} | {{ row.conf }} |
               {%- endfor %}
             {% else %}
               Big Ten standings unavailable

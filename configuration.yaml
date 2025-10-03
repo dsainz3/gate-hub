@@ -104,6 +104,10 @@ lovelace:
     - url: /hacsfiles/lovelace-auto-entities/auto-entities.js
       type: module
 
+    # TeamTracker Card
+    - url: /hacsfiles/teamtracker-card/ha-teamtracker-card.js
+      type: module
+
     # ApexCharts
     - url: /hacsfiles/apexcharts-card/apexcharts-card.js
       type: module

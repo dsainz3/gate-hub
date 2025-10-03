@@ -3,7 +3,7 @@ title: Husker LED MQTT Controls
 summary: Deploy and operate the Husker LED scripts that drive permanent outdoor lighting via MQTT.
 status: active
 category: how-to
-updated: 2025-09-27
+updated: 2025-10-06
 owner: huskers-team
 tags:
   - mqtt
@@ -36,7 +36,7 @@ This guide explains how to deploy the Husker LED scripts that coordinate the per
 - `script.husker_led_start` — pushes the scarlet & cream theme via MQTT.
 - `script.husker_led_stop` — stops the show and re-applies the monthly effect using `automation.exterior_led_monthly_effect`.
 
-Use these scripts from the [Husker dashboards](../huskers/dashboard.md) or via service calls.
+Use these scripts from the [Husker dashboards](../huskers/dashboard.md)—the **Lighting & Scenes** view surfaces the key scripts and automations—or via direct service calls.
 
 ## Manual Invocation
 Trigger from Developer Tools → Services:

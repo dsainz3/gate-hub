@@ -26,6 +26,7 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 - Modular `packages/` layout keeps automations, helpers, and dashboards scoped by feature.
 - Lovelace dashboards are YAML-driven and stored in the repo so UI state matches commits; the kiosk dashboard now relies exclusively on built-in cards for zero-dependency deployments.
 - Custom Huskers theme in `themes.yaml` exposes `--huskers-*` variables for consistent Scarlet & Cream styling across dashboards.
+- Huskers Game Day board blends the TeamTracker card, manual override-aware countdowns, and Big Ten standings sourced from ESPN's Core API.
 - Pre-commit and GitHub Actions enforce formatting, linting, and Home Assistant config checks.
 - Helper scripts normalise secrets and run containerised validation for local or CI usage.
 - Documentation under `docs/` captures infrastructure, add-ons, ADRs, and package notes.
@@ -123,7 +124,7 @@ The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant
 
 ## Dashboards
 
-- **Huskers Game Day:** multi-view board for live status, debug, and LED testing.
+- **Huskers Game Day:** Game Day, Team & Data, and Lighting views featuring the TeamTracker hero card, color-chip profiles, manual override-aware countdowns, and Big Ten standings markdown.
 - **Rooms & Areas:** light, climate, and occupancy controls by space.
 - **Networking & System:** Deco mesh insight, supervisor health, backup status.
 - **Weather:** AccuWeather + Wunderground summaries, forecasts, and warnings.
@@ -149,9 +150,11 @@ Each dashboard is defined under `dashboards/` and registered in `configuration.y
 All supporting docs live under `docs/`:
 
 - `docs/index.md` – navigation hub for tooling, ADRs, and guides.
+- `docs/how-to/huskers/dashboard.md` – operating the refreshed Huskers Game Day board (TeamTracker card, color chips, countdown overrides).
+- `docs/how-to/lighting/husker-led-mqtt.md` – scripts and MQTT details for exterior light shows.
+- `docs/explanation/huskers-dashboard-history.md` – rationale behind the consolidation and 2025 refresh (Core API standings, auto-entities scene list).
 - `docs/ci.md` – CI pipeline reference and troubleshooting notes.
 - `docs/pre-commit.md` – local hook usage and hook descriptions.
-- `docs/husker_package/` – in-depth Huskers automation and dashboard guides.
 
 ---
 
