@@ -24,6 +24,34 @@ views:
               ## Snapshot Overview
               Quick status tiles using core kiosk sensors.
 
+          - type: markdown
+            content: |
+              ### Sanitation Schedule
+              {% set trash = states('sensor.kiosk_trash_pickup') %}
+              {% set trash_day = state_attr('sensor.kiosk_trash_pickup', 'pickup_weekday') %}
+              {% set recycle = states('sensor.kiosk_recycling_pickup') %}
+              {% set recycle_day = state_attr('sensor.kiosk_recycling_pickup', 'pickup_weekday') %}
+              {% set trash_valid = trash not in ['unknown', 'unavailable', '', none] %}
+              {% set trash_day_valid = trash_day not in ['unknown', 'unavailable', '', none] %}
+              {% set recycle_valid = recycle not in ['unknown', 'unavailable', '', none] %}
+              {% set recycle_day_valid = recycle_day not in ['unknown', 'unavailable', '', none] %}
+              {% set trash_display = 'Pending…' %}
+              {% set recycle_display = 'Pending…' %}
+              {% if trash_valid %}
+                {% set trash_display = trash %}
+                {% if trash_day_valid %}
+                  {% set trash_display = trash_display ~ ' (' ~ trash_day ~ ')' %}
+                {% endif %}
+              {% endif %}
+              {% if recycle_valid %}
+                {% set recycle_display = recycle %}
+                {% if recycle_day_valid %}
+                  {% set recycle_display = recycle_display ~ ' (' ~ recycle_day ~ ')' %}
+                {% endif %}
+              {% endif %}
+              - **Trash:** {{ trash_display }}
+              - **Recycling:** {{ recycle_display }}
+
           - type: grid
             columns: 3
             square: false

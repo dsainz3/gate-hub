@@ -97,7 +97,4 @@
       hours: 1
     precision: 2
 # Repository TODO tracker
-  - platform: command_line
-    name: Todo Repo Tracker
-    command: 'cat /config/TODO.md'
-    scan_interval: 120
+  # Command line sensors moved to configuration.yaml under command_line:
