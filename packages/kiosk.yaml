@@ -381,6 +381,81 @@ template:
           {% set h = states('sensor.hygrometer_humidor_humidity') | float(0) %}
           {{ 100 if (68 <= t <= 72 and 62 <= h <= 68) else 0 }}
 
+      - name: kiosk_trash_pickup
+        unique_id: kiosk_trash_pickup
+        icon: mdi:trash-can
+        state: >-
+          {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+          {% set next_pickup = data.get('next_pickup') %}
+          {{ next_pickup if next_pickup else 'unknown' }}
+        attributes:
+          pickup_weekday: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+            {{ data.get('next_pickup_weekday', 'unknown') }}
+          pickup_scheduled: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+            {{ data.get('next_pickup_scheduled', 'unknown') }}
+          days_until: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+            {% if data.get('days_until') is not none %}{{ data.get('days_until') }}{% else %}unknown{% endif %}
+          holiday_delay: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+            {{ data.get('holiday_delay', False) }}
+          holiday_reason: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'trash') or {}) %}
+            {{ data.get('holiday_reason') or 'none' }}
+
+      - name: kiosk_recycling_pickup
+        unique_id: kiosk_recycling_pickup
+        icon: mdi:recycle
+        state: >-
+          {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+          {% set next_pickup = data.get('next_pickup') %}
+          {{ next_pickup if next_pickup else 'unknown' }}
+        attributes:
+          pickup_weekday: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+            {{ data.get('next_pickup_weekday', 'unknown') }}
+          pickup_scheduled: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+            {{ data.get('next_pickup_scheduled', 'unknown') }}
+          days_until: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+            {% if data.get('days_until') is not none %}{{ data.get('days_until') }}{% else %}unknown{% endif %}
+          holiday_delay: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+            {{ data.get('holiday_delay', False) }}
+          holiday_reason: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'recycling') or {}) %}
+            {{ data.get('holiday_reason') or 'none' }}
+
+      - name: kiosk_yard_waste_pickup
+        unique_id: kiosk_yard_waste_pickup
+        icon: mdi:tree
+        state: >-
+          {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+          {% set next_pickup = data.get('next_pickup') %}
+          {{ next_pickup if next_pickup else 'offseason' }}
+        attributes:
+          season_active: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('season_active', False) }}
+          season_window: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('season_start') }} -> {{ data.get('season_end') }}
+          next_season: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('next_season_start') }} -> {{ data.get('next_season_end') }}
+          days_until: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {% if data.get('days_until') is not none %}{{ data.get('days_until') }}{% else %}unknown{% endif %}
+          holiday_delay: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('holiday_delay', False) }}
+          holiday_reason: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('holiday_reason') or 'none' }}
+
   - binary_sensor:
       - name: kiosk_snapshot_automation_issue
         unique_id: kiosk_snapshot_automation_issue
@@ -406,6 +481,53 @@ template:
           {% set t = states('sensor.hygrometer_humidor_temperature')|float(0) %}
           {% set h = states('sensor.hygrometer_humidor_humidity')|float(0) %}
           {{ not (68 <= t <= 72 and 62 <= h <= 68) }}
+
+      - name: kiosk_sanitation_feed_ok
+        unique_id: kiosk_sanitation_feed_ok
+        device_class: connectivity
+        state: >-
+          {% set status = states('sensor.gretna_sanitation_schedule') %}
+          {% set generated = state_attr('sensor.gretna_sanitation_schedule', 'generated_at') %}
+          {% if status == 'ok' and generated %}
+            {% set gen_dt = as_datetime(generated) %}
+            {% if gen_dt %}
+              {{ (now() - gen_dt).total_seconds() < 43200 }}
+            {% else %}
+              false
+            {% endif %}
+          {% else %}
+            false
+          {% endif %}
+        attributes:
+          last_success: >-
+            {{ state_attr('sensor.gretna_sanitation_schedule', 'generated_at') or 'unknown' }}
+          reference_date: >-
+            {{ state_attr('sensor.gretna_sanitation_schedule', 'reference_date') or 'unknown' }}
+          age_hours: >-
+            {% set generated = state_attr('sensor.gretna_sanitation_schedule', 'generated_at') %}
+            {% if generated %}
+              {% set gen_dt = as_datetime(generated) %}
+              {% if gen_dt %}
+                {{ ((now() - gen_dt).total_seconds() / 3600) | round(1) }}
+              {% else %}
+                unknown
+              {% endif %}
+            {% else %}
+              unknown
+            {% endif %}
+
+      - name: kiosk_yard_waste_in_season
+        unique_id: kiosk_yard_waste_in_season
+        state: >-
+          {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+          {{ data.get('season_active', False) }}
+        attributes:
+          season_window: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('season_start') }} -> {{ data.get('season_end') }}
+          next_season: >-
+            {% set data = (state_attr('sensor.gretna_sanitation_schedule', 'yard_waste') or {}) %}
+            {{ data.get('next_season_start') }} -> {{ data.get('next_season_end') }}
 
 ###############################################################################
 # KIOSK MEASUREMENTS & TRENDS

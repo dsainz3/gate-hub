@@ -10,6 +10,7 @@ nav:
       - Govee2MQTT Add-on: docs/how-to/addons/govee2mqtt.md
       - Huskers Dashboard Guide: docs/how-to/huskers/dashboard.md
       - Husker LED MQTT Controls: docs/how-to/lighting/husker-led-mqtt.md
+      - Kiosk Sanitation Schedule: docs/how-to/kiosk/sanitation-schedule.md
   - Reference:
       - Documentation Style Guide: docs/README.md
       - Automation Catalog: docs/reference/automations.md

@@ -63,6 +63,29 @@ logger:
     homeassistant.components.input_number: debug
     homeassistant.components.input_text: debug
     homeassistant.components.script: debug
+    homeassistant.components.command_line: debug
+    homeassistant.components.command_line.sensor: debug
+
+command_line:
+  - sensor:
+      name: Todo Repo Tracker
+      unique_id: todo_repo_tracker
+      command: "cat /config/TODO.md"
+      scan_interval: 120
+
+  - sensor:
+      name: Gretna Sanitation Schedule
+      unique_id: kiosk_gretna_sanitation_schedule
+      command: "/config/scripts/gretna_sanitation.py"
+      scan_interval: 21600
+      value_template: "{{ value_json.status | default('error') }}"
+      json_attributes:
+        - generated_at
+        - reference_date
+        - trash
+        - recycling
+        - yard_waste
+        - metadata
 
 lovelace:
   mode: yaml
