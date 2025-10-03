@@ -3,7 +3,7 @@ title: Automation Catalog
 summary: Authoritative list of automations with triggers, guards, and actions for the gate-hub Home Assistant deployment.
 status: active
 category: reference
-updated: 2025-09-27
+updated: 2025-10-06
 owner: automation-team
 tags:
   - home-assistant
@@ -77,7 +77,7 @@ Use this catalog as the single source of truth for automation behaviour. Each en
 
 ## Huskers Package (`packages/huskers_everything.yaml`)
 
-These automations pair with the [Husker Dashboard Guide](../how-to/huskers/dashboard.md) and Huskers LED scripts.
+These automations pair with the [Husker Dashboard Guide](../how-to/huskers/dashboard.md) and Huskers LED scripts. ESPN data is sourced via the TeamTracker integration and the REST sensors defined in `packages/huskers_everything.yaml` (including the Core API standings endpoint).
 
 ### Huskers: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
 - **ID** `huskers_game_mode_enable_window`
