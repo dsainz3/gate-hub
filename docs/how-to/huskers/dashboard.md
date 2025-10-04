@@ -3,7 +3,7 @@ title: Huskers Dashboard Guide
 summary: Configure and operate the Huskers-focused Lovelace dashboards.
 status: active
 category: how-to
-updated: 2025-10-06
+updated: 2025-10-09
 owner: huskers-team
 tags:
   - lovelace
@@ -23,7 +23,7 @@ This guide documents the Huskers dashboards delivered in `dashboards/huskers-tea
     type: module
   ```
 - **ESPN REST sensors** from `packages/huskers_everything.yaml`, including the Big Ten standings endpoint (`sports.core.api.espn.com/.../groups/5/standings/0`).
-- Apply the `Huskers Cream` theme (defined in `themes.yaml`) so custom CSS vars (e.g., `--huskers-scoreboard-border`) resolve correctly.
+- Apply the `Huskers Cream` theme (defined in `themes.yaml`) so custom Huskers CSS variables resolve correctly.
 
 Reload themes after deployment via **Developer Tools → YAML → Reload themes** so the custom color variables are available.
 
@@ -36,13 +36,15 @@ Highlights
 - **TeamTracker hero card** summarising clock, score, probability, and win/loss context.
 - **Quick actions** to refresh ESPN endpoints (`sensor.husker_team`, `sensor.espn_cfb_scoreboard`, `sensor.espn_nebraska_schedule`).
 - **Lighting macros**: start 30 s chase, trigger Hail Varsity burst, revert to the all-scarlet scene.
-- **Markdown scoreboard** styled with Huskers palette variables; uses `sensor.husker_team` attributes for opponent logos, win probability, possession, and status text.
 - **Game Essentials** card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from `input_boolean.huskers_use_manual_score`/`input_boolean.huskers_use_manual_kickoff`.
-- **Situation + Hype**: down-and-distance, last play, baseball-style metrics (used for baseball/volleyball seasons) and `sensor.huskers_hype_message` for dynamic rally text.
+- **Tailgate Countdown** markdown wrapped in `binary_sensor.huskers_tailgate_window` so it only renders 24 h before kickoff through 30 min post-game.
+- **In-Game Situation** markdown gated by `binary_sensor.huskers_is_live_espn`, focused on football context (clock, down/distance, drive, timeouts, win probability).
 
 Usage Notes
 - Manual kickoffs propagate through `sensor.huskers_kickoff_in_effective`; the countdown card automatically respects `input_boolean.huskers_use_manual_kickoff` and `input_number.huskers_kickoff_in_manual`.
-- Score overrides live in `input_number.huskers_our_score_manual` and `sensor.huskers_our_score_effective` and are reflected in both the TeamTracker card and the markdown scoreboard.
+- `binary_sensor.huskers_tailgate_window` evaluates the kickoff timestamp, live/post-game states, and post-game runout to decide when the countdown card is shown.
+- Score overrides live in `input_number.huskers_our_score_manual` and `sensor.huskers_our_score_effective` and are reflected in the TeamTracker card.
+- The in-game card hides outside live phases; confirm `binary_sensor.huskers_is_live_espn` before troubleshooting missing data.
 
 ### 2. Team & Data (`/husker-team-data`)
 Purpose: Operator view for stats, standings, and sensor health.
@@ -53,7 +55,7 @@ Highlights
 - **Series summary** placeholder driven by `sensor.husker_team` attributes when ESPN provides historical matchup text.
 - **Raw sensor reference** using entity rows for `sensor.husker_team` attributes; helps validate that the TeamTracker integration is populating data.
 - **Big Ten standings markdown card** built from the new ESPN Core API feed (`sports.core.api.espn.com/v2/.../groups/5/standings/0`). Each row displays overall and conference records in a markdown table.
-- **Tailgate countdown** uses the effective kickoff helper to stay aligned with manual overrides.
+- **Tailgate countdown** uses the effective kickoff helper and is only visible while `binary_sensor.huskers_tailgate_window` is `on`.
 
 Usage Notes
 - When colors are missing from ESPN data, fallback Scarlet & Cream palette values populate the color chips.
@@ -79,6 +81,7 @@ Usage Notes
 ## Troubleshooting
 - If the TeamTracker card fails to load, verify the resource URL (`/hacsfiles/teamtracker-card/ha-teamtracker-card.js`) and clear the Lovelace cache (refresh with Ctrl+Shift+R).
 - Missing logos or color swatches often mean ESPN returned `None`; check Home Assistant logs for REST errors and rerun the refresh buttons.
+- If the countdown never shows, verify `binary_sensor.huskers_tailgate_window` (should turn on 24 h pre-kickoff) and ensure `sensor.husker_team` carries a valid `date` attribute.
 - Incorrect kickoff countdown usually points to the manual override toggles—confirm `input_boolean.huskers_use_manual_kickoff` is set as expected.
 
 ## Related Documentation
