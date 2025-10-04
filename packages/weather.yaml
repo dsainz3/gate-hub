@@ -1,3 +1,6 @@
+# packages/weather.yaml
+# Weather dashboard helpers, sensors, and groups.
+
 input_boolean:
   weather_notifications_enabled:
     name: Weather Notifications Enabled

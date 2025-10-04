@@ -1,7 +1,7 @@
 title: Weather Dashboard
 views:
   - title: Overview
-    path: weather-overview
+    path: weather
     icon: mdi:weather-partly-cloudy
     badges: []
     cards:

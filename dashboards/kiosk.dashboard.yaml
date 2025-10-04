@@ -1,10 +1,10 @@
-title: Kiosk
+title: Kiosk Dashboard
 views:
   ###########################################################################
   # 1) SNAPSHOT — high-level overview with built-in cards
   ###########################################################################
   - title: Snapshot
-    path: snapshot
+    path: kiosk
     icon: mdi:view-dashboard
     badges:
       - entity: sensor.kiosk_snapshot_lights_on

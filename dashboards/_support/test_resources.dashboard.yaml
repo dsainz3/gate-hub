@@ -1,7 +1,7 @@
-title: Test Resources
+title: Support · Test Resources
 views:
   - title: Test
-    path: test
+    path: support-test
     cards:
       - type: custom:layout-card
         layout_type: custom:grid-layout

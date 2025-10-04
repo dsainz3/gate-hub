@@ -1,4 +1,4 @@
-# packages/huskers_everything.yaml
+# packages/huskers.yaml
 # Single-package setup for Nebraska Huskers:
 # - ESPN REST endpoints (raw data)
 # - Template sensors (schedule/status/scores/record/standings/kickoff)

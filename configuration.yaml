@@ -129,53 +129,51 @@ lovelace:
 
 
   dashboards:
-    huskers-teamtracker:
+    f1-dashboard:
       mode: yaml
-      title: Huskers Team Tracker
-      icon: mdi:scoreboard-outline
-      show_in_sidebar: true
-      filename: dashboards/huskers-teamtracker.yaml
-
-    f1-scheduler:
-      mode: yaml
-      title: F1
+      title: F1 Dashboard
       icon: mdi:racing-helmet
       show_in_sidebar: true
-      filename: dashboards/f1-dashboard.yaml
+      filename: dashboards/f1.dashboard.yaml
+
+    huskers-dashboard:
+      mode: yaml
+      title: Huskers Dashboard
+      icon: mdi:scoreboard-outline
+      show_in_sidebar: true
+      filename: dashboards/huskers.dashboard.yaml
 
     weather-dashboard:
       mode: yaml
-      filename: dashboards/weather-dashboard.yaml
-      title: Weather Package
+      title: Weather Dashboard
       icon: mdi:weather-partly-cloudy
       show_in_sidebar: true
+      filename: dashboards/weather.dashboard.yaml
 
     kiosk-dashboard:
       mode: yaml
-      filename: dashboards/kiosk-dashboard.yaml
-      title: Kiosk Package
+      title: Kiosk Dashboard
       icon: mdi:monitor-dashboard
       show_in_sidebar: true
+      filename: dashboards/kiosk.dashboard.yaml
 
     network-dashboard:
       mode: yaml
-      filename: dashboards/network-dashboard.yaml
-      title: Network Monitor
+      title: Network Dashboard
       icon: mdi:access-point-network
       show_in_sidebar: true
+      filename: dashboards/network.dashboard.yaml
 
-    # ✅ Test dashboard to verify custom card resources load
-    test-resources:
-      mode: yaml
-      title: Test Resources
-      icon: mdi:test-tube
-      show_in_sidebar: true
-      filename: dashboards/test-resources.yaml
-
-    # Holiday lighting dashboard (only used seasonally)
-    holiday-lighting:
+    holiday-dashboard:
       mode: yaml
       title: Holiday Dashboard
       icon: mdi:christmas-light
       show_in_sidebar: true
-      filename: dashboards/holiday-dashboard.yaml
+      filename: dashboards/holiday.dashboard.yaml
+
+    support-test-dashboard:
+      mode: yaml
+      title: Support · Test Resources
+      icon: mdi:test-tube
+      show_in_sidebar: true
+      filename: dashboards/_support/test_resources.dashboard.yaml
