@@ -1,0 +1,1583 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+
+        <meta name="description" content="Hypermodern documentation for the gate-hub Home Assistant deployment.">
+
+
+
+
+        <link rel="prev" href="../../lighting/govee-lighting-stack/">
+
+
+        <link rel="next" href="../../lighting/husker-led-mqtt/">
+
+
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+
+
+
+        <title>Huskers Dashboard Guide - gate-hub Documentation</title>
+
+
+
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2a3383ac.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+
+
+
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+
+
+
+
+
+
+  </head>
+
+
+    <body dir="ltr">
+
+
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+
+
+        <a href="#huskers-dashboard-guide" class="md-skip">
+          Skip to content
+        </a>
+
+    </div>
+    <div data-md-component="announce">
+
+    </div>
+
+
+
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="gate-hub Documentation" class="md-header__button md-logo" aria-label="gate-hub Documentation" data-md-component="logo">
+
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            gate-hub Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+
+              Huskers Dashboard Guide
+
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+
+
+
+
+
+        <label class="md-header__button md-icon" for="__search">
+
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+      <div class="md-header__source">
+        <a href="https://github.com/dsainz3/gate-hub" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+
+  </nav>
+
+</header>
+
+    <div class="md-container" data-md-component="container">
+
+
+
+
+
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+
+
+
+
+
+
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+
+
+
+
+
+  Home
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../ci/" class="md-tabs__link">
+
+
+
+  How-to Guides
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../reference/documentation-style-guide/" class="md-tabs__link">
+
+
+
+  Reference
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../explanation/optimization-plan/" class="md-tabs__link">
+
+
+
+  Explanation
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../archive/ai-automation-builder/" class="md-tabs__link">
+
+
+
+  Archive
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../adr/_template/" class="md-tabs__link">
+
+
+
+  ADRs
+
+        </a>
+      </li>
+
+
+
+
+    </ul>
+  </div>
+</nav>
+
+
+
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+
+
+
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+
+
+
+
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="gate-hub Documentation" class="md-nav__button md-logo" aria-label="gate-hub Documentation" data-md-component="logo">
+
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    gate-hub Documentation
+  </label>
+
+    <div class="md-nav__source">
+      <a href="https://github.com/dsainz3/gate-hub" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+
+  <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Home
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+
+
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+
+
+
+  <span class="md-ellipsis">
+    How-to Guides
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../ci/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    CI Pipeline Runbook
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../pre-commit/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Pre-commit Workflow
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../agenda-planner/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Agenda Planner Setup
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../f1/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    F1 Weekend Toolkit
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../addons/mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Mosquitto MQTT Add-on
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../addons/govee2mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Govee2MQTT Add-on
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../lighting/govee-lighting-stack/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Govee Lighting Stack
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--active">
+
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+
+
+
+
+
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+
+
+
+  <span class="md-ellipsis">
+    Huskers Dashboard Guide
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+
+      <a href="./" class="md-nav__link md-nav__link--active">
+
+
+
+  <span class="md-ellipsis">
+    Huskers Dashboard Guide
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+
+
+
+
+
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#views" class="md-nav__link">
+    <span class="md-ellipsis">
+      Views
+    </span>
+  </a>
+
+    <nav class="md-nav" aria-label="Views">
+      <ul class="md-nav__list">
+
+          <li class="md-nav__item">
+  <a href="#1-game-day-husker-game-day" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Game Day (/husker-game-day)
+    </span>
+  </a>
+
+</li>
+
+          <li class="md-nav__item">
+  <a href="#2-team-data-husker-team-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Team &amp; Data (/husker-team-data)
+    </span>
+  </a>
+
+</li>
+
+          <li class="md-nav__item">
+  <a href="#3-lighting-scenes-huskers-lighting" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Lighting &amp; Scenes (/huskers-lighting)
+    </span>
+  </a>
+
+</li>
+
+      </ul>
+    </nav>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#operations-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operations Checklist
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+
+</li>
+
+    </ul>
+
+</nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../lighting/husker-led-mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Husker LED MQTT Controls
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../kiosk/sanitation-schedule/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Kiosk Sanitation Schedule
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+
+
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Reference
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-style-guide/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Documentation Style Guide
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/automations/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Automation Catalog
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/holidays/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Holiday Mode Reference
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/agenda-planner/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Agenda Planner Reference
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/infrastructure/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Infrastructure Overview
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+
+
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Explanation
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/optimization-plan/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Optimization Plan
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/huskers-dashboard-history/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Huskers Dashboard History
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/pre-commit-strategy/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Pre-commit Quality Strategy
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+
+
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Archive
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Archive
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../archive/ai-automation-builder/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    AI Automation Builder (Archived)
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--archived"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+
+
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    ADRs
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../adr/_template/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Template
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+
+
+
+
+
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#views" class="md-nav__link">
+    <span class="md-ellipsis">
+      Views
+    </span>
+  </a>
+
+    <nav class="md-nav" aria-label="Views">
+      <ul class="md-nav__list">
+
+          <li class="md-nav__item">
+  <a href="#1-game-day-husker-game-day" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Game Day (/husker-game-day)
+    </span>
+  </a>
+
+</li>
+
+          <li class="md-nav__item">
+  <a href="#2-team-data-husker-team-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Team &amp; Data (/husker-team-data)
+    </span>
+  </a>
+
+</li>
+
+          <li class="md-nav__item">
+  <a href="#3-lighting-scenes-huskers-lighting" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Lighting &amp; Scenes (/huskers-lighting)
+    </span>
+  </a>
+
+</li>
+
+      </ul>
+    </nav>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#operations-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operations Checklist
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+
+</li>
+
+    </ul>
+
+</nav>
+                  </div>
+                </div>
+              </div>
+
+
+
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+
+
+
+
+
+
+
+
+<h1 id="huskers-dashboard-guide">Huskers Dashboard Guide<a class="headerlink" href="#huskers-dashboard-guide" title="Permanent link">&para;</a></h1>
+<p>This guide documents the Huskers dashboards delivered in <code>dashboards/huskers-teamtracker.yaml</code>. Pair it with the <a href="../../../reference/automations/">Automation Catalog</a> and <a href="../../lighting/husker-led-mqtt/">Husker LED MQTT controls</a> when troubleshooting, and keep the <a href="../../../explanation/huskers-dashboard-history/">Huskers Dashboard History</a> handy for architectural context.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Team Tracker integration</strong> (<code>custom_components/teamtracker</code>) configured for Nebraska (team id <code>158</code>).</li>
+<li><strong>TeamTracker Lovelace card</strong> copied to <code>www/community/teamtracker-card/ha-teamtracker-card.js</code> and registered under <code>lovelace.resources</code>:
+  ```yaml</li>
+<li>url: /hacsfiles/teamtracker-card/ha-teamtracker-card.js
+    type: module
+  ```</li>
+<li><strong>ESPN REST sensors</strong> from <code>packages/huskers_everything.yaml</code>, including the Big Ten standings endpoint (<code>sports.core.api.espn.com/.../groups/5/standings/0</code>).</li>
+<li>Apply the <code>Huskers Cream</code> theme (defined in <code>themes.yaml</code>) so custom CSS vars (e.g., <code>--huskers-scoreboard-border</code>) resolve correctly.</li>
+</ul>
+<p>Reload themes after deployment via <strong>Developer Tools → YAML → Reload themes</strong> so the custom color variables are available.</p>
+<h2 id="views">Views<a class="headerlink" href="#views" title="Permanent link">&para;</a></h2>
+<h3 id="1-game-day-husker-game-day">1. Game Day (<code>/husker-game-day</code>)<a class="headerlink" href="#1-game-day-husker-game-day" title="Permanent link">&para;</a></h3>
+<p>Purpose: Fan-facing board with real-time game context.</p>
+<p>Highlights
+- <strong>TeamTracker hero card</strong> summarising clock, score, probability, and win/loss context.
+- <strong>Quick actions</strong> to refresh ESPN endpoints (<code>sensor.husker_team</code>, <code>sensor.espn_cfb_scoreboard</code>, <code>sensor.espn_nebraska_schedule</code>).
+- <strong>Lighting macros</strong>: start 30 s chase, trigger Hail Varsity burst, revert to the all-scarlet scene.
+- <strong>Markdown scoreboard</strong> styled with Huskers palette variables; uses <code>sensor.husker_team</code> attributes for opponent logos, win probability, possession, and status text.
+- <strong>Game Essentials</strong> card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from <code>input_boolean.huskers_use_manual_score</code>/<code>input_boolean.huskers_use_manual_kickoff</code>.
+- <strong>Situation + Hype</strong>: down-and-distance, last play, baseball-style metrics (used for baseball/volleyball seasons) and <code>sensor.huskers_hype_message</code> for dynamic rally text.</p>
+<p>Usage Notes
+- Manual kickoffs propagate through <code>sensor.huskers_kickoff_in_effective</code>; the countdown card automatically respects <code>input_boolean.huskers_use_manual_kickoff</code> and <code>input_number.huskers_kickoff_in_manual</code>.
+- Score overrides live in <code>input_number.huskers_our_score_manual</code> and <code>sensor.huskers_our_score_effective</code> and are reflected in both the TeamTracker card and the markdown scoreboard.</p>
+<h3 id="2-team-data-husker-team-data">2. Team &amp; Data (<code>/husker-team-data</code>)<a class="headerlink" href="#2-team-data-husker-team-data" title="Permanent link">&para;</a></h3>
+<p>Purpose: Operator view for stats, standings, and sensor health.</p>
+<p>Highlights
+- <strong>Profile tables</strong> for Nebraska and the upcoming opponent, rendered with table rows instead of unordered bullet lists for faster scanning.
+- <strong>Color swatches</strong> convert hex strings (primary/secondary colors discovered from TeamTracker attributes) into live chips with the hex code beside a colored square.
+- <strong>Series summary</strong> placeholder driven by <code>sensor.husker_team</code> attributes when ESPN provides historical matchup text.
+- <strong>Raw sensor reference</strong> using entity rows for <code>sensor.husker_team</code> attributes; helps validate that the TeamTracker integration is populating data.
+- <strong>Big Ten standings markdown card</strong> built from the new ESPN Core API feed (<code>sports.core.api.espn.com/v2/.../groups/5/standings/0</code>). Each row displays overall and conference records in a markdown table.
+- <strong>Tailgate countdown</strong> uses the effective kickoff helper to stay aligned with manual overrides.</p>
+<p>Usage Notes
+- When colors are missing from ESPN data, fallback Scarlet &amp; Cream palette values populate the color chips.
+- If the standings markdown shows “unavailable,” confirm that the REST sensor <code>sensor.espn_big_ten_teams</code> is returning the <code>standings</code> attribute (requires the updated package).</p>
+<h3 id="3-lighting-scenes-huskers-lighting">3. Lighting &amp; Scenes (<code>/huskers-lighting</code>)<a class="headerlink" href="#3-lighting-scenes-huskers-lighting" title="Permanent link">&para;</a></h3>
+<p>Purpose: Maintenance console for lighting automations and Husker-specific scenes.</p>
+<p>Highlights
+- Markdown intro summarising the intent and linking scenes/automations conceptually.
+- <strong>Lighting automation list</strong> for baseline daily lighting schedules (sunrise/sunset, monthly patterns).
+- <strong>Dynamic scene list</strong> using <code>custom:auto-entities</code> so transient snapshot scenes (e.g., <code>scene.huskers_before_chase</code>) only appear when available.</p>
+<p>Usage Notes
+- Because snapshot scenes (<code>scene.huskers_before_chase</code>, <code>scene.huskers_before_burst</code>) only exist while a show is running, the auto-entities card hides them after restarts to avoid “entity not available.”</p>
+<h2 id="operations-checklist">Operations Checklist<a class="headerlink" href="#operations-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Use <strong>Refresh Game Data</strong> before kickoff or when ESPN phases feel stale.</li>
+<li>Toggle <code>input_boolean.huskers_test_mode</code> to simulate game phases without waiting for live data.</li>
+<li>Monitor <code>binary_sensor.huskers_light_show_active</code> while running lighting scripts; the sidebar icon warns if shows fail to shut down post-game.</li>
+<li>Validate the Big Ten standings table weekly during the season; ESPN occasionally changes payload structure—adjust <code>packages/huskers_everything.yaml</code> accordingly.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<ul>
+<li>If the TeamTracker card fails to load, verify the resource URL (<code>/hacsfiles/teamtracker-card/ha-teamtracker-card.js</code>) and clear the Lovelace cache (refresh with Ctrl+Shift+R).</li>
+<li>Missing logos or color swatches often mean ESPN returned <code>None</code>; check Home Assistant logs for REST errors and rerun the refresh buttons.</li>
+<li>Incorrect kickoff countdown usually points to the manual override toggles—confirm <code>input_boolean.huskers_use_manual_kickoff</code> is set as expected.</li>
+</ul>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../lighting/husker-led-mqtt/">Husker LED MQTT Controls</a></li>
+<li><a href="../../../reference/automations/#huskers-package-packageshuskers_everythingyaml">Automation Catalog – Huskers Package</a></li>
+<li><a href="../../../explanation/huskers-dashboard-history/">Huskers Dashboard History</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              </article>
+            </div>
+
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+
+      </main>
+
+        <footer class="md-footer">
+
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+
+
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+
+</div>
+
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+
+
+
+
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+
+
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+
+
+  </body>
+</html>

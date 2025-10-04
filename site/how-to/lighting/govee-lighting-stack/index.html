@@ -1,0 +1,1712 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+
+        <meta name="description" content="Hypermodern documentation for the gate-hub Home Assistant deployment.">
+
+
+
+
+        <link rel="prev" href="../../addons/govee2mqtt/">
+
+
+        <link rel="next" href="../../huskers/dashboard/">
+
+
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
+
+
+
+        <title>Govee Lighting Stack - gate-hub Documentation</title>
+
+
+
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.2a3383ac.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+
+
+
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+
+
+
+
+
+
+  </head>
+
+
+    <body dir="ltr">
+
+
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+
+
+        <a href="#govee-lighting-stack" class="md-skip">
+          Skip to content
+        </a>
+
+    </div>
+    <div data-md-component="announce">
+
+    </div>
+
+
+
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="gate-hub Documentation" class="md-header__button md-logo" aria-label="gate-hub Documentation" data-md-component="logo">
+
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            gate-hub Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+
+              Govee Lighting Stack
+
+          </span>
+        </div>
+      </div>
+    </div>
+
+
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+
+
+
+
+
+        <label class="md-header__button md-icon" for="__search">
+
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+      <div class="md-header__source">
+        <a href="https://github.com/dsainz3/gate-hub" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+
+  </nav>
+
+</header>
+
+    <div class="md-container" data-md-component="container">
+
+
+
+
+
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+
+
+
+
+
+
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+
+
+
+
+
+  Home
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../ci/" class="md-tabs__link">
+
+
+
+  How-to Guides
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../reference/documentation-style-guide/" class="md-tabs__link">
+
+
+
+  Reference
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../explanation/optimization-plan/" class="md-tabs__link">
+
+
+
+  Explanation
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../archive/ai-automation-builder/" class="md-tabs__link">
+
+
+
+  Archive
+
+        </a>
+      </li>
+
+
+
+
+
+
+
+
+
+
+
+      <li class="md-tabs__item">
+        <a href="../../../adr/_template/" class="md-tabs__link">
+
+
+
+  ADRs
+
+        </a>
+      </li>
+
+
+
+
+    </ul>
+  </div>
+</nav>
+
+
+
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+
+
+
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+
+
+
+
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="gate-hub Documentation" class="md-nav__button md-logo" aria-label="gate-hub Documentation" data-md-component="logo">
+
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    gate-hub Documentation
+  </label>
+
+    <div class="md-nav__source">
+      <a href="https://github.com/dsainz3/gate-hub" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+
+  <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Home
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+
+
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+
+
+
+  <span class="md-ellipsis">
+    How-to Guides
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            How-to Guides
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../ci/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    CI Pipeline Runbook
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../pre-commit/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Pre-commit Workflow
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../agenda-planner/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Agenda Planner Setup
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../f1/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    F1 Weekend Toolkit
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../addons/mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Mosquitto MQTT Add-on
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../addons/govee2mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Govee2MQTT Add-on
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--active">
+
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+
+
+
+
+
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+
+
+
+  <span class="md-ellipsis">
+    Govee Lighting Stack
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+
+      <a href="./" class="md-nav__link md-nav__link--active">
+
+
+
+  <span class="md-ellipsis">
+    Govee Lighting Stack
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+
+
+
+
+
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+
+        <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-1-store-mqtt-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1 – Store MQTT Secrets
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-2-wire-mosquitto-to-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2 – Wire Mosquitto to Home Assistant
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-3-configure-the-govee2mqtt-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3 – Configure the Govee2MQTT Bridge
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-4-install-the-hacs-govee-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4 – Install the HACS Govee Integration
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-5-wire-the-kiosk-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5 – Wire the Kiosk Dashboard
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-6-verify-unified-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6 – Verify Unified Entities
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ongoing Maintenance
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
+    </span>
+  </a>
+
+</li>
+
+    </ul>
+
+</nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../huskers/dashboard/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Huskers Dashboard Guide
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../husker-led-mqtt/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Husker LED MQTT Controls
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../kiosk/sanitation-schedule/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Kiosk Sanitation Schedule
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+
+
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Reference
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/documentation-style-guide/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Documentation Style Guide
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/automations/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Automation Catalog
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/holidays/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Holiday Mode Reference
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/agenda-planner/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Agenda Planner Reference
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../reference/infrastructure/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Infrastructure Overview
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+
+
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Explanation
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Explanation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/optimization-plan/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Optimization Plan
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/huskers-dashboard-history/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Huskers Dashboard History
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../explanation/pre-commit-strategy/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Pre-commit Quality Strategy
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+
+
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    Archive
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Archive
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../archive/ai-automation-builder/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    AI Automation Builder (Archived)
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--archived"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item md-nav__item--nested">
+
+
+
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+
+
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+
+
+
+  <span class="md-ellipsis">
+    ADRs
+
+  </span>
+
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            ADRs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+
+
+
+
+
+
+
+    <li class="md-nav__item">
+      <a href="../../../adr/_template/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Template
+
+  </span>
+
+
+      </a>
+    </li>
+
+
+
+
+          </ul>
+        </nav>
+
+    </li>
+
+
+
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+
+
+
+
+
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+
+        <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Overview
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-1-store-mqtt-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1 – Store MQTT Secrets
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-2-wire-mosquitto-to-home-assistant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2 – Wire Mosquitto to Home Assistant
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-3-configure-the-govee2mqtt-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3 – Configure the Govee2MQTT Bridge
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-4-install-the-hacs-govee-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 4 – Install the HACS Govee Integration
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-5-wire-the-kiosk-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 5 – Wire the Kiosk Dashboard
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#step-6-verify-unified-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 6 – Verify Unified Entities
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#ongoing-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ongoing Maintenance
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
+    </span>
+  </a>
+
+</li>
+
+    </ul>
+
+</nav>
+                  </div>
+                </div>
+              </div>
+
+
+
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+
+
+
+
+
+
+
+
+<h1 id="govee-lighting-stack">Govee Lighting Stack<a class="headerlink" href="#govee-lighting-stack" title="Permanent link">&para;</a></h1>
+<p>This guide documents how we run Govee lighting (and the seasonal Tree) in Home Assistant using three coordinated pieces:</p>
+<ul>
+<li><strong>HACS Govee integration</strong> (<code>https://github.com/LaggAt/hacs-govee</code>) for REST polling, effect metadata, and diagnostics.</li>
+<li><strong>Govee2MQTT Supervisor add-on</strong> for low-latency LAN control and MQTT discovery.</li>
+<li><strong>Mosquitto broker</strong> as the shared message bus, with credentials held in <code>secrets.yaml</code>.</li>
+</ul>
+<p>The combination gives us redundant control paths—cloud-backed API plus the LAN bridge—while maintaining a single entity set in Home Assistant.</p>
+<h2 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code>Govee Cloud  ──► HACS Govee Integration
+                    │
+LAN Devices ──► Govee2MQTT Add-on ──► Mosquitto Broker ──► Home Assistant MQTT integration
+                    │                                                 │
+                    └──────────────────── entity discovery &amp; state ───┘
+</code></pre></div>
+
+<ul>
+<li>The HACS integration supplies official entity metadata (names, effect lists, diagnostics) via REST polling every 10 seconds (<code>delay</code> in the config entry).</li>
+<li>Govee2MQTT publishes instant LAN state updates and commands through Mosquitto using the MQTT credentials defined in <code>secrets.yaml</code> (<code>mqtt_username</code> / <code>mqtt_password</code>).</li>
+<li>Home Assistant merges both sources under the <code>light.*</code> entities listed in <code>.storage/core.entity_registry</code> (see the verification section below).</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Home Assistant OS 16.x with Supervisor and Advanced Mode enabled.</li>
+<li><a href="https://hacs.xyz/docs/setup/prerequisites">HACS</a> installed.</li>
+<li>Mosquitto broker and Govee2MQTT add-ons available in the Add-on Store.</li>
+<li>At least one Govee lighting device on the same network.</li>
+<li>Govee account credentials and REST API key (create at <a href="https://developer.govee.com/">https://developer.govee.com/</a>).</li>
+</ul>
+<blockquote>
+<p>Use the existing how-to guides for baseline setup: <a href="../../addons/mqtt/">Mosquitto</a> and <a href="../../addons/govee2mqtt/">Govee2MQTT</a>.</p>
+</blockquote>
+<h2 id="step-1-store-mqtt-secrets">Step 1 – Store MQTT Secrets<a class="headerlink" href="#step-1-store-mqtt-secrets" title="Permanent link">&para;</a></h2>
+<p>Hold broker credentials in <code>secrets.yaml</code> so both YAML and UI-based integrations refer to the same values:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">mqtt_username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mqtt</span>
+<span class="nt">mqtt_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">REPLACE_WITH_STRONG_PASSWORD</span>
+</code></pre></div>
+
+<p>These keys already exist in this repository; update the password locally if it changes. Avoid committing real secrets.</p>
+<h2 id="step-2-wire-mosquitto-to-home-assistant">Step 2 – Wire Mosquitto to Home Assistant<a class="headerlink" href="#step-2-wire-mosquitto-to-home-assistant" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Install and start the <strong>Mosquitto broker</strong> add-on.</li>
+<li>Add the MQTT integration via <strong>Settings → Devices &amp; Services → Add Integration → MQTT</strong>. If auto-discovery fails, use:</li>
+<li>Broker: <code>core-mosquitto</code></li>
+<li>Port: <code>1883</code></li>
+<li>Username / Password: <code>!secret mqtt_username</code> and <code>!secret mqtt_password</code></li>
+<li>(Optional) Mirror the connection in YAML:</li>
+</ol>
+<p><code>yaml
+   mqtt:
+     broker: core-mosquitto
+     port: 1883
+     username: !secret mqtt_username
+     password: !secret mqtt_password</code></p>
+<ol>
+<li>Subscribe to <code>homeassistant/#</code> in <strong>Developer Tools → MQTT</strong> to verify the broker responds.</li>
+</ol>
+<h2 id="step-3-configure-the-govee2mqtt-bridge">Step 3 – Configure the Govee2MQTT Bridge<a class="headerlink" href="#step-3-configure-the-govee2mqtt-bridge" title="Permanent link">&para;</a></h2>
+<p>Follow the <a href="../../addons/govee2mqtt/">Govee2MQTT add-on playbook</a> with these project-specific notes:</p>
+<ul>
+<li>In the add-on configuration UI, set the MQTT section to match the secrets above:</li>
+</ul>
+<p><code>yaml
+  mqtt:
+    host: core-mosquitto
+    port: 1883
+    username: mqtt
+    password: ${MQTT_PASSWORD}</code></p>
+<p>Replace <code>${MQTT_PASSWORD}</code> with the actual password—Supervisor add-ons cannot read <code>!secret</code>. Keep the value synced with <code>secrets.yaml</code> manually.
+- Enable both LAN and IoT modes when you need cloud-only devices (purifiers) alongside LAN-capable lights:</p>
+<p><code>yaml
+  enable_lan: true
+  enable_iot: true
+  prefer_lan: true</code></p>
+<ul>
+<li>Supply <code>govee_email</code>, <code>govee_password</code>, and optional <code>govee_api_key</code> directly in the add-on UI. Restart after saving and check the log for <code>MQTT connected</code> and <code>Home Assistant discovery queued</code> lines.</li>
+</ul>
+<h2 id="step-4-install-the-hacs-govee-integration">Step 4 – Install the HACS Govee Integration<a class="headerlink" href="#step-4-install-the-hacs-govee-integration" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Open <strong>HACS → Integrations → ⋮ → Custom repositories</strong>.</li>
+<li>Add <code>https://github.com/LaggAt/hacs-govee</code> with category <strong>Integration</strong>.</li>
+<li>Back in HACS, search for <strong>Govee</strong>, install the integration, and restart Home Assistant when prompted.</li>
+<li>Go to <strong>Settings → Devices &amp; Services → Add Integration → Govee</strong> (from HACS). When the config flow prompts:</li>
+<li>Enter the REST API key. Record it in a local password manager; optionally add <code>govee_rest_api_key: YOUR_KEY</code> to <code>secrets.yaml</code> for reference (not read automatically).</li>
+<li>Leave the poll delay at <code>10</code> seconds unless API limits are hit.</li>
+<li>Confirm the integration card shows <strong>1 device, N entities</strong> matching your fleet.</li>
+</ol>
+<p>The configuration data is stored in <code>.storage/core.config_entries</code> under the <code>domain: "govee"</code> entry. Changing the API key later re-runs the auth step.</p>
+<h2 id="step-5-wire-the-kiosk-dashboard">Step 5 – Wire the Kiosk Dashboard<a class="headerlink" href="#step-5-wire-the-kiosk-dashboard" title="Permanent link">&para;</a></h2>
+<p>The refreshed <code>dashboards/kiosk-dashboard.yaml</code> relies entirely on stock Lovelace cards so it works out of the box on a clean Home Assistant install. The Control tab is organised as:</p>
+<ol>
+<li><strong>Status stacks</strong> built from <code>markdown</code>, <code>grid</code>, and <code>tile</code> cards for quick counts (lights on, runtimes, automations).</li>
+<li><strong>Group and individual controls</strong> using <code>tile</code> cards so every light or switch can be toggled without third-party components.</li>
+<li><strong>Automation buttons</strong> created with the core <code>button</code> card to trigger scenes and scripts.</li>
+</ol>
+<p>Example fragment:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Main Floor lights in dashboards/kiosk-dashboard.yaml</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vertical-stack</span>
+<span class="w">  </span><span class="nt">cards</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="w">      </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;##</span><span class="nv"> </span><span class="s">Main</span><span class="nv"> </span><span class="s">Floor</span><span class="nv"> </span><span class="s">Lights&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid</span>
+<span class="w">      </span><span class="nt">columns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">      </span><span class="nt">square</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">cards</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tile</span>
+<span class="w">          </span><span class="nt">entity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">light.livingroom_light</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Living Room</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tile</span>
+<span class="w">          </span><span class="nt">entity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">light.diningroom_light</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dining Room</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tile</span>
+<span class="w">          </span><span class="nt">entity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">light.sunroom_light</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sunroom</span>
+</code></pre></div>
+
+<ul>
+<li>Because only built-in cards are used, there are no Lovelace resource entries to manage for the kiosk dashboard.</li>
+<li>After editing the YAML, a normal browser refresh is enough—no cache purge is typically required.</li>
+</ul>
+<h2 id="step-6-verify-unified-entities">Step 6 – Verify Unified Entities<a class="headerlink" href="#step-6-verify-unified-entities" title="Permanent link">&para;</a></h2>
+<p>Use this <code>jq</code> command (from <code>/config</code>) to list every entity tied to the Govee config entry <code>01K684EHN5KW6ED0GDXBZFF0J9</code> plus its device metadata:</p>
+<div class="codehilite"><pre><span></span><code>jq<span class="w"> </span>--slurp<span class="w"> </span>--arg<span class="w"> </span>entry<span class="w"> </span><span class="s2">&quot;01K684EHN5KW6ED0GDXBZFF0J9&quot;</span><span class="w"> </span><span class="s1">&#39;.[0] as $entities | .[1] as $devices | ($entities.data.entities | map(select(.config_entry_id == $entry))) as $filtered | ($devices.data.devices | map({id,name,area_id,manufacturer,model})) as $devs | $filtered | map({entity_id, original_name, device: ($devs[]? | select(.id == .device_id))})&#39;</span><span class="w"> </span>.storage/core.entity_registry<span class="w"> </span>.storage/core.device_registry
+</code></pre></div>
+
+<p>Expected highlights:</p>
+<ul>
+<li>Lights such as <code>light.livingroom_light</code> map to physical devices discovered via Govee2MQTT (<code>manufacturer: "Govee"</code>).</li>
+<li>Group entities (e.g., <code>light.mainfloor_lights</code>) live in <code>light.yaml</code> and combine the individual devices for kiosk control.</li>
+</ul>
+<p>If entities are missing, restart the add-on and re-run the command. Clearing retained MQTT discovery topics (<code>homeassistant/gv2mqtt/.../config</code>) forces a fresh publish.</p>
+<h2 id="ongoing-maintenance">Ongoing Maintenance<a class="headerlink" href="#ongoing-maintenance" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Monthly</strong>: Check HACS for updates to the Govee integration and restart Home Assistant after upgrading.</li>
+<li><strong>Quarterly</strong>: Update the Govee2MQTT add-on and confirm LAN discovery still reaches every device.</li>
+<li><strong>Secrets hygiene</strong>: Rotate the MQTT password (<code>mqtt_password</code> in <code>secrets.yaml</code>) and update the add-on UI accordingly.</li>
+<li><strong>Backup</strong>: Include <code>.storage/</code> and <code>secrets.yaml</code> in full supervisor snapshots before major upgrades.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Entities duplicated</strong> – Delete old <code>light.*</code> entries tied to legacy integrations, then reload MQTT discovery.</li>
+<li><strong>Color controls missing in the UI</strong> – Tile cards expose on/off, brightness, and colour temperature by default. For RGB colour pickers, expose the entity through the standard light more-info dialog or layer in a custom card if needed.</li>
+<li><strong>MQTT auth failures</strong> – Re-enter credentials in the add-on UI and the MQTT integration; inspect the Mosquitto log for <code>Connection Refused</code> codes.</li>
+<li><strong>API quota exceeded</strong> – Increase the poll <code>delay</code> in the Govee integration configuration or temporarily disable the cloud path and rely on the LAN bridge.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>HACS repository: <a href="https://github.com/LaggAt/hacs-govee">https://github.com/LaggAt/hacs-govee</a></li>
+<li>Lovelace tile reference: <a href="https://www.home-assistant.io/dashboards/tile/">https://www.home-assistant.io/dashboards/tile/</a></li>
+<li>Govee2MQTT project: <a href="https://github.com/wez/govee2mqtt">https://github.com/wez/govee2mqtt</a></li>
+<li>Mosquitto add-on docs: <a href="../../addons/mqtt/">docs/how-to/addons/mqtt.md</a></li>
+<li>Govee2MQTT add-on guide: <a href="../../addons/govee2mqtt/">docs/how-to/addons/govee2mqtt.md</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              </article>
+            </div>
+
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+
+      </main>
+
+        <footer class="md-footer">
+
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+
+
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+
+</div>
+
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+
+
+
+
+      <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs", "navigation.sections"], "search": "../../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+
+
+      <script src="../../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+
+
+  </body>
+</html>
