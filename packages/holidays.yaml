@@ -1,0 +1,75 @@
+# packages/holidays.yaml
+# US holiday calendar feed plus helpers for manual overrides.
+
+input_boolean:
+  holiday_mode_manual:
+    name: Holiday Mode Override
+    icon: mdi:calendar-star
+
+template:
+  - binary_sensor:
+      - name: Holiday Mode Active
+        unique_id: holiday_mode_active
+        state: >-
+          {{ is_state('calendar.us_federal_holidays', 'on') or is_state('input_boolean.holiday_mode_manual', 'on') }}
+        icon: >-
+          {% if is_state('input_boolean.holiday_mode_manual', 'on') %}
+            mdi:calendar-star
+          {% elif is_state('calendar.us_federal_holidays', 'on') %}
+            mdi:calendar-check
+          {% else %}
+            mdi:calendar-blank
+          {% endif %}
+        attributes:
+          holiday_source: >-
+            {% if is_state('input_boolean.holiday_mode_manual', 'on') %}
+              manual
+            {% elif is_state('calendar.us_federal_holidays', 'on') %}
+              calendar
+            {% else %}
+              none
+            {% endif %}
+          active_holiday: >-
+            {% if is_state('input_boolean.holiday_mode_manual', 'on') and not is_state('calendar.us_federal_holidays', 'on') %}
+              Manual Override
+            {% elif is_state('calendar.us_federal_holidays', 'on') %}
+              {{ state_attr('calendar.us_federal_holidays', 'message') | default('Holiday', true) }}
+            {% else %}
+              none
+            {% endif %}
+          active_until: >-
+            {% if is_state('calendar.us_federal_holidays', 'on') %}
+              {{ state_attr('calendar.us_federal_holidays', 'end_time') | default('unknown', true) }}
+            {% else %}
+              unknown
+            {% endif %}
+  - sensor:
+      - name: Next US Holiday
+        unique_id: next_us_holiday
+        state: >-
+          {% set next_name = state_attr('calendar.us_federal_holidays', 'message') %}
+          {% set next_start = state_attr('calendar.us_federal_holidays', 'start_time') %}
+          {% if next_start and next_name %}
+            {{ next_name }}
+          {% elif next_start %}
+            Holiday
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: >-
+          {{ state_attr('calendar.us_federal_holidays', 'start_time') is not none }}
+        attributes:
+          starts_on: >-
+            {% set next_start = state_attr('calendar.us_federal_holidays', 'start_time') %}
+            {% if next_start %}
+              {{ as_datetime(next_start) | as_local | isoformat }}
+            {% else %}
+              unknown
+            {% endif %}
+          ends_on: >-
+            {% set next_end = state_attr('calendar.us_federal_holidays', 'end_time') %}
+            {% if next_end %}
+              {{ as_datetime(next_end) | as_local | isoformat }}
+            {% else %}
+              unknown
+            {% endif %}

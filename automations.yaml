@@ -10,6 +10,9 @@
         event: sunset
         offset: '00:05:00'
     condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
@@ -34,6 +37,9 @@
         event: sunset
         offset: '00:05:00'
     condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
@@ -68,6 +74,10 @@
     trigger:
       - platform: time
         at: '00:00:00'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
     action:
       - parallel:
           - service: light.turn_off
@@ -108,6 +118,10 @@
     trigger:
       - platform: time
         at: '03:30:00'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
     action:
       - parallel:
           - service: light.turn_on
@@ -154,6 +168,9 @@
         offset: '00:15:00'
     condition:
       - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
+      - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
     action:
@@ -176,6 +193,9 @@
         event: sunrise
         offset: '00:05:00'
     condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
       - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
@@ -226,6 +246,10 @@
         11: LED-Thanksgiving
         12: Christmas
       target_effect: '{{ monthly_effects[current_month] }}'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
     action:
       - condition: template
         value_template: >-
@@ -261,6 +285,9 @@
         below: 70
         for: {minutes: 1}
     condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
       - condition: template
         value_template: >-
           {% set temp = trigger.to_state.state | float(-999) %}
@@ -299,6 +326,10 @@
     trigger:
       - platform: time
         at: '23:00:00'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.holiday_mode_active
+        state: 'off'
     action:
       - service: switch.turn_off
         target:
