@@ -1,5 +1,5 @@
 # packages/network_monitor.yaml
-# Lightweight network monitoring focused on Speedtest data.
+# Extended network monitoring focused on Speedtest, TP-Link Deco, and ping data.
 
 template:
   - binary_sensor:
@@ -18,7 +18,6 @@ template:
           download_mbps: "{{ states('sensor.speedtest_download') | float(0) }}"
           upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) }}"
           last_result_changed: "{{ states.sensor.speedtest_download.last_changed }}"
-
     sensor:
       - name: Internet Latency
         unique_id: network_monitor_internet_latency
@@ -35,23 +34,33 @@ template:
           {% set last = states.sensor.speedtest_ping.last_changed if states.sensor.speedtest_ping is not none else none %}
           {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
           {{ (states('sensor.speedtest_ping') | float(0)) > 0 and age < 7200 }}
-
       - name: Network Status Summary
         unique_id: network_status_summary
         icon: mdi:lan-check
         state: >-
-          {% if is_state('binary_sensor.internet_reachability_2', 'on') %}
+          {% set reachability = states('binary_sensor.internet_reachability') %}
+          {% if reachability == 'on' %}
             Online
-          {% elif is_state('binary_sensor.internet_reachability_2', 'off') %}
+          {% elif reachability == 'off' %}
             Offline
           {% else %}
             Unknown
           {% endif %}
         attributes:
-          latency_ms: "{{ states('sensor.internet_latency_2') | float(0) | round(1) }}"
+          reachability: "{{ states('binary_sensor.internet_reachability') }}"
+          latency_ms: >-
+            {% set latency = states('sensor.internet_latency') %}
+            {% if latency in ['unknown', 'unavailable', None] %}
+              {% set latency = states('sensor.internet_latency_2') %}
+            {% endif %}
+            {{ latency | float(0) | round(1) }}
           speedtest_ping_ms: "{{ states('sensor.speedtest_ping') | float(0) | round(1) }}"
           speedtest_download_mbps: "{{ states('sensor.speedtest_download') | float(0) | round(1) }}"
           speedtest_upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) | round(1) }}"
+          deco_down_mbps: "{{ states('sensor.deco_total_down_mbps') | float(0) }}"
+          deco_up_mbps: "{{ states('sensor.deco_total_up_mbps') | float(0) }}"
+          nodes_online: "{{ states('sensor.deco_node_count') }}"
+          clients_online: "{{ states('sensor.deco_client_count') }}"
           last_speedtest: >-
             {% set entity = states.sensor.speedtest_download %}
             {% if entity is not none and entity.last_changed %}
@@ -62,7 +71,6 @@ template:
             {% else %}
               unavailable
             {% endif %}
-
       - name: Speedtest Last Run
         unique_id: network_speedtest_last_run
         device_class: timestamp
@@ -76,3 +84,569 @@ template:
           {% else %}
             unknown
           {% endif %}
+      - name: Deco Network Health
+        unique_id: network_deco_health
+        icon: mdi:wifi-strength-3
+        state: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+          {% if not deco_nodes %}
+            unavailable
+          {% else %}
+            {% set online = deco_nodes | selectattr('state', 'equalto', 'home') | list | length %}
+            {% if online == deco_nodes | length %}
+              online
+            {% elif online == 0 %}
+              offline
+            {% else %}
+              degraded
+            {% endif %}
+          {% endif %}
+        attributes:
+          nodes_total: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+            {{ deco_nodes | length }}
+          nodes_online: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+            {{ deco_nodes | selectattr('state', 'equalto', 'home') | list | length }}
+          clients_total: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_clients = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'client') | list %}
+            {{ deco_clients | length }}
+          clients_online: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_clients = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'client') | list %}
+            {{ deco_clients | selectattr('state', 'equalto', 'home') | list | length }}
+          nodes: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+            {% set deco_clients = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'client') | list %}
+            {% set ns = namespace(items=[]) %}
+            {% for node in deco_nodes %}
+              {% set slug = node.entity_id.split('.', 1)[1] %}
+              {% set down_entity = 'sensor.' ~ slug ~ '_down' %}
+              {% set up_entity = 'sensor.' ~ slug ~ '_up' %}
+              {% set down_state = states(down_entity) %}
+              {% set up_state = states(up_entity) %}
+              {% set node_clients = deco_clients | selectattr('attributes.deco_device', 'equalto', node.name) | list %}
+              {% set ns.items = ns.items + [{
+                'entity_id': node.entity_id,
+                'name': node.name,
+                'state': node.state,
+                'internet_online': node.attributes.get('internet_online'),
+                'connection_type': node.attributes.get('connection_type'),
+                'device_model': node.attributes.get('device_model'),
+                'master': node.attributes.get('master'),
+                'signal_band2_4': node.attributes.get('signal_band2_4'),
+                'signal_band5': node.attributes.get('signal_band5'),
+                'clients_total': node_clients | length,
+                'clients_online': node_clients | selectattr('state', 'equalto', 'home') | list | length,
+                'down_mbps': ((down_state | float(0)) * 8 / 1000) | round(2) if down_state not in ['unknown', 'unavailable', None] else None,
+                'up_mbps': ((up_state | float(0)) * 8 / 1000) | round(2) if up_state not in ['unknown', 'unavailable', None] else None
+              }] %}
+            {% endfor %}
+            {{ ns.items | tojson }}
+      - name: Deco Node Count
+        unique_id: network_deco_node_count
+        icon: mdi:router-network
+        unit_of_measurement: nodes
+        state_class: measurement
+        state: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+            {% if deco_nodes %}
+              {{ deco_nodes | selectattr('state', 'equalto', 'home') | list | length }}
+            {% else %}
+              unavailable
+            {% endif %}
+          {% else %}
+            unavailable
+          {% endif %}
+        attributes:
+          nodes_total: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_nodes = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'deco') | list %}
+            {{ deco_nodes | length }}
+      - name: Deco Client Count
+        unique_id: network_deco_client_count
+        icon: mdi:account-group
+        unit_of_measurement: clients
+        state_class: measurement
+        state: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set deco_clients = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'client') | list %}
+            {{ deco_clients | selectattr('state', 'equalto', 'home') | list | length }}
+          {% else %}
+            unavailable
+          {% endif %}
+        attributes:
+          clients_total: >-
+            {% set deco_entities = integration_entities('tplink_deco') or [] %}
+            {% set deco_clients = expand(deco_entities) | selectattr('domain', 'equalto', 'device_tracker') | selectattr('attributes.device_type', 'equalto', 'client') | list %}
+            {{ deco_clients | length }}
+      - name: Deco Total Down (Mbps)
+        unique_id: network_deco_total_down_mbps
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbps
+        icon: mdi:download-network-outline
+        state: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set sensor_entities = expand(deco_entities) %}
+            {% set sensors = sensor_entities
+              | selectattr('domain', 'equalto', 'sensor')
+              | selectattr('attributes.device_class', 'equalto', 'data_rate')
+              | selectattr('entity_id', 'match', '^sensor\\..*_down$')
+              | list %}
+            {% if sensors %}
+              {% set ns = namespace(total=0) %}
+              {% for sensor in sensors %}
+                {% if sensor.state not in ['unknown', 'unavailable'] %}
+                  {% set ns.total = ns.total + (sensor.state | float(0)) %}
+                {% endif %}
+              {% endfor %}
+              {{ (ns.total * 8 / 1000) | round(2) }}
+            {% else %}
+              unavailable
+            {% endif %}
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set sensor_entities = expand(deco_entities) %}
+            {% set sensors = sensor_entities
+              | selectattr('domain', 'equalto', 'sensor')
+              | selectattr('attributes.device_class', 'equalto', 'data_rate')
+              | selectattr('entity_id', 'match', '^sensor\\..*_down$')
+              | list %}
+            {{ sensors | length > 0 }}
+          {% else %}
+            false
+          {% endif %}
+      - name: Deco Total Up (Mbps)
+        unique_id: network_deco_total_up_mbps
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbps
+        icon: mdi:upload-network-outline
+        state: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set sensor_entities = expand(deco_entities) %}
+            {% set sensors = sensor_entities
+              | selectattr('domain', 'equalto', 'sensor')
+              | selectattr('attributes.device_class', 'equalto', 'data_rate')
+              | selectattr('entity_id', 'match', '^sensor\\..*_up$')
+              | list %}
+            {% if sensors %}
+              {% set ns = namespace(total=0) %}
+              {% for sensor in sensors %}
+                {% if sensor.state not in ['unknown', 'unavailable'] %}
+                  {% set ns.total = ns.total + (sensor.state | float(0)) %}
+                {% endif %}
+              {% endfor %}
+              {{ (ns.total * 8 / 1000) | round(2) }}
+            {% else %}
+              unavailable
+            {% endif %}
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: >-
+          {% set deco_entities = integration_entities('tplink_deco') or [] %}
+          {% if deco_entities %}
+            {% set sensor_entities = expand(deco_entities) %}
+            {% set sensors = sensor_entities
+              | selectattr('domain', 'equalto', 'sensor')
+              | selectattr('attributes.device_class', 'equalto', 'data_rate')
+              | selectattr('entity_id', 'match', '^sensor\\..*_up$')
+              | list %}
+            {{ sensors | length > 0 }}
+          {% else %}
+            false
+          {% endif %}
+      - name: Network Performance Summary
+        unique_id: network_performance_summary
+        icon: mdi:chart-multiple
+        state: >-
+          {% set alerts = [] %}
+          {% set latency = states('sensor.internet_latency') | float(0) %}
+          {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
+          {% if latency_24h > 0 and latency > latency_24h * 1.25 %}
+            {% set alerts = alerts + ['latency'] %}
+          {% endif %}
+          {% set download = states('sensor.speedtest_download') | float(0) %}
+          {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
+          {% if download_24h > 0 and download < download_24h * 0.75 %}
+            {% set alerts = alerts + ['download'] %}
+          {% endif %}
+          {% set upload = states('sensor.speedtest_upload') | float(0) %}
+          {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
+          {% if upload_24h > 0 and upload < upload_24h * 0.75 %}
+            {% set alerts = alerts + ['upload'] %}
+          {% endif %}
+          {% set ping = states('sensor.speedtest_ping') | float(0) %}
+          {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
+          {% if ping_24h > 0 and ping > ping_24h * 1.25 %}
+            {% set alerts = alerts + ['ping'] %}
+          {% endif %}
+          {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
+          {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
+          {% if deco_down_24h > 0 and deco_down < deco_down_24h * 0.5 %}
+            {% set alerts = alerts + ['deco_down'] %}
+          {% endif %}
+          {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
+          {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
+          {% if deco_up_24h > 0 and deco_up < deco_up_24h * 0.5 %}
+            {% set alerts = alerts + ['deco_up'] %}
+          {% endif %}
+          {{ 'degraded' if alerts else 'normal' }}
+        attributes:
+          alerts: >-
+            {% set alerts = [] %}
+            {% set latency = states('sensor.internet_latency') | float(0) %}
+            {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
+            {% if latency_24h > 0 and latency > latency_24h * 1.25 %}
+              {% set alerts = alerts + ['latency'] %}
+            {% endif %}
+            {% set download = states('sensor.speedtest_download') | float(0) %}
+            {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
+            {% if download_24h > 0 and download < download_24h * 0.75 %}
+              {% set alerts = alerts + ['download'] %}
+            {% endif %}
+            {% set upload = states('sensor.speedtest_upload') | float(0) %}
+            {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
+            {% if upload_24h > 0 and upload < upload_24h * 0.75 %}
+              {% set alerts = alerts + ['upload'] %}
+            {% endif %}
+            {% set ping = states('sensor.speedtest_ping') | float(0) %}
+            {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
+            {% if ping_24h > 0 and ping > ping_24h * 1.25 %}
+              {% set alerts = alerts + ['ping'] %}
+            {% endif %}
+            {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
+            {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
+            {% if deco_down_24h > 0 and deco_down < deco_down_24h * 0.5 %}
+              {% set alerts = alerts + ['deco_down'] %}
+            {% endif %}
+            {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
+            {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
+            {% if deco_up_24h > 0 and deco_up < deco_up_24h * 0.5 %}
+              {% set alerts = alerts + ['deco_up'] %}
+            {% endif %}
+            {{ alerts | unique | tojson }}
+          metrics: >-
+            {% set latency = states('sensor.internet_latency') | float(0) %}
+            {% set latency_1h = states('sensor.internet_latency_1h_avg') | float(0) %}
+            {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
+            {% set latency_7d = states('sensor.internet_latency_7d_avg') | float(0) %}
+            {% set latency_30d = states('sensor.internet_latency_30d_avg') | float(0) %}
+            {% set download = states('sensor.speedtest_download') | float(0) %}
+            {% set download_1h = states('sensor.speedtest_download_1h_avg') | float(0) %}
+            {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
+            {% set download_7d = states('sensor.speedtest_download_7d_avg') | float(0) %}
+            {% set download_30d = states('sensor.speedtest_download_30d_avg') | float(0) %}
+            {% set upload = states('sensor.speedtest_upload') | float(0) %}
+            {% set upload_1h = states('sensor.speedtest_upload_1h_avg') | float(0) %}
+            {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
+            {% set upload_7d = states('sensor.speedtest_upload_7d_avg') | float(0) %}
+            {% set upload_30d = states('sensor.speedtest_upload_30d_avg') | float(0) %}
+            {% set ping = states('sensor.speedtest_ping') | float(0) %}
+            {% set ping_1h = states('sensor.speedtest_ping_1h_avg') | float(0) %}
+            {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
+            {% set ping_7d = states('sensor.speedtest_ping_7d_avg') | float(0) %}
+            {% set ping_30d = states('sensor.speedtest_ping_30d_avg') | float(0) %}
+            {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
+            {% set deco_down_1h = states('sensor.deco_total_down_mbps_1h_avg') | float(0) %}
+            {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
+            {% set deco_down_7d = states('sensor.deco_total_down_mbps_7d_avg') | float(0) %}
+            {% set deco_down_30d = states('sensor.deco_total_down_mbps_30d_avg') | float(0) %}
+            {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
+            {% set deco_up_1h = states('sensor.deco_total_up_mbps_1h_avg') | float(0) %}
+            {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
+            {% set deco_up_7d = states('sensor.deco_total_up_mbps_7d_avg') | float(0) %}
+            {% set deco_up_30d = states('sensor.deco_total_up_mbps_30d_avg') | float(0) %}
+            {% set metrics = {
+              'latency': {
+                'current': latency,
+                'avg_1h': latency_1h,
+                'avg_24h': latency_24h,
+                'avg_7d': latency_7d,
+                'avg_30d': latency_30d,
+                'vs_24h_pct': ((latency - latency_24h) / latency_24h * 100) | round(1) if latency_24h > 0 else None
+              },
+              'download': {
+                'current': download,
+                'avg_1h': download_1h,
+                'avg_24h': download_24h,
+                'avg_7d': download_7d,
+                'avg_30d': download_30d,
+                'vs_24h_pct': ((download - download_24h) / download_24h * 100) | round(1) if download_24h > 0 else None
+              },
+              'upload': {
+                'current': upload,
+                'avg_1h': upload_1h,
+                'avg_24h': upload_24h,
+                'avg_7d': upload_7d,
+                'avg_30d': upload_30d,
+                'vs_24h_pct': ((upload - upload_24h) / upload_24h * 100) | round(1) if upload_24h > 0 else None
+              },
+              'ping': {
+                'current': ping,
+                'avg_1h': ping_1h,
+                'avg_24h': ping_24h,
+                'avg_7d': ping_7d,
+                'avg_30d': ping_30d,
+                'vs_24h_pct': ((ping - ping_24h) / ping_24h * 100) | round(1) if ping_24h > 0 else None
+              },
+              'deco_down': {
+                'current': deco_down,
+                'avg_1h': deco_down_1h,
+                'avg_24h': deco_down_24h,
+                'avg_7d': deco_down_7d,
+                'avg_30d': deco_down_30d,
+                'vs_24h_pct': ((deco_down - deco_down_24h) / deco_down_24h * 100) | round(1) if deco_down_24h > 0 else None
+              },
+              'deco_up': {
+                'current': deco_up,
+                'avg_1h': deco_up_1h,
+                'avg_24h': deco_up_24h,
+                'avg_7d': deco_up_7d,
+                'avg_30d': deco_up_30d,
+                'vs_24h_pct': ((deco_up - deco_up_24h) / deco_up_24h * 100) | round(1) if deco_up_24h > 0 else None
+              }
+            } %}
+            {{ metrics | tojson }}
+sensor:
+  # Internet latency trends
+  - platform: statistics
+    name: Internet Latency (1h Avg)
+    unique_id: network_internet_latency_mean_1h
+    entity_id: sensor.internet_latency
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Internet Latency (24h Avg)
+    unique_id: network_internet_latency_mean_24h
+    entity_id: sensor.internet_latency
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Internet Latency (7d Avg)
+    unique_id: network_internet_latency_mean_7d
+    entity_id: sensor.internet_latency
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Internet Latency (30d Avg)
+    unique_id: network_internet_latency_mean_30d
+    entity_id: sensor.internet_latency
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
+
+  # Speedtest download trends
+  - platform: statistics
+    name: Speedtest Download (1h Avg)
+    unique_id: network_speedtest_download_mean_1h
+    entity_id: sensor.speedtest_download
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Speedtest Download (24h Avg)
+    unique_id: network_speedtest_download_mean_24h
+    entity_id: sensor.speedtest_download
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Speedtest Download (7d Avg)
+    unique_id: network_speedtest_download_mean_7d
+    entity_id: sensor.speedtest_download
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Speedtest Download (30d Avg)
+    unique_id: network_speedtest_download_mean_30d
+    entity_id: sensor.speedtest_download
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
+
+  # Speedtest upload trends
+  - platform: statistics
+    name: Speedtest Upload (1h Avg)
+    unique_id: network_speedtest_upload_mean_1h
+    entity_id: sensor.speedtest_upload
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Speedtest Upload (24h Avg)
+    unique_id: network_speedtest_upload_mean_24h
+    entity_id: sensor.speedtest_upload
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Speedtest Upload (7d Avg)
+    unique_id: network_speedtest_upload_mean_7d
+    entity_id: sensor.speedtest_upload
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Speedtest Upload (30d Avg)
+    unique_id: network_speedtest_upload_mean_30d
+    entity_id: sensor.speedtest_upload
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
+
+  # Speedtest ping trends
+  - platform: statistics
+    name: Speedtest Ping (1h Avg)
+    unique_id: network_speedtest_ping_mean_1h
+    entity_id: sensor.speedtest_ping
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Speedtest Ping (24h Avg)
+    unique_id: network_speedtest_ping_mean_24h
+    entity_id: sensor.speedtest_ping
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Speedtest Ping (7d Avg)
+    unique_id: network_speedtest_ping_mean_7d
+    entity_id: sensor.speedtest_ping
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Speedtest Ping (30d Avg)
+    unique_id: network_speedtest_ping_mean_30d
+    entity_id: sensor.speedtest_ping
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
+
+  # Deco throughput trends
+  - platform: statistics
+    name: Deco Total Down Mbps (1h Avg)
+    unique_id: network_deco_total_down_mbps_mean_1h
+    entity_id: sensor.deco_total_down_mbps
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Deco Total Down Mbps (24h Avg)
+    unique_id: network_deco_total_down_mbps_mean_24h
+    entity_id: sensor.deco_total_down_mbps
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Deco Total Down Mbps (7d Avg)
+    unique_id: network_deco_total_down_mbps_mean_7d
+    entity_id: sensor.deco_total_down_mbps
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Deco Total Down Mbps (30d Avg)
+    unique_id: network_deco_total_down_mbps_mean_30d
+    entity_id: sensor.deco_total_down_mbps
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
+  - platform: statistics
+    name: Deco Total Up Mbps (1h Avg)
+    unique_id: network_deco_total_up_mbps_mean_1h
+    entity_id: sensor.deco_total_up_mbps
+    state_characteristic: mean
+    max_age:
+      hours: 1
+    sampling_size: 120
+    precision: 2
+  - platform: statistics
+    name: Deco Total Up Mbps (24h Avg)
+    unique_id: network_deco_total_up_mbps_mean_24h
+    entity_id: sensor.deco_total_up_mbps
+    state_characteristic: mean
+    max_age:
+      hours: 24
+    sampling_size: 1440
+    precision: 2
+  - platform: statistics
+    name: Deco Total Up Mbps (7d Avg)
+    unique_id: network_deco_total_up_mbps_mean_7d
+    entity_id: sensor.deco_total_up_mbps
+    state_characteristic: mean
+    max_age:
+      days: 7
+    sampling_size: 5000
+    precision: 2
+  - platform: statistics
+    name: Deco Total Up Mbps (30d Avg)
+    unique_id: network_deco_total_up_mbps_mean_30d
+    entity_id: sensor.deco_total_up_mbps
+    state_characteristic: mean
+    max_age:
+      days: 30
+    sampling_size: 8000
+    precision: 2
