@@ -10,9 +10,8 @@
         event: sunset
         offset: '00:05:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.huskers_lighting_hold
-        state: 'off'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - parallel:
           - service: light.turn_on
@@ -35,9 +34,8 @@
         event: sunset
         offset: '00:05:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.huskers_lighting_hold
-        state: 'off'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: light.turn_on
         target:
