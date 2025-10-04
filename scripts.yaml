@@ -1,2 +1,47 @@
-null
-...
+test_halloween:
+  sequence:
+    - data:
+        rgb_color:
+          - 255
+          - 100
+          - 0
+        brightness: 200
+      action: light.turn_on
+      target:
+        device_id:
+          - f5ec9879d07fc2bba81c3a7885ce5f55
+          - 99278bf7ad769d56504c0278c5f6ab7d
+          - 83ff827fba6d077abe0e9a9e306fcd74
+    - delay:
+        seconds: 3
+    - data:
+        rgb_color:
+          - 180
+          - 0
+          - 180
+        brightness: 255
+      action: light.turn_on
+      target:
+        device_id:
+          - f5ec9879d07fc2bba81c3a7885ce5f55
+          - 99278bf7ad769d56504c0278c5f6ab7d
+          - 83ff827fba6d077abe0e9a9e306fcd74
+    - delay:
+        seconds: 3
+    - data:
+        rgb_color:
+          - 0
+          - 200
+          - 0
+        brightness: 180
+      action: light.turn_on
+      target:
+        device_id:
+          - f5ec9879d07fc2bba81c3a7885ce5f55
+          - 99278bf7ad769d56504c0278c5f6ab7d
+          - 83ff827fba6d077abe0e9a9e306fcd74
+    - delay:
+        seconds: 3
+  mode: restart
+  alias: test-halloween
+  description: ''

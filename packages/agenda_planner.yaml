@@ -1,0 +1,376 @@
+# packages/agenda_planner.yaml
+# Household agenda and task management helpers, scripts, and sensors.
+
+input_text:
+  agenda_planner_calendar_entity:
+    name: Agenda Planner Calendar Entity
+    icon: mdi:calendar
+    initial: calendar.household_agenda
+    max: 80
+  agenda_planner_event_title:
+    name: Agenda Planner Event Title
+    icon: mdi:calendar-edit
+    max: 120
+  agenda_planner_event_description:
+    name: Agenda Planner Event Description
+    icon: mdi:file-document-edit
+    max: 255
+  agenda_planner_task_list_entity:
+    name: Agenda Planner Task List Entity
+    icon: mdi:format-list-bulleted
+    initial: todo.household_tasks
+    max: 80
+  agenda_planner_task_title:
+    name: Agenda Planner Task Title
+    icon: mdi:clipboard-text-outline
+    max: 120
+  agenda_planner_task_notes:
+    name: Agenda Planner Task Notes
+    icon: mdi:note-text
+    max: 255
+
+input_datetime:
+  agenda_planner_event_start:
+    name: Agenda Planner Event Start
+    has_date: true
+    has_time: true
+  agenda_planner_event_end:
+    name: Agenda Planner Event End
+    has_date: true
+    has_time: true
+  agenda_planner_task_due:
+    name: Agenda Planner Task Due
+    has_date: true
+    has_time: true
+
+input_boolean:
+  agenda_planner_task_all_day:
+    name: Agenda Planner Task All Day
+    icon: mdi:clock-remove
+    initial: false
+
+input_select:
+  agenda_planner_task_priority:
+    name: Agenda Planner Task Priority
+    icon: mdi:flag-variant
+    options:
+      - none
+      - low
+      - normal
+      - high
+      - urgent
+    initial: normal
+  agenda_planner_event_category:
+    name: Agenda Planner Event Category
+    icon: mdi:calendar-star
+    options:
+      - General
+      - Family
+      - Work
+      - School
+      - Travel
+      - Reminder
+    initial: General
+
+script:
+  agenda_planner_add_event:
+    alias: Agenda Planner – Add Calendar Event
+    mode: single
+    sequence:
+      - variables:
+          calendar_entity: >-
+            {% set raw = states('input_text.agenda_planner_calendar_entity') %}
+            {% if raw in ['unknown', 'unavailable', ''] -%}
+              {{ '' }}
+            {% else -%}
+              {{ raw | lower }}
+            {% endif %}
+          summary: "{{ states('input_text.agenda_planner_event_title') | trim }}"
+          description: "{{ states('input_text.agenda_planner_event_description') | trim }}"
+          category: "{{ states('input_select.agenda_planner_event_category') }}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ summary != '' }}"
+              - condition: template
+                value_template: >-
+                  {% set cal = calendar_entity %}
+                  {{ cal in state_attr('sensor.agenda_planner_entities', 'calendars') | default([]) }}
+            sequence:
+              - variables:
+                  start_iso: >-
+                    {% set start_str = states('input_datetime.agenda_planner_event_start') %}
+                    {% if start_str not in ['unknown', 'unavailable'] %}
+                      {{ as_datetime(start_str).isoformat() }}
+                    {% else %}
+                      {{ (now() + timedelta(minutes=15)).isoformat() }}
+                    {% endif %}
+                  end_iso: >-
+                    {% set end_str = states('input_datetime.agenda_planner_event_end') %}
+                    {% if end_str not in ['unknown', 'unavailable'] %}
+                      {{ as_datetime(end_str).isoformat() }}
+                    {% else %}
+                      {{ (as_datetime(start_iso) + timedelta(minutes=60)).isoformat() }}
+                    {% endif %}
+                  safe_start_iso: "{{ start_iso }}"
+                  safe_end_iso: >-
+                    {% set start = as_datetime(start_iso) %}
+                    {% set end = as_datetime(end_iso) %}
+                    {% if end <= start %}
+                      {{ (start + timedelta(minutes=60)).isoformat() }}
+                    {% else %}
+                      {{ end.isoformat() }}
+                    {% endif %}
+              - service: calendar.create_event
+                target:
+                  entity_id: "{{ calendar_entity }}"
+                data:
+                  summary: "{{ summary }}"
+                  description: >-
+                    {% if description %}{{ description }}{% endif %}
+                  start_date_time: "{{ safe_start_iso }}"
+                  end_date_time: "{{ safe_end_iso }}"
+              - service: persistent_notification.create
+                data:
+                  title: Agenda Planner
+                  message: >-
+                    Event "{{ summary }}" scheduled on {{ (as_datetime(safe_start_iso) | as_local).strftime('%b %-d, %Y %I:%M %p') }}
+                    {% if category %} ({{ category }}){% endif %}.
+              - service: input_text.set_value
+                target:
+                  entity_id:
+                    - input_text.agenda_planner_event_title
+                    - input_text.agenda_planner_event_description
+                data:
+                  value: ""
+              - service: input_datetime.set_datetime
+                target:
+                  entity_id:
+                    - input_datetime.agenda_planner_event_start
+                data:
+                  datetime: "{{ (now() + timedelta(hours=1)).isoformat(timespec='minutes') }}"
+              - service: input_datetime.set_datetime
+                target:
+                  entity_id:
+                    - input_datetime.agenda_planner_event_end
+                data:
+                  datetime: "{{ (now() + timedelta(hours=2)).isoformat(timespec='minutes') }}"
+        default:
+          - service: persistent_notification.create
+            data:
+              title: Agenda Planner
+              message: >-
+                Unable to schedule event. Ensure a calendar entity is set and a title is provided.
+  agenda_planner_add_task:
+    alias: Agenda Planner – Add Task
+    mode: single
+    sequence:
+      - variables:
+          todo_entity: >-
+            {% set raw = states('input_text.agenda_planner_task_list_entity') %}
+            {% if raw in ['unknown', 'unavailable', ''] -%}
+              {{ '' }}
+            {% else -%}
+              {{ raw | lower }}
+            {% endif %}
+          summary: "{{ states('input_text.agenda_planner_task_title') | trim }}"
+          description: "{{ states('input_text.agenda_planner_task_notes') | trim }}"
+          priority: "{{ states('input_select.agenda_planner_task_priority') }}"
+          all_day: "{{ is_state('input_boolean.agenda_planner_task_all_day', 'on') }}"
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ summary != '' }}"
+              - condition: template
+                value_template: >-
+                  {% set todo = todo_entity %}
+                  {{ todo in state_attr('sensor.agenda_planner_entities', 'todo_lists') | default([]) }}
+            sequence:
+              - variables:
+                  due_str: "{{ states('input_datetime.agenda_planner_task_due') }}"
+                  due_iso: >-
+                    {% if due_str not in ['unknown', 'unavailable'] %}
+                      {{ as_datetime(due_str).isoformat() }}
+                    {% else %}
+                      {{ (now() + timedelta(days=1)).isoformat() }}
+                    {% endif %}
+                  due_date: "{{ as_datetime(due_iso).date().isoformat() }}"
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ all_day | bool }}"
+                    sequence:
+                      - service: todo.add_item
+                        target:
+                          entity_id: "{{ todo_entity }}"
+                        data:
+                          item: "{{ summary }}"
+                          description: >-
+                            {% if description %}{{ description }}{% endif %}
+                          due_date: "{{ due_date }}"
+                default:
+                  - service: todo.add_item
+                    target:
+                      entity_id: "{{ todo_entity }}"
+                    data:
+                      item: "{{ summary }}"
+                      description: >-
+                        {% if description %}{{ description }}{% endif %}
+                      due_datetime: "{{ due_iso }}"
+              - service: persistent_notification.create
+                data:
+                  title: Agenda Planner
+                  message: >-
+                    Task "{{ summary }}" added
+                    {% if not (all_day | bool) %}
+                      with due {{ (as_datetime(due_iso) | as_local).strftime('%b %-d, %Y %I:%M %p') }}.
+                    {% else %}
+                      (all day {{ (as_datetime(due_iso) | as_local).strftime('%b %-d, %Y') }}).
+                    {% endif %}
+              - service: input_text.set_value
+                target:
+                  entity_id:
+                    - input_text.agenda_planner_task_title
+                    - input_text.agenda_planner_task_notes
+                data:
+                  value: ""
+              - service: input_datetime.set_datetime
+                target:
+                  entity_id: input_datetime.agenda_planner_task_due
+                data:
+                  datetime: "{{ (now() + timedelta(days=1)).isoformat(timespec='minutes') }}"
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.agenda_planner_task_all_day
+        default:
+          - service: persistent_notification.create
+            data:
+              title: Agenda Planner
+              message: >-
+                Unable to add task. Ensure a todo list entity is set and a title is provided.
+
+automation:
+  - id: agenda_planner_initialize_defaults
+    alias: Agenda Planner – Refresh Defaults On Startup
+    mode: single
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - service: input_datetime.set_datetime
+        target:
+          entity_id:
+            - input_datetime.agenda_planner_event_start
+        data:
+          datetime: "{{ (now() + timedelta(hours=1)).isoformat(timespec='minutes') }}"
+      - service: input_datetime.set_datetime
+        target:
+          entity_id:
+            - input_datetime.agenda_planner_event_end
+        data:
+          datetime: "{{ (now() + timedelta(hours=2)).isoformat(timespec='minutes') }}"
+      - service: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.agenda_planner_task_due
+        data:
+          datetime: "{{ (now() + timedelta(days=1)).isoformat(timespec='minutes') }}"
+
+  - id: agenda_planner_auto_end_adjust
+    alias: Agenda Planner – Auto Adjust End Time
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_datetime.agenda_planner_event_start
+    condition:
+      - condition: template
+        value_template: "{{ states('input_datetime.agenda_planner_event_start') not in ['unknown', 'unavailable'] }}"
+    action:
+      - variables:
+          start_str: "{{ states('input_datetime.agenda_planner_event_start') }}"
+          end_str: "{{ states('input_datetime.agenda_planner_event_end') }}"
+          start_dt: "{{ as_datetime(start_str) }}"
+          end_dt: >-
+            {% if end_str not in ['unknown', 'unavailable'] %}
+              {{ as_datetime(end_str) }}
+            {% else %}
+              {{ as_datetime(start_str) + timedelta(hours=1) }}
+            {% endif %}
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ as_datetime(end_dt) <= as_datetime(start_dt) }}"
+            sequence:
+              - service: input_datetime.set_datetime
+                target:
+                  entity_id: input_datetime.agenda_planner_event_end
+                data:
+                  datetime: "{{ (as_datetime(start_dt) + timedelta(hours=1)).isoformat(timespec='minutes') }}"
+
+  - id: agenda_planner_set_all_day_flag
+    alias: Agenda Planner – Toggle Due Time On All-Day Flag
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.agenda_planner_task_all_day
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.agenda_planner_task_all_day
+                state: 'on'
+            sequence:
+              - service: input_datetime.set_datetime
+                target:
+                  entity_id: input_datetime.agenda_planner_task_due
+                data:
+                  datetime: "{{ as_datetime(states('input_datetime.agenda_planner_task_due'), default=now() + timedelta(days=1)).date().isoformat() }}"
+        default: []
+
+template:
+  - sensor:
+      - name: Agenda Planner Summary
+        unique_id: agenda_planner_summary
+        icon: mdi:calendar-check
+        state: >-
+          {% set calendars = state_attr('sensor.agenda_planner_entities', 'calendars') | default([]) %}
+          {% set todos = state_attr('sensor.agenda_planner_entities', 'todo_lists') | default([]) %}
+          {{ calendars | length }} calendars · {{ todos | length }} lists
+        attributes:
+          next_event: >-
+            {% set cal_entity = states('input_text.agenda_planner_calendar_entity') %}
+            {% if cal_entity not in ['unknown', 'unavailable', ''] %}
+              {% set summary = state_attr(cal_entity, 'message') %}
+              {% set start = state_attr(cal_entity, 'start_time') %}
+              {% if start %}
+                {% set local_dt = (as_datetime(start) | as_local) %}
+                {% if summary %}
+                  {{ summary ~ ' @ ' ~ local_dt.strftime('%b %-d, %Y %I:%M %p') }}
+                {% else %}
+                  {{ local_dt.strftime('%b %-d, %Y %I:%M %p') }}
+                {% endif %}
+              {% elif summary %}
+                {{ summary }}
+              {% else %}
+                No upcoming events
+              {% endif %}
+            {% else %}
+              unavailable
+            {% endif %}
+          open_tasks: >-
+            {% set todo_entity = states('input_text.agenda_planner_task_list_entity') %}
+            {% if todo_entity not in ['unknown', 'unavailable', ''] %}
+              {% set items = state_attr(todo_entity, 'items') | default([]) %}
+              {{ (items | selectattr('status', 'ne', 'completed') | list | length) }}
+            {% else %}
+              unavailable
+            {% endif %}
+  - sensor:
+      - name: Agenda Planner Entities
+        unique_id: agenda_planner_entities
+        icon: mdi:home-circle
+        state: ready
+        attributes:
+          calendars: >-
+            {{ states.calendar | map(attribute='entity_id') | list }}
+          todo_lists: >-
+            {{ states.todo | map(attribute='entity_id') | list }}

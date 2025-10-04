@@ -3,7 +3,7 @@ title: Infrastructure Overview
 summary: Inventory of the gate-hub Home Assistant OS environment, tooling stack, and repository layout.
 status: active
 category: reference
-updated: 2025-09-27
+updated: 2025-10-05
 owner: platform-team
 tags:
   - infrastructure
@@ -82,6 +82,11 @@ See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 - [TP-Link Deco custom integration](https://github.com/amosyuen/ha-tplink-deco) is configured alongside it for expanded mesh telemetry and device tracking.
 - `packages/network_monitor.yaml` aggregates the speedtest entities plus Deco throughput into summary sensors and rolling statistics windows (1h/24h/7d/30d). Those statistics sensors power the Network Monitor dashboard comparisons and are whitelisted in `recorder_include_entities` so long-term trend charts stay populated.
 - The `dashboards/network-dashboard.yaml` Lovelace view surfaces the Deco health, throughput trends, and ping comparisons (current vs averages) alongside auto-entities blocks for live Deco nodes and any `sensor.ping_*` entities.
+
+## Agenda & Tasks
+
+- `packages/agenda_planner.yaml` centralizes helpers and scripts for adding events (`calendar.create_event`) and tasks (`todo.add_item`) from the UI. The Kiosk snapshot view now includes a dedicated agenda column using this package.
+- `docs/reference/agenda-planner.md` documents setup, dashboards, and entity usage.
 
 ## Repository Layout
 
