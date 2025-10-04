@@ -534,15 +534,50 @@
         icon: mdi:party-popper
         availability: "{{ has_value('sensor.husker_team') }}"
         state: >-
-          {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
-          {% if minutes <= 0 %}
+          {% set iso = state_attr('sensor.husker_team', 'date') %}
+          {% set kickoff = as_timestamp(iso, default=None) %}
+          {% set now_ts = now().timestamp() %}
+          {% set live = is_state('binary_sensor.huskers_is_live_espn', 'on') %}
+          {% set postgame = is_state('binary_sensor.huskers_is_postgame_espn', 'on') %}
+          {% set postgame_age = now_ts - as_timestamp(states.binary_sensor.huskers_is_postgame_espn.last_changed, default=0) %}
+          {% set show = False %}
+          {% if kickoff is not none %}
+            {% if now_ts >= kickoff - 86400 %}
+              {% set show = True %}
+            {% endif %}
+            {% if now_ts > kickoff + 14400 and not live and not postgame %}
+              {% set show = False %}
+            {% endif %}
+            {% if postgame %}
+              {% if postgame_age <= 1800 %}
+                {% set show = True %}
+              {% else %}
+                {% set show = False %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          {% if not show %}
+            Idle
+          {% elif kickoff is none %}
+            Kickoff time TBD
+          {% elif now_ts >= kickoff %}
             It's game time!
-          {% elif minutes < 60 %}
-            {{ minutes }} minutes to kickoff
-          {% elif minutes < 1440 %}
-            {{ (minutes // 60) }}h {{ minutes % 60 }}m to kickoff
           {% else %}
-            {{ (minutes // 1440) }}d {{ (minutes % 1440) // 60 }}h out
+            {% set remaining = kickoff - now_ts %}
+            {% set total_minutes = (remaining / 60) | int(0) %}
+            {% if total_minutes >= 1440 %}
+              {% set days = total_minutes // 1440 %}
+              {% set rem_minutes = total_minutes % 1440 %}
+              {% set hours = rem_minutes // 60 %}
+              {% set minutes = rem_minutes % 60 %}
+              {{ days }}d {{ '%02d' % hours }}h {{ '%02d' % minutes }}m to kickoff
+            {% elif total_minutes >= 60 %}
+              {% set hours = total_minutes // 60 %}
+              {% set minutes = total_minutes % 60 %}
+              {{ hours }}h {{ '%02d' % minutes }}m to kickoff
+            {% else %}
+              {{ total_minutes }} minutes to kickoff
+            {% endif %}
           {% endif %}
 
       - name: huskers_hype_message
@@ -689,3 +724,33 @@
           {% else %}
             mdi:emoticon-question
           {% endif %}
+
+  - binary_sensor:
+      - name: huskers_tailgate_window
+        unique_id: huskers_tailgate_window_tt
+        icon: mdi:clock-start
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: >-
+          {% set iso = state_attr('sensor.husker_team', 'date') %}
+          {% set kickoff = as_timestamp(iso, default=None) %}
+          {% set now_ts = now().timestamp() %}
+          {% set live = is_state('binary_sensor.huskers_is_live_espn', 'on') %}
+          {% set postgame = is_state('binary_sensor.huskers_is_postgame_espn', 'on') %}
+          {% set postgame_age = now_ts - as_timestamp(states.binary_sensor.huskers_is_postgame_espn.last_changed, default=0) %}
+          {% set show = False %}
+          {% if kickoff is not none %}
+            {% if now_ts >= kickoff - 86400 %}
+              {% set show = True %}
+            {% endif %}
+            {% if now_ts > kickoff + 14400 and not live and not postgame %}
+              {% set show = False %}
+            {% endif %}
+            {% if postgame %}
+              {% if postgame_age <= 1800 %}
+                {% set show = True %}
+              {% else %}
+                {% set show = False %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          {{ show }}
