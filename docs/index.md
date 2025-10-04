@@ -2,7 +2,7 @@
 title: Documentation Index
 summary: Entry point for the gate-hub knowledge base organised with the Divio documentation model.
 status: active
-updated: 2025-10-06
+updated: 2025-10-09
 owner: ops-team
 ---
 
@@ -28,7 +28,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Pre-commit Hooks](how-to/pre-commit.md)
 - [Mosquitto MQTT Add-on](how-to/addons/mqtt.md)
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
-- [Husker Dashboard Guide](how-to/huskers/dashboard.md) *(TeamTracker card, Big Ten standings, lighting macros)*
+- [Husker Dashboard Guide](how-to/huskers/dashboard.md) *(TeamTracker card, tailgate window, Big Ten standings, lighting macros)*
 - [Husker LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
 - [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)

@@ -124,7 +124,7 @@ The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant
 
 ## Dashboards
 
-- **Huskers Game Day:** Game Day, Team & Data, and Lighting views featuring the TeamTracker hero card, color-chip profiles, manual override-aware countdowns, and Big Ten standings markdown.
+- **Huskers Game Day:** Game Day, Team & Data, and Lighting views featuring the TeamTracker hero card, color-chip profiles, a `binary_sensor.huskers_tailgate_window`-gated countdown, and Big Ten standings markdown.
 - **Rooms & Areas:** light, climate, and occupancy controls by space.
 - **Networking & System:** Deco mesh insight, supervisor health, backup status.
 - **Weather:** AccuWeather + Wunderground summaries, forecasts, and warnings.
@@ -150,7 +150,7 @@ Each dashboard is defined under `dashboards/` and registered in `configuration.y
 All supporting docs live under `docs/`:
 
 - `docs/index.md` – navigation hub for tooling, ADRs, and guides.
-- `docs/how-to/huskers/dashboard.md` – operating the refreshed Huskers Game Day board (TeamTracker card, color chips, countdown overrides).
+- `docs/how-to/huskers/dashboard.md` – operating the refreshed Huskers Game Day board (TeamTracker card, tailgate window, color chips, countdown overrides).
 - `docs/how-to/lighting/husker-led-mqtt.md` – scripts and MQTT details for exterior light shows.
 - `docs/explanation/huskers-dashboard-history.md` – rationale behind the consolidation and 2025 refresh (Core API standings, auto-entities scene list).
 - `docs/ci.md` – CI pipeline reference and troubleshooting notes.
