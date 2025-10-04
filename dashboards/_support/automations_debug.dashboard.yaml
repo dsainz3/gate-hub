@@ -1,7 +1,7 @@
-title: Automations Debug
+title: Support · Automations Debug
 views:
   - title: Overview
-    path: autos-overview
+    path: support-automations
     icon: mdi:cogs
     badges: []
     cards:

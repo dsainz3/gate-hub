@@ -1,8 +1,8 @@
-title: Huskers Team Tracker
+title: Huskers Dashboard
 theme: Huskers Cream
 views:
   - title: Game Day
-    path: huskers-game-day
+    path: huskers
     icon: mdi:football-helmet
     badges: []
     cards:

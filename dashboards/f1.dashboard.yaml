@@ -1,7 +1,7 @@
-title: F1 Race Center
+title: F1 Dashboard
 views:
   - title: Race Weekend
-    path: f1-race-weekend
+    path: f1
     icon: mdi:flag-outline
     badges: []
     cards:
