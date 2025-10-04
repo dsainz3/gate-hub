@@ -251,24 +251,39 @@
         entity_id: binary_sensor.holiday_mode_active
         state: 'off'
     action:
-      - condition: template
-        value_template: >-
+      - alias: 'Wait for permanent outdoor lights to advertise effects after startup'
+        wait_template: >-
           {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
           {{ target_effect in available_effects }}
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: light.turn_on
-            target:
-              entity_id: light.permanent_outdoor_lights
+        timeout: '00:02:00'
+        continue_on_timeout: true
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
+                  {{ target_effect in available_effects }}
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+                then:
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.permanent_outdoor_lights
+                    data:
+                      effect: '{{ target_effect }}'
+                    continue_on_error: true
+              - service: logbook.log
+                data:
+                  name: LED Monthly Effect
+                  message: 'Applied {{ target_effect }} for month {{ current_month }}'
+        default:
+          - service: logbook.log
             data:
-              effect: '{{ target_effect }}'
-            continue_on_error: true
-      - service: logbook.log
-        data:
-          name: LED Monthly Effect
-          message: 'Applied {{ target_effect }} for month {{ current_month }}'
+              name: LED Monthly Effect
+              message: >-
+                Skipped {{ target_effect }} for month {{ current_month }} -- effect missing after startup wait
 
   - id: humidor_plug_temp_control
     alias: 'Climate: Humidor Temperature Control'

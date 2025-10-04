@@ -56,7 +56,7 @@ Use this catalog as the single source of truth for automation behaviour. Each en
 - **ID** `exterior_led_monthly_effect`
 - **Triggers**: Time `00:00:01` daily and Home Assistant start.
 - **Guards**: Requires `binary_sensor.holiday_mode_active` to be `off` and confirms the requested `effect` exists in `light.permanent_outdoor_lights`.
-- **Actions**: Applies the month-specific effect and logs the change. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
+- **Actions**: Waits up to two minutes for the permanent outdoor light effect list to load after startup, applies the month-specific effect when available, and logs success or a skip if the effect never appears. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
 
 ### Climate: Humidor Temperature Control (`automations.yaml:251`)
 - **ID** `humidor_plug_temp_control`
