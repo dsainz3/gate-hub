@@ -44,3 +44,110 @@ views:
               service: script.turn_off
               target:
                 entity_id: script.test_halloween
+  - title: Plex · Theater
+    path: support-test-plex
+    icon: mdi:plex
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Plex & Basement Theater
+              Quick controls and telemetry for the new Plex server and basement Fire TV client.
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: custom:mushroom-media-player-card
+                entity: media_player.basement_fire_tv
+                name: Basement Theater Fire TV
+                use_media_info: true
+                show_volume_level: true
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.basement_theater_active
+                primary: >-
+                  {{ iif(is_state('binary_sensor.basement_theater_active', 'on'), 'Theater Active', 'Theater Idle') }}
+                secondary: |-
+                  Fire TV: {{ states('sensor.basement_theater_media_status') }} · App: {{ state_attr('sensor.basement_theater_media_status', 'app_name') }}
+                  Plex sessions: {{ states('sensor.plex_server_sessions') }}
+                icon: mdi:movie-open
+                icon_color: >-
+                  {{ iif(is_state('binary_sensor.basement_theater_active', 'on'), 'orange', 'grey') }}
+                tap_action:
+                  action: more-info
+          - type: markdown
+            content: |
+              ### Controls
+              Manage playback, navigation, and power for the theater client.
+          - type: grid
+            columns: 5
+            square: false
+            cards:
+              - type: button
+                entity: script.basement_fire_tv_launch_plex
+                name: Launch Plex
+                icon: mdi:television-play
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_launch_plex
+              - type: button
+                entity: script.basement_fire_tv_play_pause
+                name: Play/Pause
+                icon: mdi:play-pause
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_play_pause
+              - type: button
+                entity: script.basement_fire_tv_home
+                name: Fire TV Home
+                icon: mdi:remote-tv
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_home
+              - type: button
+                entity: script.basement_fire_tv_power_off
+                name: Power Off
+                icon: mdi:television-off
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_power_off
+              - type: button
+                entity: script.plex_refresh_clients
+                name: Refresh Plex
+                icon: mdi:plex
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.plex_refresh_clients
+          - type: markdown
+            content: |
+              ### Telemetry
+              Live status from the Fire TV client and Plex server.
+          - type: entities
+            entities:
+              - entity: sensor.basement_theater_media_status
+                name: Fire TV Status
+              - entity: sensor.plex_server_sessions
+                name: Plex Sessions
+              - entity: sensor.plex
+                name: Plex Raw Sensor
+              - entity: button.plex_scan_clients
+                name: Plex Scan Clients
+          - type: markdown
+            content: |
+              ### Plex Library
+              Browse the Plex library and launch playback directly on the theater Fire TV.
+          - type: media-browser
+            title: Plex Library Browser
+            entity: media_player.plex_plex_for_android_tv_aftgazl

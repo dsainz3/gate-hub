@@ -177,3 +177,5 @@ lovelace:
       icon: mdi:test-tube
       show_in_sidebar: true
       filename: dashboards/_support/test_resources.dashboard.yaml
+
+media_source:

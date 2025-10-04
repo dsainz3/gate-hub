@@ -1,0 +1,218 @@
+###############################################################################
+# Basement theater media helpers (Fire TV + Plex)
+# Adds scripts, template sensors, and groups used by the test dashboard view.
+###############################################################################
+
+homeassistant:
+  customize:
+    script.basement_fire_tv_launch_plex:
+      friendly_name: Launch Plex on Basement Fire TV
+      icon: mdi:television-play
+    script.basement_fire_tv_power_off:
+      friendly_name: Power Off Basement Fire TV
+      icon: mdi:television-off
+    script.basement_fire_tv_home:
+      friendly_name: Send Home Command to Basement Fire TV
+      icon: mdi:remote-tv
+    script.basement_fire_tv_play_pause:
+      friendly_name: Play/Pause Basement Fire TV
+      icon: mdi:play-pause
+    script.plex_refresh_clients:
+      friendly_name: Plex · Refresh Clients
+      icon: mdi:plex
+
+    media_player.basement_fire_tv:
+      friendly_name: Basement Theater Fire TV
+      icon: mdi:television
+    remote.basement_fire_tv:
+      friendly_name: Basement Fire TV Remote
+      icon: mdi:remote-tv
+
+script:
+  basement_fire_tv_launch_plex:
+    alias: Launch Plex on Basement Fire TV
+    description: >-
+      Power on the basement Fire TV (if needed) and launch the Plex client.
+    mode: restart
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states('media_player.basement_fire_tv') in ['off', 'standby', 'unknown', 'unavailable'] }}
+            sequence:
+              - service: media_player.turn_on
+                target:
+                  entity_id: media_player.basement_fire_tv
+              - delay:
+                  seconds: 4
+        default: []
+      - service: remote.send_command
+        target:
+          entity_id: remote.basement_fire_tv
+        data:
+          command:
+            - HOME
+        continue_on_error: true
+      - delay:
+          seconds: 1
+      - service: androidtv.adb_command
+        target:
+          entity_id: media_player.basement_fire_tv
+        data:
+          command: >-
+            am start -n com.plexapp.mediaserver.smb/com.plexapp.mediaserver.activities.SplashActivity
+
+  basement_fire_tv_power_off:
+    alias: Power Off Basement Fire TV
+    mode: single
+    sequence:
+      - service: media_player.turn_off
+        target:
+          entity_id: media_player.basement_fire_tv
+
+  basement_fire_tv_home:
+    alias: Send Home Command to Basement Fire TV
+    mode: single
+    sequence:
+      - service: remote.send_command
+        target:
+          entity_id: remote.basement_fire_tv
+        data:
+          command:
+            - HOME
+
+  basement_fire_tv_play_pause:
+    alias: Play/Pause Basement Fire TV
+    mode: single
+    sequence:
+      - service: media_player.media_play_pause
+        target:
+          entity_id: media_player.basement_fire_tv
+
+  plex_refresh_clients:
+    alias: Plex · Refresh Clients
+    mode: single
+    sequence:
+      - service: button.press
+        target:
+          entity_id: button.plex_scan_clients
+
+template:
+  - sensor:
+      - name: Basement Theater Media Status
+        unique_id: basement_theater_media_status
+        icon: mdi:television-classic
+        state: >-
+          {% set player_state = states('media_player.basement_fire_tv') %}
+          {% if player_state in ['unknown', 'unavailable', none] %}
+            unavailable
+          {% else %}
+            {{ player_state | title }}
+          {% endif %}
+        availability: >-
+          {{ states('media_player.basement_fire_tv') not in ['unknown', 'unavailable', none] }}
+        attributes:
+          app_name: >-
+            {% set app = state_attr('media_player.basement_fire_tv', 'app_name') or state_attr('media_player.basement_fire_tv', 'source') %}
+            {% if app in ['', none, 'unknown', 'unavailable'] %}
+              Idle
+            {% else %}
+              {{ app }}
+            {% endif %}
+          media_title: >-
+            {% set title = state_attr('media_player.basement_fire_tv', 'media_title') %}
+            {% if title in ['', none, 'unknown', 'unavailable'] %}
+              Idle
+            {% else %}
+              {{ title }}
+            {% endif %}
+          media_content_type: >-
+            {% set content = state_attr('media_player.basement_fire_tv', 'media_content_type') %}
+            {% if content in ['', none, 'unknown', 'unavailable'] %}
+              unknown
+            {% else %}
+              {{ content }}
+            {% endif %}
+          last_changed: >-
+            {% set entity = states.media_player.basement_fire_tv %}
+            {% if entity is not none and entity.last_changed %}
+              {{ entity.last_changed.isoformat() }}
+            {% else %}
+              unknown
+            {% endif %}
+
+      - name: Plex Server Sessions
+        unique_id: plex_server_sessions
+        icon: mdi:plex
+        unit_of_measurement: sessions
+        state: >-
+          {% set count = state_attr('sensor.plex', 'count') %}
+          {% if count not in [none, 'unknown', 'unavailable'] %}
+            {{ count }}
+          {% else %}
+            {% set base = states('sensor.plex') %}
+            {% if base in ['', none, 'unknown', 'unavailable'] %}
+              0
+            {% else %}
+              {{ base }}
+            {% endif %}
+          {% endif %}
+        availability: >-
+          {{ states('sensor.plex') not in [none, 'unknown', 'unavailable'] or state_attr('sensor.plex', 'count') not in [none, 'unknown', 'unavailable'] }}
+        attributes:
+          friendly_state: >-
+            {% set count = state_attr('sensor.plex', 'count') %}
+            {% if count not in [none, 'unknown', 'unavailable'] %}
+              {% set count_int = count | int(0) %}
+              {% if count_int > 0 %}
+                {{ count_int }} active session{{ 's' if count_int != 1 else '' }}
+              {% else %}
+                Idle
+              {% endif %}
+            {% else %}
+              {% set base = states('sensor.plex') %}
+              {% if base in ['', none, 'unknown', 'unavailable'] %}
+                Offline
+              {% else %}
+                {{ base }}
+              {% endif %}
+            {% endif %}
+          sessions: "{{ state_attr('sensor.plex', 'sessions') }}"
+          players: "{{ state_attr('sensor.plex', 'players') }}"
+          last_updated: >-
+            {% set entity = states.sensor.plex %}
+            {% if entity is not none and entity.last_changed %}
+              {{ entity.last_changed.isoformat() }}
+            {% else %}
+              unknown
+            {% endif %}
+
+  - binary_sensor:
+      - name: Basement Theater Active
+        unique_id: basement_theater_active
+        icon: mdi:movie-open
+        state: >-
+          {% set player_state = states('media_player.basement_fire_tv') %}
+          {% set sessions = states('sensor.plex_server_sessions') %}
+          {% set player_active = player_state in ['on', 'playing', 'paused', 'buffering'] %}
+          {% set plex_active = sessions not in ['unknown', 'unavailable', none] and (sessions | int(0)) > 0 %}
+          {{ player_active or plex_active }}
+        attributes:
+          player_state: "{{ states('media_player.basement_fire_tv') }}"
+          plex_sessions: "{{ states('sensor.plex_server_sessions') }}"
+
+group:
+  theater_media_entities:
+    name: Theater Media Entities
+    entities:
+      - media_player.basement_fire_tv
+      - remote.basement_fire_tv
+      - script.basement_fire_tv_launch_plex
+      - script.basement_fire_tv_power_off
+      - script.basement_fire_tv_home
+      - script.basement_fire_tv_play_pause
+      - script.plex_refresh_clients
+      - sensor.basement_theater_media_status
+      - sensor.plex_server_sessions
+      - binary_sensor.basement_theater_active
