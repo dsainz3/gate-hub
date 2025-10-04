@@ -1045,10 +1045,22 @@ template:
           {% set manual_kick = is_state('input_boolean.huskers_use_manual_kickoff','on') %}
           {% set has_next = state_attr('sensor.huskers_kickoff_in_2','has_next_game') | default(false) %}
           {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(999) %}
-          {% set pre_window = (manual_kick or has_next) and minutes <= 120 %}
+          {% set pre_window = (manual_kick or has_next) and minutes >= 0 and minutes <= 120 %}
           {% set live = is_state('binary_sensor.huskers_is_live_espn','on') %}
           {% set show_active = is_state('binary_sensor.huskers_light_show_active','on') %}
-          {{ auto_enabled and game_mode and (show_active or live or pre_window) }}
+          {% set postgame_recent = (
+            is_state('binary_sensor.huskers_is_postgame_espn','on')
+            and (
+              now().timestamp()
+              - as_timestamp(states.binary_sensor.huskers_is_postgame_espn.last_changed, 0)
+            ) <= 1800
+          ) %}
+          {{ auto_enabled and game_mode and (
+            show_active
+            or live
+            or pre_window
+            or postgame_recent
+          ) }}
 
 ################################################################################
 # AUTOMATIONS
