@@ -10,6 +10,11 @@ owner: ops-team
 
 Welcome to the hypermodern documentation set for the gate-hub Home Assistant deployment. Content is grouped using the Divio model so readers can quickly find the right depth:
 
+Latest highlights:
+- Snapshot view includes a dedicated agenda column showing the household calendar.
+- Agenda Planner package + kiosk view enable event/task entry from HA tablets.
+
+
 - **Tutorials** – step-by-step project onboarding (coming soon; contribute via the docs style guide).
 - **How-to guides** – task-focused instructions to operate or extend the system.
 - **Reference** – authoritative facts, inventories, and API/service contracts.
@@ -31,6 +36,8 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 ## Reference
 - [Automation Catalog](reference/automations.md)
 - [Infrastructure Overview](reference/infrastructure.md)
+- [Agenda Planner Package](reference/agenda-planner.md)
+- [Configure Agenda Planner Calendars & Todo Lists](how-to/agenda-planner.md)
 
 ## Explanation
 - [Optimization Plan](explanation/optimization-plan.md)
