@@ -14,6 +14,7 @@ nav:
   - Reference:
       - Documentation Style Guide: docs/README.md
       - Automation Catalog: docs/reference/automations.md
+      - Holiday Mode Reference: docs/reference/holidays.md
       - Infrastructure Overview: docs/reference/infrastructure.md
   - Explanation:
       - Optimization Plan: docs/explanation/optimization-plan.md

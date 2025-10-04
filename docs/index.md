@@ -35,6 +35,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 
 ## Reference
 - [Automation Catalog](reference/automations.md)
+- [Holiday Mode Reference](reference/holidays.md)
 - [Infrastructure Overview](reference/infrastructure.md)
 - [Agenda Planner Package](reference/agenda-planner.md)
 - [Configure Agenda Planner Calendars & Todo Lists](how-to/agenda-planner.md)
