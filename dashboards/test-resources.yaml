@@ -21,3 +21,26 @@ views:
             - entity_id: sensor.*
           exclude:
             - domain: weather
+      - type: grid
+        title: Halloween Lights
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            entity: script.test_halloween
+            name: Start Halloween Lights
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.test_halloween
+          - type: button
+            entity: script.test_halloween
+            name: Stop Halloween Lights
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_off
+              target:
+                entity_id: script.test_halloween

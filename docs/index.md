@@ -21,7 +21,7 @@ Latest highlights:
 - **Explanation** – architectural rationale, historical context, and strategy.
 - **Archive** – retired experiments kept for institutional memory.
 
-Use the sections below or the navigation in `mkdocs.yml` (once rendered) to browse. See `README.md` in this directory for authoring conventions.
+Use the sections below or the navigation in `mkdocs.yml` (once rendered) to browse. See the [Documentation Style Guide](reference/documentation-style-guide.md) for authoring conventions.
 
 ## How-to Guides
 - [CI Pipeline Runbook](how-to/ci.md)
@@ -53,4 +53,4 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - Capture decisions for significant changes. Submit a PR adding a new ADR when the decision is accepted.
 
 ## Contributing to the Docs
-See [README.md](README.md) in this directory for the docs style guide, workflow, and review checklist.
+See the [Documentation Style Guide](reference/documentation-style-guide.md) for the docs workflow and review checklist.

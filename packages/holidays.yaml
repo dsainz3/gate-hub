@@ -73,3 +73,379 @@ template:
             {% else %}
               unknown
             {% endif %}
+
+script:
+  test_halloween:
+    alias: Test Halloween
+    description: Rotate Halloween colors across theater and sunroom lights.
+    mode: restart
+    sequence:
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ true }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_theater_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 255
+                  - 110
+                  - 0
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_theater_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 180
+                  - 40
+                  - 220
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.sunroom_light
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 220
+                  - 50
+                  - 50
+            - delay:
+                seconds: 5
+
+  holiday_exterior_lights:
+    alias: Holiday Exterior Lights
+    description: Rotate exterior front and garage lights through Halloween colors.
+    mode: restart
+    sequence:
+      - repeat:
+          while:
+            - condition: template
+              value_template: "{{ true }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 255
+                  - 110
+                  - 0
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 180
+                  - 40
+                  - 220
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 220
+                  - 50
+                  - 50
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_center
+              data:
+                brightness_pct: 70
+                transition: 5
+                rgb_color:
+                  - 0
+                  - 140
+                  - 20
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 230
+                  - 120
+                  - 10
+            - delay:
+                seconds: 5
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 180
+                  - 40
+                  - 220
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 220
+                  - 50
+                  - 50
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_left
+              data:
+                brightness_pct: 70
+                transition: 5
+                rgb_color:
+                  - 0
+                  - 140
+                  - 20
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_center
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 230
+                  - 120
+                  - 10
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 255
+                  - 110
+                  - 0
+            - delay:
+                seconds: 5
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 220
+                  - 50
+                  - 50
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_right
+              data:
+                brightness_pct: 70
+                transition: 5
+                rgb_color:
+                  - 0
+                  - 140
+                  - 20
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 230
+                  - 120
+                  - 10
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_center
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 255
+                  - 110
+                  - 0
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 180
+                  - 40
+                  - 220
+            - delay:
+                seconds: 5
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_left
+              data:
+                brightness_pct: 70
+                transition: 5
+                rgb_color:
+                  - 0
+                  - 140
+                  - 20
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_front_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 230
+                  - 120
+                  - 10
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_left
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 255
+                  - 110
+                  - 0
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_center
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 180
+                  - 40
+                  - 220
+            - service: light.turn_on
+              target:
+                entity_id:
+                  - light.light_garage_right
+              data:
+                brightness_pct: 75
+                transition: 5
+                rgb_color:
+                  - 220
+                  - 50
+                  - 50
+            - delay:
+                seconds: 5
+
+  holiday_exterior_lights_resume:
+    alias: Holiday Exterior Lights Resume
+    description: Stop the holiday rotation and reapply scheduled exterior lighting automations.
+    mode: single
+    sequence:
+      - service: script.turn_off
+        target:
+          entity_id: script.holiday_exterior_lights
+      - delay:
+          seconds: 1
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ is_state('sun.sun', 'below_horizon') and now() >= today_at('03:30:00') }}
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id:
+                    - light.front_porch_lights
+                    - light.light_garage_left
+                    - light.light_garage_center
+                    - light.light_garage_right
+                data:
+                  color_temp: 500
+                  brightness_pct: 10
+                  transition: 3
+              - if:
+                  - condition: template
+                    value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+                then:
+                  - service: light.turn_on
+                    target:
+                      entity_id: light.permanent_outdoor_lights
+                    data:
+                      brightness_pct: 50
+                      transition: 3
+                    continue_on_error: true
+        default:
+          - service: light.turn_off
+            target:
+              entity_id:
+                - light.front_porch_lights
+                - light.light_garage_left
+                - light.light_garage_center
+                - light.light_garage_right
+            data:
+              transition: 5
+          - if:
+              - condition: template
+                value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+            then:
+              - service: light.turn_off
+                target:
+                  entity_id: light.permanent_outdoor_lights
+                data:
+                  transition: 5
+                continue_on_error: true
+
+automation:
+  - id: activate_halloween_exterior_lights
+    alias: Activate Halloween Exterior Lights
+    description: Start the Halloween exterior rotation at midnight on Halloween.
+    trigger:
+      - platform: time
+        at: "00:00:00"
+    condition:
+      - condition: template
+        value_template: "{{ now().month == 10 and now().day == 31 }}"
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.holiday_exterior_lights
+    mode: single
+
+  - id: deactivate_halloween_exterior_lights
+    alias: Deactivate Halloween Exterior Lights
+    description: Stop the Halloween exterior rotation at midnight after Halloween.
+    trigger:
+      - platform: time
+        at: "00:00:00"
+    condition:
+      - condition: template
+        value_template: "{{ now().month == 11 and now().day == 1 }}"
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.holiday_exterior_lights_resume
+    mode: single

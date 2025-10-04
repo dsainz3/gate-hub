@@ -1,0 +1,97 @@
+title: Holiday Dashboard
+views:
+  - title: Holiday
+    path: holiday
+    cards:
+      - type: grid
+        title: Exterior Lights Status
+        columns: 5
+        square: false
+        cards:
+          - type: tile
+            entity: light.light_front_left
+          - type: tile
+            entity: light.light_front_right
+          - type: tile
+            entity: light.light_garage_left
+          - type: tile
+            entity: light.light_garage_center
+          - type: tile
+            entity: light.light_garage_right
+      - type: grid
+        title: Exterior Lights
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            entity: script.holiday_exterior_lights
+            name: Start Exterior Lights
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.holiday_exterior_lights
+          - type: button
+            entity: script.holiday_exterior_lights_resume
+            name: Stop Exterior Lights
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.holiday_exterior_lights_resume
+      - type: grid
+        title: Schedule Simulation
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            entity: automation.activate_halloween_exterior_lights
+            name: Simulate Halloween Midnight
+            icon: mdi:clock-start
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.activate_halloween_exterior_lights
+              data:
+                skip_condition: true
+          - type: button
+            entity: automation.deactivate_halloween_exterior_lights
+            name: Simulate November 1 Midnight
+            icon: mdi:clock-end
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.deactivate_halloween_exterior_lights
+              data:
+                skip_condition: true
+
+  - title: Test Automations
+    path: test-automations
+    cards:
+      - type: grid
+        title: Halloween Scripts
+        columns: 2
+        square: false
+        cards:
+          - type: button
+            entity: script.test_halloween
+            name: Start Halloween Lights
+            icon: mdi:play-circle
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.test_halloween
+          - type: button
+            entity: script.test_halloween
+            name: Stop Halloween Lights
+            icon: mdi:stop-circle
+            tap_action:
+              action: call-service
+              service: script.turn_off
+              target:
+                entity_id: script.test_halloween

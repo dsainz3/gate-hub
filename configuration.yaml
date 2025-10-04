@@ -164,13 +164,6 @@ lovelace:
       icon: mdi:access-point-network
       show_in_sidebar: true
 
-    f1-dashboard:
-      mode: yaml
-      filename: dashboards/f1-dashboard.yaml
-      title: F1
-      icon: mdi:racing-helmet
-      show_in_sidebar: true
-
     # ✅ Test dashboard to verify custom card resources load
     test-resources:
       mode: yaml
@@ -178,3 +171,11 @@ lovelace:
       icon: mdi:test-tube
       show_in_sidebar: true
       filename: dashboards/test-resources.yaml
+
+    # Holiday lighting dashboard (only used seasonally)
+    holiday-lighting:
+      mode: yaml
+      title: Holiday Dashboard
+      icon: mdi:christmas-light
+      show_in_sidebar: true
+      filename: dashboards/holiday-dashboard.yaml

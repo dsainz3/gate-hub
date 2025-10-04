@@ -58,5 +58,5 @@ Update `updated` whenever you make a meaningful change. Keep `owner` aligned wit
 
 ## Contributing
 - For major structural changes, open or update an ADR in `docs/adr/`.
-- Keep the [Documentation Index](index.md) in sync with new pages.
+- Keep the [Documentation Index](../index.md) in sync with new pages.
 - Archive obsolete content instead of deleting when historical context matters.
