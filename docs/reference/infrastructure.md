@@ -88,6 +88,12 @@ See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 - `packages/agenda_planner.yaml` centralizes helpers and scripts for adding events (`calendar.create_event`) and tasks (`todo.add_item`) from the UI. The Kiosk snapshot view now includes a dedicated agenda column using this package.
 - `docs/reference/agenda-planner.md` documents setup, dashboards, and entity usage.
 
+## Media & Theater
+
+- `packages/theater_media.yaml` encapsulates the basement Fire TV + Plex helper scripts, template sensors, and entity group used by the Support · Test Resources dashboard.
+- The Plex · Theater view (`dashboards/_support/test_resources.dashboard.yaml`) surfaces the controls alongside a Lovelace media browser card. Ensure `media_source:` stays declared in `configuration.yaml` so the browser renders.
+- Reference details live in [Basement Theater Media Package](theater-media.md).
+
 ## Repository Layout
 
 ```

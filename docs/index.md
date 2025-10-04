@@ -2,7 +2,7 @@
 title: Documentation Index
 summary: Entry point for the gate-hub knowledge base organised with the Divio documentation model.
 status: active
-updated: 2025-10-09
+updated: 2025-10-10
 owner: ops-team
 ---
 
@@ -11,8 +11,9 @@ owner: ops-team
 Welcome to the hypermodern documentation set for the gate-hub Home Assistant deployment. Content is grouped using the Divio model so readers can quickly find the right depth:
 
 Latest highlights:
-- Snapshot view includes a dedicated agenda column showing the household calendar.
+- Snapshot view now includes a dedicated agenda column showing the household calendar.
 - Agenda Planner package + kiosk view enable event/task entry from HA tablets.
+- Support · Test Resources dashboard adds a Plex · Theater lab with direct Fire TV controls and the HA Media Browser.
 
 
 - **Tutorials** – step-by-step project onboarding (coming soon; contribute via the docs style guide).
@@ -36,6 +37,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 ## Reference
 - [Automation Catalog](reference/automations.md)
 - [Holiday Mode Reference](reference/holidays.md)
+- [Basement Theater Media Package](reference/theater-media.md)
 - [Infrastructure Overview](reference/infrastructure.md)
 - [Agenda Planner Package](reference/agenda-planner.md)
 - [Configure Agenda Planner Calendars & Todo Lists](how-to/agenda-planner.md)
