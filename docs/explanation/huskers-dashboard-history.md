@@ -3,7 +3,7 @@ title: Huskers Dashboard History
 summary: Rationale behind consolidating Huskers dashboards and related clean-up actions.
 status: active
 category: explanation
-updated: 2025-09-27
+updated: 2025-10-06
 owner: huskers-team
 tags:
   - huskers
@@ -19,27 +19,35 @@ This document summarizes the cleanup of redundant Husker dashboard configuration
 
 ## Changes Made
 
-1. **Consolidated Dashboards**
+1. **Consolidated Dashboards (2024)**
    - Kept `dashboards/huskers-teamtracker.yaml` as the primary dashboard
    - Merged useful controls from `huskers-auto.yaml` into the teamtracker dashboard
    - Removed redundant dashboard files
 
 2. **Removed Files**
-   - `dashboards/huskers-all.yaml` - Basic version, functionality covered by teamtracker
-   - `dashboards/huskers-dashboard.yaml` - Older version using individual sensors
-   - `dashboards/huskers-auto.yaml` - Automation controls merged into teamtracker
-   - `ui-lovelace/huskers.yaml` - Legacy UI template
+   - `dashboards/huskers-all.yaml` – Basic version, functionality covered by teamtracker
+   - `dashboards/huskers-dashboard.yaml` – Older version using individual sensors
+   - `dashboards/huskers-auto.yaml` – Automation controls merged into teamtracker
+   - `ui-lovelace/huskers.yaml` – Legacy UI template
 
 3. **File Structure**
    - Primary dashboard: `dashboards/huskers-teamtracker.yaml`
    - Core configuration: `packages/huskers_everything.yaml`
-   - Lovelace config: `lovelace/huskers.yaml`
+   - Lovelace include set: `lovelace/huskers.yaml`
 
-4. **Key Components**
-   - Team Tracker card for game info display
+4. **2025 Enhancements**
+   - Split dashboard into **Game Day**, **Team & Data**, and **Lighting & Scenes** views for clearer separation of duties.
+   - Adopted the TeamTracker custom card and vendored resource (`www/community/teamtracker-card/ha-teamtracker-card.js`) for the hero game panel.
+   - Replaced legacy Big Ten standings scrape with ESPN’s Core API (`sports.core.api.espn.com/v2/.../groups/5/standings/0`) and rendered it as a markdown table.
+   - Rebuilt team/opponent profiles as table-based cards with live color swatches derived from TeamTracker attributes.
+   - Switched scene listings to `custom:auto-entities` so snapshot scenes appear only while active, reducing Lovelace errors after restarts.
+   - Countdown cards now rely on `sensor.huskers_kickoff_in_effective`, respecting manual overrides from `input_boolean.huskers_use_manual_kickoff`.
+
+5. **Key Components (current)**
+   - TeamTracker card for game info display
    - Quick refresh controls for data updates
-   - Light show control buttons
-   - Game phase-specific automations
+   - Lighting macros (chase, burst, restore) tied into Huskers scripts
+   - Big Ten standings + matchup metadata sourced from updated ESPN feeds
 
 ## References
 - Main configuration is in `packages/huskers_everything.yaml`

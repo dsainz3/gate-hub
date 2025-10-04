@@ -208,7 +208,7 @@ views:
               - type: markdown
                 title: Tailgate Countdown
                 content: |-
-                  {% set minutes = states('sensor.huskers_kickoff_in') | int(0) %}
+                  {% set minutes = states('sensor.huskers_kickoff_in_effective') | int(0) %}
                   {% if minutes <= 0 %}
                     ### It's game time!
                   {% elif minutes < 60 %}
@@ -261,50 +261,158 @@ views:
     badges: []
     cards:
       - type: grid
-        columns: 3
+        columns: 2
         square: false
         cards:
           - type: markdown
             title: Huskers Profile
             content: |-
-              ### Huskers Profile
-              - **Name:** {{ state_attr('sensor.husker_team', 'team_long_name') or 'Nebraska Cornhuskers' }}
-              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'team_abbr') or 'NEB' }}
-              - **Team ID:** {{ state_attr('sensor.husker_team', 'team_id') or '158' }}
-              - **Conference:** {{ state_attr('sensor.husker_team', 'team_conference_id') or 'Big Ten' }}
-              - **Record:** {{ state_attr('sensor.husker_team', 'team_record') or 'TBA' }}
-              - **Rank:** {{ state_attr('sensor.husker_team', 'team_rank') or 'Unranked' }}
-              - **Colors:** {{ state_attr('sensor.husker_team', 'team_colors') or 'Scarlet & Cream' }}
-              - **Timeouts:** {{ state_attr('sensor.husker_team', 'team_timeouts') if state_attr('sensor.husker_team', 'team_timeouts') is not none else 'TBA' }}
-              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'team_winner') }}
-              - **Website:** {{ state_attr('sensor.husker_team', 'team_url') or 'https://huskers.com' }}
+              {% set rows = [
+                ('Name', state_attr('sensor.husker_team', 'team_long_name') or 'Nebraska Cornhuskers'),
+                ('Abbreviation', state_attr('sensor.husker_team', 'team_abbr') or 'NEB'),
+                ('Team ID', state_attr('sensor.husker_team', 'team_id') or '158'),
+                ('Conference', state_attr('sensor.husker_team', 'team_conference_id') or 'Big Ten'),
+                ('Record', state_attr('sensor.husker_team', 'team_record') or 'TBA'),
+                ('Rank', state_attr('sensor.husker_team', 'team_rank') or 'Unranked'),
+                ('Timeouts', state_attr('sensor.husker_team', 'team_timeouts') if state_attr('sensor.husker_team', 'team_timeouts') is not none else 'TBA'),
+                ('Winner Flag', state_attr('sensor.husker_team', 'team_winner') or '—'),
+                ('Website', state_attr('sensor.husker_team', 'team_url') or 'https://huskers.com')
+              ] %}
+              {% set raw_colors = state_attr('sensor.husker_team', 'team_colors') %}
+              {% set primary = state_attr('sensor.husker_team', 'team_color_primary') %}
+              {% set secondary = state_attr('sensor.husker_team', 'team_color_secondary') %}
+              {% set ns = namespace(colors=[]) %}
+              {% for candidate in [primary, secondary] %}
+                {% if candidate %}
+                  {% set normalized = candidate if candidate.startswith('#') else '#' ~ candidate %}
+                  {% if normalized not in ns.colors %}
+                    {% set ns.colors = ns.colors + [normalized] %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {% if raw_colors %}
+                {% if raw_colors is string %}
+                  {% set color_list = raw_colors.split(',') %}
+                {% else %}
+                  {% set color_list = raw_colors %}
+                {% endif %}
+                {% for candidate in color_list %}
+                  {% set cleaned = candidate | trim %}
+                  {% if cleaned %}
+                    {% set normalized = cleaned if cleaned.startswith('#') else '#' ~ cleaned %}
+                    {% if normalized not in ns.colors %}
+                      {% set ns.colors = ns.colors + [normalized] %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              {% if ns.colors | length == 0 %}
+                {% set ns.colors = ['#E41C38', '#FDF3E7'] %}
+              {% endif %}
+              <table style="width:100%;border-collapse:collapse;">
+              {% for label, value in rows %}
+                <tr>
+                  <th style="text-align:left;padding:4px 0;font-weight:600;color:var(--secondary-text-color);">{{ label }}</th>
+                  <td style="text-align:right;padding:4px 0;color:var(--primary-text-color);">{{ value }}</td>
+                </tr>
+              {% endfor %}
+              </table>
+              {% if ns.colors %}
+              {% set chips = [] %}
+              {% for swatch in ns.colors %}
+                {% set chips = chips + ['<div style="display:flex;align-items:center;gap:6px;">'
+                  ~ '<span style="display:inline-block;width:20px;height:20px;border-radius:4px;border:1px solid rgba(0,0,0,0.2);background:'
+                  ~ swatch ~ ';"></span><span>' ~ swatch ~ '</span></div>'] %}
+              {% endfor %}
+              {{ '<div style="margin-top:12px;">'
+                 ~ '<p style="margin:0 0 6px 0;font-weight:600;color:var(--secondary-text-color);">Team Colors</p>'
+                 ~ '<div style="display:flex;flex-direction:column;gap:6px;">'
+                 ~ (chips | join(''))
+                 ~ '</div></div>' }}
+              {% endif %}
           - type: markdown
             title: Opponent Profile
             content: |-
-              ### Opponent Profile
-              - **Name:** {{ state_attr('sensor.husker_team', 'opponent_long_name') or 'Opponent' }}
-              - **Abbreviation:** {{ state_attr('sensor.husker_team', 'opponent_abbr') or '-' }}
-              - **Team ID:** {{ state_attr('sensor.husker_team', 'opponent_id') or '-' }}
-              - **Conference:** {{ state_attr('sensor.husker_team', 'opponent_conference_id') or '-' }}
-              - **Record:** {{ state_attr('sensor.husker_team', 'opponent_record') or 'TBA' }}
-              - **Rank:** {{ state_attr('sensor.husker_team', 'opponent_rank') or 'Unranked' }}
-              - **Colors:** {{ state_attr('sensor.husker_team', 'opponent_colors') or 'TBA' }}
-              - **Timeouts:** {{ state_attr('sensor.husker_team', 'opponent_timeouts') if state_attr('sensor.husker_team', 'opponent_timeouts') is not none else 'TBA' }}
-              - **Winner Flag:** {{ state_attr('sensor.husker_team', 'opponent_winner') }}
-              - **Website:** {{ state_attr('sensor.husker_team', 'opponent_url') or '#' }}
+              {% set rows = [
+                ('Name', state_attr('sensor.husker_team', 'opponent_long_name') or 'Opponent'),
+                ('Abbreviation', state_attr('sensor.husker_team', 'opponent_abbr') or '-'),
+                ('Team ID', state_attr('sensor.husker_team', 'opponent_id') or '-'),
+                ('Conference', state_attr('sensor.husker_team', 'opponent_conference_id') or '-'),
+                ('Record', state_attr('sensor.husker_team', 'opponent_record') or 'TBA'),
+                ('Rank', state_attr('sensor.husker_team', 'opponent_rank') or 'Unranked'),
+                ('Timeouts', state_attr('sensor.husker_team', 'opponent_timeouts') if state_attr('sensor.husker_team', 'opponent_timeouts') is not none else 'TBA'),
+                ('Winner Flag', state_attr('sensor.husker_team', 'opponent_winner') or '—'),
+                ('Website', state_attr('sensor.husker_team', 'opponent_url') or '#')
+              ] %}
+              {% set raw_colors = state_attr('sensor.husker_team', 'opponent_colors') %}
+              {% set primary = state_attr('sensor.husker_team', 'opponent_color_primary') %}
+              {% set secondary = state_attr('sensor.husker_team', 'opponent_color_secondary') %}
+              {% set ns = namespace(colors=[]) %}
+              {% for candidate in [primary, secondary] %}
+                {% if candidate %}
+                  {% set normalized = candidate if candidate.startswith('#') else '#' ~ candidate %}
+                  {% if normalized not in ns.colors %}
+                    {% set ns.colors = ns.colors + [normalized] %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {% if raw_colors %}
+                {% if raw_colors is string %}
+                  {% set color_list = raw_colors.split(',') %}
+                {% else %}
+                  {% set color_list = raw_colors %}
+                {% endif %}
+                {% for candidate in color_list %}
+                  {% set cleaned = candidate | trim %}
+                  {% if cleaned %}
+                    {% set normalized = cleaned if cleaned.startswith('#') else '#' ~ cleaned %}
+                    {% if normalized not in ns.colors %}
+                      {% set ns.colors = ns.colors + [normalized] %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <table style="width:100%;border-collapse:collapse;">
+              {% for label, value in rows %}
+                <tr>
+                  <th style="text-align:left;padding:4px 0;font-weight:600;color:var(--secondary-text-color);">{{ label }}</th>
+                  <td style="text-align:right;padding:4px 0;color:var(--primary-text-color);">{{ value }}</td>
+                </tr>
+              {% endfor %}
+              </table>
+              {% if ns.colors %}
+              {% set chips = [] %}
+              {% for swatch in ns.colors %}
+                {% set chips = chips + ['<div style="display:flex;align-items:center;gap:6px;">'
+                  ~ '<span style="display:inline-block;width:20px;height:20px;border-radius:4px;border:1px solid rgba(0,0,0,0.2);background:'
+                  ~ swatch ~ ';"></span><span>' ~ swatch ~ '</span></div>'] %}
+              {% endfor %}
+              {{ '<div style="margin-top:12px;">'
+                 ~ '<p style="margin:0 0 6px 0;font-weight:600;color:var(--secondary-text-color);">Team Colors</p>'
+                 ~ '<div style="display:flex;flex-direction:column;gap:6px;">'
+                 ~ (chips | join(''))
+                 ~ '</div></div>' }}
+              {% endif %}
           - type: markdown
             title: League & API
             content: |-
-              ### League & API
-              - **Sport:** {{ state_attr('sensor.husker_team', 'sport') or 'Football' }}
-                ({{ state_attr('sensor.husker_team', 'sport_path') or 'college-football' }})
-              - **League:** {{ state_attr('sensor.husker_team', 'league') or 'NCAAF' }}
-                ({{ state_attr('sensor.husker_team', 'league_path') or 'college-football' }})
-              - **Season:** {{ state_attr('sensor.husker_team', 'season') or 'Current' }}
-              - **API Status:** {{ state_attr('sensor.husker_team', 'api_message') or 'OK' }}
-              - **API URL:** {{ state_attr('sensor.husker_team', 'api_url') or 'n/a' }}
-              - **Last Update:** {{ state_attr('sensor.husker_team', 'last_update') or '-' }}
-              - **Rapid Refresh:** {{ 'Yes' if state_attr('sensor.husker_team', 'private_fast_refresh') else 'No' }}
+              {% set rows = [
+                ('Sport', (state_attr('sensor.husker_team', 'sport') or 'Football') ~ ' (' ~ (state_attr('sensor.husker_team', 'sport_path') or 'college-football') ~ ')'),
+                ('League', (state_attr('sensor.husker_team', 'league') or 'NCAAF') ~ ' (' ~ (state_attr('sensor.husker_team', 'league_path') or 'college-football') ~ ')'),
+                ('Season', state_attr('sensor.husker_team', 'season') or 'Current'),
+                ('API Status', state_attr('sensor.husker_team', 'api_message') or 'OK'),
+                ('Last Update', state_attr('sensor.husker_team', 'last_update') or '-'),
+                ('Rapid Refresh', 'Yes' if state_attr('sensor.husker_team', 'private_fast_refresh') else 'No'),
+                ('API URL', state_attr('sensor.husker_team', 'api_url') or 'n/a')
+              ] %}
+              <table style="width:100%;border-collapse:collapse;">
+              {% for label, value in rows %}
+                <tr>
+                  <th style="text-align:left;padding:4px 0;font-weight:600;color:var(--secondary-text-color);">{{ label }}</th>
+                  <td style="text-align:right;padding:4px 0;color:var(--primary-text-color);">{{ value }}</td>
+                </tr>
+              {% endfor %}
+              </table>
       - type: markdown
         title: Series Summary
         content: |-
@@ -385,10 +493,15 @@ views:
                 secondary_info: last-triggered
               - entity: automation.exterior_led_monthly_effect
                 secondary_info: last-triggered
-          - type: entities
-            title: Huskers Scenes
-            show_header_toggle: false
-            entities:
-              - entity: scene.huskers_seven_all_scarlet
-              - entity: scene.huskers_before_chase
-              - entity: scene.huskers_before_burst
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Huskers Scenes
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: scene.huskers_seven_all_scarlet
+                - entity_id: scene.huskers_before_chase
+                - entity_id: scene.huskers_before_burst
+            sort:
+              method: name

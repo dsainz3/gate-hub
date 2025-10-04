@@ -95,6 +95,7 @@ See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 ├─ scripts/ & scripts.yaml     # reusable automation helpers
 ├─ docs/                       # you are here
 └─ www/                        # static assets (dashboards, themes, cards)
+   └─ community/teamtracker-card/ha-teamtracker-card.js   # vendored TeamTracker Lovelace card
 ```
 
 Use this structure when creating new features so includes stay predictable for CI and for the [Automation Catalog](automations.md).
