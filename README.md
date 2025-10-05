@@ -55,7 +55,6 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 |-- custom_components/         # Checked-in custom integrations (BLE, Govee, ...)
 |-- scripts/                   # Local+CI helpers, incl. ha_check_portable
 |-- docs/                      # Living documentation for infra, tooling, ADRs
-|-- Fix-HAConfig.ps1           # PowerShell fixer/normaliser with backup support
 ```
 
 ---
@@ -66,7 +65,6 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 
 1. Clone the repository into your Home Assistant `/config` directory.
 2. Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
-3. Review `Fix-HAConfig.ps1` for optional one-time normalisation tasks.
 
 ### Runtime data and local copies
 

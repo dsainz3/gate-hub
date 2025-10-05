@@ -3,7 +3,7 @@
 ## Active Items
 - [ ] Remove obsolete HA helper scripts and associated tooling
   - Delete legacy helpers from `scripts/` and the `.ci/fakesecrets.yaml` placeholder once the workflow no longer needs them.
-  - Drop PowerShell utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) or relocate them to an archival location.
+  - ~~Drop PowerShell utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) or relocate them to an archival location.~~ _(Completed: archived from repo October 2025)_
   - Update `.pre-commit-config.yaml` to run `hass --script check_config` via Docker or the supported runner after the local scripts are gone.
 - [ ] Fix Huskers theme issue for Huskers Team Tracker dashboard
   - Background: top app bar still renders blue despite theme overrides.
@@ -43,7 +43,7 @@
 
 ## Recent actions (cleanup)
 - Audited cleanup plan and confirmed legacy helper scripts still exist (`.ci/fakesecrets.yaml`, `scripts/ha_check_portable.py`, `scripts/ha_check_portable.sh`, `scripts/hass_check.py`, `scripts/hass_check.sh`).
-- Verified PowerShell helper utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) remain in the repository and need deliberate removal or archival.
+- PowerShell helper utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) removed from the repository and no longer tracked.
 - Updated `.github/workflows/ha-config-check.yaml` to create valid empty YAML files (`{}`) for `secrets.yaml`, `automations.yaml`, `scripts.yaml`, and `customize.yaml` when missing.
 
 ## Next steps

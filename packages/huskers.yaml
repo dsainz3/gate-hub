@@ -1021,82 +1021,125 @@ template:
       # Today’s game status (plus basic attributes)
       - name: huskers_game_status_espn
         unique_id: huskers_game_status_espn
-        state: >-
-          {% set scoreboard_events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-          {% set game = namespace(comp=None, source='scoreboard') %}
-          {% for ev in scoreboard_events %}
-            {% set comp = (ev.competitions | default([])) | first %}
-            {% if comp and comp.competitors is defined %}
-              {% if comp.competitors | selectattr('team.id','equalto','158') | list | count > 0 %}
-                {% set game.comp = comp %}
-                {% set game.source = 'scoreboard' %}
-                {% break %}
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-
-          {% if game.comp is none %}
-            {% set schedule_events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
-            {% set now_ts = now().timestamp() %}
-            {% set recent = namespace(comp=None, delta=999999) %}
-            {% for item in schedule_events %}
-              {% set comp = (item.competitions | default([])) | first %}
-              {% if not comp or comp.competitors is not defined %}{% continue %}{% endif %}
-              {% if comp.competitors | selectattr('team.id','equalto','158') | list | count == 0 %}{% continue %}{% endif %}
-              {% set dt = item.date | as_datetime %}
-              {% if not dt %}{% continue %}{% endif %}
-              {% set ts = as_timestamp(dt, 0) %}
-              {% if ts is none %}{% continue %}{% endif %}
-              {% if ts > now_ts %}{% continue %}{% endif %}
-              {% set delta = now_ts - ts %}
-              {% if delta < recent.delta %}
-                {% set recent.comp = comp %}
-                {% set recent.delta = delta %}
+        variables:
+          game_payload: >-
+            {% set scoreboard_events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+            {% set game = namespace(comp=None, source='none') %}
+            {% for ev in scoreboard_events %}
+              {% set comp = (ev.competitions | default([])) | first %}
+              {% if comp and comp.competitors is defined %}
+                {% if comp.competitors | selectattr('team.id','equalto','158') | list | count > 0 %}
+                  {% set game.comp = comp %}
+                  {% set game.source = 'scoreboard' %}
+                  {% break %}
+                {% endif %}
               {% endif %}
             {% endfor %}
-            {% if recent.comp and recent.delta <= 43200 %}
-              {% set game.comp = recent.comp %}
-              {% set game.source = 'schedule' %}
-            {% endif %}
-          {% endif %}
 
-          {% if game.comp %}
-            {% set status_obj = game.comp.status if game.comp.status is defined else none %}
-            {% set status_type = status_obj.type if status_obj is defined and status_obj.type is defined else none %}
-            {% set description = status_type.description if status_type is defined and status_type.description is defined else none %}
-            {% set completed = status_type.completed if status_type is defined and status_type.completed is defined else false %}
-            {% if description %}
-              {{ description }}
-            {% elif completed %}
-              Final
-            {% else %}
-              Scheduled
+            {% if game.comp is none %}
+              {% set schedule_events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+              {% set now_ts = now().timestamp() %}
+              {% set recent = namespace(comp=None, delta=999999) %}
+              {% for item in schedule_events %}
+                {% set comp = (item.competitions | default([])) | first %}
+                {% if not comp or comp.competitors is not defined %}{% continue %}{% endif %}
+                {% if comp.competitors | selectattr('team.id','equalto','158') | list | count == 0 %}{% continue %}{% endif %}
+                {% set dt = item.date | as_datetime %}
+                {% if not dt %}{% continue %}{% endif %}
+                {% set ts = as_timestamp(dt, 0) %}
+                {% if ts is none %}{% continue %}{% endif %}
+                {% if ts > now_ts %}{% continue %}{% endif %}
+                {% set delta = now_ts - ts %}
+                {% if delta < recent.delta %}
+                  {% set recent.comp = comp %}
+                  {% set recent.delta = delta %}
+                {% endif %}
+              {% endfor %}
+              {% if recent.comp and recent.delta <= 43200 %}
+                {% set game.comp = recent.comp %}
+                {% set game.source = 'schedule' %}
+              {% endif %}
             {% endif %}
-          {% else %}
-            No game today
-          {% endif %}
+
+            {% set status = 'No game today' %}
+            {% set home_team = '' %}
+            {% set away_team = '' %}
+            {% set home_score = 0 %}
+            {% set away_score = 0 %}
+
+            {% if game.comp %}
+              {% set status_obj = game.comp.status if game.comp.status is defined else none %}
+              {% set status_type = status_obj.type if status_obj is defined and status_obj.type is defined else none %}
+              {% set description = status_type.description if status_type is defined and status_type.description is defined else none %}
+              {% set completed = status_type.completed if status_type is defined and status_type.completed is defined else false %}
+              {% if description %}
+                {% set status = description %}
+              {% elif completed %}
+                {% set status = 'Final' %}
+              {% else %}
+                {% set status = 'Scheduled' %}
+              {% endif %}
+
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+
+              {% if home %}
+                {% if home.team is defined and home.team.displayName is defined %}
+                  {% set home_team = home.team.displayName %}
+                {% endif %}
+                {% if home.score is defined %}
+                  {% if home.score is mapping %}
+                    {% set raw_home_score = home.score.value if home.score.value is defined else home.score.displayValue if home.score.displayValue is defined else 0 %}
+                  {% else %}
+                    {% set raw_home_score = home.score %}
+                  {% endif %}
+                  {% set home_score = (raw_home_score | int(0)) %}
+                {% endif %}
+              {% endif %}
+
+              {% if away %}
+                {% if away.team is defined and away.team.displayName is defined %}
+                  {% set away_team = away.team.displayName %}
+                {% endif %}
+                {% if away.score is defined %}
+                  {% if away.score is mapping %}
+                    {% set raw_away_score = away.score.value if away.score.value is defined else away.score.displayValue if away.score.displayValue is defined else 0 %}
+                  {% else %}
+                    {% set raw_away_score = away.score %}
+                  {% endif %}
+                  {% set away_score = (raw_away_score | int(0)) %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+
+            {{ {
+              'has_game': game.comp is not none,
+              'source': game.source,
+              'status': status,
+              'home_team': home_team,
+              'away_team': away_team,
+              'home_score': home_score | int(0),
+              'away_score': away_score | int(0)
+            } | tojson }}
+        state: >-
+          {% set game = game_payload | from_json %}
+          {{ game.status }}
         attributes:
-          status_source: '{{ game.source if game.comp else "none" }}'
+          status_source: >-
+            {% set game = game_payload | from_json %}
+            {{ game.source if game.has_game else 'none' }}
           home_team: >-
-            {% if game.comp %}
-              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
-              {{ home.team.displayName if home and home.team is defined else '' }}
-            {% endif %}
+            {% set game = game_payload | from_json %}
+            {{ game.home_team if game.has_game else '' }}
           away_team: >-
-            {% if game.comp %}
-              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-              {{ away.team.displayName if away and away.team is defined else '' }}
-            {% endif %}
+            {% set game = game_payload | from_json %}
+            {{ game.away_team if game.has_game else '' }}
           home_score: >-
-            {% if game.comp %}
-              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
-              {{ (home.score | int(0)) if home is defined and home.score is defined else 0 }}
-            {% else %}0{% endif %}
+            {% set game = game_payload | from_json %}
+            {{ game.home_score if game.has_game else 0 }}
           away_score: >-
-            {% if game.comp %}
-              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
-              {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
-            {% else %}0{% endif %}
+            {% set game = game_payload | from_json %}
+            {{ game.away_score if game.has_game else 0 }}
 
       # Nebraska record
       - name: huskers_record
