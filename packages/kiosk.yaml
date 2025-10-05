@@ -53,15 +53,13 @@ group:
   kiosk_all_automations:
     name: Kiosk — Core Automations
     entities:
-      - automation.evening_lights_at_sunset
-      # - automation.night_mode_at_midnight  # Commented out - entity doesn't exist
-      # - automation.early_morning_lights_0330  # Commented out - entity doesn't exist
-      # - automation.interior_lights_sunrise_off  # Commented out - entity doesn't exist
-      # - automation.exterior_front_garage_on_sunset  # Commented out - entity doesn't exist
-      # - automation.exterior_lights_sunrise_off  # Commented out - entity doesn't exist
-      - automation.exterior_led_monthly_effect
-      # - automation.humidor_plug_temp_control  # Commented out - entity doesn't exist
-      # - automation.burner_plugs_off_2300  # Commented out - entity doesn't exist
+      - automation.lighting_evening_sunset_interior
+      - automation.lighting_evening_sunset_exterior
+      - automation.lighting_night_mode
+      - automation.lighting_early_morning_gentle_wake
+      - automation.lighting_morning_interior_off
+      - automation.lighting_morning_exterior_off
+      - automation.led_monthly_effect_scheduler
 
   # Exterior-only (no segments)
   kiosk_exterior_lights:
@@ -157,15 +155,13 @@ group:
   kiosk_snapshot_automations:
     name: Kiosk - Snapshot Automations
     entities:
-      - automation.evening_lights_at_sunset
-      # - automation.night_mode_at_midnight  # Commented out - entity doesn't exist
-      # - automation.early_morning_lights_0330  # Commented out - entity doesn't exist
-      # - automation.interior_lights_sunrise_off  # Commented out - entity doesn't exist
-      # - automation.exterior_front_garage_on_sunset  # Commented out - entity doesn't exist
-      # - automation.exterior_lights_sunrise_off  # Commented out - entity doesn't exist
-      - automation.exterior_led_monthly_effect
-      # - automation.humidor_plug_temp_control  # Commented out - entity doesn't exist
-      # - automation.burner_plugs_off_2300  # Commented out - entity doesn't exist
+      - automation.lighting_evening_sunset_interior
+      - automation.lighting_evening_sunset_exterior
+      - automation.lighting_night_mode
+      - automation.lighting_early_morning_gentle_wake
+      - automation.lighting_morning_interior_off
+      - automation.lighting_morning_exterior_off
+      - automation.led_monthly_effect_scheduler
 
 ###############################################################################
 # Scripts (mapping style; aliases quoted)

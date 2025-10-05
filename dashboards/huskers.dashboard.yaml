@@ -360,17 +360,17 @@ views:
             title: Lighting Automations
             show_header_toggle: false
             entities:
-              - entity: automation.evening_lights_at_sunset
+              - entity: automation.lighting_evening_sunset_interior
                 secondary_info: last-triggered
-              - entity: automation.night_mode_at_midnight
+              - entity: automation.lighting_night_mode
                 secondary_info: last-triggered
-              - entity: automation.early_morning_lights_0330
+              - entity: automation.lighting_early_morning_gentle_wake
                 secondary_info: last-triggered
-              - entity: automation.interior_lights_sunrise_off
+              - entity: automation.lighting_morning_interior_off
                 secondary_info: last-triggered
-              - entity: automation.exterior_lights_sunrise_off
+              - entity: automation.lighting_morning_exterior_off
                 secondary_info: last-triggered
-              - entity: automation.exterior_led_monthly_effect
+              - entity: automation.led_monthly_effect_scheduler
                 secondary_info: last-triggered
           - type: custom:auto-entities
             card:
