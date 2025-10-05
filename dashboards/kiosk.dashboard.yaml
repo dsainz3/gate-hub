@@ -838,16 +838,77 @@ views:
           - type: markdown
             content: "## Lighting Scenes"
 
-          - type: entities
-            title: Lighting Scenes
-            show_header_toggle: false
-            entities:
-              - scene.lighting_evening_sunset_mainfloor
-              - scene.lighting_evening_sunset_exterior
-              - scene.lighting_night_mode
-              - scene.lighting_early_morning_gentle_wake
-              - scene.lighting_morning_interior_off
-              - scene.lighting_morning_exterior_off
+          - type: grid
+            title: Activate Scenes
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: scene.lighting_evening_sunset_mainfloor
+                name: Evening Sunset (Interior)
+                icon: mdi:weather-sunset
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_evening_sunset_mainfloor
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_evening_sunset_exterior
+                name: Evening Sunset (Exterior)
+                icon: mdi:weather-sunset-down
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_evening_sunset_exterior
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_night_mode
+                name: Night Mode
+                icon: mdi:weather-night
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_night_mode
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_early_morning_gentle_wake
+                name: Early Morning Wake
+                icon: mdi:alarm
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_early_morning_gentle_wake
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_morning_interior_off
+                name: Morning Interior Off
+                icon: mdi:weather-sunset-up
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_morning_interior_off
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_morning_exterior_off
+                name: Morning Exterior Off
+                icon: mdi:weather-sunny-off
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_morning_exterior_off
+                hold_action:
+                  action: more-info
 
       - type: vertical-stack
         cards:
