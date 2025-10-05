@@ -836,6 +836,110 @@ views:
       - type: vertical-stack
         cards:
           - type: markdown
+            content: "## Lighting Scenes"
+
+          - type: entities
+            title: Lighting Scenes
+            show_header_toggle: false
+            entities:
+              - scene.lighting_evening_sunset_mainfloor
+              - scene.lighting_evening_sunset_exterior
+              - scene.lighting_night_mode
+              - scene.lighting_early_morning_gentle_wake
+              - scene.lighting_morning_interior_off
+              - scene.lighting_morning_exterior_off
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Lighting Automations"
+
+          - type: grid
+            title: Manual Triggers
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: automation.lighting_evening_lights_at_sunset
+                name: Evening Sunset (Interior)
+                icon: mdi:weather-sunset
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_evening_lights_at_sunset
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.lighting_exterior_front_garage_on_sunset
+                name: Evening Sunset (Exterior)
+                icon: mdi:weather-sunset-down
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_exterior_front_garage_on_sunset
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.lighting_night_mode_at_midnight
+                name: Night Mode
+                icon: mdi:weather-night
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_night_mode_at_midnight
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.lighting_early_morning_gentle_wake_3_30_am
+                name: Early Morning
+                icon: mdi:alarm
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_early_morning_gentle_wake_3_30_am
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.lighting_morning_lights_off_sunrise_15min
+                name: Morning Interior Off
+                icon: mdi:weather-sunset-up
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_morning_lights_off_sunrise_15min
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.lighting_exterior_front_garage_off_sunrise
+                name: Morning Exterior Off
+                icon: mdi:white-balance-sunny
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.lighting_exterior_front_garage_off_sunrise
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.led_monthly_effect_scheduler
+                name: LED Monthly Effect
+                icon: mdi:led-strip-variant
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.led_monthly_effect_scheduler
+                hold_action:
+                  action: toggle
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
             content: "## Kiosk Scripts"
 
           - type: entities
