@@ -66,13 +66,15 @@ Purpose: Maintenance console for lighting automations and Husker-specific scenes
 
 Highlights
 - Markdown intro summarising the intent and linking scenes/automations conceptually.
-- **Lighting automation list** for baseline daily lighting schedules (sunrise/sunset, monthly patterns).
-- **Permanent LED status** row showing `light.permanent_outdoor_lights` plus its detected effect, alongside the eight interior/exterior chase fixtures.
-- **Dynamic scene list** using `custom:auto-entities` so transient snapshot scenes (e.g., `scene.huskers_before_chase`) only appear when available.
+- **Lighting automation list** with last-triggered metadata for the baseline daily schedules and monthly LED routines.
+- **Huskers scene catalog** enumerating every lighting preset so the snapshots, daily looks, and seasonal exterior effects are always one tap away.
+- **Lighting control grid** that surfaces every interior and exterior fixture touched by the Huskers shows for quick overrides.
 
 Usage Notes
-- Because snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) only exist while a show is running, the auto-entities card hides them after restarts to avoid “entity not available.”
-- The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; use the effect attribute row to confirm the strip picked up `LED-Gametime` during shows.
+- Snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
+- The scene catalog now auto-discovers anything with `husker`, `cornhusker`, or `nebraska` in the entity ID (and still keeps the baseline lighting scenes) so new presets appear automatically without `entity not found` warnings.
+- Use the automation last-triggered timestamps to confirm the daily schedule fired; if an entry stays blank, check for disabled automations in Home Assistant Settings → Automations.
+- The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; open the light more-info dialog to confirm the strip picked up `LED-Gametime` during shows.
 - The `sensor.huskers_game_status_espn` tile now exposes a `status_source` attribute. If ESPN removes the live scoreboard entry immediately after the whistle, the sensor falls back to the latest completed game from the season schedule so postgame automation checks keep working. If you notice the wrong source, confirm the schedule feed still lists the most recent matchup.
 
 ## Operations Checklist
