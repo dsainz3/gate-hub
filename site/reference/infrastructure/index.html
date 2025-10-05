@@ -853,6 +853,36 @@
 
 
     <li class="md-nav__item">
+      <a href="../theater-media/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Basement Theater Media Package
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
       <a href="../agenda-planner/" class="md-nav__link">
 
 
@@ -995,6 +1025,15 @@
   <a href="#agenda-tasks" class="md-nav__link">
     <span class="md-ellipsis">
       Agenda &amp; Tasks
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
+  <a href="#media-theater" class="md-nav__link">
+    <span class="md-ellipsis">
+      Media &amp; Theater
     </span>
   </a>
 
@@ -1408,6 +1447,15 @@
 </li>
 
         <li class="md-nav__item">
+  <a href="#media-theater" class="md-nav__link">
+    <span class="md-ellipsis">
+      Media &amp; Theater
+    </span>
+  </a>
+
+</li>
+
+        <li class="md-nav__item">
   <a href="#repository-layout" class="md-nav__link">
     <span class="md-ellipsis">
       Repository Layout
@@ -1502,6 +1550,12 @@ poetry<span class="w"> </span>run<span class="w"> </span>python<span class="w"> 
 <ul>
 <li><code>packages/agenda_planner.yaml</code> centralizes helpers and scripts for adding events (<code>calendar.create_event</code>) and tasks (<code>todo.add_item</code>) from the UI. The Kiosk snapshot view now includes a dedicated agenda column using this package.</li>
 <li><code>docs/reference/agenda-planner.md</code> documents setup, dashboards, and entity usage.</li>
+</ul>
+<h2 id="media-theater">Media &amp; Theater<a class="headerlink" href="#media-theater" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>packages/theater_media.yaml</code> encapsulates the basement Fire TV + Plex helper scripts, template sensors, and entity group used by the Support · Test Resources dashboard.</li>
+<li>The Plex · Theater view (<code>dashboards/_support/test_resources.dashboard.yaml</code>) surfaces the controls alongside a Lovelace media browser card. Ensure <code>media_source:</code> stays declared in <code>configuration.yaml</code> so the browser renders.</li>
+<li>Reference details live in <a href="../theater-media/">Basement Theater Media Package</a>.</li>
 </ul>
 <h2 id="repository-layout">Repository Layout<a class="headerlink" href="#repository-layout" title="Permanent link">&para;</a></h2>
 <div class="codehilite"><pre><span></span><code><span class="p">.</span>

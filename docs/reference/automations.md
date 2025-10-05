@@ -98,19 +98,20 @@ These automations pair with the [Husker Dashboard Guide](../how-to/huskers/dashb
 - **ID** `huskers_showtime_at_t_20`
 - **Trigger**: Kickoff timer between 19–21 minutes for >5 seconds.
 - **Guards**: Huskers automations enabled, game mode `on`, ESPN pregame `on` (or test mode), and chase scripts idle.
-- **Actions**: Launches `script.huskers_chase30_start` and logs.
+- **Actions**: Launches `script.huskers_chase30_start` (dual-cream, 45 s loop; interior group at 80 % brightness, permanent LEDs pinned at 100 %) and logs the start event.
 
 ### Huskers: Touchdown Celebration (`packages/huskers_everything.yaml:1114`)
 - **ID** `huskers_td_burst_on_score`
 - **Trigger**: State change on `sensor.huskers_our_score_effective`.
 - **Guards**: Huskers automations + game mode `on`; score must increase.
-- **Actions**: Runs `script.huskers_hail_burst_8s` and logs the score delta.
+- **Actions**: Runs `script.huskers_hail_burst_8s` (scarlet reset plus cream accents at 80 %, permanent LEDs held at 100 %) and logs the score delta.
 
 ### Huskers: Postgame Cleanup (`packages/huskers_everything.yaml:1144`)
 - **ID** `huskers_postgame_cleanup`
 - **Trigger**: `binary_sensor.huskers_is_postgame_espn` transitions `on` → `off`.
 - **Guards**: Huskers automations + game mode `on`.
 - **Actions**: Stops chase scripts in parallel and records cleanup completion.
+- **Notes**: The supporting status sensor stores a `status_source` attribute (`scoreboard` or `schedule`). If ESPN’s live feed disappears immediately after the game, the fallback schedule entry keeps the sensor in `Final` so this automation still fires once the postgame window expires.
 
 ---
 

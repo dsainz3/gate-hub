@@ -274,9 +274,26 @@ scene:
 ################################################################################
 script:
   huskers_chase30_start:
-    alias: 'Huskers: Start 30s Cream Chase'
+    alias: 'Huskers: Start Cream Chase (45s Dual)'
     mode: restart
     sequence:
+      - variables:
+          permanent_light: light.permanent_outdoor_lights
+          husker_effect_name: >-
+            {% set effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+            {% if 'LED-Gametime' in effects %}
+              LED-Gametime
+            {% elif 'Husker' in effects %}
+              Husker
+            {% elif 'Nebraska' in effects %}
+              Nebraska
+            {% else %}
+              ''
+            {% endif %}
+          scarlet_rgb: [228, 28, 56]
+          cream_rgb: [253, 243, 231]
+          chase_brightness_pct: 80
+          permanent_brightness_pct: 100
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase_speed_loop
@@ -284,20 +301,50 @@ script:
       - service: scene.create
         data:
           scene_id: huskers_before_chase
-          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+          snapshot_entities: >-
+            {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
+            {% if has_value(permanent_light) %}
+              {{ base + [permanent_light] }}
+            {% else %}
+              {{ base }}
+            {% endif %}
       - service: light.turn_on
         target:
           entity_id: group.huskers_eight_lights
         data:
-          hs_color: [355, 90]
-          brightness: 255
+          rgb_color: '{{ scarlet_rgb }}'
+          brightness_pct: '{{ chase_brightness_pct }}'
           transition: 0.1
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(permanent_light) }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ husker_effect_name != '' }}"
+                    sequence:
+                      - service: light.turn_on
+                        target:
+                          entity_id: '{{ permanent_light }}'
+                        data:
+                          effect: '{{ husker_effect_name }}'
+                          brightness_pct: '{{ permanent_brightness_pct }}'
+                default:
+                  - service: light.turn_on
+                    target:
+                      entity_id: '{{ permanent_light }}'
+                    data:
+                      rgb_color: '{{ scarlet_rgb }}'
+                      brightness_pct: '{{ permanent_brightness_pct }}'
+                      transition: 0.1
       - service: script.turn_on
         target:
           entity_id: script.huskers_chase30_loop
 
   huskers_chase30_loop:
-    alias: 'Huskers: 30s Cream Chase LOOP'
+    alias: 'Huskers: Cream Chase LOOP (45s Dual)'
     mode: restart
     sequence:
       - variables:
@@ -310,40 +357,78 @@ script:
             - light.light_garage_center
             - light.light_garage_right
             - light.light_office
-          step_ms: 3750
-          xfade_ms: 300
-          hold_ms: '{{ (step_ms - xfade_ms) | int }}'
+          accent_spacing: 3
+          cycle_ms: 45000
+          step_ms: '{{ (cycle_ms / (lights | count)) | int }}'
+          xfade_ms: 2000
+          transition_sec: '{{ (xfade_ms / 1000) | float }}'
+          scarlet_rgb: [228, 28, 56]
+          cream_rgb: [253, 243, 231]
+          chase_brightness_pct: 80
+          permanent_brightness_pct: 100
+          hold_ms: '{{ [ (step_ms - xfade_ms) | int, 250 ] | max }}'
       - repeat:
           while:
             - condition: template
               value_template: '{{ true }}'
           sequence:
             - repeat:
-                for_each: '{{ lights }}'
+                count: '{{ lights | count }}'
                 sequence:
                   - variables:
-                      current: '{{ repeat.item }}'
-                      prev_index: '{{ (repeat.index - 2) % (lights | count) }}'
-                      previous: '{{ lights[prev_index|int] }}'
+                      total: '{{ lights | count }}'
+                      spacing: '{{ [accent_spacing | int, (lights | count) - 1] | min }}'
+                      current_index: '{{ ((repeat.index | int) - 1) % total }}'
+                      secondary_index: '{{ (current_index + spacing) % total }}'
+                      prev_primary_index: '{{ (current_index - 1) % total }}'
+                      prev_secondary_index: '{{ (prev_primary_index + spacing) % total }}'
+                      primary_light: '{{ lights[current_index|int] }}'
+                      secondary_light: '{{ lights[secondary_index|int] }}'
+                      prev_primary_light: '{{ lights[prev_primary_index|int] }}'
+                      prev_secondary_light: '{{ lights[prev_secondary_index|int] }}'
                   - service: light.turn_on
                     target:
-                      entity_id: '{{ previous }}'
+                      entity_id: '{{ prev_primary_light }}'
                     data:
-                      hs_color: [355, 90]
-                      brightness: 255
-                      transition: 0.3
+                      rgb_color: '{{ scarlet_rgb }}'
+                      brightness_pct: '{{ chase_brightness_pct }}'
+                      transition: '{{ transition_sec }}'
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ prev_secondary_light != prev_primary_light }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: '{{ prev_secondary_light }}'
+                            data:
+                              rgb_color: '{{ scarlet_rgb }}'
+                              brightness_pct: '{{ chase_brightness_pct }}'
+                              transition: '{{ transition_sec }}'
                   - service: light.turn_on
                     target:
-                      entity_id: '{{ current }}'
+                      entity_id: '{{ primary_light }}'
                     data:
-                      hs_color: [45, 20]
-                      brightness: 255
-                      transition: 0.3
+                      rgb_color: '{{ cream_rgb }}'
+                      brightness_pct: '{{ chase_brightness_pct }}'
+                      transition: '{{ transition_sec }}'
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ secondary_light != primary_light }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: '{{ secondary_light }}'
+                            data:
+                              rgb_color: '{{ cream_rgb }}'
+                              brightness_pct: '{{ chase_brightness_pct }}'
+                              transition: '{{ transition_sec }}'
                   - delay:
                       milliseconds: '{{ hold_ms | int }}'
 
   huskers_chase30_stop:
-    alias: 'Huskers: Stop 30s Chase (restore)'
+    alias: 'Huskers: Stop Cream Chase (restore)'
     mode: single
     sequence:
       - service: script.turn_off
@@ -359,6 +444,22 @@ script:
     alias: 'Huskers: Start Cream Chase (Variable-Speed)'
     mode: restart
     sequence:
+      - variables:
+          permanent_light: light.permanent_outdoor_lights
+          husker_effect_name: >-
+            {% set effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+            {% if 'LED-Gametime' in effects %}
+              LED-Gametime
+            {% elif 'Husker' in effects %}
+              Husker
+            {% elif 'Nebraska' in effects %}
+              Nebraska
+            {% else %}
+              ''
+            {% endif %}
+          scarlet_rgb: [228, 28, 56]
+          cream_rgb: [253, 243, 231]
+          chase_brightness_pct: 80
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase30_loop
@@ -366,14 +467,44 @@ script:
       - service: scene.create
         data:
           scene_id: huskers_before_chase
-          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+          snapshot_entities: >-
+            {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
+            {% if has_value(permanent_light) %}
+              {{ base + [permanent_light] }}
+            {% else %}
+              {{ base }}
+            {% endif %}
       - service: light.turn_on
         target:
           entity_id: group.huskers_eight_lights
         data:
-          hs_color: [355, 90]
-          brightness: 255
+          rgb_color: '{{ scarlet_rgb }}'
+          brightness_pct: '{{ chase_brightness_pct }}'
           transition: 0.1
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(permanent_light) }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ husker_effect_name != '' }}"
+                    sequence:
+                      - service: light.turn_on
+                        target:
+                          entity_id: '{{ permanent_light }}'
+                        data:
+                          effect: '{{ husker_effect_name }}'
+                          brightness_pct: '{{ permanent_brightness_pct }}'
+                default:
+                  - service: light.turn_on
+                    target:
+                      entity_id: '{{ permanent_light }}'
+                    data:
+                      rgb_color: '{{ scarlet_rgb }}'
+                      brightness_pct: '{{ permanent_brightness_pct }}'
+                      transition: 0.1
       - service: script.turn_on
         target:
           entity_id: script.huskers_chase_speed_loop
@@ -444,6 +575,23 @@ script:
     mode: restart
     sequence:
       - variables:
+          permanent_light: light.permanent_outdoor_lights
+          husker_effect_name: >-
+            {% set effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+            {% if 'LED-Gametime' in effects %}
+              LED-Gametime
+            {% elif 'Husker' in effects %}
+              Husker
+            {% elif 'Nebraska' in effects %}
+              Nebraska
+            {% else %}
+              ''
+            {% endif %}
+          scarlet_rgb: [228, 28, 56]
+          cream_rgb: [253, 243, 231]
+          chase_brightness_pct: 80
+          permanent_brightness_pct: 100
+      - variables:
           lights:
             - light.light_theater_left
             - light.light_theater_right
@@ -475,14 +623,44 @@ script:
       - service: scene.create
         data:
           scene_id: huskers_before_burst
-          snapshot_entities: "{{ expand('group.huskers_eight_lights') | map(attribute='entity_id') | list }}"
+          snapshot_entities: >-
+            {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
+            {% if has_value(permanent_light) %}
+              {{ base + [permanent_light] }}
+            {% else %}
+              {{ base }}
+            {% endif %}
       - service: light.turn_on
         target:
           entity_id: group.huskers_eight_lights
         data:
-          hs_color: [355, 90]
-          brightness: 255
+          rgb_color: '{{ scarlet_rgb }}'
+          brightness_pct: '{{ chase_brightness_pct }}'
           transition: 0.05
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(permanent_light) }}"
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: "{{ husker_effect_name != '' }}"
+                    sequence:
+                      - service: light.turn_on
+                        target:
+                          entity_id: '{{ permanent_light }}'
+                        data:
+                          effect: '{{ husker_effect_name }}'
+                          brightness_pct: '{{ permanent_brightness_pct }}'
+                default:
+                  - service: light.turn_on
+                    target:
+                      entity_id: '{{ permanent_light }}'
+                    data:
+                      rgb_color: '{{ scarlet_rgb }}'
+                      brightness_pct: '{{ permanent_brightness_pct }}'
+                      transition: 0.05
       - repeat:
           count: '{{ [beats, 1] | max }}'
           sequence:
@@ -492,15 +670,15 @@ script:
               target:
                 entity_id: group.huskers_eight_lights
               data:
-                hs_color: [355, 90]
-                brightness: 255
+                rgb_color: '{{ scarlet_rgb }}'
+                brightness_pct: '{{ chase_brightness_pct }}'
                 transition: 0
             - service: light.turn_on
               target:
                 entity_id: '{{ cream_set }}'
               data:
-                hs_color: [45, 20]
-                brightness: 255
+                rgb_color: '{{ cream_rgb }}'
+                brightness_pct: '{{ chase_brightness_pct }}'
                 transition: 0.05
             - delay:
                 milliseconds: '{{ (beat_ms * 0.80) | int }}'
@@ -518,6 +696,154 @@ script:
           entity_id:
             - script.huskers_chase30_stop
             - script.huskers_chase_speed_stop
+
+  # Debug helper routines exposed as scripts rather than automations
+  huskers_debug_exterior_brightness:
+    alias: '[Huskers Debug] Exterior brightness check'
+    mode: single
+    variables:
+      cloud_cover: "{{ states('sensor.openweathermap_cloud_coverage') | int(50) }}"
+      calc_pct: >-
+        {% set pct = 100 - (cloud_cover * 0.6) %}
+        {{ [10, [pct|round(0), 100]|min]|max }}
+    sequence:
+      - service: light.turn_on
+        target:
+          entity_id:
+            - light.front_porch_lights
+            - light.light_garage_left
+            - light.light_garage_center
+            - light.light_garage_right
+        data:
+          brightness_pct: "{{ calc_pct }}"
+          transition: 2
+      - if:
+          - condition: template
+            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+        then:
+          - service: light.turn_on
+            target:
+              entity_id: light.permanent_outdoor_lights
+            data:
+              brightness_pct: "{{ calc_pct }}"
+              transition: 2
+            continue_on_error: true
+      - service: logbook.log
+        data:
+          name: Huskers Debug
+          message: "Exterior brightness test → {{ calc_pct }}% (cloud: {{ cloud_cover }}%)"
+
+  huskers_debug_scene_activated:
+    alias: '[Huskers Debug] Scene activated'
+    mode: single
+    variables:
+      test_scene: scene.huskers_seven_all_scarlet
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(test_scene) }}"
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: "{{ test_scene }}"
+              - service: logbook.log
+                data:
+                  name: Huskers Debug
+                  message: "Scene turned on: {{ test_scene }}"
+        default:
+          - service: logbook.log
+            data:
+              name: Huskers Debug
+              message: "Scene not found: {{ test_scene }} (skipped)"
+
+  huskers_debug_script_start:
+    alias: '[Huskers Debug] Script start'
+    mode: single
+    variables:
+      start_script: script.huskers_chase30_start
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(start_script) }}"
+            sequence:
+              - service: script.turn_on
+                target:
+                  entity_id: "{{ start_script }}"
+              - service: logbook.log
+                data:
+                  name: Huskers Debug
+                  message: "Started script: {{ start_script }}"
+        default:
+          - service: logbook.log
+            data:
+              name: Huskers Debug
+              message: "Script not found: {{ start_script }} (skipped)"
+
+  huskers_debug_script_stop:
+    alias: '[Huskers Debug] Script stop'
+    mode: single
+    variables:
+      loops:
+        - script.huskers_chase30_loop
+        - script.huskers_chase_speed_loop
+    sequence:
+      - repeat:
+          for_each: "{{ loops }}"
+          sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ has_value(repeat.item) }}"
+              then:
+                - service: script.turn_off
+                  target:
+                    entity_id: "{{ repeat.item }}"
+                - service: logbook.log
+                  data:
+                    name: Huskers Debug
+                    message: "Stopped {{ repeat.item }}"
+      - service: logbook.log
+        data:
+          name: Huskers Debug
+          message: 'Loop-stop sweep completed'
+
+  huskers_debug_theater_color_change:
+    alias: '[Huskers Debug] Theater color change'
+    mode: single
+    variables:
+      test_ct: 370
+      test_brightness: 60
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value('light.theater_lights') }}"
+            sequence:
+              - service: light.turn_on
+                target:
+                  entity_id: light.theater_lights
+                data:
+                  brightness_pct: "{{ test_brightness }}"
+                  color_temp: "{{ test_ct }}"
+                  transition: 1
+              - delay: '00:00:02'
+              - service: light.turn_on
+                target:
+                  entity_id: light.theater_lights
+                data:
+                  brightness_pct: 30
+                  color_temp: 454
+                  transition: 1
+              - service: logbook.log
+                data:
+                  name: Huskers Debug
+                  message: 'Theater color debug complete'
+        default:
+          - service: logbook.log
+            data:
+              name: Huskers Debug
+              message: 'Theater lights entity not found (skipped)'
 
 ################################################################################
 # TEMPLATE SENSORS & ESPN PHASE FLAGS
@@ -696,76 +1022,79 @@ template:
       - name: huskers_game_status_espn
         unique_id: huskers_game_status_espn
         state: >-
-          {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-          {% set game = namespace(ev=None) %}
-          {% for e in events %}
-            {% set comp = (e.competitions | default([])) | first %}
+          {% set scoreboard_events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+          {% set game = namespace(comp=None, source='scoreboard') %}
+          {% for ev in scoreboard_events %}
+            {% set comp = (ev.competitions | default([])) | first %}
             {% if comp and comp.competitors is defined %}
-              {% set has_huskers = comp.competitors | selectattr('team.id', 'equalto', '158') | list | count > 0 %}
-              {% if has_huskers %}
-                {% set game.ev = e %}
+              {% if comp.competitors | selectattr('team.id','equalto','158') | list | count > 0 %}
+                {% set game.comp = comp %}
+                {% set game.source = 'scoreboard' %}
                 {% break %}
               {% endif %}
             {% endif %}
           {% endfor %}
-          {% if game.ev %}
-            {{ game.ev.status.type.description if (game.ev.status is defined and game.ev.status.type is defined) else 'Scheduled' }}
-          {% else %}No game today{% endif %}
-        attributes:
-          home_team: >-
-            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-            {% set comp = none %}
-            {% for e in events %}
-              {% set c = (e.competitions | default([])) | first %}
-              {% if c and c.competitors is defined and (c.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
-                {% set comp = c %}
-                {% break %}
+
+          {% if game.comp is none %}
+            {% set schedule_events = state_attr('sensor.espn_nebraska_schedule', 'events') or [] %}
+            {% set now_ts = now().timestamp() %}
+            {% set recent = namespace(comp=None, delta=999999) %}
+            {% for item in schedule_events %}
+              {% set comp = (item.competitions | default([])) | first %}
+              {% if not comp or comp.competitors is not defined %}{% continue %}{% endif %}
+              {% if comp.competitors | selectattr('team.id','equalto','158') | list | count == 0 %}{% continue %}{% endif %}
+              {% set dt = item.date | as_datetime %}
+              {% if not dt %}{% continue %}{% endif %}
+              {% set ts = as_timestamp(dt, 0) %}
+              {% if ts is none %}{% continue %}{% endif %}
+              {% if ts > now_ts %}{% continue %}{% endif %}
+              {% set delta = now_ts - ts %}
+              {% if delta < recent.delta %}
+                {% set recent.comp = comp %}
+                {% set recent.delta = delta %}
               {% endif %}
             {% endfor %}
-            {% if comp %}
-              {% set home = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+            {% if recent.comp and recent.delta <= 43200 %}
+              {% set game.comp = recent.comp %}
+              {% set game.source = 'schedule' %}
+            {% endif %}
+          {% endif %}
+
+          {% if game.comp %}
+            {% set status_obj = game.comp.status if game.comp.status is defined else none %}
+            {% set status_type = status_obj.type if status_obj is defined and status_obj.type is defined else none %}
+            {% set description = status_type.description if status_type is defined and status_type.description is defined else none %}
+            {% set completed = status_type.completed if status_type is defined and status_type.completed is defined else false %}
+            {% if description %}
+              {{ description }}
+            {% elif completed %}
+              Final
+            {% else %}
+              Scheduled
+            {% endif %}
+          {% else %}
+            No game today
+          {% endif %}
+        attributes:
+          status_source: '{{ game.source if game.comp else "none" }}'
+          home_team: >-
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
               {{ home.team.displayName if home and home.team is defined else '' }}
             {% endif %}
           away_team: >-
-            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-            {% set comp = none %}
-            {% for e in events %}
-              {% set c = (e.competitions | default([])) | first %}
-              {% if c and c.competitors is defined and (c.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
-                {% set comp = c %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% if comp %}
-              {% set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {{ away.team.displayName if away and away.team is defined else '' }}
             {% endif %}
           home_score: >-
-            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-            {% set comp = none %}
-            {% for e in events %}
-              {% set c = (e.competitions | default([])) | first %}
-              {% if c and c.competitors is defined and (c.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
-                {% set comp = c %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% if comp %}
-              {% set home = (comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
+            {% if game.comp %}
+              {% set home = (game.comp.competitors | selectattr('homeAway','equalto','home') | list | first) %}
               {{ (home.score | int(0)) if home is defined and home.score is defined else 0 }}
             {% else %}0{% endif %}
           away_score: >-
-            {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
-            {% set comp = none %}
-            {% for e in events %}
-              {% set c = (e.competitions | default([])) | first %}
-              {% if c and c.competitors is defined and (c.competitors | selectattr('team.id','equalto','158') | list | count) > 0 %}
-                {% set comp = c %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% if comp %}
-              {% set away = (comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
+            {% if game.comp %}
+              {% set away = (game.comp.competitors | selectattr('homeAway','equalto','away') | list | first) %}
               {{ (away.score | int(0)) if away is defined and away.score is defined else 0 }}
             {% else %}0{% endif %}
 
@@ -1112,12 +1441,11 @@ automation:
     description: 'Turns game mode off two hours after postgame or when the next kickoff is more than two hours away.'
     mode: single
     trigger:
-      - platform: state
-        entity_id: binary_sensor.huskers_is_postgame_espn
-        to: 'on'
-        for:
-          hours: 2
-      - platform: numeric_state
+      - id: postgame_elapsed
+        platform: time_pattern
+        minutes: '/5'
+      - id: kickoff_far
+        platform: numeric_state
         entity_id: sensor.huskers_kickoff_in_effective
         above: 120
         for:
@@ -1126,20 +1454,38 @@ automation:
       - condition: state
         entity_id: input_boolean.huskers_game_mode
         state: 'on'
-      - condition: state
-        entity_id: binary_sensor.huskers_is_pregame_espn
-        state: 'off'
-      - condition: state
-        entity_id: binary_sensor.huskers_is_live_espn
-        state: 'off'
+      - condition: template
+        value_template: >-
+          {{ not is_state('binary_sensor.huskers_is_pregame_espn', 'on') }}
+      - condition: template
+        value_template: >-
+          {{ not is_state('binary_sensor.huskers_is_live_espn', 'on') }}
+      - condition: template
+        value_template: >-
+          {% if trigger is not defined or trigger.id == 'kickoff_far' %}
+            true
+          {% else %}
+            {% set postgame = states.binary_sensor.huskers_is_postgame_espn %}
+            {{ postgame is not none
+               and postgame.state == 'on'
+               and (now().timestamp() - as_timestamp(postgame.last_changed, 0)) >= 7200 }}
+          {% endif %}
     action:
+      - variables:
+          disable_reason: >-
+            {% if trigger is not defined or trigger.id == 'kickoff_far' %}
+              kickoff outside the two-hour window
+            {% else %}
+              postgame window elapsed
+            {% endif %}
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.huskers_game_mode
       - service: logbook.log
         data:
           name: Huskers Game Mode
-          message: Game mode disabled after postgame window.
+          message: >-
+            Game mode disabled ({{ disable_reason }}).
 
   - id: huskers_showtime_at_t_20
     alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
@@ -1243,138 +1589,6 @@ automation:
           name: Huskers Automation
           message: 'Postgame cleanup completed (loops stopped, state restored)'
           entity_id: automation.huskers_postgame_cleanup
-
-  # ===== HUSKERS DEBUG (append under existing `automation:` key) =====
-
-  - id: huskers_debug_exterior_brightness
-    alias: "[Huskers Debug] Exterior brightness check"
-    description: "Manual test: compute brightness from cloud cover (safe defaults)."
-    mode: single
-    trigger: []     # run manually from UI
-    variables:
-      cloud_cover: "{{ states('sensor.openweathermap_cloud_coverage') | int(50) }}"
-      calc_pct: >
-        {% set pct = 100 - (cloud_cover * 0.6) %}
-        {{ [10, [pct|round(0), 100]|min]|max }}
-    action:
-      - service: light.turn_on
-        target:
-          entity_id:
-            - light.front_porch_lights
-            - light.light_garage_left
-            - light.light_garage_center
-            - light.light_garage_right
-        data:
-          brightness_pct: "{{ calc_pct }}"
-          transition: 2
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: light.turn_on
-            target:
-              entity_id: light.permanent_outdoor_lights
-            data:
-              brightness_pct: "{{ calc_pct }}"
-              transition: 2
-            continue_on_error: true
-      - service: logbook.log
-        data:
-          name: Huskers Debug
-          message: "Exterior brightness test → {{ calc_pct }}% (cloud: {{ cloud_cover }}%)"
-
-  - id: huskers_debug_scene_activated
-    alias: "[Huskers Debug] Scene activated"
-    description: "Turn on a test scene if it exists; otherwise just logs."
-    mode: single
-    trigger: []
-    variables:
-      test_scene: "scene.huskers_seven_all_scarlet"  # existing scene in this package
-    action:
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: "{{ has_value(test_scene) }}"
-            sequence:
-              - service: scene.turn_on
-                target: {entity_id: "{{ test_scene }}"}
-              - service: logbook.log
-                data: {name: Huskers Debug, message: "Scene turned on: {{ test_scene }}"}
-        default:
-          - service: logbook.log
-            data: {name: Huskers Debug, message: "Scene not found: {{ test_scene }} (skipped)"}
-
-  - id: huskers_debug_script_start
-    alias: "[Huskers Debug] Script start"
-    description: "Kick off a Huskers start script if present."
-    mode: single
-    trigger: []
-    variables:
-      start_script: "script.huskers_chase30_start"
-    action:
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: "{{ has_value(start_script) }}"
-            sequence:
-              - service: script.turn_on
-                target: {entity_id: "{{ start_script }}"}
-              - service: logbook.log
-                data: {name: Huskers Debug, message: "Started script: {{ start_script }}"}
-        default:
-          - service: logbook.log
-            data: {name: Huskers Debug, message: "Script not found: {{ start_script }} (skipped)"}
-
-  - id: huskers_debug_script_stop
-    alias: "[Huskers Debug] Script stop"
-    description: "Stop any running Huskers loop scripts (guarded)."
-    mode: single
-    trigger: []
-    variables:
-      loops:
-        - script.huskers_chase30_loop
-        - script.huskers_chase_speed_loop
-    action:
-      - repeat:
-          for_each: "{{ loops }}"
-          sequence:
-            - if:
-                - condition: template
-                  value_template: "{{ has_value(repeat.item) }}"
-              then:
-                - service: script.turn_off
-                  target: {entity_id: "{{ repeat.item }}"}
-                - service: logbook.log
-                  data: {name: Huskers Debug, message: "Stopped {{ repeat.item }}"}
-      - service: logbook.log
-        data: {name: Huskers Debug, message: "Loop-stop sweep completed"}
-
-  - id: huskers_debug_theater_color_change
-    alias: "[Huskers Debug] Theater color change"
-    description: "Flash theater lights through a quick warm→cool test; guarded."
-    mode: single
-    trigger: []
-    variables:
-      test_ct: 370          # ≈2700K
-      test_brightness: 60
-    action:
-      - choose:
-          - conditions:
-              - condition: template
-                value_template: "{{ has_value('light.theater_lights') }}"
-            sequence:
-              - service: light.turn_on
-                target: {entity_id: light.theater_lights}
-                data: {brightness_pct: "{{ test_brightness }}", color_temp: "{{ test_ct }}", transition: 1}
-              - delay: "00:00:02"
-              - service: light.turn_on
-                target: {entity_id: light.theater_lights}
-                data: {brightness_pct: 30, color_temp: 454, transition: 1}
-              - service: logbook.log
-                data: {name: Huskers Debug, message: "Theater color debug complete"}
-        default:
-          - service: logbook.log
-            data: {name: Huskers Debug, message: "Theater lights entity not found (skipped)"}
 
 # packages/huskers_everything.yaml
 # …your existing content above…

@@ -35,7 +35,7 @@ Purpose: Fan-facing board with real-time game context.
 Highlights
 - **TeamTracker hero card** summarising clock, score, probability, and win/loss context.
 - **Quick actions** to refresh ESPN endpoints (`sensor.husker_team`, `sensor.espn_cfb_scoreboard`, `sensor.espn_nebraska_schedule`).
-- **Lighting macros**: start 30 s chase, trigger Hail Varsity burst, revert to the all-scarlet scene.
+- **Lighting macros**: launch the dual-cream 45 s chase, trigger the Hail Varsity burst, or fall back to the all-scarlet scene.
 - **Game Essentials** card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from `input_boolean.huskers_use_manual_score`/`input_boolean.huskers_use_manual_kickoff`.
 - **Tailgate Countdown** markdown wrapped in `binary_sensor.huskers_tailgate_window` so it only renders 24 h before kickoff through 30 min post-game.
 - **In-Game Situation** markdown gated by `binary_sensor.huskers_is_live_espn`, focused on football context (clock, down/distance, drive, timeouts, win probability).
@@ -67,10 +67,13 @@ Purpose: Maintenance console for lighting automations and Husker-specific scenes
 Highlights
 - Markdown intro summarising the intent and linking scenes/automations conceptually.
 - **Lighting automation list** for baseline daily lighting schedules (sunrise/sunset, monthly patterns).
+- **Permanent LED status** row showing `light.permanent_outdoor_lights` plus its detected effect, alongside the eight interior/exterior chase fixtures.
 - **Dynamic scene list** using `custom:auto-entities` so transient snapshot scenes (e.g., `scene.huskers_before_chase`) only appear when available.
 
 Usage Notes
 - Because snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) only exist while a show is running, the auto-entities card hides them after restarts to avoid “entity not available.”
+- The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; use the effect attribute row to confirm the strip picked up `LED-Gametime` during shows.
+- The `sensor.huskers_game_status_espn` tile now exposes a `status_source` attribute. If ESPN removes the live scoreboard entry immediately after the whistle, the sensor falls back to the latest completed game from the season schedule so postgame automation checks keep working. If you notice the wrong source, confirm the schedule feed still lists the most recent matchup.
 
 ## Operations Checklist
 - Use **Refresh Game Data** before kickoff or when ESPN phases feel stale.

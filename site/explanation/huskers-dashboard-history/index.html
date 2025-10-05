@@ -848,6 +848,36 @@
 
 
     <li class="md-nav__item">
+      <a href="../../reference/theater-media/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Basement Theater Media Package
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
       <a href="../../reference/agenda-planner/" class="md-nav__link">
 
 
@@ -1390,8 +1420,10 @@
 <li>Replaced legacy Big Ten standings scrape with ESPN’s Core API (<code>sports.core.api.espn.com/v2/.../groups/5/standings/0</code>) and rendered it as a markdown table.</li>
 <li>Rebuilt team/opponent profiles as table-based cards with live color swatches derived from TeamTracker attributes.</li>
 <li>Switched scene listings to <code>custom:auto-entities</code> so snapshot scenes appear only while active, reducing Lovelace errors after restarts.</li>
+<li>Countdown cards now rely on <code>sensor.huskers_kickoff_in_effective</code>, respecting manual overrides from <code>input_boolean.huskers_use_manual_kickoff</code>.</li>
+<li>Removed the bespoke markdown scoreboard in favor of the TeamTracker hero card plus a lean pregame stack.</li>
 <li>
-<p>Countdown cards now rely on <code>sensor.huskers_kickoff_in_effective</code>, respecting manual overrides from <code>input_boolean.huskers_use_manual_kickoff</code>.</p>
+<p>Introduced <code>binary_sensor.huskers_tailgate_window</code> to gate the countdown (24 h pre-kickoff through 30 min post-game) and trimmed the in-game markdown to football-specific data shown only during live play.</p>
 </li>
 <li>
 <p><strong>Key Components (current)</strong></p>
