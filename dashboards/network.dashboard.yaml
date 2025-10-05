@@ -319,7 +319,21 @@ views:
           {%- endmacro %}
           {% macro row(title, key, unit='') -%}
             {%- set item = metrics.get(key, {}) -%}
-            | **{{ title }}** | {{ fmt(item.get('current'), unit) }} | {{ fmt(item.get('avg_1h'), unit) }} | {{ fmt(item.get('avg_24h'), unit) }} | {{ fmt(item.get('avg_7d'), unit) }} | {{ fmt(item.get('avg_30d'), unit) }} | {{ fmt(item.get('baseline'), unit) }}{% if item.get('baseline_label') not in [None, 'unavailable'] %} ({{ item.get('baseline_label') }}){% endif %} |
+            {%- set baseline_label = item.get('baseline_label') -%}
+            {%- set baseline_display = fmt(item.get('baseline'), unit) -%}
+            {%- if baseline_label not in [None, 'unavailable'] -%}
+              {%- set baseline_display = baseline_display ~ ' (' ~ baseline_label ~ ')' -%}
+            {%- endif -%}
+            {%- set cells = [
+              '**' ~ title ~ '**',
+              fmt(item.get('current'), unit),
+              fmt(item.get('avg_1h'), unit),
+              fmt(item.get('avg_24h'), unit),
+              fmt(item.get('avg_7d'), unit),
+              fmt(item.get('avg_30d'), unit),
+              baseline_display
+            ] -%}
+            | {{ cells | join(' | ') }} |
           {%- endmacro %}
           {% set metrics_attr = state_attr('sensor.network_performance_summary', 'metrics') %}
           {% set metrics = metrics_attr | from_json if metrics_attr else {} %}
