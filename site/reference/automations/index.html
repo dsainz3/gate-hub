@@ -1082,6 +1082,36 @@
 
 
     <li class="md-nav__item">
+      <a href="../theater-media/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Basement Theater Media Package
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
       <a href="../agenda-planner/" class="md-nav__link">
 
 
@@ -1710,7 +1740,7 @@
 <li><strong>ID</strong> <code>exterior_led_monthly_effect</code></li>
 <li><strong>Triggers</strong>: Time <code>00:00:01</code> daily and Home Assistant start.</li>
 <li><strong>Guards</strong>: Requires <code>binary_sensor.holiday_mode_active</code> to be <code>off</code> and confirms the requested <code>effect</code> exists in <code>light.permanent_outdoor_lights</code>.</li>
-<li><strong>Actions</strong>: Applies the month-specific effect and logs the change. See <a href="../../how-to/lighting/husker-led-mqtt/">Husker LED MQTT Controls</a> for manual overrides.</li>
+<li><strong>Actions</strong>: Waits up to two minutes for the permanent outdoor light effect list to load after startup, applies the month-specific effect when available, and logs success or a skip if the effect never appears. See <a href="../../how-to/lighting/husker-led-mqtt/">Husker LED MQTT Controls</a> for manual overrides.</li>
 </ul>
 <h3 id="climate-humidor-temperature-control-automationsyaml251">Climate: Humidor Temperature Control (<code>automations.yaml:251</code>)<a class="headerlink" href="#climate-humidor-temperature-control-automationsyaml251" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1755,14 +1785,14 @@
 <li><strong>ID</strong> <code>huskers_showtime_at_t_20</code></li>
 <li><strong>Trigger</strong>: Kickoff timer between 19–21 minutes for &gt;5 seconds.</li>
 <li><strong>Guards</strong>: Huskers automations enabled, game mode <code>on</code>, ESPN pregame <code>on</code> (or test mode), and chase scripts idle.</li>
-<li><strong>Actions</strong>: Launches <code>script.huskers_chase30_start</code> and logs.</li>
+<li><strong>Actions</strong>: Launches <code>script.huskers_chase30_start</code> (dual-cream, 45 s loop; interior group at 80 % brightness, permanent LEDs pinned at 100 %) and logs the start event.</li>
 </ul>
 <h3 id="huskers-touchdown-celebration-packageshuskers_everythingyaml1114">Huskers: Touchdown Celebration (<code>packages/huskers_everything.yaml:1114</code>)<a class="headerlink" href="#huskers-touchdown-celebration-packageshuskers_everythingyaml1114" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>ID</strong> <code>huskers_td_burst_on_score</code></li>
 <li><strong>Trigger</strong>: State change on <code>sensor.huskers_our_score_effective</code>.</li>
 <li><strong>Guards</strong>: Huskers automations + game mode <code>on</code>; score must increase.</li>
-<li><strong>Actions</strong>: Runs <code>script.huskers_hail_burst_8s</code> and logs the score delta.</li>
+<li><strong>Actions</strong>: Runs <code>script.huskers_hail_burst_8s</code> (scarlet reset plus cream accents at 80 %, permanent LEDs held at 100 %) and logs the score delta.</li>
 </ul>
 <h3 id="huskers-postgame-cleanup-packageshuskers_everythingyaml1144">Huskers: Postgame Cleanup (<code>packages/huskers_everything.yaml:1144</code>)<a class="headerlink" href="#huskers-postgame-cleanup-packageshuskers_everythingyaml1144" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1770,6 +1800,7 @@
 <li><strong>Trigger</strong>: <code>binary_sensor.huskers_is_postgame_espn</code> transitions <code>on</code> → <code>off</code>.</li>
 <li><strong>Guards</strong>: Huskers automations + game mode <code>on</code>.</li>
 <li><strong>Actions</strong>: Stops chase scripts in parallel and records cleanup completion.</li>
+<li><strong>Notes</strong>: The supporting status sensor stores a <code>status_source</code> attribute (<code>scoreboard</code> or <code>schedule</code>). If ESPN’s live feed disappears immediately after the game, the fallback schedule entry keeps the sensor in <code>Final</code> so this automation still fires once the postgame window expires.</li>
 </ul>
 <hr />
 <p><strong>Maintenance checklist</strong>

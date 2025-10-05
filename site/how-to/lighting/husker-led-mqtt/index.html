@@ -956,6 +956,36 @@
 
 
     <li class="md-nav__item">
+      <a href="../../../reference/theater-media/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Basement Theater Media Package
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
       <a href="../../../reference/agenda-planner/" class="md-nav__link">
 
 
@@ -1432,7 +1462,7 @@
 <li><code>script.husker_led_start</code> — pushes the scarlet &amp; cream theme via MQTT.</li>
 <li><code>script.husker_led_stop</code> — stops the show and re-applies the monthly effect using <code>automation.exterior_led_monthly_effect</code>.</li>
 </ul>
-<p>Use these scripts from the <a href="../../huskers/dashboard/">Husker dashboards</a>—the <strong>Lighting &amp; Scenes</strong> view surfaces the key scripts and automations—or via direct service calls.</p>
+<p>Use these scripts from the <a href="../../huskers/dashboard/">Husker dashboards</a>—the <strong>Lighting &amp; Scenes</strong> view surfaces the key scripts and automations—or via direct service calls. During game-day shows the chase routines hold the permanent LEDs at 100 % brightness while the chase group runs at 80 %, so the strip always punches through exterior ambient light even if indoor fixtures are dimmed.</p>
 <h2 id="manual-invocation">Manual Invocation<a class="headerlink" href="#manual-invocation" title="Permanent link">&para;</a></h2>
 <p>Trigger from Developer Tools → Services:</p>
 <div class="codehilite"><pre><span></span><code><span class="nt">service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">script.turn_on</span>

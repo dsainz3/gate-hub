@@ -384,3 +384,91 @@ views:
                 - entity_id: scene.huskers_before_burst
             sort:
               method: name
+  - title: Ops Console
+    path: huskers-ops
+    icon: mdi:clipboard-text-clock
+    badges: []
+    cards:
+      - type: glance
+        title: Game Snapshot
+        columns: 3
+        entities:
+          - entity: sensor.huskers_game_status_espn
+            name: Status
+          - entity: sensor.huskers_our_score_effective
+            name: NU Score
+          - entity: input_number.huskers_opponent_score_manual
+            name: Opp Score
+          - entity: input_text.huskers_last_score
+            name: Last Score
+          - entity: sensor.huskers_kickoff_in_effective
+            name: Kickoff (min)
+          - entity: binary_sensor.huskers_is_live_espn
+            name: Live
+          - entity: binary_sensor.huskers_is_postgame_espn
+            name: Postgame
+      - type: entities
+        title: Game Mode & Automations
+        show_header_toggle: false
+        entities:
+          - input_boolean.huskers_automations_enabled
+          - input_boolean.huskers_game_mode
+          - input_boolean.huskers_test_mode
+          - type: section
+            label: Huskers Automations
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
+          - automation.huskers_showtime_at_t_20
+          - automation.huskers_td_burst_on_score
+          - automation.huskers_postgame_cleanup
+      - type: entities
+        title: Lighting & Shows
+        show_header_toggle: false
+        entities:
+          - group.huskers_eight_lights
+          - entity: light.permanent_outdoor_lights
+            name: Permanent Outdoor LEDs
+            secondary_info: last-changed
+          - type: attribute
+            entity: light.permanent_outdoor_lights
+            attribute: effect
+            name: Permanent LED Effect
+          - light.light_theater_left
+          - light.light_theater_right
+          - light.light_front_left
+          - light.light_front_right
+          - light.light_garage_left
+          - light.light_garage_center
+          - light.light_garage_right
+          - light.light_office
+          - type: section
+            label: Huskers Show Scripts
+          - script.huskers_chase30_start
+          - script.huskers_chase30_stop
+          - script.huskers_chase_speed_start
+          - script.huskers_chase_speed_stop
+          - script.huskers_hail_burst_8s
+      - type: entities
+        title: Score & State Inputs
+        show_header_toggle: false
+        entities:
+          - input_number.huskers_our_score
+          - input_number.huskers_our_score_manual
+          - input_number.huskers_opponent_score_manual
+          - input_text.huskers_last_score
+          - sensor.huskers_kickoff_in_2
+          - sensor.huskers_kickoff_in_effective
+          - sensor.huskers_game_status_espn
+      - type: logbook
+        title: Huskers Activity Log
+        entities:
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
+          - automation.huskers_showtime_at_t_20
+          - automation.huskers_td_burst_on_score
+          - automation.huskers_postgame_cleanup
+          - script.huskers_chase30_start
+          - script.huskers_chase_speed_start
+          - script.huskers_hail_burst_8s
+          - group.huskers_eight_lights
+        hours_to_show: 12

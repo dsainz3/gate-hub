@@ -980,6 +980,36 @@
 
 
     <li class="md-nav__item">
+      <a href="../../../reference/theater-media/" class="md-nav__link">
+
+
+
+  <span class="md-ellipsis">
+    Basement Theater Media Package
+
+  </span>
+
+
+
+
+    <span class="md-status md-status--active"></span>
+
+
+
+
+      </a>
+    </li>
+
+
+
+
+
+
+
+
+
+
+    <li class="md-nav__item">
       <a href="../../../reference/agenda-planner/" class="md-nav__link">
 
 
@@ -1467,7 +1497,7 @@
     type: module
   ```</li>
 <li><strong>ESPN REST sensors</strong> from <code>packages/huskers_everything.yaml</code>, including the Big Ten standings endpoint (<code>sports.core.api.espn.com/.../groups/5/standings/0</code>).</li>
-<li>Apply the <code>Huskers Cream</code> theme (defined in <code>themes.yaml</code>) so custom CSS vars (e.g., <code>--huskers-scoreboard-border</code>) resolve correctly.</li>
+<li>Apply the <code>Huskers Cream</code> theme (defined in <code>themes.yaml</code>) so custom Huskers CSS variables resolve correctly.</li>
 </ul>
 <p>Reload themes after deployment via <strong>Developer Tools → YAML → Reload themes</strong> so the custom color variables are available.</p>
 <h2 id="views">Views<a class="headerlink" href="#views" title="Permanent link">&para;</a></h2>
@@ -1476,13 +1506,15 @@
 <p>Highlights
 - <strong>TeamTracker hero card</strong> summarising clock, score, probability, and win/loss context.
 - <strong>Quick actions</strong> to refresh ESPN endpoints (<code>sensor.husker_team</code>, <code>sensor.espn_cfb_scoreboard</code>, <code>sensor.espn_nebraska_schedule</code>).
-- <strong>Lighting macros</strong>: start 30 s chase, trigger Hail Varsity burst, revert to the all-scarlet scene.
-- <strong>Markdown scoreboard</strong> styled with Huskers palette variables; uses <code>sensor.husker_team</code> attributes for opponent logos, win probability, possession, and status text.
+- <strong>Lighting macros</strong>: launch the dual-cream 45 s chase, trigger the Hail Varsity burst, or fall back to the all-scarlet scene.
 - <strong>Game Essentials</strong> card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from <code>input_boolean.huskers_use_manual_score</code>/<code>input_boolean.huskers_use_manual_kickoff</code>.
-- <strong>Situation + Hype</strong>: down-and-distance, last play, baseball-style metrics (used for baseball/volleyball seasons) and <code>sensor.huskers_hype_message</code> for dynamic rally text.</p>
+- <strong>Tailgate Countdown</strong> markdown wrapped in <code>binary_sensor.huskers_tailgate_window</code> so it only renders 24 h before kickoff through 30 min post-game.
+- <strong>In-Game Situation</strong> markdown gated by <code>binary_sensor.huskers_is_live_espn</code>, focused on football context (clock, down/distance, drive, timeouts, win probability).</p>
 <p>Usage Notes
 - Manual kickoffs propagate through <code>sensor.huskers_kickoff_in_effective</code>; the countdown card automatically respects <code>input_boolean.huskers_use_manual_kickoff</code> and <code>input_number.huskers_kickoff_in_manual</code>.
-- Score overrides live in <code>input_number.huskers_our_score_manual</code> and <code>sensor.huskers_our_score_effective</code> and are reflected in both the TeamTracker card and the markdown scoreboard.</p>
+- <code>binary_sensor.huskers_tailgate_window</code> evaluates the kickoff timestamp, live/post-game states, and post-game runout to decide when the countdown card is shown.
+- Score overrides live in <code>input_number.huskers_our_score_manual</code> and <code>sensor.huskers_our_score_effective</code> and are reflected in the TeamTracker card.
+- The in-game card hides outside live phases; confirm <code>binary_sensor.huskers_is_live_espn</code> before troubleshooting missing data.</p>
 <h3 id="2-team-data-husker-team-data">2. Team &amp; Data (<code>/husker-team-data</code>)<a class="headerlink" href="#2-team-data-husker-team-data" title="Permanent link">&para;</a></h3>
 <p>Purpose: Operator view for stats, standings, and sensor health.</p>
 <p>Highlights
@@ -1491,7 +1523,7 @@
 - <strong>Series summary</strong> placeholder driven by <code>sensor.husker_team</code> attributes when ESPN provides historical matchup text.
 - <strong>Raw sensor reference</strong> using entity rows for <code>sensor.husker_team</code> attributes; helps validate that the TeamTracker integration is populating data.
 - <strong>Big Ten standings markdown card</strong> built from the new ESPN Core API feed (<code>sports.core.api.espn.com/v2/.../groups/5/standings/0</code>). Each row displays overall and conference records in a markdown table.
-- <strong>Tailgate countdown</strong> uses the effective kickoff helper to stay aligned with manual overrides.</p>
+- <strong>Tailgate countdown</strong> uses the effective kickoff helper and is only visible while <code>binary_sensor.huskers_tailgate_window</code> is <code>on</code>.</p>
 <p>Usage Notes
 - When colors are missing from ESPN data, fallback Scarlet &amp; Cream palette values populate the color chips.
 - If the standings markdown shows “unavailable,” confirm that the REST sensor <code>sensor.espn_big_ten_teams</code> is returning the <code>standings</code> attribute (requires the updated package).</p>
@@ -1500,9 +1532,12 @@
 <p>Highlights
 - Markdown intro summarising the intent and linking scenes/automations conceptually.
 - <strong>Lighting automation list</strong> for baseline daily lighting schedules (sunrise/sunset, monthly patterns).
+- <strong>Permanent LED status</strong> row showing <code>light.permanent_outdoor_lights</code> plus its detected effect, alongside the eight interior/exterior chase fixtures.
 - <strong>Dynamic scene list</strong> using <code>custom:auto-entities</code> so transient snapshot scenes (e.g., <code>scene.huskers_before_chase</code>) only appear when available.</p>
 <p>Usage Notes
-- Because snapshot scenes (<code>scene.huskers_before_chase</code>, <code>scene.huskers_before_burst</code>) only exist while a show is running, the auto-entities card hides them after restarts to avoid “entity not available.”</p>
+- Because snapshot scenes (<code>scene.huskers_before_chase</code>, <code>scene.huskers_before_burst</code>) only exist while a show is running, the auto-entities card hides them after restarts to avoid “entity not available.”
+- The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; use the effect attribute row to confirm the strip picked up <code>LED-Gametime</code> during shows.
+- The <code>sensor.huskers_game_status_espn</code> tile now exposes a <code>status_source</code> attribute. If ESPN removes the live scoreboard entry immediately after the whistle, the sensor falls back to the latest completed game from the season schedule so postgame automation checks keep working. If you notice the wrong source, confirm the schedule feed still lists the most recent matchup.</p>
 <h2 id="operations-checklist">Operations Checklist<a class="headerlink" href="#operations-checklist" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Use <strong>Refresh Game Data</strong> before kickoff or when ESPN phases feel stale.</li>
@@ -1514,6 +1549,7 @@
 <ul>
 <li>If the TeamTracker card fails to load, verify the resource URL (<code>/hacsfiles/teamtracker-card/ha-teamtracker-card.js</code>) and clear the Lovelace cache (refresh with Ctrl+Shift+R).</li>
 <li>Missing logos or color swatches often mean ESPN returned <code>None</code>; check Home Assistant logs for REST errors and rerun the refresh buttons.</li>
+<li>If the countdown never shows, verify <code>binary_sensor.huskers_tailgate_window</code> (should turn on 24 h pre-kickoff) and ensure <code>sensor.husker_team</code> carries a valid <code>date</code> attribute.</li>
 <li>Incorrect kickoff countdown usually points to the manual override toggles—confirm <code>input_boolean.huskers_use_manual_kickoff</code> is set as expected.</li>
 </ul>
 <h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
