@@ -87,7 +87,7 @@ views:
           {% set deco_down_trend = trend_compare(states('sensor.deco_total_down_mbps'), deco_down_ref, ' Mbps', 'Mbps', 2, deco_down_ref_label) %}
           {% set deco_up_trend = trend_compare(states('sensor.deco_total_up_mbps'), deco_up_ref, ' Mbps', 'Mbps', 2, deco_up_ref_label) %}
           ## Network Snapshot
-          **Status:** {{ states('sensor.network_status_summary') }} · {{ states('sensor.network_performance_summary') | title }}
+          **Status:** {{ states('sensor.network_status_summary') | title }} · {{ states('sensor.network_performance_summary') | title }}
 
           **Ping:** {{ fmt(latency_live) }} ms ({{ latency_source | lower }}, {{ 'reachable' if reachability else 'unreachable' }}) ·
           {{ latency_trend }}
@@ -302,52 +302,39 @@ views:
           - sensor.speedtest_last_run
           - update.tp_link_deco_update
           - update.tp_link_router_update
-      - type: entities
+      - type: markdown
         title: Rolling averages
-        show_header_toggle: false
-        entities:
-          - type: section
-            label: Baselines (fallback)
-          - sensor.internet_latency_baseline
-          - sensor.speedtest_download_baseline
-          - sensor.speedtest_upload_baseline
-          - sensor.speedtest_ping_baseline
-          - sensor.deco_total_down_baseline
-          - sensor.deco_total_up_baseline
-          - type: section
-            label: Latency (ms)
-          - sensor.internet_latency_1h_avg
-          - sensor.internet_latency_24h_avg
-          - sensor.internet_latency_7d_avg
-          - sensor.internet_latency_30d_avg
-          - type: section
-            label: Download (Mbps)
-          - sensor.speedtest_download_1h_avg
-          - sensor.speedtest_download_24h_avg
-          - sensor.speedtest_download_7d_avg
-          - sensor.speedtest_download_30d_avg
-          - type: section
-            label: Upload (Mbps)
-          - sensor.speedtest_upload_1h_avg
-          - sensor.speedtest_upload_24h_avg
-          - sensor.speedtest_upload_7d_avg
-          - sensor.speedtest_upload_30d_avg
-          - type: section
-            label: Ping (ms)
-          - sensor.speedtest_ping_1h_avg
-          - sensor.speedtest_ping_24h_avg
-          - sensor.speedtest_ping_7d_avg
-          - sensor.speedtest_ping_30d_avg
-          - type: section
-            label: Deco throughput (Mbps)
-          - sensor.deco_total_down_mbps_1h_avg
-          - sensor.deco_total_down_mbps_24h_avg
-          - sensor.deco_total_down_mbps_7d_avg
-          - sensor.deco_total_down_mbps_30d_avg
-          - sensor.deco_total_up_mbps_1h_avg
-          - sensor.deco_total_up_mbps_24h_avg
-          - sensor.deco_total_up_mbps_7d_avg
-          - sensor.deco_total_up_mbps_30d_avg
+        content: >-
+          {% macro fmt(val, unit='') -%}
+            {%- if val in [None, 'unknown', 'unavailable'] -%}
+              –
+            {%- else -%}
+              {%- set num = (val | float(0)) | round(2) -%}
+              {%- if num == num | int -%}
+                {{ num | int }}{{ ' ' ~ unit if unit else '' }}
+              {%- else -%}
+                {{ num }}{{ ' ' ~ unit if unit else '' }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endmacro %}
+          {% macro row(title, key, unit='') -%}
+            {%- set item = metrics.get(key, {}) -%}
+            | **{{ title }}** | {{ fmt(item.get('current'), unit) }} | {{ fmt(item.get('avg_1h'), unit) }} | {{ fmt(item.get('avg_24h'), unit) }} | {{ fmt(item.get('avg_7d'), unit) }} | {{ fmt(item.get('avg_30d'), unit) }} | {{ fmt(item.get('baseline'), unit) }}{% if item.get('baseline_label') not in [None, 'unavailable'] %} ({{ item.get('baseline_label') }}){% endif %} |
+          {%- endmacro %}
+          {% set metrics_attr = state_attr('sensor.network_performance_summary', 'metrics') %}
+          {% set metrics = metrics_attr | from_json if metrics_attr else {} %}
+          {% if metrics %}
+          | Metric | Current | 1h | 24h | 7d | 30d | Baseline |
+          | :- | :-: | :-: | :-: | :-: | :-: | :- |
+          {{ row('Latency', 'latency', 'ms') }}
+          {{ row('Download', 'download', 'Mbps') }}
+          {{ row('Upload', 'upload', 'Mbps') }}
+          {{ row('Ping', 'ping', 'ms') }}
+          {{ row('Deco ↓', 'deco_down', 'Mbps') }}
+          {{ row('Deco ↑', 'deco_up', 'Mbps') }}
+          {% else %}
+          _Rolling statistics unavailable_
+          {% endif %}
       - type: custom:auto-entities
         show_empty: false
         card:

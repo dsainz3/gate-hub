@@ -34,24 +34,39 @@ template:
         state: >-
           {% set age_limit = 2 * 3600 %}
           {% set ping_state = states('sensor.speedtest_ping') %}
-          {% set ping = ping_state | float(0) if ping_state not in ['unknown', 'unavailable', None] else 0 %}
+          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else None %}
           {% set entity = states.sensor.speedtest_ping %}
           {% set last_changed = entity.last_changed if entity is not none else none %}
           {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
           {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
-          {% if ping > 0 and (age is none or age < age_limit) %}
+          {% if ping is not none and ping > 0 and (age is none or age < age_limit) %}
             {{ ping | round(1) }}
           {% else %}
-            unknown
+            {% set fallback = states('sensor.speedtest_ping_baseline') %}
+            {% if fallback not in ['unknown', 'unavailable', None] %}
+              {{ fallback | float | round(1) }}
+            {% else %}
+              {% set latest = states('sensor.speedtest_ping') %}
+              {% if latest not in ['unknown', 'unavailable', None] %}
+                {{ latest | float | round(1) }}
+              {% else %}
+                unknown
+              {% endif %}
+            {% endif %}
           {% endif %}
         availability: >-
           {% set ping_state = states('sensor.speedtest_ping') %}
-          {% set ping = ping_state | float(0) if ping_state not in ['unknown', 'unavailable', None] else 0 %}
+          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else None %}
           {% set entity = states.sensor.speedtest_ping %}
           {% set last_changed = entity.last_changed if entity is not none else none %}
           {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
           {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
-          {{ ping > 0 and (age is none or age < 7200) }}
+          {% if ping is not none and ping > 0 and (age is none or age < 7200) %}
+            true
+          {% else %}
+            {% set fallback = states('sensor.speedtest_ping_baseline') %}
+            {{ fallback not in ['unknown', 'unavailable', None] }}
+          {% endif %}
       - name: Network Status Summary
         unique_id: network_status_summary
         icon: mdi:lan-check
@@ -61,6 +76,8 @@ template:
             Online
           {% elif reachability == 'off' %}
             Offline
+          {% elif reachability == 'unavailable' %}
+            Unavailable
           {% else %}
             Unknown
           {% endif %}
