@@ -72,7 +72,7 @@ Highlights
 
 Usage Notes
 - Snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
-- The curated scene catalog uses an auto-entities filter so only scenes that actually exist render; the list keeps the manual order while avoiding `entity not found` warnings if a routine is temporarily removed.
+- The scene catalog now auto-discovers anything with `husker`, `cornhusker`, or `nebraska` in the entity ID (and still keeps the baseline lighting scenes) so new presets appear automatically without `entity not found` warnings.
 - Use the automation last-triggered timestamps to confirm the daily schedule fired; if an entry stays blank, check for disabled automations in Home Assistant Settings → Automations.
 - The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; open the light more-info dialog to confirm the strip picked up `LED-Gametime` during shows.
 - The `sensor.huskers_game_status_espn` tile now exposes a `status_source` attribute. If ESPN removes the live scoreboard entry immediately after the whistle, the sensor falls back to the latest completed game from the season schedule so postgame automation checks keep working. If you notice the wrong source, confirm the schedule feed still lists the most recent matchup.
