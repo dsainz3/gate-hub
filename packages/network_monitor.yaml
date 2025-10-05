@@ -10,14 +10,19 @@ template:
         state: >-
           {% set ping = states('sensor.speedtest_ping') | float(0) %}
           {% set down = states('sensor.speedtest_download') | float(0) %}
-          {% set last = states.sensor.speedtest_download.last_changed if states.sensor.speedtest_download is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ ping > 0 and down > 1 and age < 7200 }}
+          {% set entity = states.sensor.speedtest_download %}
+          {% set last_changed = entity.last_changed if entity is not none else none %}
+          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else none %}
+          {% set healthy = ping > 0 and down > 1 and (age is none or age < 7200) %}
+          {{ 'on' if healthy else 'off' }}
         attributes:
           ping_ms: "{{ states('sensor.speedtest_ping') | float(0) }}"
           download_mbps: "{{ states('sensor.speedtest_download') | float(0) }}"
           upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) }}"
-          last_result_changed: "{{ states.sensor.speedtest_download.last_changed }}"
+          last_result_changed: >-
+            {% set entity = states.sensor.speedtest_download %}
+            {{ entity.last_changed if entity is not none else none }}
     sensor:
       - name: Internet Latency
         unique_id: network_monitor_internet_latency
@@ -26,14 +31,25 @@ template:
         state_class: measurement
         state: >-
           {% set age_limit = 2 * 3600 %}
-          {% set p = states('sensor.speedtest_ping') | float(0) %}
-          {% set last = states.sensor.speedtest_ping.last_changed if states.sensor.speedtest_ping is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ iif(p > 0 and age < age_limit, p | round(1), 'unknown') }}
+          {% set ping_state = states('sensor.speedtest_ping') %}
+          {% set ping = ping_state | float(0) if ping_state not in ['unknown', 'unavailable', None] else 0 %}
+          {% set entity = states.sensor.speedtest_ping %}
+          {% set last_changed = entity.last_changed if entity is not none else none %}
+          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
+          {% if ping > 0 and (age is none or age < age_limit) %}
+            {{ ping | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
         availability: >-
-          {% set last = states.sensor.speedtest_ping.last_changed if states.sensor.speedtest_ping is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ (states('sensor.speedtest_ping') | float(0)) > 0 and age < 7200 }}
+          {% set ping_state = states('sensor.speedtest_ping') %}
+          {% set ping = ping_state | float(0) if ping_state not in ['unknown', 'unavailable', None] else 0 %}
+          {% set entity = states.sensor.speedtest_ping %}
+          {% set last_changed = entity.last_changed if entity is not none else none %}
+          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
+          {{ ping > 0 and (age is none or age < 7200) }}
       - name: Network Status Summary
         unique_id: network_status_summary
         icon: mdi:lan-check
