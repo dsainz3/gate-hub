@@ -23,37 +23,55 @@
         icon: mdi:weather-sunny
       - name: Temperature
         unique_id: kneplatt72_temperature_fixed
-        state: "{{ states('sensor.kneplatt72_temperature') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_temperature') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_temperature') | float(0) }}
         unit_of_measurement: '°F'
         device_class: temperature
 
       - name: Heat Index
         unique_id: kneplatt72_heat_index_fixed
-        state: "{{ states('sensor.kneplatt72_heat_index') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_heat_index') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_heat_index') | float(0) }}
         unit_of_measurement: '°F'
         device_class: temperature
 
       - name: Wind Chill
         unique_id: kneplatt72_wind_chill_fixed
-        state: "{{ states('sensor.kneplatt72_wind_chill') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_wind_chill') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_wind_chill') | float(0) }}
         unit_of_measurement: '°F'
         device_class: temperature
 
       - name: Dew Point
         unique_id: kneplatt72_dewpoint_fixed
-        state: "{{ states('sensor.kneplatt72_dewpoint') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_dewpoint') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_dewpoint') | float(0) }}
         unit_of_measurement: '°F'
         device_class: temperature
 
       - name: Wind Speed
         unique_id: kneplatt72_wind_speed_fixed
-        state: "{{ states('sensor.kneplatt72_wind_speed') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_wind_speed') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_wind_speed') | float(0) }}
         unit_of_measurement: 'mph'
         device_class: wind_speed
 
       - name: Wind Gust
         unique_id: kneplatt72_wind_gust_fixed
-        state: "{{ states('sensor.kneplatt72_wind_gust') }}"
+        availability: >-
+          {{ states('sensor.kneplatt72_wind_gust') not in ['', 'unknown', 'unavailable', None] }}
+        state: >-
+          {{ states('sensor.kneplatt72_wind_gust') | float(0) }}
         unit_of_measurement: 'mph'
         device_class: wind_speed
 

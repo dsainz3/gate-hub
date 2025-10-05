@@ -332,8 +332,8 @@ template:
         unique_id: agenda_planner_summary
         icon: mdi:calendar-check
         state: >-
-          {% set calendars = state_attr('sensor.agenda_planner_entities', 'calendars') | default([]) %}
-          {% set todos = state_attr('sensor.agenda_planner_entities', 'todo_lists') | default([]) %}
+          {% set calendars = state_attr('sensor.agenda_planner_entities', 'calendars') | default([], true) %}
+          {% set todos = state_attr('sensor.agenda_planner_entities', 'todo_lists') | default([], true) %}
           {{ calendars | length }} calendars · {{ todos | length }} lists
         attributes:
           next_event: >-
