@@ -860,25 +860,25 @@ views:
             square: false
             cards:
               - type: button
-                entity: automation.lighting_evening_lights_at_sunset
+                entity: automation.evening_lights_at_sunset
                 name: Evening Sunset (Interior)
                 icon: mdi:weather-sunset
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.lighting_evening_lights_at_sunset
+                    entity_id: automation.evening_lights_at_sunset
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.lighting_exterior_front_garage_on_sunset
+                entity: automation.exterior_front_garage_on_sunset
                 name: Evening Sunset (Exterior)
                 icon: mdi:weather-sunset-down
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.lighting_exterior_front_garage_on_sunset
+                    entity_id: automation.exterior_front_garage_on_sunset
                 hold_action:
                   action: toggle
               - type: button
@@ -893,36 +893,36 @@ views:
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.lighting_early_morning_gentle_wake_3_30_am
+                entity: automation.early_morning_lights_0330
                 name: Early Morning
                 icon: mdi:alarm
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.lighting_early_morning_gentle_wake_3_30_am
+                    entity_id: automation.early_morning_lights_0330
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.lighting_morning_lights_off_sunrise_15min
+                entity: automation.interior_lights_sunrise_off
                 name: Morning Interior Off
                 icon: mdi:weather-sunset-up
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.lighting_morning_lights_off_sunrise_15min
+                    entity_id: automation.interior_lights_sunrise_off
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.lighting_exterior_front_garage_off_sunrise
+                entity: automation.exterior_lights_sunrise_off
                 name: Morning Exterior Off
                 icon: mdi:white-balance-sunny
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.lighting_exterior_front_garage_off_sunrise
+                    entity_id: automation.exterior_lights_sunrise_off
                 hold_action:
                   action: toggle
               - type: button
