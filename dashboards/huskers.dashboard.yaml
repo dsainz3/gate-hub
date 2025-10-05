@@ -356,19 +356,19 @@ views:
         title: Lighting Automations
         show_header_toggle: false
         entities:
-          - entity: automation.lighting_evening_sunset_interior
+          - entity: automation.evening_lights_at_sunset
             secondary_info: last-triggered
-          - entity: automation.lighting_evening_sunset_exterior
+          - entity: automation.exterior_front_garage_on_sunset
             secondary_info: last-triggered
-          - entity: automation.lighting_night_mode
+          - entity: automation.night_mode_at_midnight
             secondary_info: last-triggered
-          - entity: automation.lighting_early_morning_gentle_wake
+          - entity: automation.early_morning_lights_0330
             secondary_info: last-triggered
-          - entity: automation.lighting_morning_interior_off
+          - entity: automation.interior_lights_sunrise_off
             secondary_info: last-triggered
-          - entity: automation.lighting_morning_exterior_off
+          - entity: automation.exterior_lights_sunrise_off
             secondary_info: last-triggered
-          - entity: automation.led_monthly_effect_scheduler
+          - entity: automation.exterior_led_monthly_effect
             secondary_info: last-triggered
       - type: entities
         title: Huskers Scenes
