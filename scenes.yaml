@@ -130,3 +130,88 @@
         state: 'off'
       light.permanent_outdoor_lights:
         state: 'off'
+
+  - id: lighting_led_effect_january
+    name: Lighting – Exterior LED Effect January
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-January
+
+  - id: lighting_led_effect_february
+    name: Lighting – Exterior LED Effect February
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-February
+
+  - id: lighting_led_effect_march
+    name: Lighting – Exterior LED Effect March
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-March
+
+  - id: lighting_led_effect_april
+    name: Lighting – Exterior LED Effect April
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-April
+
+  - id: lighting_led_effect_patriotic
+    name: Lighting – Exterior LED Effect Patriotic
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: BSMT-Patriotic
+
+  - id: lighting_led_effect_august
+    name: Lighting – Exterior LED Effect August
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-August
+
+  - id: lighting_led_effect_halloween
+    name: Lighting – Exterior LED Effect Halloween
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: Halloween
+
+  - id: lighting_led_effect_thanksgiving
+    name: Lighting – Exterior LED Effect Thanksgiving
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: LED-Thanksgiving
+
+  - id: lighting_led_effect_christmas
+    name: Lighting – Exterior LED Effect Christmas
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        effect: Christmas
+
+  - id: climate_humidor_cooling_on
+    name: Climate – Humidor Cooling On
+    entities:
+      switch.plug_humidor:
+        state: 'on'
+
+  - id: climate_humidor_cooling_off
+    name: Climate – Humidor Cooling Off
+    entities:
+      switch.plug_humidor:
+        state: 'off'
+
+  - id: safety_burner_plugs_off
+    name: Safety – Burner Plugs Off
+    entities:
+      switch.plug_basement_burner:
+        state: 'off'
+      switch.plug_mainfloor_burner:
+        state: 'off'
+      switch.plug_bedroom_burner:
+        state: 'off'

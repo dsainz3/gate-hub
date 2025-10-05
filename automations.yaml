@@ -140,20 +140,46 @@
         event: start
     variables:
       current_month: '{{ now().month }}'
-      monthly_effects:
-        1: LED-January
-        2: LED-February
-        3: LED-March
-        4: LED-April
-        5: BSMT-Patriotic
-        6: BSMT-Patriotic
-        7: BSMT-Patriotic
-        8: LED-August
-        9: LED-August
-        10: Halloween
-        11: LED-Thanksgiving
-        12: Christmas
-      target_effect: '{{ monthly_effects[current_month] }}'
+      monthly_configs:
+        1:
+          scene: scene.lighting_led_effect_january
+          effect: LED-January
+        2:
+          scene: scene.lighting_led_effect_february
+          effect: LED-February
+        3:
+          scene: scene.lighting_led_effect_march
+          effect: LED-March
+        4:
+          scene: scene.lighting_led_effect_april
+          effect: LED-April
+        5:
+          scene: scene.lighting_led_effect_patriotic
+          effect: BSMT-Patriotic
+        6:
+          scene: scene.lighting_led_effect_patriotic
+          effect: BSMT-Patriotic
+        7:
+          scene: scene.lighting_led_effect_patriotic
+          effect: BSMT-Patriotic
+        8:
+          scene: scene.lighting_led_effect_august
+          effect: LED-August
+        9:
+          scene: scene.lighting_led_effect_august
+          effect: LED-August
+        10:
+          scene: scene.lighting_led_effect_halloween
+          effect: Halloween
+        11:
+          scene: scene.lighting_led_effect_thanksgiving
+          effect: LED-Thanksgiving
+        12:
+          scene: scene.lighting_led_effect_christmas
+          effect: Christmas
+      target_config: '{{ monthly_configs.get(current_month, {}) }}'
+      target_scene: '{{ target_config.get("scene") }}'
+      target_effect: '{{ target_config.get("effect") }}'
     condition:
       - condition: state
         entity_id: binary_sensor.holiday_mode_active
@@ -168,6 +194,8 @@
       - choose:
           - conditions:
               - condition: template
+                value_template: "{{ target_scene is not none and target_scene != '' }}"
+              - condition: template
                 value_template: >-
                   {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
                   {{ target_effect in available_effects }}
@@ -176,22 +204,20 @@
                   - condition: template
                     value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
                 then:
-                  - service: light.turn_on
+                  - service: scene.turn_on
                     target:
-                      entity_id: light.permanent_outdoor_lights
-                    data:
-                      effect: '{{ target_effect }}'
+                      entity_id: '{{ target_scene }}'
                     continue_on_error: true
               - service: logbook.log
                 data:
                   name: LED Monthly Effect
-                  message: 'Applied {{ target_effect }} for month {{ current_month }}'
+                  message: 'Applied {{ target_effect or "unknown effect" }} for month {{ current_month }} via {{ target_scene or "unknown scene" }}'
         default:
           - service: logbook.log
             data:
               name: LED Monthly Effect
               message: >-
-                Skipped {{ target_effect }} for month {{ current_month }} -- effect missing after startup wait
+                Skipped {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing after startup wait or scene unavailable
 
   - id: humidor_plug_temp_control
     alias: 'Climate: Humidor Temperature Control'
@@ -223,8 +249,9 @@
                 entity_id: sensor.hygrometer_humidor_temperature
                 above: 74
             sequence:
-              - service: switch.turn_on
-                target: {entity_id: switch.plug_humidor}
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.climate_humidor_cooling_on
               - service: logbook.log
                 data:
                   name: Humidor Control
@@ -234,8 +261,9 @@
                 entity_id: sensor.hygrometer_humidor_temperature
                 below: 70
             sequence:
-              - service: switch.turn_off
-                target: {entity_id: switch.plug_humidor}
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.climate_humidor_cooling_off
               - service: logbook.log
                 data:
                   name: Humidor Control
@@ -254,12 +282,9 @@
         entity_id: binary_sensor.holiday_mode_active
         state: 'off'
     action:
-      - service: switch.turn_off
+      - service: scene.turn_on
         target:
-          entity_id:
-            - switch.plug_basement_burner
-            - switch.plug_mainfloor_burner
-            - switch.plug_bedroom_burner
+          entity_id: scene.safety_burner_plugs_off
         continue_on_error: true
       - service: persistent_notification.create
         data:
