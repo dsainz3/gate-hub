@@ -370,28 +370,33 @@ views:
             secondary_info: last-triggered
           - entity: automation.exterior_led_monthly_effect
             secondary_info: last-triggered
-      - type: entities
-        title: Huskers Scenes
-        show_header_toggle: false
-        entities:
-          - scene.huskers_seven_all_scarlet
-          - scene.huskers_before_chase
-          - scene.huskers_before_burst
-          - scene.lighting_evening_sunset_interior
-          - scene.lighting_evening_sunset_exterior
-          - scene.lighting_night_mode
-          - scene.lighting_early_morning_gentle_wake
-          - scene.lighting_morning_interior_off
-          - scene.lighting_morning_exterior_off
-          - scene.lighting_led_effect_january
-          - scene.lighting_led_effect_february
-          - scene.lighting_led_effect_march
-          - scene.lighting_led_effect_april
-          - scene.lighting_led_effect_patriotic
-          - scene.lighting_led_effect_august
-          - scene.lighting_led_effect_halloween
-          - scene.lighting_led_effect_thanksgiving
-          - scene.lighting_led_effect_christmas
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Huskers Scenes
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: scene.huskers_seven_all_scarlet
+            - entity_id: scene.huskers_before_chase
+            - entity_id: scene.huskers_before_burst
+            - entity_id: scene.lighting_evening_sunset_interior
+            - entity_id: scene.lighting_evening_sunset_exterior
+            - entity_id: scene.lighting_night_mode
+            - entity_id: scene.lighting_early_morning_gentle_wake
+            - entity_id: scene.lighting_morning_interior_off
+            - entity_id: scene.lighting_morning_exterior_off
+            - entity_id: scene.lighting_led_effect_january
+            - entity_id: scene.lighting_led_effect_february
+            - entity_id: scene.lighting_led_effect_march
+            - entity_id: scene.lighting_led_effect_april
+            - entity_id: scene.lighting_led_effect_patriotic
+            - entity_id: scene.lighting_led_effect_august
+            - entity_id: scene.lighting_led_effect_halloween
+            - entity_id: scene.lighting_led_effect_thanksgiving
+            - entity_id: scene.lighting_led_effect_christmas
+        sort:
+          method: none
       - type: grid
         title: Lighting Controls
         columns: 3
