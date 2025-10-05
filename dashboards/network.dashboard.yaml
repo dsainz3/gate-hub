@@ -333,7 +333,8 @@ views:
               fmt(item.get('avg_30d'), unit),
               baseline_display
             ] -%}
-            | {{ cells | join(' | ') }} |
+            {%- set joined = cells | join(' | ') -%}
+            | {{ joined }} |
           {%- endmacro %}
           {% set metrics_attr = state_attr('sensor.network_performance_summary', 'metrics') %}
           {% set metrics = metrics_attr | from_json if metrics_attr else {} %}
