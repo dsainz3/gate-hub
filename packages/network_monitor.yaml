@@ -4,6 +4,7 @@
 template:
   - binary_sensor:
       - name: Internet Reachability
+        object_id: internet_reachability
         unique_id: network_monitor_internet_reachability
         device_class: connectivity
         # ONLINE when we have a recent speedtest and non-zero ping & reasonable download
@@ -25,6 +26,7 @@ template:
             {{ entity.last_changed if entity is not none else none }}
     sensor:
       - name: Internet Latency
+        object_id: internet_latency
         unique_id: network_monitor_internet_latency
         unit_of_measurement: ms
         device_class: duration
