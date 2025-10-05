@@ -109,6 +109,7 @@ pip install pre-commit ruff
 ha core check                         # requires the HA CLI
 pre-commit run --all-files            # formatting, linting, HA config check
 python scripts/ha_check_portable.py   # portable dockerised config validation
+pytest                                # repository unit tests
 ```
 
 The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant:stable` and runs `check_config`, generating temporary secrets if none exist.

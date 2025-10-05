@@ -37,6 +37,17 @@ views:
               {%- endif -%}
             {%- endif -%}
           {%- endmacro %}
+          {% macro trend_compare(current, reference, trend_unit='', fmt_unit='', precision=1, label=None) -%}
+            {%- set t = trend(current, reference, trend_unit) -%}
+            {%- if t == '–' -%}
+              –
+            {%- elif reference in ['unknown', 'unavailable', None] -%}
+              {{ t }}
+            {%- else -%}
+              {%- set lbl = label if label not in [None, 'unavailable'] else 'baseline' -%}
+              {{ t }} vs {{ lbl }} {{ fmt(reference, precision, fmt_unit) }}
+            {%- endif -%}
+          {%- endmacro %}
           {% set last_speedtest = state_attr('sensor.network_status_summary', 'last_speedtest') %}
           {% set last_label = 'pending runs' %}
           {% if last_speedtest not in ['unknown', 'unavailable', None] %}
@@ -47,29 +58,50 @@ views:
           {% endif %}
           {% set reachability = is_state('binary_sensor.internet_reachability', 'on') %}
           {% set clients_total = state_attr('sensor.deco_network_health', 'clients_total') %}
+          {% set latency_live = states('sensor.internet_latency') %}
+          {% set latency_source = 'Internet latency' %}
+          {% if latency_live in ['unknown', 'unavailable', None] %}
+            {% set latency_live = states('sensor.speedtest_ping') %}
+            {% set latency_source = 'Speedtest ping' %}
+          {% endif %}
+          {% set latency_ref = states('sensor.internet_latency_baseline') %}
+          {% set latency_ref_label = state_attr('sensor.internet_latency_baseline', 'source_label') %}
+          {% if latency_ref in ['unknown', 'unavailable', None] %}
+            {% set latency_ref = states('sensor.speedtest_ping_baseline') %}
+            {% set latency_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
+          {% endif %}
+          {% set download_ref = states('sensor.speedtest_download_baseline') %}
+          {% set download_ref_label = state_attr('sensor.speedtest_download_baseline', 'source_label') %}
+          {% set upload_ref = states('sensor.speedtest_upload_baseline') %}
+          {% set upload_ref_label = state_attr('sensor.speedtest_upload_baseline', 'source_label') %}
+          {% set ping_ref = states('sensor.speedtest_ping_baseline') %}
+          {% set ping_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
+          {% set deco_down_ref = states('sensor.deco_total_down_baseline') %}
+          {% set deco_down_ref_label = state_attr('sensor.deco_total_down_baseline', 'source_label') %}
+          {% set deco_up_ref = states('sensor.deco_total_up_baseline') %}
+          {% set deco_up_ref_label = state_attr('sensor.deco_total_up_baseline', 'source_label') %}
+          {% set latency_trend = trend_compare(latency_live, latency_ref, ' ms', 'ms', 1, latency_ref_label) %}
+          {% set download_trend = trend_compare(states('sensor.speedtest_download'), download_ref, ' Mbps', 'Mbps', 1, download_ref_label) %}
+          {% set upload_trend = trend_compare(states('sensor.speedtest_upload'), upload_ref, ' Mbps', 'Mbps', 1, upload_ref_label) %}
+          {% set ping_trend = trend_compare(states('sensor.speedtest_ping'), ping_ref, ' ms', 'ms', 1, ping_ref_label) %}
+          {% set deco_down_trend = trend_compare(states('sensor.deco_total_down_mbps'), deco_down_ref, ' Mbps', 'Mbps', 2, deco_down_ref_label) %}
+          {% set deco_up_trend = trend_compare(states('sensor.deco_total_up_mbps'), deco_up_ref, ' Mbps', 'Mbps', 2, deco_up_ref_label) %}
           ## Network Snapshot
           **Status:** {{ states('sensor.network_status_summary') }} · {{ states('sensor.network_performance_summary') | title }}
 
-          **Ping:** {{ fmt(states('sensor.internet_latency')) }} ms
-          ({{ 'reachable' if reachability else 'unreachable' }}) ·
-          {{ trend(states('sensor.internet_latency'),
-            states('sensor.internet_latency_24h_avg'),
-            ' ms') }}
+          **Ping:** {{ fmt(latency_live) }} ms ({{ latency_source | lower }}, {{ 'reachable' if reachability else 'unreachable' }}) ·
+          {{ latency_trend }}
 
           **Speedtest:** ↓ {{ fmt(states('sensor.speedtest_download'), 1, 'Mbps') }}
-          ({{ trend(states('sensor.speedtest_download'),
-            states('sensor.speedtest_download_24h_avg'),
-            ' Mbps') }}) · ↑ {{ fmt(states('sensor.speedtest_upload'), 1, 'Mbps') }}
-          ({{ trend(states('sensor.speedtest_upload'),
-            states('sensor.speedtest_upload_24h_avg'),
-            ' Mbps') }}) ·
+          ({{ download_trend }}) · ↑ {{ fmt(states('sensor.speedtest_upload'), 1, 'Mbps') }}
+          ({{ upload_trend }}) ·
           Ping {{ fmt(states('sensor.speedtest_ping'), 1, 'ms') }}
-          ({{ trend(states('sensor.speedtest_ping'),
-            states('sensor.speedtest_ping_24h_avg'),
-            ' ms') }})
+          ({{ ping_trend }})
 
-          **Deco Throughput:** ↓ {{ fmt(states('sensor.deco_total_down_mbps'), 2, 'Mbps') }} ·
-          ↑ {{ fmt(states('sensor.deco_total_up_mbps'), 2, 'Mbps') }} ·
+          **Deco Throughput:** ↓ {{ fmt(states('sensor.deco_total_down_mbps'), 2, 'Mbps') }}
+          ({{ deco_down_trend }}) ·
+          ↑ {{ fmt(states('sensor.deco_total_up_mbps'), 2, 'Mbps') }}
+          ({{ deco_up_trend }}) ·
           Clients {{ fmt(states('sensor.deco_client_count'), 0) }}
           {% if clients_total is not none %}/ {{ clients_total }}{% endif %}
           ({{ states('sensor.deco_network_health') | title }})
@@ -268,10 +300,20 @@ views:
           - sensor.deco_node_count
           - sensor.network_performance_summary
           - sensor.speedtest_last_run
+          - update.tp_link_deco_update
+          - update.tp_link_router_update
       - type: entities
         title: Rolling averages
         show_header_toggle: false
         entities:
+          - type: section
+            label: Baselines (fallback)
+          - sensor.internet_latency_baseline
+          - sensor.speedtest_download_baseline
+          - sensor.speedtest_upload_baseline
+          - sensor.speedtest_ping_baseline
+          - sensor.deco_total_down_baseline
+          - sensor.deco_total_up_baseline
           - type: section
             label: Latency (ms)
           - sensor.internet_latency_1h_avg
