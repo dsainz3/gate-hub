@@ -69,7 +69,7 @@ template:
           latency_ms: >-
             {% set latency = states('sensor.internet_latency') %}
             {% if latency in ['unknown', 'unavailable', None] %}
-              {% set latency = states('sensor.internet_latency_2') %}
+              {% set latency = states('sensor.internet_latency_1h_avg') %}
             {% endif %}
             {% if latency in ['unknown', 'unavailable', None] %}
               {% set latency = states('sensor.internet_latency_baseline') %}
