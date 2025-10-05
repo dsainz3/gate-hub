@@ -107,6 +107,93 @@ template:
                 unavailable
               {% endif %}
             {% endif %}
+      - name: Network Dashboard Internet Online
+        unique_id: network_dashboard_internet_online
+        device_class: connectivity
+        icon: mdi:lan-check
+        variables:
+          internet_source: >-
+            {% set override = states('input_text.network_dashboard_internet_online_source') %}
+            {% set options = [
+              override,
+              'binary_sensor.internet_reachability',
+              'binary_sensor.internet_online',
+              'binary_sensor.internet_connection',
+              'binary_sensor.network_online',
+              'binary_sensor.network_connection'
+            ] %}
+            {% for candidate in options %}
+              {% if candidate not in ['', 'unknown', 'unavailable', None] %}
+                {% set value = states(candidate) %}
+                {% if value not in ['unknown', 'unavailable', None, ''] %}
+                  {{ candidate }}
+                  {% break %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          internet_state: >-
+            {% if internet_source %}
+              {{ states(internet_source) }}
+            {% else %}
+              unknown
+            {% endif %}
+        state: >-
+          {% set raw = internet_state | string | lower %}
+          {% if raw in ['on', 'true', 'online', 'connected', 'up', 'available', 'reachable', '1', 'open'] %}
+            on
+          {% elif raw in ['off', 'false', 'offline', 'disconnected', 'down', 'unreachable', 'not reachable', '0', 'closed'] %}
+            off
+          {% elif raw in ['unavailable'] %}
+            unavailable
+          {% else %}
+            unknown
+          {% endif %}
+        attributes:
+          source_entity: "{{ internet_source if internet_source else 'unknown' }}"
+          source_state: "{{ internet_state }}"
+      - name: Network Dashboard Live Latency
+        unique_id: network_dashboard_live_latency
+        unit_of_measurement: ms
+        device_class: duration
+        state_class: measurement
+        icon: mdi:speedometer
+        variables:
+          latency_source: >-
+            {% set override = states('input_text.network_dashboard_latency_source') %}
+            {% set options = [
+              override,
+              'sensor.internet_latency',
+              'sensor.internet_latency_1h_avg',
+              'sensor.internet_latency_baseline',
+              'sensor.speedtest_ping'
+            ] %}
+            {% for candidate in options %}
+              {% if candidate not in ['', 'unknown', 'unavailable', None] %}
+                {% set value = states(candidate) %}
+                {% if value not in ['unknown', 'unavailable', None, ''] %}
+                  {{ candidate }}
+                  {% break %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          latency_state: >-
+            {% if latency_source %}
+              {{ states(latency_source) }}
+            {% else %}
+              unknown
+            {% endif %}
+        state: >-
+          {% set text = latency_state | string | trim %}
+          {% if text in ['unknown', 'unavailable', ''] or latency_state is none %}
+            unknown
+          {% elif text is match('^-?[0-9]+(\.[0-9]+)?$') %}
+            {{ text | float | round(1) }}
+          {% else %}
+            unknown
+          {% endif %}
+        attributes:
+          source_entity: "{{ latency_source if latency_source else 'unknown' }}"
+          source_state: "{{ latency_state }}"
       - name: Speedtest Last Run
         unique_id: network_speedtest_last_run
         device_class: timestamp

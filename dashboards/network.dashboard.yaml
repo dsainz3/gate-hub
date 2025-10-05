@@ -117,7 +117,7 @@ views:
         square: false
         cards:
           - type: tile
-            entity: binary_sensor.internet_reachability
+            entity: binary_sensor.network_dashboard_internet_online
             name: Internet online
             color: '#43a047'
           - type: tile
@@ -129,7 +129,7 @@ views:
             name: Deco health
             color: '#1e88e5'
           - type: tile
-            entity: sensor.internet_latency
+            entity: sensor.network_dashboard_live_latency
             name: Live latency
             color: '#039be5'
           - type: tile
