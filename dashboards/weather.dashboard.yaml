@@ -44,57 +44,50 @@ views:
             name: Temperature
             color: '#ef5350'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_feels_like
             name: Feels like
             color: '#ef5350'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_humidity_wx
             name: Humidity
             color: '#3949ab'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_dew_point_approx
             name: Dew point
             color: '#00897b'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_wind_speed_wx
             name: Wind speed
             color: '#039be5'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.wind_gust
             name: Wind gust
             color: '#0277bd'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.kneplatt72_uv_index
             name: UV index
             color: '#f9a825'
             features:
-              - type: graph
-                graph: line
-                detail: 2
+              - type: trend-graph
+                hours_to_show: 24
           - type: tile
             entity: sensor.outdoor_visibility_wx
             name: Visibility
