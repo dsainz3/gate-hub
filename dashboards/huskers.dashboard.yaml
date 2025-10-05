@@ -352,51 +352,78 @@ views:
           - **Automations** handle the daily schedule so lighting always matches the time of day.
           - **Scenes** instantly trigger game day looks like Scarlet, Chase, or Burst.
           Tap any item below to enable or activate it.
+      - type: entities
+        title: Lighting Automations
+        show_header_toggle: false
+        entities:
+          - entity: automation.lighting_evening_sunset_interior
+            secondary_info: last-triggered
+          - entity: automation.lighting_evening_sunset_exterior
+            secondary_info: last-triggered
+          - entity: automation.lighting_night_mode
+            secondary_info: last-triggered
+          - entity: automation.lighting_early_morning_gentle_wake
+            secondary_info: last-triggered
+          - entity: automation.lighting_morning_interior_off
+            secondary_info: last-triggered
+          - entity: automation.lighting_morning_exterior_off
+            secondary_info: last-triggered
+          - entity: automation.led_monthly_effect_scheduler
+            secondary_info: last-triggered
+      - type: entities
+        title: Huskers Scenes
+        show_header_toggle: false
+        entities:
+          - scene.huskers_seven_all_scarlet
+          - scene.huskers_before_chase
+          - scene.huskers_before_burst
+          - scene.lighting_evening_sunset_interior
+          - scene.lighting_evening_sunset_exterior
+          - scene.lighting_night_mode
+          - scene.lighting_early_morning_gentle_wake
+          - scene.lighting_morning_interior_off
+          - scene.lighting_morning_exterior_off
+          - scene.lighting_led_effect_january
+          - scene.lighting_led_effect_february
+          - scene.lighting_led_effect_march
+          - scene.lighting_led_effect_april
+          - scene.lighting_led_effect_patriotic
+          - scene.lighting_led_effect_august
+          - scene.lighting_led_effect_halloween
+          - scene.lighting_led_effect_thanksgiving
+          - scene.lighting_led_effect_christmas
       - type: grid
-        columns: 2
+        title: Lighting Controls
+        columns: 3
         square: false
         cards:
-          - type: custom:auto-entities
-            show_empty: false
-            card:
-              type: entities
-              title: Lighting Automations
-              show_header_toggle: false
-            filter:
-              include:
-                - entity_id: automation.lighting_evening_sunset_interior
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.lighting_evening_sunset_exterior
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.lighting_night_mode
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.lighting_early_morning_gentle_wake
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.lighting_morning_interior_off
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.lighting_morning_exterior_off
-                  options:
-                    secondary_info: last-triggered
-                - entity_id: automation.led_monthly_effect_scheduler
-                  options:
-                    secondary_info: last-triggered
-          - type: custom:auto-entities
-            card:
-              type: entities
-              title: Huskers Scenes
-              show_header_toggle: false
-            filter:
-              include:
-                - entity_id: scene.huskers_seven_all_scarlet
-                - entity_id: scene.huskers_before_chase
-                - entity_id: scene.huskers_before_burst
-            sort:
-              method: name
+          - type: light
+            entity: light.sunroom_light
+            name: Sunroom
+          - type: light
+            entity: light.diningroom_light
+            name: Dining Room
+          - type: light
+            entity: light.livingroom_light
+            name: Living Room
+          - type: light
+            entity: light.theater_lights
+            name: Theater
+          - type: light
+            entity: light.front_porch_lights
+            name: Front Porch
+          - type: light
+            entity: light.light_garage_left
+            name: Garage Left
+          - type: light
+            entity: light.light_garage_center
+            name: Garage Center
+          - type: light
+            entity: light.light_garage_right
+            name: Garage Right
+          - type: light
+            entity: light.permanent_outdoor_lights
+            name: Permanent Outdoor
   - title: Ops Console
     path: huskers-ops
     icon: mdi:clipboard-text-clock
