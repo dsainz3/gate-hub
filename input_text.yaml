@@ -9,3 +9,15 @@ weather_station_label:
   icon: mdi:sign-text
   initial: !secret weather_station_label
   mode: text
+
+network_dashboard_internet_online_source:
+  name: Network Dashboard Internet Online Source
+  icon: mdi:lan-check
+  initial: ''
+  mode: text
+
+network_dashboard_latency_source:
+  name: Network Dashboard Latency Source
+  icon: mdi:speedometer
+  initial: ''
+  mode: text
