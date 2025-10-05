@@ -55,7 +55,6 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 |-- custom_components/         # Checked-in custom integrations (BLE, Govee, ...)
 |-- scripts/                   # Local+CI helpers, incl. ha_check_portable
 |-- docs/                      # Living documentation for infra, tooling, ADRs
-|-- Fix-HAConfig.ps1           # PowerShell fixer/normaliser with backup support
 ```
 
 ---
@@ -66,7 +65,6 @@ Gate Hub keeps all Home Assistant configuration under version control so changes
 
 1. Clone the repository into your Home Assistant `/config` directory.
 2. Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
-3. Review `Fix-HAConfig.ps1` for optional one-time normalisation tasks.
 
 ### Runtime data and local copies
 
@@ -109,6 +107,7 @@ pip install pre-commit ruff
 ha core check                         # requires the HA CLI
 pre-commit run --all-files            # formatting, linting, HA config check
 python scripts/ha_check_portable.py   # portable dockerised config validation
+pytest                                # repository unit tests
 ```
 
 The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant:stable` and runs `check_config`, generating temporary secrets if none exist.

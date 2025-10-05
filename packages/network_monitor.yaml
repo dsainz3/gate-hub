@@ -10,14 +10,21 @@ template:
         state: >-
           {% set ping = states('sensor.speedtest_ping') | float(0) %}
           {% set down = states('sensor.speedtest_download') | float(0) %}
-          {% set last = states.sensor.speedtest_download.last_changed if states.sensor.speedtest_download is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ ping > 0 and down > 1 and age < 7200 }}
+          {% set entity = states.sensor.speedtest_download %}
+          {% set last_changed = entity.last_changed if entity is not none else none %}
+          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else none %}
+          {% set healthy = ping > 0 and down > 1 and (age is none or age < 7200) %}
+          {{ 'on' if healthy else 'off' }}
         attributes:
           ping_ms: "{{ states('sensor.speedtest_ping') | float(0) }}"
           download_mbps: "{{ states('sensor.speedtest_download') | float(0) }}"
           upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) }}"
-          last_result_changed: "{{ states.sensor.speedtest_download.last_changed }}"
+          last_result_changed: >-
+            {% set entity = states.sensor.speedtest_download %}
+            {{ entity.last_changed if entity is not none else none }}
+        availability: >-
+          true
     sensor:
       - name: Internet Latency
         unique_id: network_monitor_internet_latency
@@ -26,14 +33,26 @@ template:
         state_class: measurement
         state: >-
           {% set age_limit = 2 * 3600 %}
-          {% set p = states('sensor.speedtest_ping') | float(0) %}
-          {% set last = states.sensor.speedtest_ping.last_changed if states.sensor.speedtest_ping is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ iif(p > 0 and age < age_limit, p | round(1), 'unknown') }}
-        availability: >-
-          {% set last = states.sensor.speedtest_ping.last_changed if states.sensor.speedtest_ping is not none else none %}
-          {% set age = (now().timestamp() - as_timestamp(last, 0)) %}
-          {{ (states('sensor.speedtest_ping') | float(0)) > 0 and age < 7200 }}
+          {% set ping_state = states('sensor.speedtest_ping') %}
+          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else none %}
+          {% set entity = states.sensor.speedtest_ping %}
+          {% set last_changed = entity.last_changed if entity is not none else none %}
+          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else none %}
+          {% if ping is not none and ping > 0 and (age is none or age < age_limit) %}
+            {{ ping | round(1) }}
+          {% else %}
+            {% set fallback = states('sensor.speedtest_ping_baseline') %}
+            {% if fallback not in ['unknown', 'unavailable', None] %}
+              {{ fallback | float | round(1) }}
+            {% else %}
+              {% if ping is not none and ping > 0 %}
+                {{ ping | round(1) }}
+              {% else %}
+                unknown
+              {% endif %}
+            {% endif %}
+          {% endif %}
       - name: Network Status Summary
         unique_id: network_status_summary
         icon: mdi:lan-check
@@ -43,6 +62,8 @@ template:
             Online
           {% elif reachability == 'off' %}
             Offline
+          {% elif reachability == 'unavailable' %}
+            Unavailable
           {% else %}
             Unknown
           {% endif %}
@@ -51,9 +72,19 @@ template:
           latency_ms: >-
             {% set latency = states('sensor.internet_latency') %}
             {% if latency in ['unknown', 'unavailable', None] %}
-              {% set latency = states('sensor.internet_latency_2') %}
+              {% set latency = states('sensor.internet_latency_1h_avg') %}
             {% endif %}
-            {{ latency | float(0) | round(1) }}
+            {% if latency in ['unknown', 'unavailable', None] %}
+              {% set latency = states('sensor.internet_latency_baseline') %}
+            {% endif %}
+            {% if latency in ['unknown', 'unavailable', None] %}
+              {% set latency = states('sensor.speedtest_ping') %}
+            {% endif %}
+            {% if latency in ['unknown', 'unavailable', None] %}
+              unknown
+            {% else %}
+              {{ latency | float | round(1) }}
+            {% endif %}
           speedtest_ping_ms: "{{ states('sensor.speedtest_ping') | float(0) | round(1) }}"
           speedtest_download_mbps: "{{ states('sensor.speedtest_download') | float(0) | round(1) }}"
           speedtest_upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) | round(1) }}"
@@ -62,6 +93,35 @@ template:
           nodes_online: "{{ states('sensor.deco_node_count') }}"
           clients_online: "{{ states('sensor.deco_client_count') }}"
           last_speedtest: >-
+            {% set run = states('sensor.speedtest_last_run') %}
+            {% if run not in ['unknown', 'unavailable', None] %}
+              {{ run }}
+            {% else %}
+              {% set entity = states.sensor.speedtest_download %}
+              {% if entity is not none and entity.last_changed %}
+                {% set ts = as_timestamp(entity.last_changed) %}
+                {% set date = ts | timestamp_custom('%Y-%m-%dT%H:%M:%S', True) %}
+                {% set offset = ts | timestamp_custom('%z', True) %}
+                {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
+              {% else %}
+                unavailable
+              {% endif %}
+            {% endif %}
+      - name: Speedtest Last Run
+        unique_id: network_speedtest_last_run
+        device_class: timestamp
+        state: >-
+          {% set run = states('sensor.speedtest_last_run') %}
+          {% if run not in ['unknown', 'unavailable', None] %}
+            {% set ts = as_timestamp(run) %}
+            {% if ts %}
+              {% set date = ts | timestamp_custom('%Y-%m-%dT%H:%M:%S', True) %}
+              {% set offset = ts | timestamp_custom('%z', True) %}
+              {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
+            {% else %}
+              {{ run }}
+            {% endif %}
+          {% else %}
             {% set entity = states.sensor.speedtest_download %}
             {% if entity is not none and entity.last_changed %}
               {% set ts = as_timestamp(entity.last_changed) %}
@@ -69,20 +129,8 @@ template:
               {% set offset = ts | timestamp_custom('%z', True) %}
               {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
             {% else %}
-              unavailable
+              unknown
             {% endif %}
-      - name: Speedtest Last Run
-        unique_id: network_speedtest_last_run
-        device_class: timestamp
-        state: >-
-          {% set entity = states.sensor.speedtest_download %}
-          {% if entity is not none and entity.last_changed %}
-            {% set ts = as_timestamp(entity.last_changed) %}
-            {% set date = ts | timestamp_custom('%Y-%m-%dT%H:%M:%S', True) %}
-            {% set offset = ts | timestamp_custom('%z', True) %}
-            {{ date ~ offset[:3] ~ ':' ~ offset[3:] }}
-          {% else %}
-            unknown
           {% endif %}
       - name: Deco Network Health
         unique_id: network_deco_health
@@ -272,39 +320,393 @@ template:
           {% else %}
             false
           {% endif %}
+      - name: Internet Latency Baseline
+        unique_id: network_internet_latency_baseline
+        device_class: duration
+        state_class: measurement
+        unit_of_measurement: ms
+        icon: mdi:clock-check
+        state: >-
+          {% set options = [
+            ('sensor.internet_latency_24h_avg', '24h avg'),
+            ('sensor.internet_latency_7d_avg', '7d avg'),
+            ('sensor.internet_latency_30d_avg', '30d avg'),
+            ('sensor.internet_latency', 'live')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.internet_latency_24h_avg', '24h avg'),
+              ('sensor.internet_latency_7d_avg', '7d avg'),
+              ('sensor.internet_latency_30d_avg', '30d avg'),
+              ('sensor.internet_latency', 'live')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.internet_latency_24h_avg',
+              'sensor.internet_latency_7d_avg',
+              'sensor.internet_latency_30d_avg',
+              'sensor.internet_latency'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+      - name: Speedtest Download Baseline
+        unique_id: network_speedtest_download_baseline
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbit/s
+        icon: mdi:download-circle
+        state: >-
+          {% set options = [
+            ('sensor.speedtest_download_24h_avg', '24h avg'),
+            ('sensor.speedtest_download_7d_avg', '7d avg'),
+            ('sensor.speedtest_download_30d_avg', '30d avg'),
+            ('sensor.speedtest_download', 'latest')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.speedtest_download_24h_avg', '24h avg'),
+              ('sensor.speedtest_download_7d_avg', '7d avg'),
+              ('sensor.speedtest_download_30d_avg', '30d avg'),
+              ('sensor.speedtest_download', 'latest')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.speedtest_download_24h_avg',
+              'sensor.speedtest_download_7d_avg',
+              'sensor.speedtest_download_30d_avg',
+              'sensor.speedtest_download'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+      - name: Speedtest Upload Baseline
+        unique_id: network_speedtest_upload_baseline
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbit/s
+        icon: mdi:upload-circle
+        state: >-
+          {% set options = [
+            ('sensor.speedtest_upload_24h_avg', '24h avg'),
+            ('sensor.speedtest_upload_7d_avg', '7d avg'),
+            ('sensor.speedtest_upload_30d_avg', '30d avg'),
+            ('sensor.speedtest_upload', 'latest')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.speedtest_upload_24h_avg', '24h avg'),
+              ('sensor.speedtest_upload_7d_avg', '7d avg'),
+              ('sensor.speedtest_upload_30d_avg', '30d avg'),
+              ('sensor.speedtest_upload', 'latest')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.speedtest_upload_24h_avg',
+              'sensor.speedtest_upload_7d_avg',
+              'sensor.speedtest_upload_30d_avg',
+              'sensor.speedtest_upload'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+      - name: Speedtest Ping Baseline
+        unique_id: network_speedtest_ping_baseline
+        device_class: duration
+        state_class: measurement
+        unit_of_measurement: ms
+        icon: mdi:timer-outline
+        state: >-
+          {% set options = [
+            ('sensor.speedtest_ping_24h_avg', '24h avg'),
+            ('sensor.speedtest_ping_7d_avg', '7d avg'),
+            ('sensor.speedtest_ping_30d_avg', '30d avg'),
+            ('sensor.speedtest_ping', 'latest')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.speedtest_ping_24h_avg', '24h avg'),
+              ('sensor.speedtest_ping_7d_avg', '7d avg'),
+              ('sensor.speedtest_ping_30d_avg', '30d avg'),
+              ('sensor.speedtest_ping', 'latest')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.speedtest_ping_24h_avg',
+              'sensor.speedtest_ping_7d_avg',
+              'sensor.speedtest_ping_30d_avg',
+              'sensor.speedtest_ping'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+      - name: Deco Total Down Baseline
+        unique_id: network_deco_total_down_baseline
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbps
+        icon: mdi:download-lock
+        state: >-
+          {% set options = [
+            ('sensor.deco_total_down_mbps_24h_avg', '24h avg'),
+            ('sensor.deco_total_down_mbps_7d_avg', '7d avg'),
+            ('sensor.deco_total_down_mbps_30d_avg', '30d avg'),
+            ('sensor.deco_total_down_mbps', 'latest')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.deco_total_down_mbps_24h_avg', '24h avg'),
+              ('sensor.deco_total_down_mbps_7d_avg', '7d avg'),
+              ('sensor.deco_total_down_mbps_30d_avg', '30d avg'),
+              ('sensor.deco_total_down_mbps', 'latest')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.deco_total_down_mbps_24h_avg',
+              'sensor.deco_total_down_mbps_7d_avg',
+              'sensor.deco_total_down_mbps_30d_avg',
+              'sensor.deco_total_down_mbps'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+      - name: Deco Total Up Baseline
+        unique_id: network_deco_total_up_baseline
+        device_class: data_rate
+        state_class: measurement
+        unit_of_measurement: Mbps
+        icon: mdi:upload-lock
+        state: >-
+          {% set options = [
+            ('sensor.deco_total_up_mbps_24h_avg', '24h avg'),
+            ('sensor.deco_total_up_mbps_7d_avg', '7d avg'),
+            ('sensor.deco_total_up_mbps_30d_avg', '30d avg'),
+            ('sensor.deco_total_up_mbps', 'latest')
+          ] %}
+          {% set ns = namespace(value=None) %}
+          {% for entity_id, _label in options %}
+            {% if ns.value is none %}
+              {% set val = states(entity_id) %}
+              {% if val not in ['unknown', 'unavailable', None] %}
+                {% set ns.value = val | float %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.value if ns.value is not none else 'unavailable' }}
+        attributes:
+          source_label: >-
+            {% set options = [
+              ('sensor.deco_total_up_mbps_24h_avg', '24h avg'),
+              ('sensor.deco_total_up_mbps_7d_avg', '7d avg'),
+              ('sensor.deco_total_up_mbps_30d_avg', '30d avg'),
+              ('sensor.deco_total_up_mbps', 'latest')
+            ] %}
+            {% set ns = namespace(label='unavailable') %}
+            {% for entity_id, label in options %}
+              {% if ns.label == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.label = label %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.label }}
+          source_entity: >-
+            {% set options = [
+              'sensor.deco_total_up_mbps_24h_avg',
+              'sensor.deco_total_up_mbps_7d_avg',
+              'sensor.deco_total_up_mbps_30d_avg',
+              'sensor.deco_total_up_mbps'
+            ] %}
+            {% set ns = namespace(entity='unavailable') %}
+            {% for entity_id in options %}
+              {% if ns.entity == 'unavailable' %}
+                {% set val = states(entity_id) %}
+                {% if val not in ['unknown', 'unavailable', None] %}
+                  {% set ns.entity = entity_id %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
       - name: Network Performance Summary
         unique_id: network_performance_summary
         icon: mdi:chart-multiple
         state: >-
           {% set alerts = [] %}
           {% set latency = states('sensor.internet_latency') | float(0) %}
-          {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
-          {% if latency_24h > 0 and latency > latency_24h * 1.25 %}
+          {% set latency_baseline = states('sensor.internet_latency_baseline') %}
+          {% set latency_ref = latency_baseline | float if latency_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if latency_ref is not none and latency_ref > 0 and latency > latency_ref * 1.25 %}
             {% set alerts = alerts + ['latency'] %}
           {% endif %}
           {% set download = states('sensor.speedtest_download') | float(0) %}
-          {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
-          {% if download_24h > 0 and download < download_24h * 0.75 %}
+          {% set download_baseline = states('sensor.speedtest_download_baseline') %}
+          {% set download_ref = download_baseline | float if download_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if download_ref is not none and download_ref > 0 and download < download_ref * 0.75 %}
             {% set alerts = alerts + ['download'] %}
           {% endif %}
           {% set upload = states('sensor.speedtest_upload') | float(0) %}
-          {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
-          {% if upload_24h > 0 and upload < upload_24h * 0.75 %}
+          {% set upload_baseline = states('sensor.speedtest_upload_baseline') %}
+          {% set upload_ref = upload_baseline | float if upload_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if upload_ref is not none and upload_ref > 0 and upload < upload_ref * 0.75 %}
             {% set alerts = alerts + ['upload'] %}
           {% endif %}
           {% set ping = states('sensor.speedtest_ping') | float(0) %}
-          {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
-          {% if ping_24h > 0 and ping > ping_24h * 1.25 %}
+          {% set ping_baseline = states('sensor.speedtest_ping_baseline') %}
+          {% set ping_ref = ping_baseline | float if ping_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if ping_ref is not none and ping_ref > 0 and ping > ping_ref * 1.25 %}
             {% set alerts = alerts + ['ping'] %}
           {% endif %}
           {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
-          {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
-          {% if deco_down_24h > 0 and deco_down < deco_down_24h * 0.5 %}
+          {% set deco_down_baseline = states('sensor.deco_total_down_baseline') %}
+          {% set deco_down_ref = deco_down_baseline | float if deco_down_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if deco_down_ref is not none and deco_down_ref > 0 and deco_down < deco_down_ref * 0.5 %}
             {% set alerts = alerts + ['deco_down'] %}
           {% endif %}
           {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
-          {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
-          {% if deco_up_24h > 0 and deco_up < deco_up_24h * 0.5 %}
+          {% set deco_up_baseline = states('sensor.deco_total_up_baseline') %}
+          {% set deco_up_ref = deco_up_baseline | float if deco_up_baseline not in ['unknown', 'unavailable', None] else None %}
+          {% if deco_up_ref is not none and deco_up_ref > 0 and deco_up < deco_up_ref * 0.5 %}
             {% set alerts = alerts + ['deco_up'] %}
           {% endif %}
           {{ 'degraded' if alerts else 'normal' }}
@@ -312,67 +714,121 @@ template:
           alerts: >-
             {% set alerts = [] %}
             {% set latency = states('sensor.internet_latency') | float(0) %}
-            {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
-            {% if latency_24h > 0 and latency > latency_24h * 1.25 %}
+            {% set latency_baseline = states('sensor.internet_latency_baseline') %}
+            {% set latency_ref = latency_baseline | float if latency_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if latency_ref is not none and latency_ref > 0 and latency > latency_ref * 1.25 %}
               {% set alerts = alerts + ['latency'] %}
             {% endif %}
             {% set download = states('sensor.speedtest_download') | float(0) %}
-            {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
-            {% if download_24h > 0 and download < download_24h * 0.75 %}
+            {% set download_baseline = states('sensor.speedtest_download_baseline') %}
+            {% set download_ref = download_baseline | float if download_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if download_ref is not none and download_ref > 0 and download < download_ref * 0.75 %}
               {% set alerts = alerts + ['download'] %}
             {% endif %}
             {% set upload = states('sensor.speedtest_upload') | float(0) %}
-            {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
-            {% if upload_24h > 0 and upload < upload_24h * 0.75 %}
+            {% set upload_baseline = states('sensor.speedtest_upload_baseline') %}
+            {% set upload_ref = upload_baseline | float if upload_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if upload_ref is not none and upload_ref > 0 and upload < upload_ref * 0.75 %}
               {% set alerts = alerts + ['upload'] %}
             {% endif %}
             {% set ping = states('sensor.speedtest_ping') | float(0) %}
-            {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
-            {% if ping_24h > 0 and ping > ping_24h * 1.25 %}
+            {% set ping_baseline = states('sensor.speedtest_ping_baseline') %}
+            {% set ping_ref = ping_baseline | float if ping_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if ping_ref is not none and ping_ref > 0 and ping > ping_ref * 1.25 %}
               {% set alerts = alerts + ['ping'] %}
             {% endif %}
             {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
-            {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
-            {% if deco_down_24h > 0 and deco_down < deco_down_24h * 0.5 %}
+            {% set deco_down_baseline = states('sensor.deco_total_down_baseline') %}
+            {% set deco_down_ref = deco_down_baseline | float if deco_down_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if deco_down_ref is not none and deco_down_ref > 0 and deco_down < deco_down_ref * 0.5 %}
               {% set alerts = alerts + ['deco_down'] %}
             {% endif %}
             {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
-            {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
-            {% if deco_up_24h > 0 and deco_up < deco_up_24h * 0.5 %}
+            {% set deco_up_baseline = states('sensor.deco_total_up_baseline') %}
+            {% set deco_up_ref = deco_up_baseline | float if deco_up_baseline not in ['unknown', 'unavailable', None] else None %}
+            {% if deco_up_ref is not none and deco_up_ref > 0 and deco_up < deco_up_ref * 0.5 %}
               {% set alerts = alerts + ['deco_up'] %}
             {% endif %}
             {{ alerts | unique | tojson }}
           metrics: >-
-            {% set latency = states('sensor.internet_latency') | float(0) %}
-            {% set latency_1h = states('sensor.internet_latency_1h_avg') | float(0) %}
-            {% set latency_24h = states('sensor.internet_latency_24h_avg') | float(0) %}
-            {% set latency_7d = states('sensor.internet_latency_7d_avg') | float(0) %}
-            {% set latency_30d = states('sensor.internet_latency_30d_avg') | float(0) %}
-            {% set download = states('sensor.speedtest_download') | float(0) %}
-            {% set download_1h = states('sensor.speedtest_download_1h_avg') | float(0) %}
-            {% set download_24h = states('sensor.speedtest_download_24h_avg') | float(0) %}
-            {% set download_7d = states('sensor.speedtest_download_7d_avg') | float(0) %}
-            {% set download_30d = states('sensor.speedtest_download_30d_avg') | float(0) %}
-            {% set upload = states('sensor.speedtest_upload') | float(0) %}
-            {% set upload_1h = states('sensor.speedtest_upload_1h_avg') | float(0) %}
-            {% set upload_24h = states('sensor.speedtest_upload_24h_avg') | float(0) %}
-            {% set upload_7d = states('sensor.speedtest_upload_7d_avg') | float(0) %}
-            {% set upload_30d = states('sensor.speedtest_upload_30d_avg') | float(0) %}
-            {% set ping = states('sensor.speedtest_ping') | float(0) %}
-            {% set ping_1h = states('sensor.speedtest_ping_1h_avg') | float(0) %}
-            {% set ping_24h = states('sensor.speedtest_ping_24h_avg') | float(0) %}
-            {% set ping_7d = states('sensor.speedtest_ping_7d_avg') | float(0) %}
-            {% set ping_30d = states('sensor.speedtest_ping_30d_avg') | float(0) %}
-            {% set deco_down = states('sensor.deco_total_down_mbps') | float(0) %}
-            {% set deco_down_1h = states('sensor.deco_total_down_mbps_1h_avg') | float(0) %}
-            {% set deco_down_24h = states('sensor.deco_total_down_mbps_24h_avg') | float(0) %}
-            {% set deco_down_7d = states('sensor.deco_total_down_mbps_7d_avg') | float(0) %}
-            {% set deco_down_30d = states('sensor.deco_total_down_mbps_30d_avg') | float(0) %}
-            {% set deco_up = states('sensor.deco_total_up_mbps') | float(0) %}
-            {% set deco_up_1h = states('sensor.deco_total_up_mbps_1h_avg') | float(0) %}
-            {% set deco_up_24h = states('sensor.deco_total_up_mbps_24h_avg') | float(0) %}
-            {% set deco_up_7d = states('sensor.deco_total_up_mbps_7d_avg') | float(0) %}
-            {% set deco_up_30d = states('sensor.deco_total_up_mbps_30d_avg') | float(0) %}
+            {% set latency_state = states('sensor.internet_latency') %}
+            {% set latency = latency_state | float if latency_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_1h_state = states('sensor.internet_latency_1h_avg') %}
+            {% set latency_1h = latency_1h_state | float if latency_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_24h_state = states('sensor.internet_latency_24h_avg') %}
+            {% set latency_24h = latency_24h_state | float if latency_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_7d_state = states('sensor.internet_latency_7d_avg') %}
+            {% set latency_7d = latency_7d_state | float if latency_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_30d_state = states('sensor.internet_latency_30d_avg') %}
+            {% set latency_30d = latency_30d_state | float if latency_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_baseline_state = states('sensor.internet_latency_baseline') %}
+            {% set latency_baseline = latency_baseline_state | float if latency_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set latency_baseline_label = state_attr('sensor.internet_latency_baseline', 'source_label') %}
+            {% set download_state = states('sensor.speedtest_download') %}
+            {% set download = download_state | float if download_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_1h_state = states('sensor.speedtest_download_1h_avg') %}
+            {% set download_1h = download_1h_state | float if download_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_24h_state = states('sensor.speedtest_download_24h_avg') %}
+            {% set download_24h = download_24h_state | float if download_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_7d_state = states('sensor.speedtest_download_7d_avg') %}
+            {% set download_7d = download_7d_state | float if download_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_30d_state = states('sensor.speedtest_download_30d_avg') %}
+            {% set download_30d = download_30d_state | float if download_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_baseline_state = states('sensor.speedtest_download_baseline') %}
+            {% set download_baseline = download_baseline_state | float if download_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set download_baseline_label = state_attr('sensor.speedtest_download_baseline', 'source_label') %}
+            {% set upload_state = states('sensor.speedtest_upload') %}
+            {% set upload = upload_state | float if upload_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_1h_state = states('sensor.speedtest_upload_1h_avg') %}
+            {% set upload_1h = upload_1h_state | float if upload_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_24h_state = states('sensor.speedtest_upload_24h_avg') %}
+            {% set upload_24h = upload_24h_state | float if upload_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_7d_state = states('sensor.speedtest_upload_7d_avg') %}
+            {% set upload_7d = upload_7d_state | float if upload_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_30d_state = states('sensor.speedtest_upload_30d_avg') %}
+            {% set upload_30d = upload_30d_state | float if upload_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_baseline_state = states('sensor.speedtest_upload_baseline') %}
+            {% set upload_baseline = upload_baseline_state | float if upload_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set upload_baseline_label = state_attr('sensor.speedtest_upload_baseline', 'source_label') %}
+            {% set ping_state = states('sensor.speedtest_ping') %}
+            {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_1h_state = states('sensor.speedtest_ping_1h_avg') %}
+            {% set ping_1h = ping_1h_state | float if ping_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_24h_state = states('sensor.speedtest_ping_24h_avg') %}
+            {% set ping_24h = ping_24h_state | float if ping_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_7d_state = states('sensor.speedtest_ping_7d_avg') %}
+            {% set ping_7d = ping_7d_state | float if ping_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_30d_state = states('sensor.speedtest_ping_30d_avg') %}
+            {% set ping_30d = ping_30d_state | float if ping_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_baseline_state = states('sensor.speedtest_ping_baseline') %}
+            {% set ping_baseline = ping_baseline_state | float if ping_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set ping_baseline_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
+            {% set deco_down_state = states('sensor.deco_total_down_mbps') %}
+            {% set deco_down = deco_down_state | float if deco_down_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_1h_state = states('sensor.deco_total_down_mbps_1h_avg') %}
+            {% set deco_down_1h = deco_down_1h_state | float if deco_down_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_24h_state = states('sensor.deco_total_down_mbps_24h_avg') %}
+            {% set deco_down_24h = deco_down_24h_state | float if deco_down_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_7d_state = states('sensor.deco_total_down_mbps_7d_avg') %}
+            {% set deco_down_7d = deco_down_7d_state | float if deco_down_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_30d_state = states('sensor.deco_total_down_mbps_30d_avg') %}
+            {% set deco_down_30d = deco_down_30d_state | float if deco_down_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_baseline_state = states('sensor.deco_total_down_baseline') %}
+            {% set deco_down_baseline = deco_down_baseline_state | float if deco_down_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_down_baseline_label = state_attr('sensor.deco_total_down_baseline', 'source_label') %}
+            {% set deco_up_state = states('sensor.deco_total_up_mbps') %}
+            {% set deco_up = deco_up_state | float if deco_up_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_1h_state = states('sensor.deco_total_up_mbps_1h_avg') %}
+            {% set deco_up_1h = deco_up_1h_state | float if deco_up_1h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_24h_state = states('sensor.deco_total_up_mbps_24h_avg') %}
+            {% set deco_up_24h = deco_up_24h_state | float if deco_up_24h_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_7d_state = states('sensor.deco_total_up_mbps_7d_avg') %}
+            {% set deco_up_7d = deco_up_7d_state | float if deco_up_7d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_30d_state = states('sensor.deco_total_up_mbps_30d_avg') %}
+            {% set deco_up_30d = deco_up_30d_state | float if deco_up_30d_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_baseline_state = states('sensor.deco_total_up_baseline') %}
+            {% set deco_up_baseline = deco_up_baseline_state | float if deco_up_baseline_state not in ['unknown', 'unavailable', None] else None %}
+            {% set deco_up_baseline_label = state_attr('sensor.deco_total_up_baseline', 'source_label') %}
             {% set metrics = {
               'latency': {
                 'current': latency,
@@ -380,7 +836,9 @@ template:
                 'avg_24h': latency_24h,
                 'avg_7d': latency_7d,
                 'avg_30d': latency_30d,
-                'vs_24h_pct': ((latency - latency_24h) / latency_24h * 100) | round(1) if latency_24h > 0 else None
+                'baseline': latency_baseline,
+                'baseline_label': latency_baseline_label,
+                'vs_baseline_pct': ((latency - latency_baseline) / latency_baseline * 100) | round(1) if latency is not none and latency_baseline not in [None, 0] else None
               },
               'download': {
                 'current': download,
@@ -388,7 +846,9 @@ template:
                 'avg_24h': download_24h,
                 'avg_7d': download_7d,
                 'avg_30d': download_30d,
-                'vs_24h_pct': ((download - download_24h) / download_24h * 100) | round(1) if download_24h > 0 else None
+                'baseline': download_baseline,
+                'baseline_label': download_baseline_label,
+                'vs_baseline_pct': ((download - download_baseline) / download_baseline * 100) | round(1) if download is not none and download_baseline not in [None, 0] else None
               },
               'upload': {
                 'current': upload,
@@ -396,7 +856,9 @@ template:
                 'avg_24h': upload_24h,
                 'avg_7d': upload_7d,
                 'avg_30d': upload_30d,
-                'vs_24h_pct': ((upload - upload_24h) / upload_24h * 100) | round(1) if upload_24h > 0 else None
+                'baseline': upload_baseline,
+                'baseline_label': upload_baseline_label,
+                'vs_baseline_pct': ((upload - upload_baseline) / upload_baseline * 100) | round(1) if upload is not none and upload_baseline not in [None, 0] else None
               },
               'ping': {
                 'current': ping,
@@ -404,7 +866,9 @@ template:
                 'avg_24h': ping_24h,
                 'avg_7d': ping_7d,
                 'avg_30d': ping_30d,
-                'vs_24h_pct': ((ping - ping_24h) / ping_24h * 100) | round(1) if ping_24h > 0 else None
+                'baseline': ping_baseline,
+                'baseline_label': ping_baseline_label,
+                'vs_baseline_pct': ((ping - ping_baseline) / ping_baseline * 100) | round(1) if ping is not none and ping_baseline not in [None, 0] else None
               },
               'deco_down': {
                 'current': deco_down,
@@ -412,7 +876,9 @@ template:
                 'avg_24h': deco_down_24h,
                 'avg_7d': deco_down_7d,
                 'avg_30d': deco_down_30d,
-                'vs_24h_pct': ((deco_down - deco_down_24h) / deco_down_24h * 100) | round(1) if deco_down_24h > 0 else None
+                'baseline': deco_down_baseline,
+                'baseline_label': deco_down_baseline_label,
+                'vs_baseline_pct': ((deco_down - deco_down_baseline) / deco_down_baseline * 100) | round(1) if deco_down is not none and deco_down_baseline not in [None, 0] else None
               },
               'deco_up': {
                 'current': deco_up,
@@ -420,7 +886,9 @@ template:
                 'avg_24h': deco_up_24h,
                 'avg_7d': deco_up_7d,
                 'avg_30d': deco_up_30d,
-                'vs_24h_pct': ((deco_up - deco_up_24h) / deco_up_24h * 100) | round(1) if deco_up_24h > 0 else None
+                'baseline': deco_up_baseline,
+                'baseline_label': deco_up_baseline_label,
+                'vs_baseline_pct': ((deco_up - deco_up_baseline) / deco_up_baseline * 100) | round(1) if deco_up is not none and deco_up_baseline not in [None, 0] else None
               }
             } %}
             {{ metrics | tojson }}
