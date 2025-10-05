@@ -16,16 +16,11 @@
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
-      - parallel:
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.sunroom_light
-                - light.diningroom_light
-                - light.livingroom_light
-            data:
-              brightness_pct: 60
-              transition: 2
+      - service: scene.turn_on
+        target:
+          entity_id: scene.lighting_evening_sunset_mainfloor
+        data:
+          transition: 2
 
   - id: exterior_front_garage_on_sunset
     alias: 'Lighting: Exterior Front & Garage On (Sunset)'
@@ -43,28 +38,23 @@
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
-      - service: light.turn_on
-        target:
-          entity_id:
-            - light.front_porch_lights
-            - light.light_garage_left
-            - light.light_garage_center
-            - light.light_garage_right
-        data:
-          color_temp: 500
-          brightness_pct: 10
-          transition: 2
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: light.turn_on
+      - parallel:
+          - service: scene.turn_on
             target:
-              entity_id: light.permanent_outdoor_lights
+              entity_id: scene.lighting_evening_sunset_exterior
             data:
-              brightness_pct: 50
               transition: 2
-            continue_on_error: true
+          - sequence:
+              - if:
+                  - condition: template
+                    value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+                then:
+                  - service: scene.turn_on
+                    target:
+                      entity_id: scene.lighting_evening_sunset_permanent_led
+                    data:
+                      transition: 2
+                    continue_on_error: true
 
   - id: night_mode_at_midnight
     alias: 'Lighting: Night Mode at Midnight'
@@ -79,36 +69,21 @@
         entity_id: binary_sensor.holiday_mode_active
         state: 'off'
     action:
-      - parallel:
-          - service: light.turn_off
+      - service: scene.turn_on
+        target:
+          entity_id: scene.lighting_night_mode
+        data:
+          transition: 5
+      - if:
+          - condition: template
+            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+        then:
+          - service: scene.turn_on
             target:
-              entity_id:
-                - light.sunroom_light
-                - light.diningroom_light
-                - light.livingroom_light
-                - light.theater_lights
+              entity_id: scene.lighting_night_mode_permanent_led
             data:
               transition: 5
-          - service: light.turn_off
-            target:
-              entity_id:
-                - light.front_porch_lights
-                - light.light_garage_left
-                - light.light_garage_center
-                - light.light_garage_right
-            data:
-              transition: 5
-          - if:
-              - condition: template
-                value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-            then:
-              - service: light.turn_on
-                target:
-                  entity_id: light.permanent_outdoor_lights
-                data:
-                  brightness_pct: 20
-                  transition: 5
-                continue_on_error: true
+            continue_on_error: true
 
   - id: early_morning_lights_0330
     alias: 'Lighting: Early Morning Gentle Wake (3:30 AM)'
@@ -123,39 +98,21 @@
         entity_id: binary_sensor.holiday_mode_active
         state: 'off'
     action:
-      - parallel:
-          - service: light.turn_on
+      - service: scene.turn_on
+        target:
+          entity_id: scene.lighting_early_morning_gentle_wake
+        data:
+          transition: 3
+      - if:
+          - condition: template
+            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+        then:
+          - service: scene.turn_on
             target:
-              entity_id:
-                - light.sunroom_light
-                - light.diningroom_light
-                - light.livingroom_light
+              entity_id: scene.lighting_early_morning_permanent_led
             data:
-              brightness_pct: 10
-              color_temp: 454
               transition: 3
-          - service: light.turn_on
-            target:
-              entity_id:
-                - light.front_porch_lights
-                - light.light_garage_left
-                - light.light_garage_center
-                - light.light_garage_right
-            data:
-              color_temp: 500
-              brightness_pct: 10
-              transition: 3
-          - if:
-              - condition: template
-                value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-            then:
-              - service: light.turn_on
-                target:
-                  entity_id: light.permanent_outdoor_lights
-                data:
-                  brightness_pct: 50
-                  transition: 3
-                continue_on_error: true
+            continue_on_error: true
 
   - id: interior_lights_sunrise_off
     alias: 'Lighting: Morning Lights Off (Sunrise + 15min)'
@@ -174,12 +131,9 @@
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
     action:
-      - service: light.turn_off
+      - service: scene.turn_on
         target:
-          entity_id:
-            - light.sunroom_light
-            - light.livingroom_light
-            - light.diningroom_light
+          entity_id: scene.lighting_morning_interior_off
         data:
           transition: 10
 
@@ -200,25 +154,21 @@
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
     action:
-      - service: light.turn_off
+      - service: scene.turn_on
         target:
-          entity_id:
-            - light.front_porch_lights
-            - light.light_garage_center
-            - light.light_garage_right
-            - light.light_garage_left
+          entity_id: scene.lighting_morning_exterior_off
         data:
           transition: 10
-
       - if:
           - condition: template
             value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
         then:
-          - service: light.turn_off
+          - service: scene.turn_on
             target:
-              entity_id: light.permanent_outdoor_lights
+              entity_id: scene.lighting_morning_permanent_led_off
             data:
               transition: 10
+            continue_on_error: true
 
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'

@@ -9,3 +9,140 @@
     entities:
       light.light_theater_left:
         state: 'off'
+
+  - id: lighting_evening_sunset_mainfloor
+    name: Lighting – Evening Sunset Mainfloor
+    entities:
+      light.sunroom_light:
+        state: 'on'
+        brightness_pct: 60
+        color_temp_kelvin: 2000
+      light.diningroom_light:
+        state: 'on'
+        brightness_pct: 60
+        color_temp_kelvin: 2000
+      light.livingroom_light:
+        state: 'on'
+        brightness_pct: 60
+        color_temp_kelvin: 2000
+
+  - id: lighting_evening_sunset_exterior
+    name: Lighting – Evening Sunset Exterior
+    entities:
+      light.front_porch_lights:
+        state: 'on'
+        brightness_pct: 10
+        color_temp_kelvin: 2000
+      light.light_garage_left:
+        state: 'on'
+        brightness_pct: 10
+        color_temp_kelvin: 2000
+      light.light_garage_center:
+        state: 'on'
+        brightness_pct: 10
+        color_temp_kelvin: 2000
+      light.light_garage_right:
+        state: 'on'
+        brightness_pct: 10
+        color_temp_kelvin: 2000
+
+  - id: lighting_evening_sunset_permanent_led
+    name: Lighting – Evening Sunset Permanent LED
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        brightness_pct: 50
+
+  - id: lighting_night_mode
+    name: Lighting – Night Mode Interior & Exterior
+    entities:
+      light.sunroom_light:
+        state: 'off'
+      light.diningroom_light:
+        state: 'off'
+      light.livingroom_light:
+        state: 'off'
+      light.theater_lights:
+        state: 'off'
+      light.front_porch_lights:
+        state: 'off'
+      light.light_garage_left:
+        state: 'off'
+      light.light_garage_center:
+        state: 'off'
+      light.light_garage_right:
+        state: 'off'
+
+  - id: lighting_night_mode_permanent_led
+    name: Lighting – Night Mode Permanent LED
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        brightness_pct: 20
+
+  - id: lighting_early_morning_gentle_wake
+    name: Lighting – Early Morning Gentle Wake Interior & Exterior
+    entities:
+      light.sunroom_light:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 454
+      light.diningroom_light:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 454
+      light.livingroom_light:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 454
+      light.front_porch_lights:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 500
+      light.light_garage_left:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 500
+      light.light_garage_center:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 500
+      light.light_garage_right:
+        state: 'on'
+        brightness_pct: 10
+        color_temp: 500
+
+  - id: lighting_early_morning_permanent_led
+    name: Lighting – Early Morning Permanent LED
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        brightness_pct: 50
+
+  - id: lighting_morning_interior_off
+    name: Lighting – Morning Interior Off
+    entities:
+      light.sunroom_light:
+        state: 'off'
+      light.livingroom_light:
+        state: 'off'
+      light.diningroom_light:
+        state: 'off'
+
+  - id: lighting_morning_exterior_off
+    name: Lighting – Morning Exterior Off
+    entities:
+      light.front_porch_lights:
+        state: 'off'
+      light.light_garage_center:
+        state: 'off'
+      light.light_garage_right:
+        state: 'off'
+      light.light_garage_left:
+        state: 'off'
+
+  - id: lighting_morning_permanent_led_off
+    name: Lighting – Morning Permanent LED Off
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'off'
