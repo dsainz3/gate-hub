@@ -34,7 +34,7 @@ This guide explains how to deploy the Husker LED scripts that coordinate the per
 
 ## Available Scripts
 - `script.husker_led_start` — pushes the scarlet & cream theme via MQTT.
-- `script.husker_led_stop` — stops the show and re-applies the monthly effect using `automation.exterior_led_monthly_effect`.
+- `script.husker_led_stop` — stops the show and re-applies the monthly effect using `automation.led_monthly_effect_scheduler`.
 
 Use these scripts from the [Husker dashboards](../huskers/dashboard.md)—the **Lighting & Scenes** view surfaces the key scripts and automations—or via direct service calls. During game-day shows the chase routines hold the permanent LEDs at 100 % brightness while the chase group runs at 80 %, so the strip always punches through exterior ambient light even if indoor fixtures are dimmed.
 

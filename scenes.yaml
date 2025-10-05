@@ -10,8 +10,8 @@
       light.light_theater_left:
         state: 'off'
 
-  - id: lighting_evening_sunset_mainfloor
-    name: Lighting – Evening Sunset Mainfloor
+  - id: lighting_evening_sunset_interior
+    name: Lighting – Evening Sunset (Interior)
     entities:
       light.sunroom_light:
         state: 'on'
@@ -27,7 +27,7 @@
         color_temp_kelvin: 2000
 
   - id: lighting_evening_sunset_exterior
-    name: Lighting – Evening Sunset Exterior
+    name: Lighting – Evening Sunset (Exterior)
     entities:
       light.front_porch_lights:
         state: 'on'
@@ -50,7 +50,7 @@
         brightness_pct: 50
 
   - id: lighting_night_mode
-    name: Lighting – Night Mode Interior & Exterior
+    name: Lighting – Night Mode
     entities:
       light.sunroom_light:
         state: 'off'
@@ -73,7 +73,7 @@
         brightness_pct: 20
 
   - id: lighting_early_morning_gentle_wake
-    name: Lighting – Early Morning Gentle Wake Interior & Exterior
+    name: Lighting – Early Morning Gentle Wake
     entities:
       light.sunroom_light:
         state: 'on'
