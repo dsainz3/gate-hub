@@ -1413,6 +1413,9 @@ automation:
         to: 'on'
     condition:
       - condition: state
+        entity_id: input_boolean.huskers_automations_enabled
+        state: 'on'
+      - condition: state
         entity_id: input_boolean.huskers_game_mode
         state: 'off'
       - condition: or
@@ -1493,12 +1496,16 @@ automation:
     initial_state: true
     mode: single
     trigger:
-      - platform: numeric_state
+      - id: countdown_window
+        platform: numeric_state
         entity_id: sensor.huskers_kickoff_in_effective
         above: 19
         below: 21
         for:
           seconds: 5
+      - id: safety_poll
+        platform: time_pattern
+        minutes: '/1'
     condition:
       - condition: state
         entity_id: input_boolean.huskers_automations_enabled
@@ -1520,6 +1527,14 @@ automation:
       - condition: state
         entity_id: script.huskers_chase_speed_loop
         state: 'off'
+      - condition: template
+        value_template: >-
+          {% if trigger is defined and trigger.id == 'safety_poll' %}
+            {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(99) %}
+            {{ 0 <= minutes <= 25 }}
+          {% else %}
+            true
+          {% endif %}
     action:
       - service: script.turn_on
         target:
@@ -1565,17 +1580,53 @@ automation:
     initial_state: true
     mode: single
     trigger:
-      - platform: state
+      - id: postgame_closed
+        platform: state
         entity_id: binary_sensor.huskers_is_postgame_espn
         from: 'on'
         to: 'off'
-    condition:
-      - condition: state
-        entity_id: input_boolean.huskers_automations_enabled
-        state: 'on'
-      - condition: state
+      - id: postgame_unavailable
+        platform: state
+        entity_id: binary_sensor.huskers_is_postgame_espn
+        from: 'on'
+        to: 'unavailable'
+      - id: postgame_unknown
+        platform: state
+        entity_id: binary_sensor.huskers_is_postgame_espn
+        from: 'on'
+        to: 'unknown'
+      - id: game_mode_disabled
+        platform: state
         entity_id: input_boolean.huskers_game_mode
-        state: 'on'
+        from: 'on'
+        to: 'off'
+      - id: chase_timeout
+        platform: time_pattern
+        minutes: '/5'
+    condition:
+      - condition: template
+        value_template: >-
+          {% if trigger is not defined %}
+            true
+          {% elif trigger.id in ['postgame_closed', 'postgame_unavailable', 'postgame_unknown'] %}
+            {{ is_state('input_boolean.huskers_game_mode', 'on') }}
+          {% elif trigger.id == 'game_mode_disabled' %}
+            true
+          {% elif trigger.id == 'chase_timeout' %}
+            {% set now_ts = as_timestamp(now()) %}
+            {% set threshold = 900 %}
+            {% set chase30_last = as_timestamp(state_attr('script.huskers_chase30_loop', 'last_triggered')) %}
+            {% set chase_speed_last = as_timestamp(state_attr('script.huskers_chase_speed_loop', 'last_triggered')) %}
+            {% set chase30_expired = is_state('script.huskers_chase30_loop', 'on')
+              and chase30_last is not none
+              and (now_ts - chase30_last) > threshold %}
+            {% set chase_speed_expired = is_state('script.huskers_chase_speed_loop', 'on')
+              and chase_speed_last is not none
+              and (now_ts - chase_speed_last) > threshold %}
+            {{ chase30_expired or chase_speed_expired }}
+          {% else %}
+            true
+          {% endif %}
     action:
       - parallel:
           - service: script.turn_on
