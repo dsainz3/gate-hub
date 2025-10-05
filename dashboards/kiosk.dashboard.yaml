@@ -998,39 +998,39 @@ views:
                     entity_id: automation.lighting_morning_exterior_off
                 hold_action:
                   action: toggle
-                - type: button
-                  entity: automation.led_monthly_effect_scheduler
-                  name: LED Monthly Effect
-                  icon: mdi:led-strip-variant
-                  tap_action:
-                    action: call-service
-                    service: automation.trigger
-                    target:
-                      entity_id: automation.led_monthly_effect_scheduler
-                  hold_action:
-                    action: toggle
-                - type: button
-                  entity: automation.climate_humidor_temperature_control
-                  name: Humidor Control
-                  icon: mdi:cigar
-                  tap_action:
-                    action: call-service
-                    service: automation.trigger
-                    target:
-                      entity_id: automation.climate_humidor_temperature_control
-                  hold_action:
-                    action: toggle
-                - type: button
-                  entity: automation.safety_nightly_burner_plug_shutoff
-                  name: Burners Off 23:00
-                  icon: mdi:fire-off
-                  tap_action:
-                    action: call-service
-                    service: automation.trigger
-                    target:
-                      entity_id: automation.safety_nightly_burner_plug_shutoff
-                  hold_action:
-                    action: toggle
+              - type: button
+                entity: automation.led_monthly_effect_scheduler
+                name: LED Monthly Effect
+                icon: mdi:led-strip-variant
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.led_monthly_effect_scheduler
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.climate_humidor_temperature_control
+                name: Humidor Control
+                icon: mdi:cigar
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.climate_humidor_temperature_control
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.safety_nightly_burner_plug_shutoff
+                name: Burners Off 23:00
+                icon: mdi:fire-off
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.safety_nightly_burner_plug_shutoff
+                hold_action:
+                  action: toggle
 
       - type: vertical-stack
         cards:
