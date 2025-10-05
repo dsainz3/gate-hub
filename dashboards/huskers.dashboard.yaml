@@ -358,15 +358,15 @@ views:
         entities:
           - entity: automation.evening_lights_at_sunset
             secondary_info: last-triggered
-          - entity: automation.exterior_front_garage_on_sunset
+          - entity: automation.lighting_exterior_front_garage_on_sunset
             secondary_info: last-triggered
-          - entity: automation.night_mode_at_midnight
+          - entity: automation.lighting_night_mode_at_midnight
             secondary_info: last-triggered
-          - entity: automation.early_morning_lights_0330
+          - entity: automation.early_morning_lights_03_30
             secondary_info: last-triggered
-          - entity: automation.interior_lights_sunrise_off
+          - entity: automation.interior_lights_off_15_minutes_after_sunrise
             secondary_info: last-triggered
-          - entity: automation.exterior_lights_sunrise_off
+          - entity: automation.lighting_morning_lights_off_sunrise
             secondary_info: last-triggered
           - entity: automation.exterior_led_monthly_effect
             secondary_info: last-triggered
