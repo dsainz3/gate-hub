@@ -243,24 +243,24 @@ views:
                 name: Active Plugs Count
 
           - type: entity-filter
+            entities:
+              - automation.lighting_evening_sunset_interior
+              - automation.lighting_evening_sunset_exterior
+              - automation.lighting_night_mode
+              - automation.lighting_early_morning_gentle_wake
+              - automation.lighting_morning_interior_off
+              - automation.lighting_morning_exterior_off
+              - automation.led_monthly_effect_scheduler
+              - automation.climate_humidor_temperature_control
+              - automation.safety_nightly_burner_plug_shutoff
+            state_filter:
+              - unavailable
+              - unknown
             card:
               type: entities
               title: Automations With Issues
               show_header_toggle: false
-            state_filter:
-              - unavailable
-              - unknown
-              entities:
-                - automation.lighting_evening_sunset_interior
-                - automation.lighting_evening_sunset_exterior
-                - automation.lighting_night_mode
-                - automation.lighting_early_morning_gentle_wake
-                - automation.lighting_morning_interior_off
-                - automation.lighting_morning_exterior_off
-                - automation.led_monthly_effect_scheduler
-                - automation.climate_humidor_temperature_control
-                - automation.safety_nightly_burner_plug_shutoff
-              show_empty: false
+            show_empty: false
 
   ###########################################################################
   # 2) CONTROL — lights, plugs, relays using standard cards
