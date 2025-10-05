@@ -20,9 +20,9 @@ group:
       - light.light_garage_center
       - light.light_garage_left
       - light.light_garage_right
-      - light.light_parents
-      - light.light_guest_room
-      - light.light_attic
+      - light.light_parents_2
+      - light.light_guest_room_2
+      - light.light_attic_2
       - light.sunroom_light
       - light.livingroom_light
       - light.diningroom_light
@@ -53,13 +53,13 @@ group:
   kiosk_all_automations:
     name: Kiosk — Core Automations
     entities:
-      - automation.lighting_evening_sunset_interior
-      - automation.lighting_evening_sunset_exterior
-      - automation.lighting_night_mode
-      - automation.lighting_early_morning_gentle_wake
-      - automation.lighting_morning_interior_off
-      - automation.lighting_morning_exterior_off
-      - automation.led_monthly_effect_scheduler
+      - automation.evening_lights_at_sunset
+      - automation.lighting_exterior_front_garage_on_sunset
+      - automation.lighting_night_mode_at_midnight
+      - automation.early_morning_lights_03_30
+      - automation.interior_lights_off_15_minutes_after_sunrise
+      - automation.lighting_morning_lights_off_sunrise
+      - automation.exterior_led_monthly_effect
 
   # Exterior-only (no segments)
   kiosk_exterior_lights:
@@ -91,7 +91,6 @@ group:
   kiosk_light_power_switches:
     name: Kiosk — Light Power Switches
     entities:
-      - switch.bar_light_power_switch
       - switch.diningroom_light_power_switch
       - switch.livingroom_light_power_switch
       - switch.light_parents_power_switch
@@ -99,17 +98,12 @@ group:
       - switch.sunroom_light_power_switch
       - switch.light_attic_power_switch
       - switch.permanent_outdoor_lights_power_switch
-      - switch.exterior_lights_power_switch
       - switch.outside_power_switch
       - switch.main_power_switch
       - switch.mainfloor_power_switch
       - switch.main_floor_power_switch
       - switch.light_ari_power_switch
       - switch.christmas_tree_lights_power_switch
-      - switch.tv_lights_power_switch
-      - switch.scenic_dreamview_power_switch
-      - switch.scenic_dreamview1_power_switch
-      - switch.scenic_dreamview2_power_switch
 
   # Snapshot quick reference bundles
   kiosk_snapshot_weather:
@@ -155,13 +149,13 @@ group:
   kiosk_snapshot_automations:
     name: Kiosk - Snapshot Automations
     entities:
-      - automation.lighting_evening_sunset_interior
-      - automation.lighting_evening_sunset_exterior
-      - automation.lighting_night_mode
-      - automation.lighting_early_morning_gentle_wake
-      - automation.lighting_morning_interior_off
-      - automation.lighting_morning_exterior_off
-      - automation.led_monthly_effect_scheduler
+      - automation.evening_lights_at_sunset
+      - automation.lighting_exterior_front_garage_on_sunset
+      - automation.lighting_night_mode_at_midnight
+      - automation.early_morning_lights_03_30
+      - automation.interior_lights_off_15_minutes_after_sunrise
+      - automation.lighting_morning_lights_off_sunrise
+      - automation.exterior_led_monthly_effect
 
 ###############################################################################
 # Scripts (mapping style; aliases quoted)
