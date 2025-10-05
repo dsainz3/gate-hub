@@ -356,22 +356,35 @@ views:
         columns: 2
         square: false
         cards:
-          - type: entities
-            title: Lighting Automations
-            show_header_toggle: false
-            entities:
-              - entity: automation.lighting_evening_sunset_interior
-                secondary_info: last-triggered
-              - entity: automation.lighting_night_mode
-                secondary_info: last-triggered
-              - entity: automation.lighting_early_morning_gentle_wake
-                secondary_info: last-triggered
-              - entity: automation.lighting_morning_interior_off
-                secondary_info: last-triggered
-              - entity: automation.lighting_morning_exterior_off
-                secondary_info: last-triggered
-              - entity: automation.led_monthly_effect_scheduler
-                secondary_info: last-triggered
+          - type: custom:auto-entities
+            show_empty: false
+            card:
+              type: entities
+              title: Lighting Automations
+              show_header_toggle: false
+            filter:
+              include:
+                - entity_id: automation.lighting_evening_sunset_interior
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.lighting_evening_sunset_exterior
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.lighting_night_mode
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.lighting_early_morning_gentle_wake
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.lighting_morning_interior_off
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.lighting_morning_exterior_off
+                  options:
+                    secondary_info: last-triggered
+                - entity_id: automation.led_monthly_effect_scheduler
+                  options:
+                    secondary_info: last-triggered
           - type: custom:auto-entities
             card:
               type: entities
