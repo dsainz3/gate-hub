@@ -38,23 +38,11 @@
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
-      - parallel:
-          - service: scene.turn_on
-            target:
-              entity_id: scene.lighting_evening_sunset_exterior
-            data:
-              transition: 2
-          - sequence:
-              - if:
-                  - condition: template
-                    value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-                then:
-                  - service: scene.turn_on
-                    target:
-                      entity_id: scene.lighting_evening_sunset_permanent_led
-                    data:
-                      transition: 2
-                    continue_on_error: true
+      - service: scene.turn_on
+        target:
+          entity_id: scene.lighting_evening_sunset_exterior
+        data:
+          transition: 2
 
   - id: night_mode_at_midnight
     alias: 'Lighting: Night Mode at Midnight'
@@ -74,16 +62,6 @@
           entity_id: scene.lighting_night_mode
         data:
           transition: 5
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: scene.turn_on
-            target:
-              entity_id: scene.lighting_night_mode_permanent_led
-            data:
-              transition: 5
-            continue_on_error: true
 
   - id: early_morning_lights_0330
     alias: 'Lighting: Early Morning Gentle Wake (3:30 AM)'
@@ -103,16 +81,6 @@
           entity_id: scene.lighting_early_morning_gentle_wake
         data:
           transition: 3
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: scene.turn_on
-            target:
-              entity_id: scene.lighting_early_morning_permanent_led
-            data:
-              transition: 3
-            continue_on_error: true
 
   - id: interior_lights_sunrise_off
     alias: 'Lighting: Morning Lights Off (Sunrise + 15min)'
@@ -159,16 +127,6 @@
           entity_id: scene.lighting_morning_exterior_off
         data:
           transition: 10
-      - if:
-          - condition: template
-            value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
-        then:
-          - service: scene.turn_on
-            target:
-              entity_id: scene.lighting_morning_permanent_led_off
-            data:
-              transition: 10
-            continue_on_error: true
 
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'

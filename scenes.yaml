@@ -45,10 +45,6 @@
         state: 'on'
         brightness_pct: 10
         color_temp_kelvin: 2000
-
-  - id: lighting_evening_sunset_permanent_led
-    name: Lighting – Evening Sunset Permanent LED
-    entities:
       light.permanent_outdoor_lights:
         state: 'on'
         brightness_pct: 50
@@ -72,10 +68,6 @@
         state: 'off'
       light.light_garage_right:
         state: 'off'
-
-  - id: lighting_night_mode_permanent_led
-    name: Lighting – Night Mode Permanent LED
-    entities:
       light.permanent_outdoor_lights:
         state: 'on'
         brightness_pct: 20
@@ -111,10 +103,6 @@
         state: 'on'
         brightness_pct: 10
         color_temp: 500
-
-  - id: lighting_early_morning_permanent_led
-    name: Lighting – Early Morning Permanent LED
-    entities:
       light.permanent_outdoor_lights:
         state: 'on'
         brightness_pct: 50
@@ -140,9 +128,5 @@
         state: 'off'
       light.light_garage_left:
         state: 'off'
-
-  - id: lighting_morning_permanent_led_off
-    name: Lighting – Morning Permanent LED Off
-    entities:
       light.permanent_outdoor_lights:
         state: 'off'
