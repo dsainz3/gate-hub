@@ -23,6 +23,8 @@ template:
           last_result_changed: >-
             {% set entity = states.sensor.speedtest_download %}
             {{ entity.last_changed if entity is not none else none }}
+        availability: >-
+          true
     sensor:
       - name: Internet Latency
         unique_id: network_monitor_internet_latency
@@ -32,11 +34,11 @@ template:
         state: >-
           {% set age_limit = 2 * 3600 %}
           {% set ping_state = states('sensor.speedtest_ping') %}
-          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else None %}
+          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else none %}
           {% set entity = states.sensor.speedtest_ping %}
           {% set last_changed = entity.last_changed if entity is not none else none %}
           {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
-          {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
+          {% set age = now().timestamp() - last_ts if last_ts is not none else none %}
           {% if ping is not none and ping > 0 and (age is none or age < age_limit) %}
             {{ ping | round(1) }}
           {% else %}
@@ -44,26 +46,12 @@ template:
             {% if fallback not in ['unknown', 'unavailable', None] %}
               {{ fallback | float | round(1) }}
             {% else %}
-              {% set latest = states('sensor.speedtest_ping') %}
-              {% if latest not in ['unknown', 'unavailable', None] %}
-                {{ latest | float | round(1) }}
+              {% if ping is not none and ping > 0 %}
+                {{ ping | round(1) }}
               {% else %}
                 unknown
               {% endif %}
             {% endif %}
-          {% endif %}
-        availability: >-
-          {% set ping_state = states('sensor.speedtest_ping') %}
-          {% set ping = ping_state | float if ping_state not in ['unknown', 'unavailable', None] else None %}
-          {% set entity = states.sensor.speedtest_ping %}
-          {% set last_changed = entity.last_changed if entity is not none else none %}
-          {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
-          {% set age = now().timestamp() - last_ts if last_ts is not none else None %}
-          {% if ping is not none and ping > 0 and (age is none or age < 7200) %}
-            true
-          {% else %}
-            {% set fallback = states('sensor.speedtest_ping_baseline') %}
-            {{ fallback not in ['unknown', 'unavailable', None] }}
           {% endif %}
       - name: Network Status Summary
         unique_id: network_status_summary
@@ -92,7 +80,11 @@ template:
             {% if latency in ['unknown', 'unavailable', None] %}
               {% set latency = states('sensor.speedtest_ping') %}
             {% endif %}
-            {{ latency | float(0) | round(1) }}
+            {% if latency in ['unknown', 'unavailable', None] %}
+              unknown
+            {% else %}
+              {{ latency | float | round(1) }}
+            {% endif %}
           speedtest_ping_ms: "{{ states('sensor.speedtest_ping') | float(0) | round(1) }}"
           speedtest_download_mbps: "{{ states('sensor.speedtest_download') | float(0) | round(1) }}"
           speedtest_upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) | round(1) }}"
