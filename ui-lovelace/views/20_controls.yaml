@@ -86,6 +86,20 @@ cards:
 
       - type: conditional
         conditions:
+          - entity: scene.sports_theater
+            state_not: unavailable
+        card:
+          type: button
+          name: 'Scene: Sports Theater'
+          icon: mdi:stadium
+          tap_action:
+            action: call-service
+            service: scene.turn_on
+            target:
+              entity_id: scene.sports_theater
+
+      - type: conditional
+        conditions:
           - entity: script.huskers_update_last_score_test
             state_not: unavailable
         card:
