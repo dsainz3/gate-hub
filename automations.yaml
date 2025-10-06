@@ -140,6 +140,70 @@
         data:
           transition: 10
 
+  - id: exterior_lights_cloudy_daytime
+    alias: 'Lighting: Daytime Cloudy Exterior'
+    description: >
+      Brings exterior lights to a gentle daytime level when heavy clouds roll in and turns them back off as skies clear.
+    mode: single
+    trigger:
+      - platform: numeric_state
+        id: cloudy
+        entity_id: sensor.openweathermap_cloud_coverage
+        above: 80
+      - platform: numeric_state
+        id: clearing
+        entity_id: sensor.openweathermap_cloud_coverage
+        below: 80
+      - platform: time_pattern
+        id: periodic
+        minutes: '/10'
+      - platform: homeassistant
+        event: start
+        id: startup
+      - platform: event
+        event_type: automation_reloaded
+        id: reload
+    condition:
+      - condition: sun
+        after: sunrise
+        before: sunset
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.id in ['cloudy', 'periodic', 'startup', 'reload'] }}"
+              - condition: numeric_state
+                entity_id: sensor.openweathermap_cloud_coverage
+                above: 80
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.lighting_daytime_cloudy_exterior
+                data:
+                  transition: 2
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.lighting_daytime_cloudy_interior
+                data:
+                  transition: 2
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.id in ['clearing', 'periodic', 'startup', 'reload'] }}"
+              - condition: numeric_state
+                entity_id: sensor.openweathermap_cloud_coverage
+                below: 80
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.lighting_morning_exterior_off
+                data:
+                  transition: 2
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.lighting_morning_interior_off
+                data:
+                  transition: 2
+
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'
     description: >
