@@ -1,31 +1,31 @@
 # Auto-generated light groups from your current entities
 # Place this file at /config/lights.yaml and include it with `light: !include lights.yaml`
 
-  - platform: group
+- platform: group
     name: Office Lights
     unique_id: lg_office_lights
     entities:
       - light.light_office
-  - platform: group
+- platform: group
     name: Theater Lights
     unique_id: lg_theater_lights
     entities:
       - light.light_theater_left
       - light.light_theater_right
-  - platform: group
+- platform: group
     name: Front Porch Lights
     unique_id: lg_front_porch_lights
     entities:
       - light.light_front_left
       - light.light_front_right
-  - platform: group
+- platform: group
     name: Permanent Outdoor Lights
     unique_id: lg_permanent_outdoor_lights
     entities:
       - light.light_garage_left
       - light.light_garage_center
       - light.light_garage_right
-  - platform: group
+- platform: group
     name: All Exterior Lights
     unique_id: lg_all_exterior_lights
     entities:
@@ -35,7 +35,7 @@
       - light.light_front_right
       - light.light_front_left
       - light.permanent_outdoor_lights
-  - platform: group
+- platform: group
     name: All Lights
     unique_id: lg_all_lights
     entities:
@@ -55,14 +55,14 @@
       - light.light_garage_center
       - light.light_garage_left
       - light.light_garage_right
-  - platform: group
+- platform: group
     name: Garage Lights
     unique_id: lg_garage_lights
     entities:
       - light.light_garage_center
       - light.light_garage_left
       - light.light_garage_right
-  - platform: group
+- platform: group
     name: Mainfloor Lights
     unique_id: lg_mainfloor_lights
     entities:
