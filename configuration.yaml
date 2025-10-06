@@ -38,6 +38,8 @@ input_boolean: !include input_boolean.yaml
 # Keep multiple input_number files (directory merge)
 input_number: !include_dir_merge_named input_number
 
+input_select: !include input_select.yaml
+
 input_text: !include input_text.yaml
 script: !include scripts.yaml
 
@@ -65,6 +67,8 @@ logger:
     homeassistant.components.script: debug
     homeassistant.components.command_line: debug
     homeassistant.components.command_line.sensor: debug
+    homeassistant.components.device_tracker.nmap_tracker: debug
+    homeassistant.components.nmap_tracker: debug
 
 command_line:
   - sensor:

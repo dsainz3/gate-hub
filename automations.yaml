@@ -156,7 +156,7 @@
         below: 80
       - platform: time_pattern
         id: periodic
-        minutes: '/10'
+        minutes: '/5'
       - platform: homeassistant
         event: start
         id: startup
@@ -172,9 +172,8 @@
           - conditions:
               - condition: template
                 value_template: "{{ trigger.id in ['cloudy', 'periodic', 'startup', 'reload'] }}"
-              - condition: numeric_state
-                entity_id: sensor.openweathermap_cloud_coverage
-                above: 80
+              - condition: template
+                value_template: "{{ (states('sensor.openweathermap_cloud_coverage') | float(0) >= 80) and (is_state('light.front_porch_lights', 'off') or is_state('light.garage_lights', 'off')) }}"
             sequence:
               - service: scene.turn_on
                 target:
@@ -186,12 +185,19 @@
                   entity_id: scene.lighting_daytime_cloudy_interior
                 data:
                   transition: 2
+              - service: light.turn_on
+                target:
+                  entity_id:
+                    - light.front_porch_lights
+                    - light.garage_lights
+                data:
+                  brightness_pct: 30
+                  transition: 2
           - conditions:
               - condition: template
                 value_template: "{{ trigger.id in ['clearing', 'periodic', 'startup', 'reload'] }}"
-              - condition: numeric_state
-                entity_id: sensor.openweathermap_cloud_coverage
-                below: 80
+              - condition: template
+                value_template: "{{ (states('sensor.openweathermap_cloud_coverage') | float(0) < 80) and (is_state('light.front_porch_lights', 'on') or is_state('light.garage_lights', 'on')) }}"
             sequence:
               - service: scene.turn_on
                 target:
@@ -203,6 +209,11 @@
                   entity_id: scene.lighting_morning_interior_off
                 data:
                   transition: 2
+              - service: light.turn_off
+                target:
+                  entity_id:
+                    - light.front_porch_lights
+                    - light.garage_lights
 
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'

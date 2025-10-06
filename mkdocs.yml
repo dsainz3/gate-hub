@@ -14,6 +14,7 @@ nav:
       - Huskers Dashboard Guide: how-to/huskers/dashboard.md
       - Husker LED MQTT Controls: how-to/lighting/husker-led-mqtt.md
       - Kiosk Sanitation Schedule: how-to/kiosk/sanitation-schedule.md
+      - Nmap Tracker Debugging: how-to/network/nmap-debugging.md
   - Reference:
       - Documentation Style Guide: reference/documentation-style-guide.md
       - Automation Catalog: reference/automations.md
