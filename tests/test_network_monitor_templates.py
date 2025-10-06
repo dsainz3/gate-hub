@@ -40,12 +40,18 @@ def test_network_dashboard_internet_online_is_binary_sensor():
             for index, line in enumerate(lines)
             if "- name: Network Dashboard Internet Online" in line
         )
-    except StopIteration as exc:  # pragma: no cover - aids debugging if missing
-        raise AssertionError("template entry not found in network_monitor.yaml") from exc
+    except (
+        StopIteration
+    ) as exc:  # pragma: no cover - aids debugging if missing
+        raise AssertionError(
+            "template entry not found in network_monitor.yaml"
+        ) from exc
 
     stack = _build_context(lines, target_index)
 
-    binary_sensor_context = [entry for entry in stack if entry[1] == "- binary_sensor:"]
+    binary_sensor_context = [
+        entry for entry in stack if entry[1] == "- binary_sensor:"
+    ]
 
     assert binary_sensor_context, (
         "Expected Network Dashboard Internet Online template to be declared "
