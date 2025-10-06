@@ -248,20 +248,20 @@
                                     message: >-
                                       Brought {{ light_name | lower }} lights to cloudy daytime level
                                       ({{ cloud_coverage | round(0) }}% coverage).
-                            - default:
-                                - service: logbook.log
-                                  data:
-                                    name: Cloudy Daytime Exterior
-                                    message: >-
-                                      Failed to bring {{ light_name | lower }} lights to cloudy daytime level
-                                      ({{ cloud_coverage | round(0) }}% coverage).
-                                - service: persistent_notification.create
-                                  data:
-                                    title: Cloudy Daytime Exterior validation failed
-                                    message: >-
-                                      {{ light_name }} lights did not reach the expected cloudy
-                                      brightness ({{ cloud_coverage | round(0) }}% coverage).
-                                    notification_id: cloudy_daytime_exterior_validation
+                        default:
+                            - service: logbook.log
+                              data:
+                                name: Cloudy Daytime Exterior
+                                message: >-
+                                  Failed to bring {{ light_name | lower }} lights to cloudy daytime level
+                                  ({{ cloud_coverage | round(0) }}% coverage).
+                            - service: persistent_notification.create
+                              data:
+                                title: Cloudy Daytime Exterior validation failed
+                                message: >-
+                                  {{ light_name }} lights did not reach the expected cloudy
+                                  brightness ({{ cloud_coverage | round(0) }}% coverage).
+                                notification_id: cloudy_daytime_exterior_validation
           - conditions:
               - condition: template
                 value_template: "{{ (not should_be_on) | bool }}"
@@ -299,20 +299,20 @@
                                     message: >-
                                       Turned off {{ light_name | lower }} lights as skies cleared
                                       ({{ cloud_coverage | round(0) }}% coverage).
-                            - default:
-                                - service: logbook.log
-                                  data:
-                                    name: Cloudy Daytime Exterior
-                                    message: >-
-                                      Failed to turn off {{ light_name | lower }} lights as skies cleared
-                                      ({{ cloud_coverage | round(0) }}% coverage).
-                                - service: persistent_notification.create
-                                  data:
-                                    title: Cloudy Daytime Exterior validation failed
-                                    message: >-
-                                      {{ light_name }} lights did not turn off after skies cleared
-                                      ({{ cloud_coverage | round(0) }}% coverage).
-                                    notification_id: cloudy_daytime_exterior_validation
+                        default:
+                            - service: logbook.log
+                              data:
+                                name: Cloudy Daytime Exterior
+                                message: >-
+                                  Failed to turn off {{ light_name | lower }} lights as skies cleared
+                                  ({{ cloud_coverage | round(0) }}% coverage).
+                            - service: persistent_notification.create
+                              data:
+                                title: Cloudy Daytime Exterior validation failed
+                                message: >-
+                                  {{ light_name }} lights did not turn off after skies cleared
+                                  ({{ cloud_coverage | round(0) }}% coverage).
+                                notification_id: cloudy_daytime_exterior_validation
       - choose:
           - conditions:
               - condition: template

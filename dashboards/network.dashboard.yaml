@@ -394,7 +394,8 @@ views:
           - type: template
             icon: mdi:clock-time-three-outline
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '1d' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '1d' ? 'primary' : 'disabled'; ]]]
             content: 1d
             tap_action:
               action: call-service
@@ -406,7 +407,8 @@ views:
           - type: template
             icon: mdi:clock-time-three-outline
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '3d' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '3d' ? 'primary' : 'disabled'; ]]]
             content: 3d
             tap_action:
               action: call-service
@@ -418,7 +420,8 @@ views:
           - type: template
             icon: mdi:clock-time-three-outline
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '5d' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '5d' ? 'primary' : 'disabled'; ]]]
             content: 5d
             tap_action:
               action: call-service
@@ -430,7 +433,8 @@ views:
           - type: template
             icon: mdi:calendar-week
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '1w' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '1w' ? 'primary' : 'disabled'; ]]]
             content: 1w
             tap_action:
               action: call-service
@@ -442,7 +446,8 @@ views:
           - type: template
             icon: mdi:calendar-week
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '2w' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '2w' ? 'primary' : 'disabled'; ]]]
             content: 2w
             tap_action:
               action: call-service
@@ -454,7 +459,8 @@ views:
           - type: template
             icon: mdi:calendar-month
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '1m' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '1m' ? 'primary' : 'disabled'; ]]]
             content: 1m
             tap_action:
               action: call-service
@@ -466,7 +472,8 @@ views:
           - type: template
             icon: mdi:calendar-multiple
             icon_color: >-
-              [[[ return states['input_select.network_history_range'].state === '3m' ? 'primary' : 'disabled'; ]]]
+              [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                  return current === '3m' ? 'primary' : 'disabled'; ]]]
             content: 3m
             tap_action:
               action: call-service
@@ -478,14 +485,16 @@ views:
       - type: custom:apexcharts-card
         header:
           title: >-
-            [[[ return `Latency trend (${states['input_select.network_history_range'].state})`; ]]]
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                return `Latency trend (${current})`; ]]]
           show: true
         graph_span: >-
           [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+              const current = states['input_select.network_history_range']?.state || '1w';
+              return map[current] || '7d'; ]]]
         span:
           end: >-
-            [[[ const current = states['input_select.network_history_range'].state;
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
                 return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
         yaxis:
           - min: 0
@@ -512,14 +521,16 @@ views:
       - type: custom:apexcharts-card
         header:
           title: >-
-            [[[ return `Speedtest download vs upload (${states['input_select.network_history_range'].state})`; ]]]
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                return `Speedtest download vs upload (${current})`; ]]]
           show: true
         graph_span: >-
           [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+              const current = states['input_select.network_history_range']?.state || '1w';
+              return map[current] || '7d'; ]]]
         span:
           end: >-
-            [[[ const current = states['input_select.network_history_range'].state;
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
                 return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
         yaxis:
           - min: 0
@@ -552,14 +563,16 @@ views:
       - type: custom:apexcharts-card
         header:
           title: >-
-            [[[ return `Deco throughput (${states['input_select.network_history_range'].state})`; ]]]
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                return `Deco throughput (${current})`; ]]]
           show: true
         graph_span: >-
           [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+              const current = states['input_select.network_history_range']?.state || '1w';
+              return map[current] || '7d'; ]]]
         span:
           end: >-
-            [[[ const current = states['input_select.network_history_range'].state;
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
                 return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
         yaxis:
           - min: 0
@@ -592,14 +605,16 @@ views:
       - type: custom:apexcharts-card
         header:
           title: >-
-            [[[ return `Speedtest ping (${states['input_select.network_history_range'].state})`; ]]]
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
+                return `Speedtest ping (${current})`; ]]]
           show: true
         graph_span: >-
           [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+              const current = states['input_select.network_history_range']?.state || '1w';
+              return map[current] || '7d'; ]]]
         span:
           end: >-
-            [[[ const current = states['input_select.network_history_range'].state;
+            [[[ const current = states['input_select.network_history_range']?.state || '1w';
                 return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
         yaxis:
           - min: 0
