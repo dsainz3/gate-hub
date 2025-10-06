@@ -49,6 +49,19 @@
         state: 'on'
         brightness_pct: 50
 
+  - id: lighting_daytime_cloudy_exterior
+    name: Lighting – Daytime Cloudy (Exterior)
+    entities:
+      light.permanent_outdoor_lights:
+        state: 'on'
+        brightness_pct: 50
+      light.front_porch_lights:
+        state: 'on'
+        brightness_pct: 10
+      light.garage_lights:
+        state: 'on'
+        brightness_pct: 10
+
   - id: lighting_night_mode
     name: Lighting – Night Mode
     entities:
