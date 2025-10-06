@@ -167,9 +167,16 @@
       - condition: sun
         after: sunrise
         before: sunset
+      - condition: template
+        value_template: "{{ cloud_coverage_available }}"
     variables:
-      cloud_coverage: "{{ states('sensor.openweathermap_cloud_coverage') | float(0) }}"
-      should_be_on: "{{ cloud_coverage >= 80 }}"
+      cloud_coverage_raw: "{{ states('sensor.openweathermap_cloud_coverage') }}"
+      cloud_coverage_available: >-
+        {{ cloud_coverage_raw not in ['unknown', 'unavailable', 'none', None, ''] }}
+      cloud_coverage: >-
+        {{ cloud_coverage_raw | float(0) if cloud_coverage_available else 0 }}
+      should_be_on: >-
+        {{ (cloud_coverage_available and cloud_coverage >= 80) | bool }}
       target_brightness_pct: 30
       target_brightness: "{{ (255 * target_brightness_pct / 100) | round(0) | int }}"
       brightness_tolerance: 26
@@ -185,7 +192,7 @@
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ should_be_on }}"
+                value_template: "{{ should_be_on | bool }}"
             sequence:
               - repeat:
                   for_each: "{{ tracked_lights }}"
@@ -257,7 +264,7 @@
                                     notification_id: cloudy_daytime_exterior_validation
           - conditions:
               - condition: template
-                value_template: "{{ not should_be_on }}"
+                value_template: "{{ (not should_be_on) | bool }}"
             sequence:
               - repeat:
                   for_each: "{{ tracked_lights }}"
