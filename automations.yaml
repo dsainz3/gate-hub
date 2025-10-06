@@ -237,18 +237,17 @@
                                 and corrected_brightness >= (target_brightness_low | int)
                                 and corrected_brightness <= (target_brightness_high | int)
                               }}
-                        - choose:
-                            - conditions:
-                                - condition: template
-                                  value_template: "{{ correction_passed }}"
-                              sequence:
-                                - service: logbook.log
-                                  data:
-                                    name: Cloudy Daytime Exterior
-                                    message: >-
-                                      Brought {{ light_name | lower }} lights to cloudy daytime level
-                                      ({{ cloud_coverage | round(0) }}% coverage).
-                        default:
+                        - if:
+                            - condition: template
+                              value_template: "{{ correction_passed }}"
+                          then:
+                            - service: logbook.log
+                              data:
+                                name: Cloudy Daytime Exterior
+                                message: >-
+                                  Brought {{ light_name | lower }} lights to cloudy daytime level
+                                  ({{ cloud_coverage | round(0) }}% coverage).
+                          else:
                             - service: logbook.log
                               data:
                                 name: Cloudy Daytime Exterior
@@ -288,18 +287,17 @@
                           continue_on_timeout: true
                         - variables:
                             cleared: "{{ is_state(light_entity, 'off') }}"
-                        - choose:
-                            - conditions:
-                                - condition: template
-                                  value_template: "{{ cleared }}"
-                              sequence:
-                                - service: logbook.log
-                                  data:
-                                    name: Cloudy Daytime Exterior
-                                    message: >-
-                                      Turned off {{ light_name | lower }} lights as skies cleared
-                                      ({{ cloud_coverage | round(0) }}% coverage).
-                        default:
+                        - if:
+                            - condition: template
+                              value_template: "{{ cleared }}"
+                          then:
+                            - service: logbook.log
+                              data:
+                                name: Cloudy Daytime Exterior
+                                message: >-
+                                  Turned off {{ light_name | lower }} lights as skies cleared
+                                  ({{ cloud_coverage | round(0) }}% coverage).
+                          else:
                             - service: logbook.log
                               data:
                                 name: Cloudy Daytime Exterior
