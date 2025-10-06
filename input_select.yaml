@@ -1,0 +1,12 @@
+network_history_range:
+  name: Network history range
+  icon: mdi:clock-time-three-outline
+  options:
+    - 1d
+    - 3d
+    - 5d
+    - 1w
+    - 2w
+    - 1m
+    - 3m
+  initial: 1w
