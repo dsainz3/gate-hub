@@ -19,7 +19,7 @@ Use this catalog as the single source of truth for automation behaviour. Each en
 ### Lighting: Evening Lights at Sunset (`automations.yaml:3`)
 - **ID** `evening_lights_at_sunset`
 - **Trigger**: Sun sets +5 minutes (`platform: sun`, `event: sunset`, `offset: 00:05:00`).
-- **Guards**: Requires `binary_sensor.holiday_mode_active` to be `off` and `binary_sensor.huskers_lighting_hold` to be `off` so holiday overrides and Husker light shows can take priority.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_lighting_hold` is `on` so holiday overrides and Husker light shows can take priority.
 - **Actions**: Brings sunroom, dining room, and living room lighting to 60% with a 2 s transition.
 
 ### Lighting: Exterior Front & Garage On (Sunset) (`automations.yaml:28`)
@@ -55,13 +55,13 @@ Use this catalog as the single source of truth for automation behaviour. Each en
 ### LED: Monthly Effect Scheduler (`automations.yaml:205`)
 - **ID** `exterior_led_monthly_effect`
 - **Triggers**: Time `00:00:01` daily and Home Assistant start.
-- **Guards**: Requires `binary_sensor.holiday_mode_active` to be `off` and confirms the requested `effect` exists in `light.permanent_outdoor_lights`.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and confirms the requested `effect` exists in `light.permanent_outdoor_lights`.
 - **Actions**: Waits up to two minutes for the permanent outdoor light effect list to load after startup, applies the month-specific effect when available, and logs success or a skip if the effect never appears. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
 
 ### Climate: Humidor Temperature Control (`automations.yaml:251`)
 - **ID** `humidor_plug_temp_control`
 - **Triggers**: Temperature at `sensor.hygrometer_humidor_temperature` > 74°F for 2 minutes, or < 70°F for 1 minute.
-- **Guards**: Requires `binary_sensor.holiday_mode_active` to be `off` and uses a template safeguard so the plug toggles only when necessary.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and uses a template safeguard so the plug toggles only when necessary.
 - **Actions**: Switches `switch.plug_humidor` on/off and logs temperature + humidity snapshots.
 
 ### Safety: Nightly Burner Plug Shutoff (`automations.yaml:296`)

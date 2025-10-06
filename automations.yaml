@@ -10,9 +10,11 @@
         event: sunset
         offset: '00:05:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
@@ -32,9 +34,11 @@
         event: sunset
         offset: '00:05:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
@@ -53,9 +57,11 @@
       - platform: time
         at: '00:00:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
     action:
       - service: scene.turn_on
         target:
@@ -72,9 +78,11 @@
       - platform: time
         at: '03:30:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
     action:
       - service: scene.turn_on
         target:
@@ -92,9 +100,11 @@
         event: sunrise
         offset: '00:15:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
       - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
@@ -115,9 +125,11 @@
         event: sunrise
         offset: '00:05:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
       - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
@@ -181,9 +193,11 @@
       target_scene: '{{ target_config.get("scene") }}'
       target_effect: '{{ target_config.get("effect") }}'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
     action:
       - alias: 'Wait for permanent outdoor lights to advertise effects after startup'
         wait_template: >-
@@ -234,9 +248,11 @@
         below: 70
         for: {minutes: 1}
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
       - condition: template
         value_template: >-
           {% set temp = trigger.to_state.state | float(-999) %}
@@ -278,9 +294,11 @@
       - platform: time
         at: '23:00:00'
     condition:
-      - condition: state
-        entity_id: binary_sensor.holiday_mode_active
-        state: 'off'
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: binary_sensor.holiday_mode_active
+            state: 'on'
     action:
       - service: scene.turn_on
         target:
