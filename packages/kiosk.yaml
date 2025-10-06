@@ -158,6 +158,25 @@ group:
       - automation.exterior_led_monthly_effect
 
 ###############################################################################
+# Scenes
+###############################################################################
+scene:
+  - name: Sports Theater
+    entities:
+      light.light_theater_left:
+        state: "on"
+        brightness_pct: 60
+        rgb_color: [102, 51, 153]
+      light.light_theater_right:
+        state: "on"
+        brightness_pct: 60
+        rgb_color: [102, 51, 153]
+      light.sunroom_light:
+        state: "on"
+        brightness_pct: 60
+        rgb_color: [102, 51, 153]
+
+###############################################################################
 # Scripts (mapping style; aliases quoted)
 ###############################################################################
 script:
