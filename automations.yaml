@@ -176,6 +176,9 @@
       target_brightness_pct: 30
       target_brightness: 77
       brightness_tolerance: 26
+      target_brightness_low: "{{ (target_brightness - brightness_tolerance) | int }}"
+      target_brightness_high: "{{ (target_brightness + brightness_tolerance) | int }}"
+      validation_timeout: '00:00:15'
       should_be_on: "{{ cloud_coverage >= 80 }}"
       porch_needs_on: >-
         {{ should_be_on and (
@@ -203,6 +206,11 @@
               - condition: template
                 value_template: "{{ any_light_needs_on }}"
             sequence:
+              - variables:
+                  porch_validation_on: >-
+                    {{ 'pending' if porch_needs_on else 'skipped' }}
+                  garage_validation_on: >-
+                    {{ 'pending' if garage_needs_on else 'skipped' }}
               - if:
                   - condition: template
                     value_template: "{{ porch_needs_on }}"
@@ -213,6 +221,26 @@
                     data:
                       brightness_pct: 30
                       transition: 2
+                  - wait_template: >-
+                      {{
+                        is_state('light.front_porch_lights', 'on')
+                        and (state_attr('light.front_porch_lights', 'brightness') | int(0)) >= (target_brightness_low | int)
+                        and (state_attr('light.front_porch_lights', 'brightness') | int(0)) <= (target_brightness_high | int)
+                      }}
+                    timeout: "{{ validation_timeout }}"
+                    continue_on_timeout: true
+                  - variables:
+                      porch_validation_on: >-
+                        {% set state = states('light.front_porch_lights') %}
+                        {% set brightness = state_attr('light.front_porch_lights', 'brightness') | int(0) %}
+                        {% set low = target_brightness_low | int %}
+                        {% set high = target_brightness_high | int %}
+                        {% set in_range = brightness >= low and brightness <= high %}
+                        {% if state == 'on' and brightness != 0 and in_range %}
+                          passed
+                        {% else %}
+                          failed
+                        {% endif %}
               - if:
                   - condition: template
                     value_template: "{{ garage_needs_on }}"
@@ -223,6 +251,26 @@
                     data:
                       brightness_pct: 30
                       transition: 2
+                  - wait_template: >-
+                      {{
+                        is_state('light.garage_lights', 'on')
+                        and (state_attr('light.garage_lights', 'brightness') | int(0)) >= (target_brightness_low | int)
+                        and (state_attr('light.garage_lights', 'brightness') | int(0)) <= (target_brightness_high | int)
+                      }}
+                    timeout: "{{ validation_timeout }}"
+                    continue_on_timeout: true
+                  - variables:
+                      garage_validation_on: >-
+                        {% set state = states('light.garage_lights') %}
+                        {% set brightness = state_attr('light.garage_lights', 'brightness') | int(0) %}
+                        {% set low = target_brightness_low | int %}
+                        {% set high = target_brightness_high | int %}
+                        {% set in_range = brightness >= low and brightness <= high %}
+                        {% if state == 'on' and brightness != 0 and in_range %}
+                          passed
+                        {% else %}
+                          failed
+                        {% endif %}
               - service: logbook.log
                 data:
                   name: Cloudy Daytime Exterior
@@ -230,13 +278,43 @@
                     Re-applied cloudy level to {% set lights = [] %}
                     {% if porch_needs_on %}{% set _ = lights.append('front porch') %}{% endif %}
                     {% if garage_needs_on %}{% set _ = lights.append('garage') %}{% endif %}
-                    {{ lights | join(' and ') }} lights ({{ cloud_coverage | round(0) }}% coverage)
+                    {{ lights | join(' and ') }} lights ({{ cloud_coverage | round(0) }}% coverage).
+                    Validation → front porch: {{ porch_validation_on }}, garage: {{ garage_validation_on }}
+              - if:
+                  - condition: template
+                    value_template: >-
+                      {{ 'failed' in [porch_validation_on, garage_validation_on] }}
+                then:
+                  - service: persistent_notification.create
+                    data:
+                      title: Cloudy Daytime Exterior validation failed
+                      message: >-
+                        Validation failed while applying cloudy coverage ({{ cloud_coverage | round(0) }}%).
+                        Front porch: {{ porch_validation_on }}, Garage: {{ garage_validation_on }}.
+                      notification_id: cloudy_daytime_exterior_validation
+                else:
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{
+                            states('persistent_notification.cloudy_daytime_exterior_validation')
+                            not in ['unknown', 'unavailable', None]
+                          }}
+                    then:
+                      - service: persistent_notification.dismiss
+                        data:
+                          notification_id: cloudy_daytime_exterior_validation
           - conditions:
               - condition: template
                 value_template: "{{ trigger.id in ['clearing', 'periodic', 'startup', 'reload'] }}"
               - condition: template
                 value_template: "{{ any_light_needs_off }}"
             sequence:
+              - variables:
+                  porch_validation_off: >-
+                    {{ 'pending' if porch_needs_off else 'skipped' }}
+                  garage_validation_off: >-
+                    {{ 'pending' if garage_needs_off else 'skipped' }}
               - if:
                   - condition: template
                     value_template: "{{ porch_needs_off }}"
@@ -246,6 +324,17 @@
                       entity_id: light.front_porch_lights
                     data:
                       transition: 2
+                  - wait_template: >-
+                      {{ is_state('light.front_porch_lights', 'off') }}
+                    timeout: "{{ validation_timeout }}"
+                    continue_on_timeout: true
+                  - variables:
+                      porch_validation_off: >-
+                        {% if is_state('light.front_porch_lights', 'off') %}
+                          passed
+                        {% else %}
+                          failed
+                        {% endif %}
               - if:
                   - condition: template
                     value_template: "{{ garage_needs_off }}"
@@ -255,6 +344,17 @@
                       entity_id: light.garage_lights
                     data:
                       transition: 2
+                  - wait_template: >-
+                      {{ is_state('light.garage_lights', 'off') }}
+                    timeout: "{{ validation_timeout }}"
+                    continue_on_timeout: true
+                  - variables:
+                      garage_validation_off: >-
+                        {% if is_state('light.garage_lights', 'off') %}
+                          passed
+                        {% else %}
+                          failed
+                        {% endif %}
               - service: logbook.log
                 data:
                   name: Cloudy Daytime Exterior
@@ -262,7 +362,32 @@
                     Cleared cloudy lighting from {% set lights = [] %}
                     {% if porch_needs_off %}{% set _ = lights.append('front porch') %}{% endif %}
                     {% if garage_needs_off %}{% set _ = lights.append('garage') %}{% endif %}
-                    {{ lights | join(' and ') }} lights ({{ cloud_coverage | round(0) }}% coverage)
+                    {{ lights | join(' and ') }} lights ({{ cloud_coverage | round(0) }}% coverage).
+                    Validation → front porch: {{ porch_validation_off }}, garage: {{ garage_validation_off }}
+              - if:
+                  - condition: template
+                    value_template: >-
+                      {{ 'failed' in [porch_validation_off, garage_validation_off] }}
+                then:
+                  - service: persistent_notification.create
+                    data:
+                      title: Cloudy Daytime Exterior validation failed
+                      message: >-
+                        Validation failed while clearing cloudy coverage ({{ cloud_coverage | round(0) }}%).
+                        Front porch: {{ porch_validation_off }}, Garage: {{ garage_validation_off }}.
+                      notification_id: cloudy_daytime_exterior_validation
+                else:
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{
+                            states('persistent_notification.cloudy_daytime_exterior_validation')
+                            not in ['unknown', 'unavailable', None]
+                          }}
+                    then:
+                      - service: persistent_notification.dismiss
+                        data:
+                          notification_id: cloudy_daytime_exterior_validation
 
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'
