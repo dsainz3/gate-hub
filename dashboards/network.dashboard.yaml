@@ -475,14 +475,147 @@ views:
                 option: 3m
               target:
                 entity_id: input_select.network_history_range
-      - type: custom:state-switch
-        entity: input_select.network_history_range
-        default: 1w
-        states:
-          1d: !include dashboards/includes/network_history/1d.yaml
-          3d: !include dashboards/includes/network_history/3d.yaml
-          5d: !include dashboards/includes/network_history/5d.yaml
-          1w: !include dashboards/includes/network_history/1w.yaml
-          2w: !include dashboards/includes/network_history/2w.yaml
-          1m: !include dashboards/includes/network_history/1m.yaml
-          3m: !include dashboards/includes/network_history/3m.yaml
+      - type: custom:apexcharts-card
+        header:
+          title: >-
+            [[[ return `Latency trend (${states['input_select.network_history_range'].state})`; ]]]
+          show: true
+        graph_span: >-
+          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
+              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+        span:
+          end: >-
+            [[[ const current = states['input_select.network_history_range'].state;
+                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.internet_latency
+            name: Current
+            color: '#1e88e5'
+            float_precision: 1
+          - entity: sensor.internet_latency_24h_avg
+            name: 24h avg
+            color: '#fdd835'
+            type: line
+            float_precision: 1
+          - entity: sensor.internet_latency_7d_avg
+            name: 7d avg
+            color: '#43a047'
+            type: line
+            float_precision: 1
+      - type: custom:apexcharts-card
+        header:
+          title: >-
+            [[[ return `Speedtest download vs upload (${states['input_select.network_history_range'].state})`; ]]]
+          show: true
+        graph_span: >-
+          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
+              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+        span:
+          end: >-
+            [[[ const current = states['input_select.network_history_range'].state;
+                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.speedtest_download
+            name: Download
+            type: line
+            color: '#3949ab'
+            float_precision: 1
+          - entity: sensor.speedtest_upload
+            name: Upload
+            type: line
+            color: '#8d6e63'
+            float_precision: 1
+          - entity: sensor.speedtest_download_30d_avg
+            name: Download 30d avg
+            type: line
+            color: '#5c6bc0'
+            float_precision: 1
+          - entity: sensor.speedtest_upload_30d_avg
+            name: Upload 30d avg
+            type: line
+            color: '#a1887f'
+            float_precision: 1
+      - type: custom:apexcharts-card
+        header:
+          title: >-
+            [[[ return `Deco throughput (${states['input_select.network_history_range'].state})`; ]]]
+          show: true
+        graph_span: >-
+          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
+              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+        span:
+          end: >-
+            [[[ const current = states['input_select.network_history_range'].state;
+                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.deco_total_down_mbps
+            name: Down
+            type: line
+            color: '#26a69a'
+            float_precision: 2
+          - entity: sensor.deco_total_up_mbps
+            name: Up
+            type: line
+            color: '#7e57c2'
+            float_precision: 2
+          - entity: sensor.deco_total_down_mbps_7d_avg
+            name: Down 7d avg
+            type: line
+            color: '#4db6ac'
+            float_precision: 2
+          - entity: sensor.deco_total_up_mbps_7d_avg
+            name: Up 7d avg
+            type: line
+            color: '#9575cd'
+            float_precision: 2
+      - type: custom:apexcharts-card
+        header:
+          title: >-
+            [[[ return `Speedtest ping (${states['input_select.network_history_range'].state})`; ]]]
+          show: true
+        graph_span: >-
+          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
+              return map[states['input_select.network_history_range'].state] || '7d'; ]]]
+        span:
+          end: >-
+            [[[ const current = states['input_select.network_history_range'].state;
+                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
+        yaxis:
+          - min: 0
+        apex_config:
+          stroke:
+            width: 2
+          legend:
+            show: true
+        series:
+          - entity: sensor.speedtest_ping
+            name: Ping
+            type: line
+            color: '#ef6c00'
+            float_precision: 1
+          - entity: sensor.speedtest_ping_30d_avg
+            name: Ping 30d avg
+            type: line
+            color: '#ffb300'
+            float_precision: 1
