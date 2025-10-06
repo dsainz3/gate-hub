@@ -250,6 +250,7 @@ views:
               - automation.early_morning_lights_03_30
               - automation.interior_lights_off_15_minutes_after_sunrise
               - automation.lighting_morning_lights_off_sunrise
+              - automation.exterior_lights_cloudy_daytime
               - automation.exterior_led_monthly_effect
               - automation.humidor_plug_temperature_control
               - automation.safety_turn_off_burner_plugs_at_11_00_pm
@@ -891,6 +892,28 @@ views:
                 hold_action:
                   action: more-info
               - type: button
+                entity: scene.lighting_daytime_cloudy_interior
+                name: Daytime Cloudy (Interior)
+                icon: mdi:weather-partly-cloudy
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_daytime_cloudy_interior
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_daytime_cloudy_exterior
+                name: Daytime Cloudy (Exterior)
+                icon: mdi:weather-partly-rainy
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_daytime_cloudy_exterior
+                hold_action:
+                  action: more-info
+              - type: button
                 entity: scene.lighting_morning_interior_off
                 name: Morning Interior Off
                 icon: mdi:weather-sunset-up
@@ -910,6 +933,160 @@ views:
                   service: scene.turn_on
                   target:
                     entity_id: scene.lighting_morning_exterior_off
+                hold_action:
+                  action: more-info
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## LED Effect Scenes"
+
+          - type: grid
+            title: Exterior LED Effects
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: scene.lighting_led_effect_january
+                name: January Effect
+                icon: mdi:calendar-month
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_january
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_february
+                name: February Effect
+                icon: mdi:calendar-month-outline
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_february
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_march
+                name: March Effect
+                icon: mdi:calendar-month
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_march
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_april
+                name: April Effect
+                icon: mdi:calendar-month-outline
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_april
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_patriotic
+                name: Patriotic Effect
+                icon: mdi:flag-variant
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_patriotic
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_august
+                name: August Effect
+                icon: mdi:calendar-month
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_august
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_halloween
+                name: Halloween Effect
+                icon: mdi:halloween
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_halloween
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_thanksgiving
+                name: Thanksgiving Effect
+                icon: mdi:food-turkey
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_thanksgiving
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.lighting_led_effect_christmas
+                name: Christmas Effect
+                icon: mdi:string-lights
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.lighting_led_effect_christmas
+                hold_action:
+                  action: more-info
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Climate & Safety Scenes"
+
+          - type: grid
+            title: Climate & Safety
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: scene.climate_humidor_cooling_on
+                name: Humidor Cooling On
+                icon: mdi:snowflake
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.climate_humidor_cooling_on
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.climate_humidor_cooling_off
+                name: Humidor Cooling Off
+                icon: mdi:power
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.climate_humidor_cooling_off
+                hold_action:
+                  action: more-info
+              - type: button
+                entity: scene.safety_burner_plugs_off
+                name: Burner Plugs Off
+                icon: mdi:fire-off
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  target:
+                    entity_id: scene.safety_burner_plugs_off
                 hold_action:
                   action: more-info
 
@@ -987,6 +1164,17 @@ views:
                   service: automation.trigger
                   target:
                     entity_id: automation.lighting_morning_lights_off_sunrise
+                hold_action:
+                  action: toggle
+              - type: button
+                entity: automation.exterior_lights_cloudy_daytime
+                name: Daytime Cloudy Exterior
+                icon: mdi:weather-partly-rainy
+                tap_action:
+                  action: call-service
+                  service: automation.trigger
+                  target:
+                    entity_id: automation.exterior_lights_cloudy_daytime
                 hold_action:
                   action: toggle
               - type: button
