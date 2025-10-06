@@ -154,6 +154,15 @@
         id: clearing
         entity_id: sensor.openweathermap_cloud_coverage
         below: 80
+      - platform: time_pattern
+        id: periodic
+        minutes: '/10'
+      - platform: homeassistant
+        event: start
+        id: startup
+      - platform: event
+        event_type: automation_reloaded
+        id: reload
     condition:
       - condition: sun
         after: sunrise
@@ -162,7 +171,10 @@
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ trigger.id == 'cloudy' }}"
+                value_template: "{{ trigger.id in ['cloudy', 'periodic', 'startup', 'reload'] }}"
+              - condition: numeric_state
+                entity_id: sensor.openweathermap_cloud_coverage
+                above: 80
             sequence:
               - service: scene.turn_on
                 target:
@@ -171,7 +183,10 @@
                   transition: 2
           - conditions:
               - condition: template
-                value_template: "{{ trigger.id == 'clearing' }}"
+                value_template: "{{ trigger.id in ['clearing', 'periodic', 'startup', 'reload'] }}"
+              - condition: numeric_state
+                entity_id: sensor.openweathermap_cloud_coverage
+                below: 80
             sequence:
               - service: scene.turn_on
                 target:
