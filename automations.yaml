@@ -156,7 +156,7 @@
         below: 80
       - platform: time_pattern
         id: periodic
-        minutes: '/10'
+        minutes: '/5'
       - platform: homeassistant
         event: start
         id: startup
@@ -167,42 +167,197 @@
       - condition: sun
         after: sunrise
         before: sunset
+      - condition: template
+        value_template: "{{ cloud_coverage_available }}"
+    variables:
+      cloud_coverage_raw: "{{ states('sensor.openweathermap_cloud_coverage') }}"
+      cloud_coverage_available: >-
+        {{ cloud_coverage_raw not in ['unknown', 'unavailable', 'none', None, ''] }}
+      cloud_coverage: >-
+        {{ cloud_coverage_raw | float(0) if cloud_coverage_available else 0 }}
+      should_be_on: >-
+        {{ (cloud_coverage_available and cloud_coverage >= 80) | bool }}
+      target_brightness_pct: 30
+      target_brightness: "{{ (255 * target_brightness_pct / 100) | round(0) | int }}"
+      brightness_tolerance: 26
+      target_brightness_low: "{{ [target_brightness - brightness_tolerance, 1] | max | int }}"
+      target_brightness_high: "{{ [target_brightness + brightness_tolerance, 255] | min | int }}"
+      validation_timeout: '00:00:15'
+      tracked_lights:
+        - name: Front porch
+          entity_id: light.front_porch_lights
+        - name: Garage
+          entity_id: light.garage_lights
     action:
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ trigger.id in ['cloudy', 'periodic', 'startup', 'reload'] }}"
-              - condition: numeric_state
-                entity_id: sensor.openweathermap_cloud_coverage
-                above: 80
+                value_template: "{{ should_be_on | bool }}"
             sequence:
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.lighting_daytime_cloudy_exterior
-                data:
-                  transition: 2
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.lighting_daytime_cloudy_interior
-                data:
-                  transition: 2
+              - repeat:
+                  for_each: "{{ tracked_lights }}"
+                  sequence:
+                    - variables:
+                        light_entity: "{{ repeat.item.entity_id }}"
+                        light_name: "{{ repeat.item.name }}"
+                        current_state: "{{ states(light_entity) }}"
+                        current_brightness: "{{ state_attr(light_entity, 'brightness') | int(0) }}"
+                        needs_adjustment: >-
+                          {{
+                            current_state != 'on'
+                            or current_brightness == 0
+                            or current_brightness < (target_brightness_low | int)
+                            or current_brightness > (target_brightness_high | int)
+                          }}
+                    - if:
+                        - condition: template
+                          value_template: "{{ needs_adjustment }}"
+                      then:
+                        - service: light.turn_on
+                          target:
+                            entity_id: "{{ light_entity }}"
+                          data:
+                            brightness_pct: "{{ target_brightness_pct }}"
+                            transition: 2
+                        - wait_template: >-
+                            {{
+                              is_state(light_entity, 'on')
+                              and (state_attr(light_entity, 'brightness') | int(0)) >= (target_brightness_low | int)
+                              and (state_attr(light_entity, 'brightness') | int(0)) <= (target_brightness_high | int)
+                            }}
+                          timeout: "{{ validation_timeout }}"
+                          continue_on_timeout: true
+                        - variables:
+                            corrected_state: "{{ states(light_entity) }}"
+                            corrected_brightness: "{{ state_attr(light_entity, 'brightness') | int(0) }}"
+                            correction_passed: >-
+                              {{
+                                corrected_state == 'on'
+                                and corrected_brightness != 0
+                                and corrected_brightness >= (target_brightness_low | int)
+                                and corrected_brightness <= (target_brightness_high | int)
+                              }}
+                        - choose:
+                            - conditions:
+                                - condition: template
+                                  value_template: "{{ correction_passed }}"
+                              sequence:
+                                - service: logbook.log
+                                  data:
+                                    name: Cloudy Daytime Exterior
+                                    message: >-
+                                      Brought {{ light_name | lower }} lights to cloudy daytime level
+                                      ({{ cloud_coverage | round(0) }}% coverage).
+                            - default:
+                                - service: logbook.log
+                                  data:
+                                    name: Cloudy Daytime Exterior
+                                    message: >-
+                                      Failed to bring {{ light_name | lower }} lights to cloudy daytime level
+                                      ({{ cloud_coverage | round(0) }}% coverage).
+                                - service: persistent_notification.create
+                                  data:
+                                    title: Cloudy Daytime Exterior validation failed
+                                    message: >-
+                                      {{ light_name }} lights did not reach the expected cloudy
+                                      brightness ({{ cloud_coverage | round(0) }}% coverage).
+                                    notification_id: cloudy_daytime_exterior_validation
           - conditions:
               - condition: template
-                value_template: "{{ trigger.id in ['clearing', 'periodic', 'startup', 'reload'] }}"
-              - condition: numeric_state
-                entity_id: sensor.openweathermap_cloud_coverage
-                below: 80
+                value_template: "{{ (not should_be_on) | bool }}"
             sequence:
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.lighting_morning_exterior_off
-                data:
-                  transition: 2
-              - service: scene.turn_on
-                target:
-                  entity_id: scene.lighting_morning_interior_off
-                data:
-                  transition: 2
+              - repeat:
+                  for_each: "{{ tracked_lights }}"
+                  sequence:
+                    - variables:
+                        light_entity: "{{ repeat.item.entity_id }}"
+                        light_name: "{{ repeat.item.name }}"
+                        current_state: "{{ states(light_entity) }}"
+                        needs_off: "{{ current_state != 'off' }}"
+                    - if:
+                        - condition: template
+                          value_template: "{{ needs_off }}"
+                      then:
+                        - service: light.turn_off
+                          target:
+                            entity_id: "{{ light_entity }}"
+                          data:
+                            transition: 2
+                        - wait_template: "{{ is_state(light_entity, 'off') }}"
+                          timeout: "{{ validation_timeout }}"
+                          continue_on_timeout: true
+                        - variables:
+                            cleared: "{{ is_state(light_entity, 'off') }}"
+                        - choose:
+                            - conditions:
+                                - condition: template
+                                  value_template: "{{ cleared }}"
+                              sequence:
+                                - service: logbook.log
+                                  data:
+                                    name: Cloudy Daytime Exterior
+                                    message: >-
+                                      Turned off {{ light_name | lower }} lights as skies cleared
+                                      ({{ cloud_coverage | round(0) }}% coverage).
+                            - default:
+                                - service: logbook.log
+                                  data:
+                                    name: Cloudy Daytime Exterior
+                                    message: >-
+                                      Failed to turn off {{ light_name | lower }} lights as skies cleared
+                                      ({{ cloud_coverage | round(0) }}% coverage).
+                                - service: persistent_notification.create
+                                  data:
+                                    title: Cloudy Daytime Exterior validation failed
+                                    message: >-
+                                      {{ light_name }} lights did not turn off after skies cleared
+                                      ({{ cloud_coverage | round(0) }}% coverage).
+                                    notification_id: cloudy_daytime_exterior_validation
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{
+                    should_be_on
+                    and is_state('light.front_porch_lights', 'on')
+                    and (state_attr('light.front_porch_lights', 'brightness') | int(0)) >= (target_brightness_low | int)
+                    and (state_attr('light.front_porch_lights', 'brightness') | int(0)) <= (target_brightness_high | int)
+                    and is_state('light.garage_lights', 'on')
+                    and (state_attr('light.garage_lights', 'brightness') | int(0)) >= (target_brightness_low | int)
+                    and (state_attr('light.garage_lights', 'brightness') | int(0)) <= (target_brightness_high | int)
+                  }}
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: >-
+                      {{
+                        states('persistent_notification.cloudy_daytime_exterior_validation')
+                        not in ['unknown', 'unavailable', None]
+                      }}
+                then:
+                  - service: persistent_notification.dismiss
+                    data:
+                      notification_id: cloudy_daytime_exterior_validation
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{
+                    (not should_be_on)
+                    and is_state('light.front_porch_lights', 'off')
+                    and is_state('light.garage_lights', 'off')
+                  }}
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: >-
+                      {{
+                        states('persistent_notification.cloudy_daytime_exterior_validation')
+                        not in ['unknown', 'unavailable', None]
+                      }}
+                then:
+                  - service: persistent_notification.dismiss
+                    data:
+                      notification_id: cloudy_daytime_exterior_validation
 
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'
