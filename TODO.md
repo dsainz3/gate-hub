@@ -24,9 +24,19 @@
     - Native Home Assistant history/recorder for metrics storage
     - Custom dashboards and cards for visualization
     - Automations for alerts and notifications
+- [ ] Finish resolving issues with networking dashboard and cards
+  - Ensure history/overview layouts are stable and charts render without config errors.
+  - Verify reachability/latency sensors show consistent states (no lingering “unreachable” vs “unavailable” mismatches).
+  - Add tests/checklist for future dashboard changes.
 - [ ] Build household package for lights/plugs/vacuums
   - Goal: consolidate common helpers, automations, scenes, and groups into a reusable package.
   - Considerations: device coverage, naming conventions, package structure.
+- [ ] On kiosk build out shortcut calls to critical network sensors
+  - Add Lovelace buttons/tiles for quick access to latency, speedtest, Deco health.
+  - Surface manual refresh actions (e.g., trigger speedtest) and key binary sensors.
+- [ ] Add Reolink cameras
+  - Integrate Reolink integration or ONVIF streams.
+  - Expose cameras to dashboards and automations; confirm recording/alerts.
 - [x] Enhance weather dashboard with additional data source and reorganized views
   - Goal: integrate a secondary provider (e.g., OpenWeather, AQI) and improve view layout/sections.
   - Considerations: API keys, sensor creation, updating `weather-dashboard.yaml`, ensure lint compliance.
