@@ -115,33 +115,32 @@ The configuration data is stored in `.storage/core.config_entries` under the `do
 
 ## Step 5 – Wire the Kiosk Dashboard
 
-The refreshed `dashboards/kiosk-dashboard.yaml` relies entirely on stock Lovelace cards so it works out of the box on a clean Home Assistant install. The Control tab is organised as:
+The refreshed `dashboards/kiosk-dashboard.yaml` relies entirely on stock Lovelace cards so it works out of the box on a clean Home Assistant install. Each view now uses a three-column layout:
 
-1. **Status stacks** built from `markdown`, `grid`, and `tile` cards for quick counts (lights on, runtimes, automations).
-2. **Group and individual controls** using `tile` cards so every light or switch can be toggled without third-party components.
-3. **Automation buttons** created with the core `button` card to trigger scenes and scripts.
+1. **Snapshot** – left column provides sanitation, agenda, and quick tiles; the middle column hosts an “Overrides & Testing” stack with manual holiday/Huskers toggles plus a status entities card; the right column mirrors automation diagnostics.
+2. **Control** – grouped light and switch controls rendered with `tile` cards.
+3. **Humidor** – gauges, history charts, and control tiles for the cigar cabinet.
 
 Example fragment:
 
 ```yaml
-# Main Floor lights in dashboards/kiosk-dashboard.yaml
+# Overrides stack in dashboards/kiosk-dashboard.yaml
 - type: vertical-stack
   cards:
     - type: markdown
-      content: "## Main Floor Lights"
+      content: "## Overrides & Testing"
     - type: grid
-      columns: 3
+      columns: 2
       square: false
       cards:
         - type: tile
-          entity: light.livingroom_light
-          name: Living Room
+          entity: input_boolean.holiday_mode_manual
+          name: Holiday Mode Override
+          icon: mdi:calendar-star
         - type: tile
-          entity: light.diningroom_light
-          name: Dining Room
-        - type: tile
-          entity: light.sunroom_light
-          name: Sunroom
+          entity: input_boolean.huskers_automations_enabled
+          name: Huskers Automations Enabled
+          icon: mdi:bullhorn
 ```
 
 - Because only built-in cards are used, there are no Lovelace resource entries to manage for the kiosk dashboard.

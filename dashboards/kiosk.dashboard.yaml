@@ -6,6 +6,10 @@ views:
   - title: Snapshot
     path: kiosk
     icon: mdi:view-dashboard
+    layout:
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+      grid-template-rows: auto
+      grid-auto-flow: row dense
     badges:
       - entity: sensor.kiosk_snapshot_lights_on
         name: Lights On
@@ -104,7 +108,6 @@ views:
                 entity: binary_sensor.kiosk_humidor_out_of_band
                 name: Humidor Out of Band
                 color: deep-orange
-
           - type: entities
             title: Snapshot Bundles
             show_header_toggle: false
@@ -119,6 +122,91 @@ views:
                 name: Auxiliary Bundle
               - entity: group.kiosk_snapshot_automations
                 name: Automation Bundle
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Overrides & Testing
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: input_boolean.holiday_mode_manual
+                name: Holiday Mode Override
+                icon: mdi:calendar-star
+                color: deep-orange
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_automations_enabled
+                name: Huskers Automations Enabled
+                icon: mdi:bullhorn
+                color: red
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_game_mode
+                name: Huskers Game Mode
+                icon: mdi:stadium
+                color: crimson
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_use_manual_kickoff
+                name: Manual Kickoff Override
+                icon: mdi:timer-cog
+                color: amber
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_use_manual_score
+                name: Manual Score Override
+                icon: mdi:tune
+                color: orange
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_test_mode
+                name: Huskers Test Mode
+                icon: mdi:flask
+                color: indigo
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+          - type: entities
+            title: Automation Overrides
+            state_color: true
+            show_header_toggle: false
+            entities:
+              - entity: input_boolean.holiday_mode_manual
+                name: Holiday Mode Override
+              - entity: binary_sensor.holiday_mode_active
+                name: Holiday Mode Active
+              - entity: input_boolean.huskers_automations_enabled
+                name: Huskers Automations Enabled
+              - entity: binary_sensor.huskers_lighting_hold
+                name: Huskers Lighting Hold Active
+              - entity: input_boolean.huskers_game_mode
+                name: Huskers Game Mode
+              - entity: input_boolean.huskers_use_manual_kickoff
+                name: Huskers Manual Kickoff Override
+              - entity: input_boolean.huskers_use_manual_score
+                name: Huskers Manual Score Override
+              - entity: input_boolean.huskers_test_mode
+                name: Huskers Test Mode
 
       - type: vertical-stack
         cards:
@@ -230,6 +318,64 @@ views:
                     entity_id: automation.safety_turn_off_burner_plugs_at_11_00_pm
                 hold_action:
                   action: toggle
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: input_boolean.holiday_mode_manual
+                name: Holiday Mode Override
+                icon: mdi:calendar-star
+                color: deep-orange
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_automations_enabled
+                name: Huskers Automations Enabled
+                icon: mdi:bullhorn
+                color: red
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_game_mode
+                name: Huskers Game Mode
+                icon: mdi:stadium
+                color: crimson
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_use_manual_kickoff
+                name: Manual Kickoff Override
+                icon: mdi:timer-cog
+                color: amber
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_use_manual_score
+                name: Manual Score Override
+                icon: mdi:tune
+                color: orange
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+              - type: tile
+                entity: input_boolean.huskers_test_mode
+                name: Huskers Test Mode
+                icon: mdi:flask
+                color: indigo
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
 
           - type: entities
             title: Automation Bundles
@@ -269,6 +415,10 @@ views:
   - title: Control
     path: control
     icon: mdi:lightbulb-group
+    layout:
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+      grid-template-rows: auto
+      grid-auto-flow: row dense
 
     cards:
       - type: vertical-stack
@@ -569,6 +719,10 @@ views:
   - title: Humidor
     path: humidor
     icon: mdi:cigar
+    layout:
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+      grid-template-rows: auto
+      grid-auto-flow: row dense
 
     cards:
       - type: vertical-stack

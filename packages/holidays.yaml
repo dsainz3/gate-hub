@@ -449,3 +449,29 @@ automation:
         target:
           entity_id: script.holiday_exterior_lights_resume
     mode: single
+
+  - id: holiday_mode_manual_reset
+    alias: 'Holiday Mode: Reset Manual Override'
+    description: Turn off the manual holiday mode flag once the calendar is clear.
+    trigger:
+      - platform: state
+        entity_id: calendar.us_federal_holidays
+        to: 'off'
+      - platform: time
+        at: '00:10:00'
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '/30'
+    condition:
+      - condition: state
+        entity_id: calendar.us_federal_holidays
+        state: 'off'
+      - condition: state
+        entity_id: input_boolean.holiday_mode_manual
+        state: 'on'
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.holiday_mode_manual
+    mode: restart
