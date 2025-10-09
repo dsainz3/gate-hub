@@ -158,7 +158,9 @@ def format_table(title: str, counts: Counter[str]) -> str:
     return "\n".join(lines)
 
 
-def render_section(total_lines: int, by_language: Counter[str], by_extension: Counter[str]) -> str:
+def render_section(
+    total_lines: int, by_language: Counter[str], by_extension: Counter[str]
+) -> str:
     """Render the Markdown section inserted into the README."""
 
     timestamp = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
