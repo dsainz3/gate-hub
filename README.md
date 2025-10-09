@@ -63,6 +63,64 @@ See `docs/reference/infrastructure.md` for the full environment outline and IDE 
 
 ---
 
+## Repository Line Counts
+
+Line counts stay current via `scripts/update_loc_stats.py`, which skips everything under `custom_components/` to focus on the core configuration.
+
+```bash
+poetry run python scripts/update_loc_stats.py
+```
+
+<!-- LOC_COUNTS_START -->
+_Last updated: 2025-10-09 13:51 UTC_
+
+**Total lines (excluding `custom_components/`):** 62,022
+
+### Lines by Language
+
+| Category | Lines |
+| --- | ---: |
+| HTML | 36,227 |
+| YAML | 13,744 |
+| JavaScript | 7,257 |
+| Markdown | 2,162 |
+| Python | 1,414 |
+| Lockfile | 1,001 |
+| Other | 110 |
+| TOML | 58 |
+| Shell | 39 |
+| SVG | 4 |
+| XML | 3 |
+| CSS | 2 |
+| JSON | 1 |
+
+### Lines by Extension
+
+| Category | Lines |
+| --- | ---: |
+| .html | 36,227 |
+| .yaml | 13,524 |
+| .js | 7,257 |
+| .md | 2,162 |
+| .py | 1,414 |
+| .lock | 1,001 |
+| .yml | 220 |
+| <no extension> | 91 |
+| .toml | 58 |
+| .sh | 39 |
+| .map | 16 |
+| .svg | 4 |
+| .pub | 3 |
+| .xml | 3 |
+| .css | 2 |
+| .json | 1 |
+
+<!-- LOC_COUNTS_END -->
+
+
+
+---
+
 ## Learning Artifacts & Key Reading
 
 - **How-to guides (`docs/how-to/`):** Lighting stacks (`lighting/govee-lighting-stack.md`), Football Team dashboard operations (`football-team/dashboard.md`), add-on runbooks (`addons/mqtt.md`, `addons/govee2mqtt.md`), F1 dashboard instructions (`f1/index.md`), and CI/pre-commit walkthroughs (`docs/how-to/ci.md`, `docs/how-to/pre-commit.md`).
