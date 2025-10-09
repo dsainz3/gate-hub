@@ -65,6 +65,7 @@ make_fake_secrets.py
 
 # Local workspace scratch
 /external/
+tmp/
 custom_components/tplink_router/translations/tr.json
 
 .ha_run.lock
