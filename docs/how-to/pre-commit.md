@@ -40,6 +40,39 @@ Hooks that auto-fix files (`ruff --fix`, `yaml-format`, etc.) require you to re-
 
 > ✅ **Keep PRs unblocked:** Run `pre-commit run --all-files` before pushing a branch. CI executes the same hooks, so a clean local run is the fastest way to avoid “red” pull requests and reviewer churn.
 
+## Commit Artifact Helper
+
+When `pre-commit` finishes cleanly and your changes are staged, run:
+
+```bash
+python scripts/gen_commit_artifacts.py
+```
+
+The helper inspects the staged diff and prints:
+- a conventional-style commit subject + body
+- a merge/PR template
+- review-ready bullet points
+
+Filter the output with `--commit`, `--merge`, or `--comments`, or redirect everything to a file with `--output notes.txt`. Example:
+
+```bash
+python scripts/gen_commit_artifacts.py --commit
+```
+
+```text
+=== Commit Message ===
+
+docs: refresh documentation
+
+Summary:
+- touch 2 file(s) under `docs` (pre-prod-checklist.md, pre-commit.md)
+
+Testing:
+- [ ] n/a - docs-only change
+```
+
+> Tip: add `alias gca="python scripts/gen_commit_artifacts.py"` to your shell profile, or wire the command into a `pre-push` hook if you want the prompt before every push.
+
 ## Troubleshooting
 - Upgrade hooks with `pre-commit autoupdate` then re-run to repin versions.
 - Delete `~/.cache/pre-commit` if caches become corrupted after updates.

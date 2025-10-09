@@ -33,6 +33,7 @@ Follow this playbook before you push a branch, open a pull request, or deploy to
    poetry run python scripts/ha_check_portable.py  # or `ha core check`
    ```
 5. Only after all checks pass should you stage remaining edits and continue.
+6. With a clean staging area, run `python scripts/gen_commit_artifacts.py` and reuse the suggested commit, merge, or review snippets when you push.
 
 ## 3. Commit & Push Discipline
 - Use focused commits with descriptive messages (e.g., `docs: add pre-prod push checklist`).
