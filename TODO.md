@@ -27,12 +27,14 @@
 - [ ] Build household package for lights/plugs/vacuums
   - Goal: consolidate common helpers, automations, scenes, and groups into a reusable package.
   - Considerations: device coverage, naming conventions, package structure.
-- [ ] Enhance weather dashboard with additional data source and reorganized views
+- [x] Enhance weather dashboard with additional data source and reorganized views
   - Goal: integrate a secondary provider (e.g., OpenWeather, AQI) and improve view layout/sections.
   - Considerations: API keys, sensor creation, updating `weather-dashboard.yaml`, ensure lint compliance.
-- [ ] Move recorder include list from configuration.yaml into secrets file
+  - Completed: Added dedicated OpenWeather view and reorganized core sections in `dashboards/weather.dashboard.yaml`.
+- [x] Move recorder include list from configuration.yaml into secrets file
   - Goal: isolate recorder entity list for easier sharing and secrets management.
   - Considerations: create entry in secrets.yaml (or package), update recorder config to reference secret, ensure reload succeeds.
+  - Completed: `configuration.yaml` now references `!secret recorder_include_entities` for the include list (mirrored in `secrets.example.yaml`).
 - [ ] Restore F1 sensor integration coverage
   - Current dashboard and automations rely on core sensors that are not yet exposed (`sensor.f1_session_status`, `sensor.f1_track_weather`, `sensor.f1_weather`, `sensor.f1_race_lap_count`, `binary_sensor.f1_safety_car`).
   - Re-enable the F1 Sensor config entry and ensure these entities are registered so the Network/F1 dashboards stop warning.
