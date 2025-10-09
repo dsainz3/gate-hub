@@ -225,9 +225,9 @@ def render_review_bullets(ctx: ChangeContext) -> str:
         bullets.append(f"{index}. {line}")
     tests = ", ".join(testing_lines(ctx))
     if tests:
-        bullets.append(f"{len(bullets)+1}. Tests: {tests}")
+        bullets.append(f"{len(bullets) + 1}. Tests: {tests}")
     if ctx.areas:
-        bullets.append(f"{len(bullets)+1}. Impact: {', '.join(ctx.areas)}")
+        bullets.append(f"{len(bullets) + 1}. Impact: {', '.join(ctx.areas)}")
     return "\n".join(f"- {bullet}" for bullet in bullets)
 
 
