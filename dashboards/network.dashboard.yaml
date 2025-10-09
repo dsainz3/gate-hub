@@ -164,144 +164,127 @@ views:
             entity: sensor.speedtest_last_run
             name: Last speedtest
             color: '#546e7a'
-      - type: custom:apexcharts-card
-        header:
-          title: Latency vs averages (24h)
-          show: true
-        graph_span: 24h
-        span:
-          end: hour
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.internet_latency
-            name: Current
-            color: '#1e88e5'
-            float_precision: 1
-          - entity: sensor.internet_latency_1h_avg
-            name: 1h avg
-            color: '#43a047'
-            type: line
-            float_precision: 1
-          - entity: sensor.internet_latency_24h_avg
-            name: 24h avg
-            color: '#fdd835'
-            type: line
-            float_precision: 1
-      - type: custom:apexcharts-card
-        header:
-          title: Deco throughput (6h)
-          show: true
-        graph_span: 6h
-        span:
-          end: hour
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.deco_total_down_mbps
-            name: Down
-            color: '#26a69a'
-            float_precision: 2
-          - entity: sensor.deco_total_up_mbps
-            name: Up
-            color: '#7e57c2'
-            float_precision: 2
-      - type: custom:apexcharts-card
-        header:
-          title: Speedtest results (30d)
-          show: true
-        graph_span: 30d
-        span:
-          end: day
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.speedtest_download
-            name: Download
-            type: line
-            color: '#3949ab'
-            float_precision: 1
-          - entity: sensor.speedtest_upload
-            name: Upload
-            type: line
-            color: '#8d6e63'
-            float_precision: 1
-          - entity: sensor.speedtest_ping
-            name: Ping
-            type: line
-            color: '#ef6c00'
-            float_precision: 1
-          - entity: sensor.speedtest_download_7d_avg
-            name: Download 7d avg
-            type: line
-            color: '#5c6bc0'
-            float_precision: 1
-          - entity: sensor.speedtest_upload_7d_avg
-            name: Upload 7d avg
-            type: line
-            color: '#a1887f'
-            float_precision: 1
-      - type: custom:apexcharts-card
-        header:
-          title: Speedtest ping vs averages (7d)
-          show: true
-        graph_span: 7d
-        span:
-          end: hour
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.speedtest_ping
-            name: Ping
-            color: '#ef6c00'
-            float_precision: 1
-          - entity: sensor.speedtest_ping_24h_avg
-            name: 24h avg
-            color: '#ffb300'
-            type: line
-            float_precision: 1
-          - entity: sensor.speedtest_ping_7d_avg
-            name: 7d avg
-            color: '#ffa726'
-            type: line
-            float_precision: 1
-      - type: entities
-        title: Live network sensors
-        show_header_toggle: false
-        entities:
-          - binary_sensor.internet_reachability
-          - sensor.internet_latency
-          - sensor.speedtest_ping
-          - sensor.speedtest_download
-          - sensor.speedtest_upload
-          - sensor.deco_total_down_mbps
-          - sensor.deco_total_up_mbps
-          - sensor.deco_client_count
-          - sensor.deco_node_count
-          - sensor.network_performance_summary
-          - sensor.speedtest_last_run
-          - update.tp_link_deco_update
-          - update.tp_link_router_update
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: custom:apexcharts-card
+                header:
+                  title: Latency trend (24h)
+                  show: true
+                graph_span: 24h
+                span:
+                  end: hour
+                yaxis:
+                  - min: 0
+                apex_config:
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.internet_latency
+                    name: Current
+                    color: '#1e88e5'
+                    float_precision: 1
+                  - entity: sensor.internet_latency_1h_avg
+                    name: 1h avg
+                    color: '#43a047'
+                    type: line
+                    float_precision: 1
+                  - entity: sensor.internet_latency_24h_avg
+                    name: 24h avg
+                    color: '#fdd835'
+                    type: line
+                    float_precision: 1
+              - type: custom:apexcharts-card
+                header:
+                  title: Deco throughput (24h)
+                  show: true
+                graph_span: 24h
+                span:
+                  end: hour
+                chart_type: area
+                yaxis:
+                  - min: 0
+                apex_config:
+                  fill:
+                    type: gradient
+                    gradient:
+                      shadeIntensity: 0.6
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.deco_total_down_mbps
+                    name: Down
+                    color: '#26a69a'
+                    float_precision: 2
+                  - entity: sensor.deco_total_up_mbps
+                    name: Up
+                    color: '#7e57c2'
+                    float_precision: 2
+          - type: vertical-stack
+            cards:
+              - type: custom:apexcharts-card
+                header:
+                  title: Speedtest summary (7d)
+                  show: true
+                graph_span: 7d
+                span:
+                  end: day
+                yaxis:
+                  - id: primary
+                    min: 0
+                  - id: ping
+                    opposite: true
+                    min: 0
+                apex_config:
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.speedtest_download
+                    name: Download
+                    color: '#3949ab'
+                    float_precision: 1
+                  - entity: sensor.speedtest_upload
+                    name: Upload
+                    color: '#8d6e63'
+                    float_precision: 1
+                  - entity: sensor.speedtest_ping
+                    name: Ping
+                    color: '#ef6c00'
+                    type: line
+                    float_precision: 1
+                    yaxis_id: ping
+              - type: gauge
+                entity: sensor.internet_latency
+                name: Current latency
+                unit: ms
+                min: 0
+                max: 200
+                severity:
+                  green: 0
+                  yellow: 60
+                  red: 120
+              - type: button
+                name: Run Speedtest Now
+                icon: mdi:speedometer
+                tap_action:
+                  action: call-service
+                  service: homeassistant.update_entity
+                  target:
+                    entity_id:
+                      - sensor.speedtest_download
+                      - sensor.speedtest_upload
+                      - sensor.speedtest_ping
+                hold_action:
+                  action: none
       - type: markdown
         title: Rolling averages
         content: >-
@@ -371,266 +354,283 @@ views:
         filter:
           include:
             - entity_id: sensor.ping_*
-      - type: button
-        name: Run Speedtest Now
-        icon: mdi:speedometer
-        tap_action:
-          action: call-service
-          service: homeassistant.update_entity
-          target:
-            entity_id:
-              - sensor.speedtest_download
-              - sensor.speedtest_upload
-              - sensor.speedtest_ping
-        hold_action:
-          action: none
+      - type: glance
+        title: Live network snapshot
+        columns: 3
+        entities:
+          - entity: binary_sensor.internet_reachability
+            name: Internet
+          - entity: sensor.network_performance_summary
+            name: Performance
+          - entity: sensor.internet_latency
+            name: Latency
+          - entity: sensor.speedtest_download
+            name: Download
+          - entity: sensor.speedtest_upload
+            name: Upload
+          - entity: sensor.deco_client_count
+            name: Clients
+          - entity: sensor.deco_total_down_mbps
+            name: Deco ↓
+          - entity: sensor.deco_total_up_mbps
+            name: Deco ↑
+          - entity: sensor.speedtest_last_run
+            name: Last test
+      - type: entities
+        title: Network maintenance
+        show_header_toggle: false
+        entities:
+          - update.tp_link_deco_update
+          - update.tp_link_router_update
   - title: History
     path: network-history
     icon: mdi:chart-line
     cards:
-      - type: custom:mushroom-chips-card
-        alignment: center
-        chips:
-          - type: template
-            icon: mdi:clock-time-three-outline
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '1d' ? 'primary' : 'disabled'; ]]]
-            content: 1d
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 1d
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:clock-time-three-outline
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '3d' ? 'primary' : 'disabled'; ]]]
-            content: 3d
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 3d
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:clock-time-three-outline
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '5d' ? 'primary' : 'disabled'; ]]]
-            content: 5d
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 5d
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:calendar-week
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '1w' ? 'primary' : 'disabled'; ]]]
-            content: 1w
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 1w
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:calendar-week
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '2w' ? 'primary' : 'disabled'; ]]]
-            content: 2w
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 2w
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:calendar-month
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '1m' ? 'primary' : 'disabled'; ]]]
-            content: 1m
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 1m
-              target:
-                entity_id: input_select.network_history_range
-          - type: template
-            icon: mdi:calendar-multiple
-            icon_color: >-
-              [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                  return current === '3m' ? 'primary' : 'disabled'; ]]]
-            content: 3m
-            tap_action:
-              action: call-service
-              service: input_select.select_option
-              data:
-                option: 3m
-              target:
-                entity_id: input_select.network_history_range
-      - type: custom:apexcharts-card
-        header:
-          title: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return `Latency trend (${current})`; ]]]
-          show: true
-        graph_span: >-
-          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              const current = states['input_select.network_history_range']?.state || '1w';
-              return map[current] || '7d'; ]]]
-        span:
-          end: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.internet_latency
-            name: Current
-            color: '#1e88e5'
-            float_precision: 1
-          - entity: sensor.internet_latency_24h_avg
-            name: 24h avg
-            color: '#fdd835'
-            type: line
-            float_precision: 1
-          - entity: sensor.internet_latency_7d_avg
-            name: 7d avg
-            color: '#43a047'
-            type: line
-            float_precision: 1
-      - type: custom:apexcharts-card
-        header:
-          title: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return `Speedtest download vs upload (${current})`; ]]]
-          show: true
-        graph_span: >-
-          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              const current = states['input_select.network_history_range']?.state || '1w';
-              return map[current] || '7d'; ]]]
-        span:
-          end: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.speedtest_download
-            name: Download
-            type: line
-            color: '#3949ab'
-            float_precision: 1
-          - entity: sensor.speedtest_upload
-            name: Upload
-            type: line
-            color: '#8d6e63'
-            float_precision: 1
-          - entity: sensor.speedtest_download_30d_avg
-            name: Download 30d avg
-            type: line
-            color: '#5c6bc0'
-            float_precision: 1
-          - entity: sensor.speedtest_upload_30d_avg
-            name: Upload 30d avg
-            type: line
-            color: '#a1887f'
-            float_precision: 1
-      - type: custom:apexcharts-card
-        header:
-          title: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return `Deco throughput (${current})`; ]]]
-          show: true
-        graph_span: >-
-          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              const current = states['input_select.network_history_range']?.state || '1w';
-              return map[current] || '7d'; ]]]
-        span:
-          end: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.deco_total_down_mbps
-            name: Down
-            type: line
-            color: '#26a69a'
-            float_precision: 2
-          - entity: sensor.deco_total_up_mbps
-            name: Up
-            type: line
-            color: '#7e57c2'
-            float_precision: 2
-          - entity: sensor.deco_total_down_mbps_7d_avg
-            name: Down 7d avg
-            type: line
-            color: '#4db6ac'
-            float_precision: 2
-          - entity: sensor.deco_total_up_mbps_7d_avg
-            name: Up 7d avg
-            type: line
-            color: '#9575cd'
-            float_precision: 2
-      - type: custom:apexcharts-card
-        header:
-          title: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return `Speedtest ping (${current})`; ]]]
-          show: true
-        graph_span: >-
-          [[[ const map = { '1d': '1d', '3d': '3d', '5d': '5d', '1w': '7d', '2w': '14d', '1m': '30d', '3m': '90d' };
-              const current = states['input_select.network_history_range']?.state || '1w';
-              return map[current] || '7d'; ]]]
-        span:
-          end: >-
-            [[[ const current = states['input_select.network_history_range']?.state || '1w';
-                return ['1d', '3d', '5d'].includes(current) ? 'hour' : 'day'; ]]]
-        yaxis:
-          - min: 0
-        apex_config:
-          stroke:
-            width: 2
-          legend:
-            show: true
-        series:
-          - entity: sensor.speedtest_ping
-            name: Ping
-            type: line
-            color: '#ef6c00'
-            float_precision: 1
-          - entity: sensor.speedtest_ping_30d_avg
-            name: Ping 30d avg
-            type: line
-            color: '#ffb300'
-            float_precision: 1
+      - type: markdown
+        content: >-
+          ## Historical Trends
+
+          Short, medium, and long term views with mixed chart styles for a fuller
+          picture of performance.
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: '### Last 24 Hours'
+              - type: custom:apexcharts-card
+                header:
+                  title: Latency trend
+                  show: true
+                graph_span: 24h
+                span:
+                  end: hour
+                yaxis:
+                  - min: 0
+                apex_config:
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.internet_latency
+                    name: Current
+                    color: '#1e88e5'
+                    float_precision: 1
+                  - entity: sensor.internet_latency_1h_avg
+                    name: 1h avg
+                    color: '#43a047'
+                    type: line
+                    float_precision: 1
+                  - entity: sensor.internet_latency_24h_avg
+                    name: 24h avg
+                    color: '#fdd835'
+                    type: line
+                    float_precision: 1
+              - type: custom:apexcharts-card
+                header:
+                  title: Throughput area
+                  show: true
+                graph_span: 24h
+                span:
+                  end: hour
+                chart_type: area
+                yaxis:
+                  - min: 0
+                apex_config:
+                  fill:
+                    type: gradient
+                    gradient:
+                      shadeIntensity: 0.6
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.deco_total_down_mbps
+                    name: Down
+                    color: '#26a69a'
+                    float_precision: 2
+                  - entity: sensor.deco_total_up_mbps
+                    name: Up
+                    color: '#7e57c2'
+                    float_precision: 2
+              - type: custom:apexcharts-card
+                header:
+                  title: Speedtests (bar)
+                  show: true
+                graph_span: 7d
+                span:
+                  end: day
+                chart_type: column
+                group_by:
+                  duration: 12h
+                  func: last
+                yaxis:
+                  - min: 0
+                apex_config:
+                  plotOptions:
+                    bar:
+                      columnWidth: 60%
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.speedtest_download
+                    name: Download
+                    color: '#3949ab'
+                    float_precision: 1
+                  - entity: sensor.speedtest_upload
+                    name: Upload
+                    color: '#8d6e63'
+                    float_precision: 1
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: '### Last 7 Days'
+              - type: custom:apexcharts-card
+                header:
+                  title: Latency vs averages
+                  show: true
+                graph_span: 7d
+                span:
+                  end: hour
+                yaxis:
+                  - min: 0
+                apex_config:
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.internet_latency
+                    name: Current
+                    color: '#1e88e5'
+                    float_precision: 1
+                  - entity: sensor.internet_latency_24h_avg
+                    name: 24h avg
+                    color: '#fdd835'
+                    type: line
+                    float_precision: 1
+                  - entity: sensor.internet_latency_7d_avg
+                    name: 7d avg
+                    color: '#43a047'
+                    type: line
+                    float_precision: 1
+              - type: custom:apexcharts-card
+                header:
+                  title: Throughput gradient
+                  show: true
+                graph_span: 7d
+                span:
+                  end: day
+                chart_type: area
+                group_by:
+                  duration: 3h
+                  func: avg
+                yaxis:
+                  - min: 0
+                apex_config:
+                  fill:
+                    type: gradient
+                    gradient:
+                      shadeIntensity: 0.5
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.deco_total_down_mbps
+                    name: Down
+                    color: '#26a69a'
+                    float_precision: 2
+                  - entity: sensor.deco_total_up_mbps
+                    name: Up
+                    color: '#7e57c2'
+                    float_precision: 2
+              - type: history-graph
+                title: Clients online (7d)
+                hours_to_show: 168
+                refresh_interval: 300
+                entities:
+                  - sensor.deco_client_count
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: '### Last 30 Days'
+              - type: custom:apexcharts-card
+                header:
+                  title: Latency baseline drift
+                  show: true
+                graph_span: 30d
+                span:
+                  end: day
+                chart_type: area
+                group_by:
+                  duration: 6h
+                  func: avg
+                yaxis:
+                  - min: 0
+                apex_config:
+                  fill:
+                    type: gradient
+                    gradient:
+                      shadeIntensity: 0.4
+                  stroke:
+                    width: 2
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.internet_latency
+                    name: Current
+                    color: '#1e88e5'
+                    float_precision: 1
+                  - entity: sensor.internet_latency_7d_avg
+                    name: 7d avg
+                    color: '#43a047'
+                    type: line
+                    float_precision: 1
+                  - entity: sensor.internet_latency_30d_avg
+                    name: 30d avg
+                    color: '#fdd835'
+                    type: line
+                    float_precision: 1
+              - type: custom:apexcharts-card
+                header:
+                  title: Speedtest cadence
+                  show: true
+                graph_span: 30d
+                span:
+                  end: day
+                chart_type: column
+                group_by:
+                  duration: 1d
+                  func: avg
+                yaxis:
+                  - min: 0
+                apex_config:
+                  plotOptions:
+                    bar:
+                      columnWidth: 45%
+                  legend:
+                    show: true
+                series:
+                  - entity: sensor.speedtest_download
+                    name: Download
+                    color: '#3949ab'
+                    float_precision: 1
+                  - entity: sensor.speedtest_upload
+                    name: Upload
+                    color: '#8d6e63'
+                    float_precision: 1
+              - type: statistics-graph
+                title: Ping averages (30d)
+                chart_type: line
+                period: day
+                days_to_show: 30
+                stat_types:
+                  - mean
+                  - max
+                entities:
+                  - entity: sensor.speedtest_ping
