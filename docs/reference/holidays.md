@@ -12,7 +12,7 @@ tags:
 
 # Holiday Mode Reference
 
-The holiday package centralises the signal Home Assistant uses to pause daily routines while keeping Huskers game-day flows untouched. Use this page to confirm entity names, data sources, and the manual override helper.
+The holiday package centralises the signal Home Assistant uses to pause daily routines while keeping Football Team game-day flows untouched. Use this page to confirm entity names, data sources, and the manual override helper. When rebranding, align the Football Team entity IDs with your own packages.
 
 ## Calendar Source
 - **Integration**: [ICS Calendar custom integration](https://github.com/franc6/ics_calendar) installed under `custom_components/ics_calendar`.
@@ -32,7 +32,7 @@ The holiday package centralises the signal Home Assistant uses to pause daily ro
 - **`sensor.next_us_holiday`** – friendly name and start/end timestamps for the next scheduled holiday event.
 
 ## Automation Contract
-- Lighting, LED, climate, and safety routines in `automations.yaml` include a guard requiring `binary_sensor.holiday_mode_active = off` so daily schedules pause on holidays. Huskers game automations intentionally ignore this guard to keep game-day lighting intact.
+- Lighting, LED, climate, and safety routines in `automations.yaml` include a guard requiring `binary_sensor.holiday_mode_active = off` so daily schedules pause on holidays. Football Team game automations intentionally ignore this guard to keep game-day lighting intact.
 - When adding new automations that should observe the holiday schedule, include:
   ```yaml
   condition:
@@ -40,7 +40,7 @@ The holiday package centralises the signal Home Assistant uses to pause daily ro
       entity_id: binary_sensor.holiday_mode_active
       state: 'off'
   ```
-  Add any Husker exclusions as separate conditions.
+  Add any Football Team exclusions as separate conditions.
 
 ## Operational Checklist
 1. Confirm `calendar.us_federal_holidays` exists after each Home Assistant upgrade; re-add through the UI if necessary.

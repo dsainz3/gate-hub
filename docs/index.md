@@ -29,10 +29,11 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Pre-commit Hooks](how-to/pre-commit.md)
 - [Mosquitto MQTT Add-on](how-to/addons/mqtt.md)
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
-- [Husker Dashboard Guide](how-to/huskers/dashboard.md) *(TeamTracker card, tailgate window, Big Ten standings, lighting macros)*
-- [Husker LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
+- [Football Team Dashboard Guide](how-to/football-team/dashboard.md) *(TeamTracker card, tailgate window, conference standings, lighting macros)*
+- [Football Team LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
 - [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)
+- [Pre-prod Push Checklist](how-to/pre-prod-checklist.md)
 
 ## Reference
 - [Automation Catalog](reference/automations.md)
@@ -44,7 +45,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 
 ## Explanation
 - [Optimization Plan](explanation/optimization-plan.md)
-- [Huskers Dashboard History](explanation/huskers-dashboard-history.md)
+- [Football Team Dashboard History](explanation/football-team-dashboard-history.md)
 - [Pre-commit Quality Strategy](explanation/pre-commit-strategy.md)
 
 ## Archive

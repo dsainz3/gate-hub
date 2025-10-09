@@ -7,8 +7,8 @@ This review focuses on `configuration.yaml` and its major include files. It high
 - **Modular layout** – Core domains are broken into include files (`light.yaml`, `sensor.yaml`, etc.) and packages under `packages/`. This keeps the entry-point clean and maintainable.
 - **Secrets management** – Sensitive values (e.g., latitude/longitude, recorder entity filters) are delegated to `secrets.yaml`, which is a best practice for sharing configuration safely.
 - **Command line integrations** – The two `command_line` sensors define explicit `scan_interval` values and, for the sanitation sensor, parse JSON output with attribute exposure. This avoids the default 60-second polling and prevents attribute parsing errors.
-- **Dashboard organization** – Lovelace is configured in YAML mode with dedicated dashboards for F1, Huskers, weather, and kiosk scenarios. Resource URLs for common custom cards are predeclared, simplifying deployment.
-- **Override visibility** – The kiosk Snapshot view now spans three columns, with a dedicated overrides stack that surfaces manual holiday and Huskers toggles for rapid testing.
+- **Dashboard organization** – Lovelace is configured in YAML mode with dedicated dashboards for F1, the Football Team, weather, and kiosk scenarios. Resource URLs for common custom cards are predeclared, simplifying deployment.
+- **Override visibility** – The kiosk Snapshot view now spans three columns, with a dedicated overrides stack that surfaces manual holiday and Football Team toggles for rapid testing.
 
 ## Issues Found
 

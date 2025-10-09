@@ -78,35 +78,35 @@ Use this catalog as the single source of truth for automation behaviour. Each en
 - **Guards**: Requires `input_boolean.weather_notifications_enabled` to be `on`.
 - **Actions**: Creates a persistent notification summarising the incoming alert.
 
-## Huskers Package (`packages/huskers_everything.yaml`)
+## Football Team Package (`packages/huskers_everything.yaml`)
 
-These automations pair with the [Husker Dashboard Guide](../how-to/huskers/dashboard.md) and Huskers LED scripts. ESPN data is sourced via the TeamTracker integration and the REST sensors defined in `packages/huskers_everything.yaml` (including the Core API standings endpoint).
+These automations pair with the [Football Team Dashboard Guide](../how-to/football-team/dashboard.md) and Football Team LED scripts. ESPN data is sourced via the TeamTracker integration and the REST sensors defined in `packages/huskers_everything.yaml` (including the Core API standings endpoint). When rebranding, update the helper/entity names but keep the automation logic aligned with these patterns.
 
-### Huskers: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
+### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
 - **ID** `huskers_game_mode_enable_window`
 - **Triggers**: `sensor.huskers_kickoff_in_effective` < 121 for ≥1 minute, or ESPN pregame/live binary sensors turning `on`.
 - **Guards**: Game mode currently `off` and evidence of an upcoming or active game.
 - **Actions**: Enables `input_boolean.huskers_game_mode` and logs kickoff timing.
 
-### Huskers: Disable Game Mode Window (`packages/huskers_everything.yaml:1038`)
+### Football Team: Disable Game Mode Window (`packages/huskers_everything.yaml:1038`)
 - **ID** `huskers_game_mode_disable_window`
 - **Triggers**: Postgame ESPN sensor `on` for 2 hours, or kickoff timer > 120 for ≥5 minutes.
 - **Guards**: Game mode `on`, ESPN pregame and live sensors both `off`.
 - **Actions**: Disables `input_boolean.huskers_game_mode` and logs the change.
 
-### Huskers: Pregame Showtime (T-20 Minutes) (`packages/huskers_everything.yaml:1072`)
+### Football Team: Pregame Showtime (T-20 Minutes) (`packages/huskers_everything.yaml:1072`)
 - **ID** `huskers_showtime_at_t_20`
 - **Trigger**: Kickoff timer between 19–21 minutes for >5 seconds.
 - **Guards**: Huskers automations enabled, game mode `on`, ESPN pregame `on` (or test mode), and chase scripts idle.
 - **Actions**: Launches `script.huskers_chase30_start` (dual-cream, 45 s loop; interior group at 80 % brightness, permanent LEDs pinned at 100 %) and logs the start event.
 
-### Huskers: Touchdown Celebration (`packages/huskers_everything.yaml:1114`)
+### Football Team: Touchdown Celebration (`packages/huskers_everything.yaml:1114`)
 - **ID** `huskers_td_burst_on_score`
 - **Trigger**: State change on `sensor.huskers_our_score_effective`.
 - **Guards**: Huskers automations + game mode `on`; score must increase.
 - **Actions**: Runs `script.huskers_hail_burst_8s` (scarlet reset plus cream accents at 80 %, permanent LEDs held at 100 %) and logs the score delta.
 
-### Huskers: Postgame Cleanup (`packages/huskers_everything.yaml:1144`)
+### Football Team: Postgame Cleanup (`packages/huskers_everything.yaml:1144`)
 - **ID** `huskers_postgame_cleanup`
 - **Trigger**: `binary_sensor.huskers_is_postgame_espn` transitions `on` → `off`.
 - **Guards**: Huskers automations + game mode `on`.

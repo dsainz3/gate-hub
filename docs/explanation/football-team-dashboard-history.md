@@ -1,39 +1,39 @@
 ---
-title: Huskers Dashboard History
-summary: Rationale behind consolidating Huskers dashboards and related clean-up actions.
+title: Football Team Dashboard History
+summary: Rationale behind consolidating the Football Team dashboards and related clean-up actions.
 status: active
 category: explanation
 updated: 2025-10-09
-owner: huskers-team
+owner: playbook-team
 tags:
-  - huskers
+  - football
   - dashboards
   - history
 ---
 
-# Huskers Dashboard Cleanup
+# Football Team Dashboard Cleanup
 
 ## Overview
 
-This document summarizes the cleanup of redundant Husker dashboard configurations to improve maintainability and reduce confusion.
+This document summarises the cleanup of redundant Football Team dashboard configurations to improve maintainability and reduce confusion. Filenames still use the `huskers` prefix for backwards compatibility; customise the YAML and docs together if you adopt a different club.
 
 ## Changes Made
 
 1. **Consolidated Dashboards (2024)**
-   - Kept `dashboards/huskers-teamtracker.yaml` as the primary dashboard
-   - Merged useful controls from `huskers-auto.yaml` into the teamtracker dashboard
-   - Removed redundant dashboard files
+   - Kept `dashboards/huskers-teamtracker.yaml` as the primary dashboard.
+   - Merged useful controls from `huskers-auto.yaml` into the teamtracker dashboard.
+   - Removed redundant dashboard files.
 
 2. **Removed Files**
-   - `dashboards/huskers-all.yaml` – Basic version, functionality covered by teamtracker
-   - `dashboards/huskers-dashboard.yaml` – Older version using individual sensors
-   - `dashboards/huskers-auto.yaml` – Automation controls merged into teamtracker
-   - `ui-lovelace/huskers.yaml` – Legacy UI template
+   - `dashboards/huskers-all.yaml` – basic version, functionality covered by teamtracker.
+   - `dashboards/huskers-dashboard.yaml` – older version using individual sensors.
+   - `dashboards/huskers-auto.yaml` – automation controls merged into teamtracker.
+   - `ui-lovelace/huskers.yaml` – legacy UI template.
 
 3. **File Structure**
-   - Primary dashboard: `dashboards/huskers-teamtracker.yaml`
-   - Core configuration: `packages/huskers_everything.yaml`
-   - Lovelace include set: `lovelace/huskers.yaml`
+   - Primary dashboard: `dashboards/huskers-teamtracker.yaml`.
+   - Core configuration: `packages/huskers_everything.yaml`.
+   - Lovelace include set: `lovelace/huskers.yaml`.
 
 4. **2025 Enhancements**
    - Split dashboard into **Game Day**, **Team & Data**, and **Lighting & Scenes** views for clearer separation of duties.
@@ -48,8 +48,8 @@ This document summarizes the cleanup of redundant Husker dashboard configuration
 5. **Key Components (current)**
    - TeamTracker card for game info display
    - Quick refresh controls for data updates
-   - Lighting macros (chase, burst, restore) tied into Huskers scripts
-   - Big Ten standings + matchup metadata sourced from updated ESPN feeds
+   - Lighting macros (chase, burst, restore) tied into Football Team scripts
+   - Conference standings + matchup metadata sourced from updated ESPN feeds
 
 ## References
 - Main configuration is in `packages/huskers_everything.yaml`

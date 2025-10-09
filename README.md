@@ -1,4 +1,4 @@
-# Gate Hub Home Assistant Configuration
+# Gate Hub · Hypermodern Home Automation Journey
 
 <!-- Badges -->
 [![CI](https://github.com/dsainz3/gate-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/dsainz3/gate-hub/actions/workflows/ci.yml)
@@ -11,171 +11,122 @@
 ![YAML: prettier+yamllint](https://img.shields.io/badge/yaml-prettier%20%2B%20yamllint-blue)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 
-Gate Hub contains the reproducible Home Assistant OS configuration that powers a multi-room smart home. It integrates Zigbee, MQTT, TP-Link Deco, BLE sensors, and a Nebraska Huskers game-day experience while remaining portable through automation tooling and documentation.
+Gate Hub is my learning lab for becoming a hypermodern development engineer. What started as a set of ad-hoc Home Assistant tweaks now operates like a product team project: infrastructure is versioned, documentation is intentional, and automations ship with CI guardrails. This repository captures the journey from the early experimentation days to the current platform and surfaces the skills I am building along the way. Wherever you see “Football Team” in the documentation, swap in your own club branding and entity IDs—the configuration remains opinionated, but every guide explains how to customise it safely.
 
 ---
 
-## Overview
+## Journey Highlights
 
-Gate Hub keeps all Home Assistant configuration under version control so changes can be reviewed, tested, and rolled back safely. Dashboards, automations, helper entities, and custom integrations live in this repository alongside the scripts that validate them. The configuration is designed to run on HAOS but can be adapted to supervised or container installs if desired.
-
----
-
-## Key Highlights
-
-- Modular `packages/` layout keeps automations, helpers, and dashboards scoped by feature.
-- Lovelace dashboards are YAML-driven and stored in the repo so UI state matches commits; the kiosk dashboard now relies exclusively on built-in cards for zero-dependency deployments.
-- Basement theater media package wires Fire TV + Plex controls together and exposes a test dashboard lab with direct media browsing.
-- Custom Huskers theme in `themes.yaml` exposes `--huskers-*` variables for consistent Scarlet & Cream styling across dashboards.
-- Huskers Game Day board blends the TeamTracker card, manual override-aware countdowns, and Big Ten standings sourced from ESPN's Core API.
-- Pre-commit and GitHub Actions enforce formatting, linting, and Home Assistant config checks.
-- Helper scripts normalise secrets and run containerised validation for local or CI usage.
-- Documentation under `docs/` captures infrastructure, add-ons, ADRs, and package notes.
+- **Manual dashboards → reproducible platform:** Early Football Team and room dashboards lived only in the UI. They now render from YAML stored in Git (`dashboards/`), as chronicled in `docs/explanation/football-team-dashboard-history.md`.
+- **Scripts on disk → portable tooling:** Inline fixes gave way to reusable helpers such as `scripts/ha_check_portable.py`, with the broader roadmap laid out in `docs/explanation/optimization-plan.md`.
+- **Guesswork → disciplined workflows:** The pipeline in `.github/workflows/ci.yml`, paired with the pre-commit strategy in `docs/explanation/pre-commit-strategy.md`, keeps every change reviewable.
+- **Personal notes → Divio-style documentation:** `docs/index.md` curates how-to guides, references, explanations, and archives so future contributors can find the right depth quickly.
+- **Aspirations → measurable backlog:** `TODO.md` and the optimisation plan anchor next steps, from recorder tuning to system monitoring.
 
 ---
 
-## Primary Integrations
+## Skills in Focus
 
-- Zigbee2MQTT and MQTT bridges for lighting, contact sensors, and LED effects.
-- TP-Link mesh monitoring powered by the HACS TP-Link Router component and the ha-tplink-deco integration for node health, client telemetry, and watchdog automation.
-- BLE Monitor, Govee lighting, Wunderground PWS, TeamTracker sports feeds.
-- Nebraska Huskers game-day package automating lighting, dashboards, and score effects.
+- **Infrastructure-as-code discipline:** Modular packages (`packages/`), templated dashboards, and include-driven YAML keep the platform deterministic.
+- **Automation architecture:** Complex routines such as the Football Team game-day experience blend sensors, scripts, and themes to coordinate lighting, notifications, and dashboards.
+- **Developer experience & CI/CD:** Poetry-based tooling, Ruff, Prettier, Yamllint, and GitHub Actions enforce code quality. Pre-commit keeps pull requests green and reviews focused on behaviour.
+- **Observability & optimisation:** Roadmapped work (system monitor sensors, MQTT performance metrics, backups) demonstrates the shift toward measurable reliability.
+- **Documentation & knowledge sharing:** Every major feature has a guide—lighting stacks, agenda planner, add-ons—reflecting the documentation culture described in `docs/reference/documentation-style-guide.md`.
 
 ---
 
-## Repository Guide
+## Current System Snapshot
+
+- **Core platform:** Home Assistant OS with supervised add-ons, developed remotely via VS Code as documented in `docs/reference/infrastructure.md`.
+- **Integrations:** Zigbee2MQTT, MQTT, TP-Link Deco mesh monitoring, BLE sensors, Wunderground PWS, Govee lighting, TeamTracker sports data.
+- **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, and media lab controls for Plex + Fire TV.
+- **Themes:** Football Team palette variables in `themes.yaml` provide consistent branding across dashboards. The docs call out where to adjust colours and typography for your team.
+
+---
+
+## Repository Map
 
 ```
 .
-|-- configuration.yaml         # Entry point that wires each include file and package
-|-- automations.yaml           # Base automations outside of packages
-|-- templates.yaml             # Template sensors, binary sensors, and helpers
-|-- packages/                  # Feature-scoped bundles: Huskers, kiosk, etc.
-|-- dashboards/                # YAML Lovelace dashboards served by HA
-|-- custom_components/         # Checked-in custom integrations (BLE, Govee, ...)
-|-- scripts/                   # Local+CI helpers, incl. ha_check_portable
-|-- docs/                      # Living documentation for infra, tooling, ADRs
+├─ configuration.yaml          # entry point wiring includes and packages
+├─ automations.yaml            # base automations outside feature packages
+├─ templates.yaml              # template sensors & helpers (refactor in flight)
+├─ packages/                   # feature bundles: football team, agenda, networking…
+├─ dashboards/                 # YAML Lovelace dashboards and kiosk views
+├─ custom_components/          # checked-in integrations (wundergroundpws, hacs validators)
+├─ scripts/                    # validation helpers, entity exporters, tooling
+├─ docs/                       # Divio-structured knowledge base
+└─ TODO.md                     # active learning backlog
 ```
+
+See `docs/reference/infrastructure.md` for the full environment outline and IDE workflow.
 
 ---
 
-## Getting Started
+## Learning Artifacts & Key Reading
 
-### Clone & provide secrets
+- **How-to guides (`docs/how-to/`):** Lighting stacks (`lighting/govee-lighting-stack.md`), Football Team dashboard operations (`football-team/dashboard.md`), add-on runbooks (`addons/mqtt.md`, `addons/govee2mqtt.md`), F1 dashboard instructions (`f1/index.md`), and CI/pre-commit walkthroughs (`docs/how-to/ci.md`, `docs/how-to/pre-commit.md`).
+- **Reference set (`docs/reference/`):** Automation catalog, infrastructure overview, holiday logic, agenda planner, theater media package, and the documentation style guide that keeps contributions consistent.
+- **Explanation papers (`docs/explanation/`):** Optimisation roadmap, Football Team dashboard history, and pre-commit strategy—each narrates why architectural decisions were made.
+- **Archive (`docs/archive/ai-automation-builder.md`):** Retired experiments preserved for context.
+- **Templates & ADRs (`docs/adr/_template.md`):** Structure for capturing future architectural decisions.
 
-1. Clone the repository into your Home Assistant `/config` directory.
-2. Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or create your own) and fill in real values.
+Use these documents as the study material for sharpening system design, tooling, and documentation habits.
 
-### Runtime data and local copies
+---
 
-The repository keeps redacted JSON examples for Zigbee2MQTT and bhyve while the live files stay on your development machine. Copy an example to a personal variant and keep the real snapshot untracked:
+## Automation & Tooling Workflow
+
+- **Local setup:** `poetry env use 3.11`, `poetry install`, and `pre-commit install` provision the tooling stack. Pip-based installs remain an option if Poetry is unavailable.
+- **Validation loop:** Run `pre-commit run --all-files`, `ha core check`, `python scripts/ha_check_portable.py`, and `pytest` before pushing to guarantee clean builds.
+- **Secrets hygiene:** `.ci/fakesecrets.yaml` supplies CI with stub credentials; real values stay in `secrets.yaml` on the Home Assistant host.
+- **Entity exploration:** `poetry run python scripts/export_entities.py --token-file ~/.ha_token` exports an entity index to `docs/entities.md` without leaking runtime state.
+
+---
+
+## Active Learning Backlog
+
+`TODO.md` tracks the growth areas I am tackling next:
+- Retire legacy helper scripts and modernise the CI config to rely on supported tooling.
+- Resolve the Football Team theme header edge case and validate reload behaviour.
+- Implement system monitoring sensors, MQTT performance metrics, and alerting.
+- Consolidate household device automations into a reusable package.
+- Expand weather dashboards with richer providers and responsive layouts.
+- Externalise recorder includes and restore full F1 telemetry coverage.
+
+Progress queues feed back into the optimisation plan so improvements build on one another rather than landing as one-off fixes.
+
+---
+
+## Getting Hands-On
+
+1. **Clone into `/config`:**
+   ```bash
+   git clone https://github.com/dsainz3/gate-hub.git /config
+   ```
+2. **Provide secrets:** Copy `.ci/fakesecrets.yaml` to `secrets.yaml` (or author your own) and populate real credentials.
+3. **Restore local-only snapshots:** Duplicate example runtime files (`state.example.json`, `devices.example.json`) to `.local.json` variants that stay ignored by Git.
+4. **Enable tooling:** Follow the local setup commands above, then activate pre-commit hooks.
+
+---
+
+## Validation Checklist
 
 ```bash
-cp custom_components/zigbee2mqtt/state.example.json custom_components/zigbee2mqtt/state.local.json
-cp custom_components/bhyve/pybhyve/devices.example.json custom_components/bhyve/pybhyve/devices.local.json
+ha core check                         # Home Assistant CLI validation
+pre-commit run --all-files            # Formatting, linting, HA config checks
+python scripts/ha_check_portable.py   # Dockerised Home Assistant validation
+pytest                                # Unit tests and integration shims
 ```
 
-- `state.example.json` and `coordinator_backup.example.json` document the expected shape without leaking device data.
-- Add your own `state.local.json` or `devices.local.json`; Git ignores the local variants and runtime outputs such as `state.json` so HAOS deployments are never clobbered.
-- The live files can remain side-by-side on your workstation for reference, but they will not be pushed to Home Assistant.
-
-Need a dump of entity ids without staging `state.json`? Use the helper script:
-
-```bash
-poetry run python scripts/export_entities.py --token-file ~/.ha_token
-```
-
-By default the script writes `docs/entities.md`; override the path with `--output` when required.
-
-### Local tooling
-
-```bash
-poetry env use 3.11   # ensure the Python 3.11 toolchain that matches pyproject.toml
-poetry install        # install Python tooling (Ruff, pre-commit)
-pre-commit install    # enable git hook
-```
-
-Prefer pip? Install the tooling directly:
-
-```bash
-pip install pre-commit ruff
-```
-
-### Validation
-
-```bash
-ha core check                         # requires the HA CLI
-pre-commit run --all-files            # formatting, linting, HA config check
-python scripts/ha_check_portable.py   # portable dockerised config validation
-pytest                                # repository unit tests
-```
-
-The portable checker mounts the repo into `ghcr.io/home-assistant/home-assistant:stable` and runs `check_config`, generating temporary secrets if none exist.
+These checks mirror the CI pipeline so every experiment stays production-ready.
 
 ---
 
-## Automations & Packages
+## What Comes Next
 
-- `packages/huskers/` orchestrates score tracking, lighting overrides, and dashboards for game days.
-- Base automations cover lighting schedules, notifications, backups, watchdogs, and environment control.
-- Templates normalise external weather data and generate helpers for dashboards and automations.
+- Continue executing the optimisation roadmap (recorder, logger, monitoring branches) to harden the platform.
+- Publish new documentation as features evolve—tutorials and ADRs are the next gaps.
+- Translate learnings into shareable patterns, whether that is template reorganisations, dashboard blueprints, or add-on guides.
 
----
-
-## Dashboards
-
-- **Huskers Game Day:** Game Day, Team & Data, and Lighting views featuring the TeamTracker hero card, color-chip profiles, a `binary_sensor.huskers_tailgate_window`-gated countdown, and Big Ten standings markdown.
-- **Rooms & Areas:** light, climate, and occupancy controls by space.
-- **Networking & System:** Deco mesh insight, supervisor health, backup status.
-- **Weather:** AccuWeather + Wunderground summaries, forecasts, and warnings.
-- **Kiosk:** wall-mounted interface that exposes lighting, automations, humidor, and sprinkler controls with stock tile/button cards.
-- **Support · Test Resources:** validation board that exercises custom Lovelace resources and now includes a Plex · Theater lab with live Fire TV controls and the HA Media Browser.
-
-Each dashboard is defined under `dashboards/` and registered in `configuration.yaml` for deterministic UI state.
-
----
-
-## Tooling & CI
-
-- `ruff` handles Python linting and formatting (both locally and in CI).
-- `prettier`, `yamllint`, and `pre-commit-hooks` keep YAML and markdown tidy.
-- `scripts/ha_check_portable.py` optionally runs within GitHub Actions to emulate `ha core check` without mounting secrets.
-- `scripts/export_entities.py` creates an entity index without committing live Zigbee2MQTT state.
-- `.github/workflows/ci.yml` runs Ruff and the non-Python pre-commit hooks on every push and PR. Additional workflows (e.g., `ha-config-check.yaml`) can be toggled on as needed.
-
-
----
-
-## Documentation
-
-All supporting docs live under `docs/`:
-
-- `docs/index.md` – navigation hub for tooling, ADRs, and guides.
-- `docs/how-to/huskers/dashboard.md` – operating the refreshed Huskers Game Day board (TeamTracker card, tailgate window, color chips, countdown overrides).
-- `docs/how-to/lighting/husker-led-mqtt.md` – scripts and MQTT details for exterior light shows.
-- `docs/explanation/huskers-dashboard-history.md` – rationale behind the consolidation and 2025 refresh (Core API standings, auto-entities scene list).
-- `docs/ci.md` – CI pipeline reference and troubleshooting notes.
-- `docs/pre-commit.md` – local hook usage and hook descriptions.
-
----
-
-## Roadmap
-
-- Migrate remaining Zigbee devices into Zigbee2MQTT for unified control.
-- Harmonise entity naming while keeping human-readable labels in the UI.
-- Expand media stack integration (Plex, Radarr, qBittorrent) for theater automations.
-- Enhance Huskers dashboards with standings, records, and auto-updating schedules.
-- Add local AI/LLM helpers to scaffold automations from entity state snapshots.
-- Strengthen backup, watchdog, and security alerting coverage.
-- Continue iterating on the kiosk package with presence-aware views and guest-friendly shortcuts.
-
----
-
-## Credits
-
-- [Home Assistant](https://www.home-assistant.io/)
-- [HACS](https://hacs.xyz/) and the custom integrations used in this repo
-- Community authors of blueprints, dashboards, and scripts referenced throughout
-- Nebraska Huskers fan community for inspiration and data sources
-
-_See `docs/` for deeper dives into infrastructure, packages, and operational notes._
+Gate Hub remains the sandbox where I practise being a hypermodern development engineer: ship small, document decisions, automate validation, and keep the smart home dependable.
