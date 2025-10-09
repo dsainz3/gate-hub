@@ -36,7 +36,7 @@ pre-commit run --all-files        # run everything once
 SKIP=ruff,ruff-format pre-commit run --all-files   # temporary skip (remember to re-run!)
 ```
 
-Hooks that auto-fix files (`ruff --fix`, `yaml-format`, etc.) require you to re-stage the changes before committing.
+Hooks that auto-fix files (`ruff --fix`, `yaml-format`, etc.) require you to re-stage the changes before committing. As part of the [Pre-prod Push Checklist](pre-prod-checklist.md), run the full suite twice—once to apply fixes, stage the results, then again to confirm the tree is clean before committing or pushing.
 
 > ✅ **Keep PRs unblocked:** Run `pre-commit run --all-files` before pushing a branch. CI executes the same hooks, so a clean local run is the fastest way to avoid “red” pull requests and reviewer churn.
 

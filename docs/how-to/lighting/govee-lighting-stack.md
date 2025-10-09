@@ -117,7 +117,7 @@ The configuration data is stored in `.storage/core.config_entries` under the `do
 
 The refreshed `dashboards/kiosk-dashboard.yaml` relies entirely on stock Lovelace cards so it works out of the box on a clean Home Assistant install. Each view now uses a three-column layout:
 
-1. **Snapshot** – left column provides sanitation, agenda, and quick tiles; the middle column hosts an “Overrides & Testing” stack with manual holiday/Huskers toggles plus a status entities card; the right column mirrors automation diagnostics.
+1. **Snapshot** – left column provides sanitation, agenda, and quick tiles; the middle column hosts an “Overrides & Testing” stack with manual holiday/Football Team toggles plus a status entities card; the right column mirrors automation diagnostics.
 2. **Control** – grouped light and switch controls rendered with `tile` cards.
 3. **Humidor** – gauges, history charts, and control tiles for the cigar cabinet.
 
@@ -139,7 +139,7 @@ Example fragment:
           icon: mdi:calendar-star
         - type: tile
           entity: input_boolean.huskers_automations_enabled
-          name: Huskers Automations Enabled
+          name: Football Team Automations Enabled
           icon: mdi:bullhorn
 ```
 

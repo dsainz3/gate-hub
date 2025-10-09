@@ -1,7 +1,7 @@
-# Huskers Automations Review
+# Football Team Automations Review
 
 ## Scope
-This review looks at the Nebraska Huskers Home Assistant automations defined in `packages/huskers.yaml`, with a focus on the game mode window, pregame showtime, touchdown celebration, and postgame cleanup routines.
+This review looks at the Football Team Home Assistant automations defined in `packages/huskers.yaml` (file name retained for compatibility), with a focus on the game mode window, pregame showtime, touchdown celebration, and postgame cleanup routines. Swap entity names to match your club before deploying to production.
 
 ## Strengths
 - **Clear triggers and logging.** Each automation has explicit triggers, and most actions end with a `logbook.log` call for traceability, which aids troubleshooting during gameday flows. 【F:packages/huskers.yaml†L1402-L1443】【F:packages/huskers.yaml†L1496-L1548】【F:packages/huskers.yaml†L1550-L1578】【F:packages/huskers.yaml†L1580-L1644】

@@ -1,29 +1,29 @@
 ---
-title: Huskers Dashboard Guide
-summary: Configure and operate the Huskers-focused Lovelace dashboards.
+title: Football Team Dashboard Guide
+summary: Configure and operate the Football Team-focused Lovelace dashboards.
 status: active
 category: how-to
 updated: 2025-10-09
-owner: huskers-team
+owner: playbook-team
 tags:
   - lovelace
-  - huskers
+  - football
   - dashboards
 ---
 
-# Huskers Dashboard Guide
+# Football Team Dashboard Guide
 
-This guide documents the Huskers dashboards delivered in `dashboards/huskers-teamtracker.yaml`. Pair it with the [Automation Catalog](../../reference/automations.md) and [Husker LED MQTT controls](../lighting/husker-led-mqtt.md) when troubleshooting, and keep the [Huskers Dashboard History](../../explanation/huskers-dashboard-history.md) handy for architectural context.
+This guide documents the Football Team dashboards delivered in `dashboards/huskers-teamtracker.yaml` (filename retains the original prefix for compatibility). Pair it with the [Automation Catalog](../../reference/automations.md) and [Football Team LED MQTT controls](../lighting/husker-led-mqtt.md) when troubleshooting, and keep the [Football Team Dashboard History](../../explanation/football-team-dashboard-history.md) handy for architectural context. Wherever the UI references “Huskers,” feel free to rename entities, scenes, and themes to match your own club—just update the include files to keep YAML and docs aligned.
 
 ## Prerequisites
-- **Team Tracker integration** (`custom_components/teamtracker`) configured for Nebraska (team id `158`).
+- **Team Tracker integration** (`custom_components/teamtracker`) configured for your team (example: NCAA team id `158` for Nebraska; swap to your organisation).
 - **TeamTracker Lovelace card** copied to `www/community/teamtracker-card/ha-teamtracker-card.js` and registered under `lovelace.resources`:
   ```yaml
   - url: /hacsfiles/teamtracker-card/ha-teamtracker-card.js
     type: module
   ```
-- **ESPN REST sensors** from `packages/huskers_everything.yaml`, including the Big Ten standings endpoint (`sports.core.api.espn.com/.../groups/5/standings/0`).
-- Apply the `Huskers Cream` theme (defined in `themes.yaml`) so custom Huskers CSS variables resolve correctly.
+- **ESPN REST sensors** from `packages/huskers_everything.yaml`, including the conference standings endpoint (`sports.core.api.espn.com/.../groups/5/standings/0`). Replace the group id if your league differs.
+- Apply the `Huskers Cream` theme (defined in `themes.yaml`) so the Football Team CSS variables resolve correctly, or copy the palette and create your own theme variant (see comments in the theme file).
 
 Reload themes after deployment via **Developer Tools → YAML → Reload themes** so the custom color variables are available.
 
@@ -50,11 +50,11 @@ Usage Notes
 Purpose: Operator view for stats, standings, and sensor health.
 
 Highlights
-- **Profile tables** for Nebraska and the upcoming opponent, rendered with table rows instead of unordered bullet lists for faster scanning.
+- **Profile tables** for the Football Team and the upcoming opponent, rendered with table rows instead of unordered bullet lists for faster scanning.
 - **Color swatches** convert hex strings (primary/secondary colors discovered from TeamTracker attributes) into live chips with the hex code beside a colored square.
 - **Series summary** placeholder driven by `sensor.husker_team` attributes when ESPN provides historical matchup text.
 - **Raw sensor reference** using entity rows for `sensor.husker_team` attributes; helps validate that the TeamTracker integration is populating data.
-- **Big Ten standings markdown card** built from the new ESPN Core API feed (`sports.core.api.espn.com/v2/.../groups/5/standings/0`). Each row displays overall and conference records in a markdown table.
+- **Conference standings markdown card** built from the ESPN Core API feed (`sports.core.api.espn.com/v2/.../groups/5/standings/0`). Each row displays overall and conference records in a markdown table; replace the group id to match your conference.
 - **Tailgate countdown** uses the effective kickoff helper and is only visible while `binary_sensor.huskers_tailgate_window` is `on`.
 
 Usage Notes
@@ -67,8 +67,8 @@ Purpose: Maintenance console for lighting automations and Husker-specific scenes
 Highlights
 - Markdown intro summarising the intent and linking scenes/automations conceptually.
 - **Lighting automation list** with last-triggered metadata for the baseline daily schedules and monthly LED routines.
-- **Huskers scene catalog** enumerating every lighting preset so the snapshots, daily looks, and seasonal exterior effects are always one tap away.
-- **Lighting control grid** that surfaces every interior and exterior fixture touched by the Huskers shows for quick overrides.
+- **Football Team scene catalog** enumerating every lighting preset so the snapshots, daily looks, and seasonal exterior effects are always one tap away.
+- **Lighting control grid** that surfaces every interior and exterior fixture touched by the Football Team shows for quick overrides.
 
 Usage Notes
 - Snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
@@ -90,6 +90,6 @@ Usage Notes
 - Incorrect kickoff countdown usually points to the manual override toggles—confirm `input_boolean.huskers_use_manual_kickoff` is set as expected.
 
 ## Related Documentation
-- [Husker LED MQTT Controls](../lighting/husker-led-mqtt.md)
-- [Automation Catalog – Huskers Package](../../reference/automations.md#huskers-package-packageshuskers_everythingyaml)
-- [Huskers Dashboard History](../../explanation/huskers-dashboard-history.md)
+- [Football Team LED MQTT Controls](../lighting/husker-led-mqtt.md)
+- [Automation Catalog – Football Team Package](../../reference/automations.md#football-team-package-packageshuskers_everythingyaml)
+- [Football Team Dashboard History](../../explanation/football-team-dashboard-history.md)

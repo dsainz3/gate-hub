@@ -18,7 +18,7 @@ This guide walks through enabling the Nicxe F1 Sensor integration, wiring the ne
 3. After the restart, visit **Settings → Devices & Services → Helpers** to confirm the new `F1` input booleans, numbers, and texts exist.
 
 ### Optional Tweaks
-- Edit the light group at `group.f1_show_lights` if your celebratory fixtures differ from the Huskers install.
+- Edit the light group at `group.f1_show_lights` if your celebratory fixtures differ from the Football Team install.
 - Update the `scene.f1_*` definitions with your preferred colors and transitions.
 - If you keep automations disabled outside of race weekends, flip `input_boolean.f1_automations_enabled` off; the dashboard exposes a quick toggle.
 
@@ -38,4 +38,4 @@ This guide walks through enabling the Nicxe F1 Sensor integration, wiring the ne
 - **Chequered Flag Celebration** fires when the session transitions into a finished/finalised/ended state.
 - **Track Status Watch** logs every change in the track status sensor and stashes a timestamped summary in `input_text.f1_last_flag_message` for dashboard display.
 
-Tune thresholds, quiet hours, or script targets as needed; the scaffolding mirrors the Huskers package so the patterns stay familiar.
+Tune thresholds, quiet hours, or script targets as needed; the scaffolding mirrors the Football Team package so the patterns stay familiar.

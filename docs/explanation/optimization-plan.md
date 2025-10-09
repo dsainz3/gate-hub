@@ -21,7 +21,7 @@ It is designed to serve as a **living document** in your repo (`HA_Optimization_
 ## 📌 Current Repo Strengths
 
 ### Organization
-- **Modular structure** – using `packages/` for feature-specific configs (e.g., Huskers automation).
+- **Modular structure** – using `packages/` for feature-specific configs (e.g., the Football Team automation bundle).
 - **File separation** – clear split of `automations.yaml`, `scripts.yaml`, `sensor.yaml`, dashboards, etc.
 - **Documentation** – `README.md` is structured and easy to follow.
 - **Version control** – proper Git workflow with CI/CD.
@@ -32,9 +32,9 @@ It is designed to serve as a **living document** in your repo (`HA_Optimization_
 - **Custom components** – documented integrations (BLE monitor, Govee, etc.).
 
 ### Advanced Features
-- **Custom dashboards** – multiple specialized dashboards (Huskers HQ, LED Test, etc.).
+- **Custom dashboards** – multiple specialised dashboards (Football Team HQ, LED test lab, etc.).
 - **Template sensors** – advanced templating for game status/countdowns.
-- **Complex automations** – Huskers game-day automations with proper state handling.
+- **Complex automations** – Football Team game-day automations with proper state handling.
 
 ---
 
@@ -46,7 +46,7 @@ It is designed to serve as a **living document** in your repo (`HA_Optimization_
 | **P1**   | High   | Medium | System monitoring, MQTT enhancement |
 | **P2**   | Medium | Low    | Backup automation, Secrets structure |
 | **P3**   | Medium | Medium | Zigbee2MQTT tuning, Template organization |
-| **P4**   | Low    | Medium | System Performance dashboard, Huskers fade optimization |
+| **P4**   | Low    | Medium | System Performance dashboard, Football Team fade optimisation |
 
 ---
 
@@ -65,7 +65,7 @@ Each PR will be small, focused, and deleted after merge.
 - `feat/zigbee2mqtt-tuning` (P3)
 - `chore/templates-split` (P3)
 - `feat/perf-dashboard` (P4)
-- `feat/huskers-optimizations` (P4)
+- `feat/football-team-optimizations` (P4)
 
 ---
 
@@ -186,12 +186,12 @@ Edit
 +  cache_state: true
 +  availability_timeout: 60
 P3 – Template Organization
-- Review `templates.yaml` and determine whether high-traffic sensors (e.g., Huskers game countdown) should move into dedicated include files.
+- Review `templates.yaml` and determine whether high-traffic sensors (e.g., Football Team game countdown) should move into dedicated include files.
 - If you adopt `!include_dir_merge_list` patterns, create the backing directories as part of the same change so CI and runtime both load the templates correctly.
 P4 – Performance Dashboard
 - Add a dedicated "System Performance" view under `ui-lovelace/` (create the file if it does not exist) highlighting CPU, memory, uptime, and disk usage from the sensors added in P1.
 - Combine gauges, history graphs, and entity cards to track trends and expose key metrics at a glance.
-P4 – Huskers Fade Script
+P4 – Football Team Fade Script
 diff
 Copy
 Edit
@@ -242,7 +242,7 @@ Add secrets.example.yaml, backup automation, verify backup runs nightly.
 Week 4
 Branch: feat/zigbee2mqtt-tuning, chore/templates-split
 
-Tune Z2M advanced config, move Huskers template to templates/.
+Tune Z2M advanced config, move Football Team template to templates/.
 
 Week 5
 Branch: feat/perf-dashboard, feat/huskers-optimizations

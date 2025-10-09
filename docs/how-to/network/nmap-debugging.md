@@ -41,7 +41,7 @@ Use this runbook to turn on debug logging for the built-in Nmap tracker integrat
 ### 2. Confirm the integration loads
 1. After the restart, open **Settings → Devices & Services → Integrations**.
 2. Make sure the **Nmap Tracker** card shows as **Configured**.
-3. If the integration is missing, re-add it with the correct host range (e.g., `192.168.1.1-254`) and scan interval.
+3. If the integration is missing, re-add it with the correct host range (e.g., `172.16.0.1-172.16.3.254` for a `/22`) and scan interval.
 
 ### 3. Inspect the logs
 1. Navigate to **Settings → System → Logs**, or download `/config/home-assistant.log` via the file editor/SSH.

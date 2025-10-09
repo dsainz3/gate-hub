@@ -100,7 +100,7 @@ See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 .
 ├─ configuration.yaml          # entry point (includes packages and domain files)
 ├─ automations.yaml            # base automations; see reference/automations.md
-├─ packages/                   # feature packages (Huskers, weather dashboards, etc.)
+├─ packages/                   # feature packages (Football Team, weather dashboards, etc.)
 ├─ custom_components/          # custom integrations (wundergroundpws, etc.)
 ├─ dashboards/                 # Lovelace dashboards referenced in configuration.yaml
 ├─ scripts/ & scripts.yaml     # reusable automation helpers
