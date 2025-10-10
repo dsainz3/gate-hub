@@ -1,0 +1,239 @@
+title: Automations Debug
+views:
+  - title: Overview
+    path: autos-overview
+    icon: mdi:cogs
+    badges: []
+    cards:
+      - type: markdown
+        content: >
+          # ⚙️ Automations — Run & Debug Enable/disable, **trigger**, and review
+          `last_triggered` for any automation. Use **Reload Automations** after
+          edits.
+      - type: grid
+        square: false
+        columns: 3
+        cards:
+          - type: button
+            name: Reload Automations
+            icon: mdi:refresh
+            tap_action:
+              action: call-service
+              service: automation.reload
+          - type: button
+            name: Check Config
+            icon: mdi:checkbox-marked-circle-outline
+            tap_action:
+              action: call-service
+              service: homeassistant.check_config
+          - type: button
+            name: Open Logbook View
+            icon: mdi:book-open-page-variant
+            tap_action:
+              action: navigate
+              navigation_path: /logbook
+      - type: markdown
+        content: "## 🏈 Huskers — Core Game Flow"
+      - type: entities
+        title: Huskers — Enable/Disable
+        show_header_toggle: false
+        entities:
+          - automation.huskers_pregame_tminus20_showtime
+          - automation.huskers_td_burst_on_score
+          - automation.huskers_postgame_cleanup
+          - automation.huskers_set_led_gametime_on_kickoff
+          - automation.huskers_postgame_monthly_effect_after_20m
+      - type: entities
+        title: Huskers — Last Triggered
+        show_header_toggle: false
+        entities:
+          - type: attribute
+            entity: automation.huskers_pregame_tminus20_showtime
+            attribute: last_triggered
+            name: T-20 — last_triggered
+          - type: attribute
+            entity: automation.huskers_td_burst_on_score
+            attribute: last_triggered
+            name: TD Burst on Score — last_triggered
+          - type: attribute
+            entity: automation.huskers_postgame_cleanup
+            attribute: last_triggered
+            name: Postgame Cleanup — last_triggered
+          - type: attribute
+            entity: automation.huskers_set_led_gametime_on_kickoff
+            attribute: last_triggered
+            name: LED Gametime on Kickoff — last_triggered
+          - type: attribute
+            entity: automation.huskers_postgame_monthly_effect_after_20m
+            attribute: last_triggered
+            name: Postgame→Monthly (20m) — last_triggered
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: button
+            name: Trigger T-20 Showtime
+            icon: mdi:timer-sand
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.huskers_pregame_tminus20_showtime
+          - type: button
+            name: Trigger TD Burst on Score
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.huskers_td_burst_on_score
+          - type: button
+            name: Trigger Postgame Cleanup
+            icon: mdi:broom
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.huskers_postgame_cleanup
+          - type: button
+            name: Trigger Monthly Effect (20m)
+            icon: mdi:calendar-month
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.huskers_postgame_monthly_effect_after_20m
+      - type: markdown
+        content: "## 🌙 Evening / Night / Early AM"
+      - type: entities
+        title: Evening/Night — Enable/Disable
+        show_header_toggle: false
+        entities:
+          - automation.evening_lights_at_sunset
+          - automation.night_lights_at_midnight
+          - automation.early_morning_lights_0330
+          - automation.exterior_led_monthly_effect
+      - type: entities
+        title: Evening/Night — Last Triggered
+        show_header_toggle: false
+        entities:
+          - type: attribute
+            entity: automation.evening_lights_at_sunset
+            attribute: last_triggered
+            name: Sunset — last_triggered
+          - type: attribute
+            entity: automation.night_lights_at_midnight
+            attribute: last_triggered
+            name: Midnight — last_triggered
+          - type: attribute
+            entity: automation.early_morning_lights_0330
+            attribute: last_triggered
+            name: 03:30 — last_triggered
+          - type: attribute
+            entity: automation.exterior_led_monthly_effect
+            attribute: last_triggered
+            name: Monthly Effect — last_triggered
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: button
+            name: Trigger Sunset Lights
+            icon: mdi:weather-sunset
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.evening_lights_at_sunset
+          - type: button
+            name: Trigger Midnight Lights
+            icon: mdi:weather-night
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.night_lights_at_midnight
+          - type: button
+            name: Trigger 03:30 Lights
+            icon: mdi:clock-time-three
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.early_morning_lights_0330
+          - type: button
+            name: Trigger Monthly Effect
+            icon: mdi:calendar-star
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.exterior_led_monthly_effect
+      - type: markdown
+        content: "## 🧯 Safety & Environment"
+      - type: entities
+        title: Safety/Env — Enable/Disable
+        show_header_toggle: false
+        entities:
+          - automation.burner_plugs_off_2300
+          - automation.burner_plugs_off_after_midnight
+          - automation.humidor_plug_temp_control
+      - type: entities
+        title: Safety/Env — Last Triggered
+        show_header_toggle: false
+        entities:
+          - type: attribute
+            entity: automation.burner_plugs_off_2300
+            attribute: last_triggered
+            name: Burner Plugs Off @23:00 — last_triggered
+          - type: attribute
+            entity: automation.burner_plugs_off_after_midnight
+            attribute: last_triggered
+            name: Burner Plugs Off After 00:15 — last_triggered
+          - type: attribute
+            entity: automation.humidor_plug_temp_control
+            attribute: last_triggered
+            name: Humidor Temp Control — last_triggered
+      - type: grid
+        square: false
+        columns: 3
+        cards:
+          - type: button
+            name: Trigger 23:00 Burner Off
+            icon: mdi:power-plug-off
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.burner_plugs_off_2300
+          - type: button
+            name: Trigger 00:15 Burner Off
+            icon: mdi:camera-timer
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.burner_plugs_off_after_midnight
+          - type: button
+            name: Trigger Humidor Control
+            icon: mdi:thermometer
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.humidor_plug_temp_control
+      - type: logbook
+        title: Logbook — Automations Activity
+        entities:
+          - automation.huskers_pregame_tminus20_showtime
+          - automation.huskers_td_burst_on_score
+          - automation.huskers_postgame_cleanup
+          - automation.huskers_set_led_gametime_on_kickoff
+          - automation.huskers_postgame_monthly_effect_after_20m
+          - automation.evening_lights_at_sunset
+          - automation.night_lights_at_midnight
+          - automation.early_morning_lights_0330
+          - automation.exterior_led_monthly_effect
+          - automation.burner_plugs_off_2300
+          - automation.burner_plugs_off_after_midnight
+          - automation.humidor_plug_temp_control
