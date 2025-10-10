@@ -75,7 +75,7 @@ views:
               - type: tile
                 entity: sensor.kiosk_snapshot_lights_on
                 name: Lights On
-                color: amber
+                color: '#ffc107'
               - type: tile
                 entity: sensor.kiosk_snapshot_plugs_on
                 name: Plugs On
@@ -107,7 +107,7 @@ views:
               - type: tile
                 entity: binary_sensor.kiosk_humidor_out_of_band
                 name: Humidor Out of Band
-                color: deep-orange
+                color: '#ff7043'
           - type: entities
             title: Snapshot Bundles
             show_header_toggle: false
@@ -136,7 +136,7 @@ views:
                 entity: input_boolean.holiday_mode_manual
                 name: Holiday Mode Override
                 icon: mdi:calendar-star
-                color: deep-orange
+                color: '#ff7043'
                 tap_action:
                   action: toggle
                 hold_action:
@@ -163,7 +163,7 @@ views:
                 entity: input_boolean.huskers_use_manual_kickoff
                 name: Manual Kickoff Override
                 icon: mdi:timer-cog
-                color: amber
+                color: '#ffc107'
                 tap_action:
                   action: toggle
                 hold_action:
@@ -326,7 +326,7 @@ views:
                 entity: input_boolean.holiday_mode_manual
                 name: Holiday Mode Override
                 icon: mdi:calendar-star
-                color: deep-orange
+                color: '#ff7043'
                 tap_action:
                   action: toggle
                 hold_action:
@@ -353,7 +353,7 @@ views:
                 entity: input_boolean.huskers_use_manual_kickoff
                 name: Manual Kickoff Override
                 icon: mdi:timer-cog
-                color: amber
+                color: '#ffc107'
                 tap_action:
                   action: toggle
                 hold_action:
@@ -435,7 +435,7 @@ views:
               - type: tile
                 entity: sensor.kiosk_all_lights_runtime_today
                 name: Lights Runtime (min)
-                color: amber
+                color: '#ffc107'
               - type: tile
                 entity: sensor.kiosk_plug_humidor_on_today
                 name: Humidor On (min)
@@ -469,11 +469,11 @@ views:
               - type: tile
                 entity: light.all_lights
                 name: All Lights
-                color: amber
+                color: '#ffc107'
               - type: tile
                 entity: light.mainfloor_lights
                 name: Main Floor
-                color: amber
+                color: '#ffc107'
               - type: tile
                 entity: light.all_exterior_lights
                 name: Exterior Lights
@@ -1487,3 +1487,398 @@ views:
                 name: Summary
               - entity: sensor.agenda_planner_entities
                 name: Entity Catalog
+  ###########################################################################
+  # 2) CAMERAS — Reolink live feeds, status, and control surface
+  ###########################################################################
+  - title: Cameras
+    path: kiosk-cameras
+    icon: mdi:cctv
+    layout:
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr))
+      grid-auto-flow: row dense
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ### Backyard PT Ultra
+              Live feed with quick-access controls and telemetry.
+          - type: picture-glance
+            title: Backyard PT Ultra — Live
+            entity: camera.backyard_camera_fluent
+            camera_image: camera.backyard_camera_fluent
+            camera_view: live
+            show_state: false
+            tap_action:
+              action: more-info
+            entities:
+              - binary_sensor.backyard_camera_person
+              - binary_sensor.backyard_camera_vehicle
+              - binary_sensor.backyard_camera_animal
+              - binary_sensor.backyard_camera_motion
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: light.backyard_camera_floodlight
+                name: Floodlight
+                icon: mdi:spotlight-beam
+                color: '#ffc107'
+              - type: tile
+                entity: siren.backyard_camera_siren
+                name: Siren
+                icon: mdi:alarm-bell
+                tap_action:
+                  action: call-service
+                  service: siren.toggle
+                  target:
+                    entity_id: siren.backyard_camera_siren
+                hold_action:
+                  action: more-info
+                color: red
+              - type: tile
+                entity: switch.backyard_camera_auto_tracking
+                name: Auto Tracking
+                icon: mdi:target-variant
+                color: teal
+              - type: tile
+                entity: switch.backyard_camera_record
+                name: Recording
+                icon: mdi:record-rec
+                color: red
+              - type: tile
+                entity: switch.backyard_camera_push_notifications
+                name: Push Alerts
+                icon: mdi:cellphone-message
+                color: purple
+              - type: tile
+                entity: light.backyard_camera_status_led
+                name: Status LED
+                icon: mdi:led-on
+                color: indigo
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.backyard_camera_battery
+                name: Battery
+                color: green
+              - type: tile
+                entity: sensor.backyard_camera_battery_state
+                name: Battery State
+                color: blue
+              - type: tile
+                entity: sensor.backyard_camera_wi_fi_signal
+                name: Wi-Fi Signal
+                color: cyan
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: button.backyard_camera_ptz_left
+                name: Pan Left
+                icon: mdi:arrow-left-bold
+              - type: button
+                entity: button.backyard_camera_ptz_up
+                name: Tilt Up
+                icon: mdi:arrow-up-bold
+              - type: button
+                entity: button.backyard_camera_ptz_right
+                name: Pan Right
+                icon: mdi:arrow-right-bold
+              - type: button
+                entity: button.backyard_camera_ptz_down
+                name: Tilt Down
+                icon: mdi:arrow-down-bold
+              - type: button
+                entity: button.backyard_camera_ptz_stop
+                name: Stop
+                icon: mdi:stop-circle
+              - type: button
+                entity: button.backyard_camera_ptz_calibrate
+                name: Calibrate
+                icon: mdi:axis-arrow
+              - type: button
+                entity: button.backyard_camera_guard_go_to
+                name: Guard Home
+                icon: mdi:home-import-outline
+              - type: button
+                entity: button.backyard_camera_guard_set_current_position
+                name: Set Guard
+                icon: mdi:home-export-outline
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ### Argus PT Ultra
+              Battery status, floodlight, and PTZ control for the Argus.
+          - type: picture-glance
+            title: Argus PT Ultra — Live
+            entity: camera.argus_pt_ultra_fluent
+            camera_image: camera.argus_pt_ultra_fluent
+            camera_view: live
+            show_state: false
+            tap_action:
+              action: more-info
+            entities:
+              - binary_sensor.argus_pt_ultra_person
+              - binary_sensor.argus_pt_ultra_vehicle
+              - binary_sensor.argus_pt_ultra_animal
+              - binary_sensor.argus_pt_ultra_motion
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: light.argus_pt_ultra_floodlight
+                name: Floodlight
+                icon: mdi:spotlight-beam
+                color: '#ffc107'
+              - type: tile
+                entity: siren.argus_pt_ultra_siren
+                name: Siren
+                icon: mdi:alarm-bell
+                tap_action:
+                  action: call-service
+                  service: siren.toggle
+                  target:
+                    entity_id: siren.argus_pt_ultra_siren
+                hold_action:
+                  action: more-info
+                color: red
+              - type: tile
+                entity: switch.argus_pt_ultra_pir_enabled
+                name: PIR Detect
+                icon: mdi:motion-sensor
+                color: teal
+              - type: tile
+                entity: switch.argus_pt_ultra_record
+                name: Recording
+                icon: mdi:record-rec
+                color: red
+              - type: tile
+                entity: switch.argus_pt_ultra_push_notifications
+                name: Push Alerts
+                icon: mdi:cellphone-message
+                color: purple
+              - type: tile
+                entity: switch.argus_pt_ultra_infrared_lights_in_night_mode
+                name: IR Lights
+                icon: mdi:lightbulb-on-10
+                color: indigo
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.argus_pt_ultra_battery
+                name: Battery
+                color: green
+              - type: tile
+                entity: sensor.argus_pt_ultra_battery_state
+                name: Battery State
+                color: blue
+              - type: tile
+                entity: sensor.argus_pt_ultra_wi_fi_signal
+                name: Wi-Fi Signal
+                color: cyan
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: button.argus_pt_ultra_ptz_left
+                name: Pan Left
+                icon: mdi:arrow-left-bold
+              - type: button
+                entity: button.argus_pt_ultra_ptz_up
+                name: Tilt Up
+                icon: mdi:arrow-up-bold
+              - type: button
+                entity: button.argus_pt_ultra_ptz_right
+                name: Pan Right
+                icon: mdi:arrow-right-bold
+              - type: button
+                entity: button.argus_pt_ultra_ptz_down
+                name: Tilt Down
+                icon: mdi:arrow-down-bold
+              - type: button
+                entity: button.argus_pt_ultra_ptz_stop
+                name: Stop
+                icon: mdi:stop-circle
+              - type: button
+                entity: button.argus_pt_ultra_ptz_calibrate
+                name: Calibrate
+                icon: mdi:axis-arrow
+              - type: button
+                entity: button.argus_pt_ultra_guard_go_to
+                name: Guard Home
+                icon: mdi:home-import-outline
+              - type: button
+                entity: button.argus_pt_ultra_guard_set_current_position
+                name: Set Guard
+                icon: mdi:home-export-outline
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ### Garage Cam (E1 Zoom)
+              Wired camera with zoom and lighting controls.
+          - type: picture-glance
+            title: Garage Cam — Live
+            entity: camera.garage_cam_fluent
+            camera_image: camera.garage_cam_fluent
+            camera_view: live
+            show_state: false
+            tap_action:
+              action: more-info
+            entities:
+              - binary_sensor.garage_cam_person
+              - binary_sensor.garage_cam_vehicle
+              - binary_sensor.garage_cam_motion
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: switch.garage_cam_privacy_mode
+                name: Privacy
+                icon: mdi:shield-half-full
+                color: '#ff7043'
+              - type: tile
+                entity: switch.garage_cam_auto_tracking
+                name: Auto Tracking
+                icon: mdi:target-variant
+                color: teal
+              - type: tile
+                entity: siren.garage_cam_siren
+                name: Siren
+                icon: mdi:alarm-bell
+                tap_action:
+                  action: call-service
+                  service: siren.toggle
+                  target:
+                    entity_id: siren.garage_cam_siren
+                hold_action:
+                  action: more-info
+                color: red
+              - type: tile
+                entity: switch.garage_cam_record
+                name: Recording
+                icon: mdi:record-rec
+                color: red
+              - type: tile
+                entity: switch.garage_cam_infrared_lights_in_night_mode
+                name: IR Lights
+                icon: mdi:lightbulb-on-10
+                color: indigo
+              - type: tile
+                entity: light.garage_cam_status_led
+                name: Status LED
+                icon: mdi:led-on
+                color: '#ffc107'
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.garage_cam_day_night_state
+                name: Day/Night
+                color: blue
+              - type: tile
+                entity: sensor.garage_cam_wi_fi_signal
+                name: Wi-Fi Signal
+                color: cyan
+              - type: tile
+                entity: binary_sensor.garage_cam_motion
+                name: Motion
+                color: lime
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: button
+                entity: button.garage_cam_ptz_left
+                name: Pan Left
+                icon: mdi:arrow-left-bold
+              - type: button
+                entity: button.garage_cam_ptz_up
+                name: Tilt Up
+                icon: mdi:arrow-up-bold
+              - type: button
+                entity: button.garage_cam_ptz_right
+                name: Pan Right
+                icon: mdi:arrow-right-bold
+              - type: button
+                entity: button.garage_cam_ptz_down
+                name: Tilt Down
+                icon: mdi:arrow-down-bold
+              - type: button
+                entity: button.garage_cam_ptz_stop
+                name: Stop
+                icon: mdi:stop-circle
+              - type: button
+                entity: button.garage_cam_ptz_calibrate
+                name: Calibrate
+                icon: mdi:axis-arrow
+              - type: button
+                entity: button.garage_cam_ptz_zoom_out
+                name: Zoom Out
+                icon: mdi:magnify-minus
+              - type: button
+                entity: button.garage_cam_ptz_zoom_in
+                name: Zoom In
+                icon: mdi:magnify-plus
+              - type: button
+                entity: button.garage_cam_guard_go_to
+                name: Guard Home
+                icon: mdi:home-import-outline
+              - type: button
+                entity: button.garage_cam_guard_set_current_position
+                name: Set Guard
+                icon: mdi:home-export-outline
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ### Reolink Home Hub
+              Hub-level status, storage, and alarms.
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+              - type: tile
+                entity: light.reolink_home_hub_status_led
+                name: Status LED
+                icon: mdi:led-on
+                color: '#ffc107'
+              - type: tile
+                entity: siren.reolink_home_hub_siren
+                name: Hub Siren
+                icon: mdi:alarm-light
+                tap_action:
+                  action: call-service
+                  service: siren.toggle
+                  target:
+                    entity_id: siren.reolink_home_hub_siren
+                hold_action:
+                  action: more-info
+                color: red
+              - type: button
+                entity: button.reolink_home_hub_restart
+                name: Reboot Hub
+                icon: mdi:restart
+          - type: entities
+            title: Hub Telemetry
+            show_header_toggle: false
+            entities:
+              - entity: sensor.reolink_home_hub_cpu_usage
+                name: CPU Load
+              - entity: sensor.reolink_home_hub_sd_0_storage
+                name: SD Slot 1
+              - entity: sensor.reolink_home_hub_sd_1_storage
+                name: SD Slot 2

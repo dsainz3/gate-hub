@@ -34,6 +34,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)
 - [Pre-prod Push Checklist](how-to/pre-prod-checklist.md)
+- [Kiosk Camera Overview](how-to/kiosk/camera-overview.md)
 
 ## Reference
 - [Automation Catalog](reference/automations.md)
