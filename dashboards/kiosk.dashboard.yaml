@@ -396,7 +396,7 @@ views:
               - automation.early_morning_lights_03_30
               - automation.interior_lights_off_15_minutes_after_sunrise
               - automation.lighting_morning_lights_off_sunrise
-              - automation.exterior_lights_cloudy_daytime
+              - automation.lighting_daytime_cloudy_exterior
               - automation.exterior_led_monthly_effect
               - automation.humidor_plug_temperature_control
               - automation.safety_turn_off_burner_plugs_at_11_00_pm
@@ -586,40 +586,36 @@ views:
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_basement_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_mainfloor_burner
                 name: Main Floor Burner Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_mainfloor_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_bedroom_burner
                 name: Bedroom Burner Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_bedroom_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_humidor
                 name: Humidor Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_humidor_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
 
           - type: entities
             title: Light Power Relays
@@ -1024,25 +1020,25 @@ views:
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_night_mode
+                entity: scene.lighting_night_mode_interior_exterior
                 name: Night Mode
                 icon: mdi:weather-night
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_night_mode
+                    entity_id: scene.lighting_night_mode_interior_exterior
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_early_morning_gentle_wake
+                entity: scene.lighting_early_morning_gentle_wake_interior_exterior
                 name: Early Morning Wake
                 icon: mdi:alarm
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_early_morning_gentle_wake
+                    entity_id: scene.lighting_early_morning_gentle_wake_interior_exterior
                 hold_action:
                   action: more-info
               - type: button
@@ -1101,102 +1097,102 @@ views:
             square: false
             cards:
               - type: button
-                entity: scene.lighting_led_effect_january
+                entity: scene.lighting_exterior_led_effect_january
                 name: January Effect
                 icon: mdi:calendar-month
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_january
+                    entity_id: scene.lighting_exterior_led_effect_january
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_february
+                entity: scene.lighting_exterior_led_effect_february
                 name: February Effect
                 icon: mdi:calendar-month-outline
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_february
+                    entity_id: scene.lighting_exterior_led_effect_february
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_march
+                entity: scene.lighting_exterior_led_effect_march
                 name: March Effect
                 icon: mdi:calendar-month
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_march
+                    entity_id: scene.lighting_exterior_led_effect_march
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_april
+                entity: scene.lighting_exterior_led_effect_april
                 name: April Effect
                 icon: mdi:calendar-month-outline
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_april
+                    entity_id: scene.lighting_exterior_led_effect_april
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_patriotic
+                entity: scene.lighting_exterior_led_effect_patriotic
                 name: Patriotic Effect
                 icon: mdi:flag-variant
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_patriotic
+                    entity_id: scene.lighting_exterior_led_effect_patriotic
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_august
+                entity: scene.lighting_exterior_led_effect_august
                 name: August Effect
                 icon: mdi:calendar-month
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_august
+                    entity_id: scene.lighting_exterior_led_effect_august
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_halloween
+                entity: scene.lighting_exterior_led_effect_halloween
                 name: Halloween Effect
                 icon: mdi:halloween
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_halloween
+                    entity_id: scene.lighting_exterior_led_effect_halloween
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_thanksgiving
+                entity: scene.lighting_exterior_led_effect_thanksgiving
                 name: Thanksgiving Effect
                 icon: mdi:food-turkey
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_thanksgiving
+                    entity_id: scene.lighting_exterior_led_effect_thanksgiving
                 hold_action:
                   action: more-info
               - type: button
-                entity: scene.lighting_led_effect_christmas
+                entity: scene.lighting_exterior_led_effect_christmas
                 name: Christmas Effect
                 icon: mdi:string-lights
                 tap_action:
                   action: call-service
                   service: scene.turn_on
                   target:
-                    entity_id: scene.lighting_led_effect_christmas
+                    entity_id: scene.lighting_exterior_led_effect_christmas
                 hold_action:
                   action: more-info
 
@@ -1321,14 +1317,14 @@ views:
                 hold_action:
                   action: toggle
               - type: button
-                entity: automation.exterior_lights_cloudy_daytime
+                entity: automation.lighting_daytime_cloudy_exterior
                 name: Daytime Cloudy Exterior
                 icon: mdi:weather-partly-rainy
                 tap_action:
                   action: call-service
                   service: automation.trigger
                   target:
-                    entity_id: automation.exterior_lights_cloudy_daytime
+                    entity_id: automation.lighting_daytime_cloudy_exterior
                 hold_action:
                   action: toggle
               - type: button
