@@ -3,7 +3,7 @@ title: Football Team Dashboard Guide
 summary: Configure and operate the Football Team-focused Lovelace dashboards.
 status: active
 category: how-to
-updated: 2025-10-09
+updated: 2025-10-10
 owner: playbook-team
 tags:
   - lovelace
@@ -14,6 +14,8 @@ tags:
 # Football Team Dashboard Guide
 
 This guide documents the Football Team dashboards delivered in `dashboards/huskers-teamtracker.yaml` (filename retains the original prefix for compatibility). Pair it with the [Automation Catalog](../../reference/automations.md) and [Football Team LED MQTT controls](../lighting/husker-led-mqtt.md) when troubleshooting, and keep the [Football Team Dashboard History](../../explanation/football-team-dashboard-history.md) handy for architectural context. Wherever the UI references “Huskers,” feel free to rename entities, scenes, and themes to match your own club—just update the include files to keep YAML and docs aligned.
+
+> **Operator tooling:** Day-to-day automation toggles and one-tap scene buttons now live on the admin-only **Automations** Lovelace dashboard (`dashboards/automations.dashboard.yaml`). Use that console for reloads, manual triggers, and the global Scenes view; the Football Team dashboards continue to surface fan-facing context.
 
 ## Prerequisites
 - **Team Tracker integration** (`custom_components/teamtracker`) configured for your team (example: NCAA team id `158` for Nebraska; swap to your organisation).
@@ -67,12 +69,12 @@ Purpose: Maintenance console for lighting automations and Husker-specific scenes
 Highlights
 - Markdown intro summarising the intent and linking scenes/automations conceptually.
 - **Lighting automation list** with last-triggered metadata for the baseline daily schedules and monthly LED routines.
-- **Football Team scene catalog** enumerating every lighting preset so the snapshots, daily looks, and seasonal exterior effects are always one tap away.
+- **Football Team scene catalog** enumerating the core presets most relevant to game-day; for the full estate of lighting presets (including F1, safety, and climate snapshots) use the Automations → Scenes view.
 - **Lighting control grid** that surfaces every interior and exterior fixture touched by the Football Team shows for quick overrides.
 
 Usage Notes
 - Snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
-- The scene catalog now auto-discovers anything with `husker`, `cornhusker`, or `nebraska` in the entity ID (and still keeps the baseline lighting scenes) so new presets appear automatically without `entity not found` warnings.
+- The scene catalog on this view is curated; add new Football Team presets here as needed and mirror them in the global Scenes view so they remain accessible from the Automations console.
 - Use the automation last-triggered timestamps to confirm the daily schedule fired; if an entry stays blank, check for disabled automations in Home Assistant Settings → Automations.
 - The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; open the light more-info dialog to confirm the strip picked up `LED-Gametime` during shows.
 - The `sensor.huskers_game_status_espn` tile now exposes a `status_source` attribute. If ESPN removes the live scoreboard entry immediately after the whistle, the sensor falls back to the latest completed game from the season schedule so postgame automation checks keep working. If you notice the wrong source, confirm the schedule feed still lists the most recent matchup.

@@ -3,7 +3,7 @@ title: Automation Catalog
 summary: Authoritative list of automations with triggers, guards, and actions for the gate-hub Home Assistant deployment.
 status: active
 category: reference
-updated: 2025-10-06
+updated: 2025-10-10
 owner: automation-team
 tags:
   - home-assistant
@@ -13,6 +13,17 @@ tags:
 # Automation Catalog
 
 Use this catalog as the single source of truth for automation behaviour. Each entry references its source file so code owners can jump straight to definitions. When adding or modifying automations, update this page in the same pull request.
+
+## Operations Console (`dashboards/automations.dashboard.yaml`)
+
+Administrators can manage every automation and scene from the Automations dashboard in the sidebar (title **Automations**, `require_admin: true`). The landing view provides:
+
+- Toggle switches mirroring each automation's enabled state, grouped by domain (Huskers game flow, lighting schedules, F1 race control, agenda planner, seasonal routines, and safety).
+- Last-triggered attribute rows for rapid verification after deployments or manual test runs.
+- One-tap trigger buttons for all automations, including reload/config checks and game-day lighting scripts.
+- A logbook card filtered to the same entities for timeline auditing.
+
+The second view, **Scenes**, exposes single-button access to every defined scene (Football Team snapshots, F1 cues, daypart lighting, LED holiday effects, climate and safety presets). Each button calls `scene.turn_on`, so no extra helpers are required. Update this documentation and the dashboard together if you add or rename automations or scenes.
 
 ## Lighting, LED, Safety & Climate (`automations.yaml`)
 

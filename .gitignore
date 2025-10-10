@@ -39,6 +39,7 @@ __pycache__/
 .HA_VERSION
 **/.prettier-caches/
 **/.cache/prettier/
+.ha_run.lock
 
 # Zigbee2MQTT runtime (keep config, drop state)
 zigbee2mqtt/log/
@@ -67,5 +68,3 @@ make_fake_secrets.py
 /external/
 tmp/
 custom_components/tplink_router/translations/tr.json
-
-.ha_run.lock

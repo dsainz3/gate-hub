@@ -18,6 +18,7 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 ## Journey Highlights
 
 - **Manual dashboards → reproducible platform:** Early Football Team and room dashboards lived only in the UI. They now render from YAML stored in Git (`dashboards/`), as chronicled in `docs/explanation/football-team-dashboard-history.md`.
+- **Scattered toggles → unified operations console:** `dashboards/automations.dashboard.yaml` exposes every automation, last-triggered timestamp, and scene button behind an admin-only Automations sidebar entry, keeping reloads and manual triggers in one place.
 - **Scripts on disk → portable tooling:** Inline fixes gave way to reusable helpers such as `scripts/ha_check_portable.py`, with the broader roadmap laid out in `docs/explanation/optimization-plan.md`.
 - **Guesswork → disciplined workflows:** The pipeline in `.github/workflows/ci.yml`, paired with the pre-commit strategy in `docs/explanation/pre-commit-strategy.md`, keeps every change reviewable.
 - **Personal notes → Divio-style documentation:** `docs/index.md` curates how-to guides, references, explanations, and archives so future contributors can find the right depth quickly.
@@ -39,7 +40,7 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 
 - **Core platform:** Home Assistant OS with supervised add-ons, developed remotely via VS Code as documented in `docs/reference/infrastructure.md`.
 - **Integrations:** Zigbee2MQTT, MQTT, TP-Link Deco mesh monitoring, BLE sensors, Wunderground PWS, Govee lighting, TeamTracker sports data.
-- **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, and media lab controls for Plex + Fire TV.
+- **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, media lab controls for Plex + Fire TV, plus the Automations & Scenes console for operators.
 - **Themes:** Football Team palette variables in `themes.yaml` provide consistent branding across dashboards. The docs call out where to adjust colours and typography for your team.
 
 ---

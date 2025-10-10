@@ -168,6 +168,14 @@ lovelace:
       show_in_sidebar: true
       filename: dashboards/network.dashboard.yaml
 
+    automations-dashboard:
+      mode: yaml
+      title: Automations
+      icon: mdi:robot
+      show_in_sidebar: true
+      require_admin: true
+      filename: dashboards/automations.dashboard.yaml
+
     holiday-dashboard:
       mode: yaml
       title: Holiday Dashboard
