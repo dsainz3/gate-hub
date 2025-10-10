@@ -1,0 +1,19 @@
+# Example configuration for capture_dashboard_screenshots.py
+# Copy this file and tailor it to match the dashboards you want to capture.
+dashboards:
+  - slug: default
+    path: lovelace/default
+    wait_selector: "home-assistant"  # Wait for the shell to boot
+    wait_ms: 2000                     # Additional wait before capturing (milliseconds)
+    viewport:
+      width: 1920
+      height: 1080
+    full_page: true
+    file_name: default-dashboard.png
+  - slug: kiosk
+    path: kiosks/gate-hub
+    wait_selector: "hui-view"
+    viewport:
+      width: 1440
+      height: 900
+    full_page: true
