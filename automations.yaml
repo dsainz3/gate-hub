@@ -409,6 +409,7 @@
       target_config: '{{ monthly_configs.get(current_month, {}) }}'
       target_scene: '{{ target_config.get("scene") }}'
       target_effect: '{{ target_config.get("effect") }}'
+      permanent_light: light.permanent_outdoor_lights
     condition:
       - condition: not
         conditions:
@@ -418,37 +419,56 @@
     action:
       - alias: 'Wait for permanent outdoor lights to advertise effects after startup'
         wait_template: >-
-          {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
+          {% set available_effects = state_attr(permanent_light,'effect_list') or [] %}
           {{ target_effect in available_effects }}
         timeout: '00:02:00'
         continue_on_timeout: true
       - choose:
           - conditions:
               - condition: template
-                value_template: "{{ target_scene is not none and target_scene != '' }}"
+                value_template: "{{ target_effect not in [None, ''] }}"
               - condition: template
                 value_template: >-
-                  {% set available_effects = state_attr('light.permanent_outdoor_lights','effect_list') or [] %}
+                  {% set available_effects = state_attr(permanent_light,'effect_list') or [] %}
                   {{ target_effect in available_effects }}
             sequence:
               - if:
                   - condition: template
-                    value_template: "{{ has_value('light.permanent_outdoor_lights') }}"
+                    value_template: "{{ has_value(permanent_light) }}"
                 then:
-                  - service: scene.turn_on
+                  - choose:
+                      - conditions:
+                          - condition: template
+                            value_template: "{{ target_scene is not none and target_scene != '' }}"
+                        sequence:
+                          - service: scene.turn_on
+                            target:
+                              entity_id: '{{ target_scene }}'
+                            continue_on_error: true
+                  - service: light.turn_on
                     target:
-                      entity_id: '{{ target_scene }}'
+                      entity_id: '{{ permanent_light }}'
+                    data:
+                      effect: '{{ target_effect }}'
                     continue_on_error: true
-              - service: logbook.log
-                data:
-                  name: LED Monthly Effect
-                  message: 'Applied {{ target_effect or "unknown effect" }} for month {{ current_month }} via {{ target_scene or "unknown scene" }}'
+                  - service: logbook.log
+                    data:
+                      name: LED Monthly Effect
+                      message: >-
+                        Applied {{ target_effect or "unknown effect" }} for month {{ current_month }}
+                        (scene {{ target_scene or "not used" }})
+                else:
+                  - service: logbook.log
+                    data:
+                      name: LED Monthly Effect
+                      message: >-
+                        Skipped {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- light unavailable when attempting to apply effect
         default:
           - service: logbook.log
             data:
               name: LED Monthly Effect
               message: >-
-                Skipped {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing after startup wait or scene unavailable
+                Skipped {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing after startup wait or light unavailable
 
   - id: humidor_plug_temp_control
     alias: 'Climate: Humidor Temperature Control'
