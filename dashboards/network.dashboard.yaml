@@ -48,25 +48,30 @@ views:
               {{ t }} vs {{ lbl }} {{ fmt(reference, precision, fmt_unit) }}
             {%- endif -%}
           {%- endmacro %}
+          {% set invalid = ['unknown', 'unavailable', None] %}
           {% set last_speedtest = state_attr('sensor.network_status_summary', 'last_speedtest') %}
           {% set last_label = 'pending runs' %}
-          {% if last_speedtest not in ['unknown', 'unavailable', None] %}
+          {% if last_speedtest not in invalid %}
             {% set dt = as_datetime(last_speedtest) %}
             {% if dt %}
               {% set last_label = as_timestamp(dt) | timestamp_custom('%b %-d, %Y %-I:%M %p %Z', True) %}
             {% endif %}
           {% endif %}
-          {% set reachability = is_state('binary_sensor.internet_reachability', 'on') %}
+          {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
+          {% if reachability_state in invalid %}
+            {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
+          {% endif %}
+          {% set reachability = reachability_state == 'on' %}
           {% set clients_total = state_attr('sensor.deco_network_health', 'clients_total') %}
           {% set latency_live = states('sensor.internet_latency') %}
           {% set latency_source = 'Internet latency' %}
-          {% if latency_live in ['unknown', 'unavailable', None] %}
+          {% if latency_live in invalid %}
             {% set latency_live = states('sensor.speedtest_ping') %}
             {% set latency_source = 'Speedtest ping' %}
           {% endif %}
           {% set latency_ref = states('sensor.internet_latency_baseline') %}
           {% set latency_ref_label = state_attr('sensor.internet_latency_baseline', 'source_label') %}
-          {% if latency_ref in ['unknown', 'unavailable', None] %}
+          {% if latency_ref in invalid %}
             {% set latency_ref = states('sensor.speedtest_ping_baseline') %}
             {% set latency_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
           {% endif %}
@@ -86,11 +91,33 @@ views:
           {% set ping_trend = trend_compare(states('sensor.speedtest_ping'), ping_ref, ' ms', 'ms', 1, ping_ref_label) %}
           {% set deco_down_trend = trend_compare(states('sensor.deco_total_down_mbps'), deco_down_ref, ' Mbps', 'Mbps', 2, deco_down_ref_label) %}
           {% set deco_up_trend = trend_compare(states('sensor.deco_total_up_mbps'), deco_up_ref, ' Mbps', 'Mbps', 2, deco_up_ref_label) %}
+          {% if latency_live in invalid %}
+            {% set ping_status = 'unavailable' %}
+          {% elif reachability %}
+            {% set ping_status = 'reachable' %}
+          {% else %}
+            {% set ping_status = 'reachable (monitor flagged offline)' %}
+          {% endif %}
+          {% set latency_1h = states('sensor.internet_latency_1h_avg') %}
+          {% if latency_1h in invalid %}
+            {% set latency_1h = latency_live %}
+          {% endif %}
+          {% set latency_24h = states('sensor.internet_latency_24h_avg') %}
+          {% if latency_24h in invalid %}
+            {% set latency_24h = latency_ref %}
+          {% endif %}
+          {% set latency_7d = states('sensor.internet_latency_7d_avg') %}
+          {% if latency_7d in invalid %}
+            {% set latency_7d = latency_ref %}
+          {% endif %}
+          {% set latency_30d = states('sensor.internet_latency_30d_avg') %}
+          {% if latency_30d in invalid %}
+            {% set latency_30d = latency_ref %}
+          {% endif %}
           ## Network Snapshot
           **Status:** {{ states('sensor.network_status_summary') | title }} · {{ states('sensor.network_performance_summary') | title }}
 
-          **Ping:** {{ fmt(latency_live) }} ms ({{ latency_source | lower }}, {{ 'reachable' if reachability else 'unreachable' }}) ·
-          {{ latency_trend }}
+          **Ping:** {{ fmt(latency_live) }} ms {{ ping_status }}  {{ latency_trend }}
 
           **Speedtest:** ↓ {{ fmt(states('sensor.speedtest_download'), 1, 'Mbps') }}
           ({{ download_trend }}) · ↑ {{ fmt(states('sensor.speedtest_upload'), 1, 'Mbps') }}
@@ -106,10 +133,10 @@ views:
           {% if clients_total is not none %}/ {{ clients_total }}{% endif %}
           ({{ states('sensor.deco_network_health') | title }})
 
-          **Latency averages:** 1h {{ fmt(states('sensor.internet_latency_1h_avg')) }} ·
-          24h {{ fmt(states('sensor.internet_latency_24h_avg')) }} ·
-          7d {{ fmt(states('sensor.internet_latency_7d_avg')) }} ·
-          30d {{ fmt(states('sensor.internet_latency_30d_avg')) }}
+          **Latency averages:** 1h {{ fmt(latency_1h) }} ms·
+          24h {{ fmt(latency_24h) }} ms·
+          7d {{ fmt(latency_7d) }} ms·
+          30d {{ fmt(latency_30d) }} ms
 
           **Last Speed Test:** {{ last_label }}
       - type: grid
@@ -117,7 +144,7 @@ views:
         square: false
         cards:
           - type: tile
-            entity: binary_sensor.network_dashboard_internet_online
+            entity: binary_sensor.internet_reachability_2
             name: Internet online
             color: '#43a047'
           - type: tile
@@ -358,7 +385,7 @@ views:
         title: Live network snapshot
         columns: 3
         entities:
-          - entity: binary_sensor.internet_reachability
+          - entity: binary_sensor.internet_reachability_2
             name: Internet
           - entity: sensor.network_performance_summary
             name: Performance
