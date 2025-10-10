@@ -1785,6 +1785,11 @@ views:
                 entity: binary_sensor.garage_cam_motion
                 name: Motion
                 color: lime
+              - type: tile
+                entity: number.garage_cam_zoom
+                name: Zoom Level
+                icon: mdi:magnify-plus-outline
+                color: teal
           - type: grid
             columns: 3
             square: false
@@ -1813,14 +1818,6 @@ views:
                 entity: button.garage_cam_ptz_calibrate
                 name: Calibrate
                 icon: mdi:axis-arrow
-              - type: button
-                entity: button.garage_cam_ptz_zoom_out
-                name: Zoom Out
-                icon: mdi:magnify-minus
-              - type: button
-                entity: button.garage_cam_ptz_zoom_in
-                name: Zoom In
-                icon: mdi:magnify-plus
               - type: button
                 entity: button.garage_cam_guard_go_to
                 name: Guard Home
@@ -1856,17 +1853,24 @@ views:
                 hold_action:
                   action: more-info
                 color: red
-              - type: button
-                entity: button.reolink_home_hub_restart
-                name: Reboot Hub
-                icon: mdi:restart
+              - type: tile
+                entity: number.reolink_home_hub_alarm_volume
+                name: Alarm Volume
+                icon: mdi:volume-high
+                color: indigo
+              - type: tile
+                entity: number.reolink_home_hub_message_volume
+                name: Message Volume
+                icon: mdi:volume-medium
+                color: blue
+              - type: tile
+                entity: select.reolink_home_hub_scene_mode
+                name: Scene Mode
+                icon: mdi:home-circle
+                color: teal
           - type: entities
             title: Hub Telemetry
             show_header_toggle: false
             entities:
-              - entity: sensor.reolink_home_hub_cpu_usage
-                name: CPU Load
-              - entity: sensor.reolink_home_hub_sd_0_storage
-                name: SD Slot 1
-              - entity: sensor.reolink_home_hub_sd_1_storage
-                name: SD Slot 2
+              - entity: update.reolink_home_hub_firmware
+                name: Firmware Update
