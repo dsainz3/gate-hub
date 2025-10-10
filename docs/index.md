@@ -14,6 +14,7 @@ Latest highlights:
 - Snapshot view now includes a dedicated agenda column showing the household calendar.
 - Agenda Planner package + kiosk view enable event/task entry from HA tablets.
 - Support · Test Resources dashboard adds a Plex · Theater lab with direct Fire TV controls and the HA Media Browser.
+- Admin-only Automations dashboard now inventories every automation, last-triggered timestamp, and scene button, with a companion Scenes view for one-tap presets.
 
 
 - **Tutorials** – step-by-step project onboarding (coming soon; contribute via the docs style guide).
