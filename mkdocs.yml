@@ -15,6 +15,7 @@ nav:
       - Football Team LED MQTT Controls: how-to/lighting/husker-led-mqtt.md
       - Pre-prod Push Checklist: how-to/pre-prod-checklist.md
       - Kiosk Sanitation Schedule: how-to/kiosk/sanitation-schedule.md
+      - Kiosk Camera Overview: how-to/kiosk/camera-overview.md
       - Nmap Tracker Debugging: how-to/network/nmap-debugging.md
   - Reference:
       - Documentation Style Guide: reference/documentation-style-guide.md
