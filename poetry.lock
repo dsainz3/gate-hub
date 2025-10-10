@@ -995,7 +995,49 @@ pyyaml = "*"
 [package.extras]
 dev = ["doc8", "flake8", "flake8-import-order", "rstcheck[sphinx]", "sphinx"]
 
+[[package]]
+name = "greenlet"
+version = "3.0.3"
+description = "Lightweight in-process concurrent programming"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = []
+
+[[package]]
+name = "pyee"
+version = "11.1.0"
+description = "A port of node.js's EventEmitter to python."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = []
+
+[[package]]
+name = "typing-extensions"
+version = "4.12.2"
+description = "Backported and Experimental Type Hints for Python 3.8+"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = []
+
+[[package]]
+name = "playwright"
+version = "1.47.0"
+description = "Python bindings for the Playwright browser automation library"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+
+files = []
+
+[package.dependencies]
+greenlet = "3.0.3"
+pyee = "11.1.0"
+"typing-extensions" = "4.12.2"
+
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "c6d2c217a4da1e9edb221d4017d8a6467f39f9470660032ce365e5f6f300da2e"
+content-hash = "4d6b084c09f19696a25ca197a81be2c99af5f84fca243933dcd14557a7def4b8"
