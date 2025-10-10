@@ -11,7 +11,7 @@ The kiosk dashboard adds a dedicated **Cameras** view (`dashboards/kiosk.dashboa
 - **Recording & Alert Switches** – Tiles expose recording, push notifications, privacy, and motion detection switches so operators can adjust behaviour without leaving the kiosk.
 - **Telemetry Tiles** – Battery percentage, charging state, signal quality, and day/night mode sensors appear as read-only tiles to monitor device health.
 - **PTZ & Guard Buttons** – Button cards provide directional pan/tilt actions, zoom adjustments, guard returns, and preset positioning where supported.
-- **Hub Utilities** – The aggregation hub surface supplies LED state, siren control, storage metrics, CPU load, and a reboot button.
+- **Hub Utilities** – The aggregation hub surface exposes the status LED, hub siren, alert volumes, scene profiles, and firmware status so operators can tune behaviour without leaving the dashboard.
 
 The layout uses responsive grid templates so the view scales from wall tablets to widescreen displays.
 
@@ -21,8 +21,8 @@ The layout uses responsive grid templates so the view scales from wall tablets t
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
 | Outdoor pan-tilt      | `camera.*_fluent`, `binary_sensor.*_person`, `switch.*_record`, `light.*_floodlight`, `siren.*`, `button.*_ptz_*`           | Combines live monitoring, notification control, lighting, and pan/tilt guard presets.     |
 | Battery-powered PT    | `sensor.*_battery`, `switch.*_push_notifications`, `switch.*_ir_lights`, `light.*_status_led`, `button.*_guard_set_current` | Highlights power level and signal telemetry while keeping night illumination adjustable. |
-| Interior zoom         | `switch.*_privacy_mode`, `switch.*_auto_tracking`, `button.*_ptz_zoom_in`, `sensor.*_day_night_state`                      | Focuses on privacy, tracking, and optical zoom actions for indoor coverage.               |
-| Camera hub / bridge   | `light.*_status_led`, `siren.*`, `button.*_restart`, `sensor.*_cpu_usage`, `sensor.*_sd_*`                                 | Centralised controls for the bridge hardware, including storage and health telemetry.     |
+| Interior zoom         | `switch.*_privacy_mode`, `switch.*_auto_tracking`, `number.*_zoom`, `sensor.*_day_night_state`                            | Uses zoom-level sliders alongside pan/tilt buttons for precise framing.                   |
+| Camera hub / bridge   | `light.*_status_led`, `siren.*`, `number.*_alarm_volume`, `number.*_message_volume`, `select.*_scene_mode`, `update.*`    | Centralised controls for the bridge hardware, including alert volumes and firmware state. |
 
 Match entities to your environment by replacing the wildcard examples with the actual identifiers emitted by your integration.
 
@@ -30,7 +30,7 @@ Match entities to your environment by replacing the wildcard examples with the a
 
 1. **Live Monitoring** – Tap any camera tile to expand streaming details. Use more-info dialogs for history and snapshots.
 2. **Point-in-time Control** – Tiles default to toggle actions; hold for detailed configuration when additional attributes are needed.
-3. **PTZ Safeguards** – Use the stop button after any manual move to ensure the device does not drift. Guard presets return the lens to a neutral patrol position.
+3. **PTZ Safeguards** – Use the stop button after any manual move to ensure the device does not drift. Guard presets return the lens to a neutral patrol position, while zoom sliders provide incremental framing without relying on unavailable hardware buttons.
 4. **Alert Modes** – Update recording/notification switches in tandem to avoid silent gaps. The hub siren should be exercised sparingly and reset after testing.
 5. **Health Checks** – Investigate signal telemetry that trends low; consider repositioning access points or lowering bitrate selections when needed.
 
