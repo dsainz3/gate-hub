@@ -1559,7 +1559,7 @@ views:
                 icon: mdi:led-on
                 color: indigo
           - type: grid
-            columns: 3
+            columns: 2
             square: false
             cards:
               - type: tile
@@ -1567,13 +1567,9 @@ views:
                 name: Battery
                 color: green
               - type: tile
-                entity: sensor.backyard_camera_battery_state
-                name: Battery State
-                color: blue
-              - type: tile
-                entity: sensor.backyard_camera_wi_fi_signal
-                name: Wi-Fi Signal
-                color: cyan
+                entity: sensor.backyard_camera_battery_temperature
+                name: Battery Temp
+                color: '#ff7043'
           - type: grid
             columns: 3
             square: false
@@ -1651,9 +1647,9 @@ views:
                   action: more-info
                 color: red
               - type: tile
-                entity: switch.argus_pt_ultra_pir_enabled
-                name: PIR Detect
-                icon: mdi:motion-sensor
+                entity: switch.argus_pt_ultra_guard_return
+                name: Guard Return
+                icon: mdi:target-account
                 color: teal
               - type: tile
                 entity: switch.argus_pt_ultra_record
@@ -1671,21 +1667,13 @@ views:
                 icon: mdi:lightbulb-on-10
                 color: indigo
           - type: grid
-            columns: 3
+            columns: 1
             square: false
             cards:
               - type: tile
                 entity: sensor.argus_pt_ultra_battery
                 name: Battery
                 color: green
-              - type: tile
-                entity: sensor.argus_pt_ultra_battery_state
-                name: Battery State
-                color: blue
-              - type: tile
-                entity: sensor.argus_pt_ultra_wi_fi_signal
-                name: Wi-Fi Signal
-                color: cyan
           - type: grid
             columns: 3
             square: false
@@ -1790,9 +1778,9 @@ views:
                 name: Day/Night
                 color: blue
               - type: tile
-                entity: sensor.garage_cam_wi_fi_signal
-                name: Wi-Fi Signal
-                color: cyan
+                entity: sensor.garage_cam_ptz_pan_position
+                name: Pan Position
+                color: indigo
               - type: tile
                 entity: binary_sensor.garage_cam_motion
                 name: Motion
