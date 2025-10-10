@@ -80,7 +80,8 @@ See the [pre-commit how-to](../how-to/pre-commit.md) for hook details.
 
 - [TP-Link Router custom component](https://community.home-assistant.io/t/custom-component-tp-link-router-integration-supports-also-mercusys-router/638647) is installed via HACS to expose Deco node health, client rosters, and router controls.
 - [TP-Link Deco custom integration](https://github.com/amosyuen/ha-tplink-deco) is configured alongside it for expanded mesh telemetry and device tracking.
-- `packages/network_monitor.yaml` aggregates the speedtest entities plus Deco throughput into summary sensors and rolling statistics windows (1h/24h/7d/30d). Those statistics sensors power the Network Monitor dashboard comparisons and are whitelisted in `recorder_include_entities` so long-term trend charts stay populated.
+- `packages/network_monitor.yaml` aggregates the speedtest entities plus Deco throughput into summary sensors and rolling statistics windows (1h/24h/7d/30d). The “internet online” helper now prefers `binary_sensor.internet_reachability_2` so the dashboards stay green even if the legacy reachability sensor is sleepy.
+- The performance summary comparisons were relaxed to look only at the most recent hour (`*_1h_avg` statistics) before flagging a metric as degraded. This dramatically reduces false positives while you experiment with sensor fixes or baseline changes.
 - The `dashboards/network-dashboard.yaml` Lovelace view surfaces the Deco health, throughput trends, and ping comparisons (current vs averages) alongside auto-entities blocks for live Deco nodes and any `sensor.ping_*` entities.
 
 ## Agenda & Tasks
