@@ -586,40 +586,36 @@ views:
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_basement_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_mainfloor_burner
                 name: Main Floor Burner Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_mainfloor_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_bedroom_burner
                 name: Bedroom Burner Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_bedroom_burner_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
               - type: tile
                 entity: switch.plug_humidor
                 name: Humidor Plug
                 color: teal
                 tap_action:
                   action: toggle
-                features:
-                  - type: target-entity
-                    entity: sensor.plug_humidor_power
-                    name: Power (W)
+                state_content:
+                  - state
+                  - power
 
           - type: entities
             title: Light Power Relays
