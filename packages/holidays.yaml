@@ -458,7 +458,7 @@ automation:
         entity_id: calendar.us_federal_holidays
         to: 'off'
       - platform: time
-        at: '00:10:00'
+        at: '23:30:00'
       - platform: homeassistant
         event: start
       - platform: time_pattern
@@ -475,3 +475,19 @@ automation:
         target:
           entity_id: input_boolean.holiday_mode_manual
     mode: restart
+
+  - id: holiday_mode_manual_reset_2330
+    alias: 'Holiday Mode: 11:30 PM Reset'
+    description: Ensure the manual holiday override is cleared each night at 11:30 PM.
+    trigger:
+      - platform: time
+        at: '23:30:00'
+    condition:
+      - condition: state
+        entity_id: input_boolean.holiday_mode_manual
+        state: 'on'
+    action:
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.holiday_mode_manual
+    mode: single

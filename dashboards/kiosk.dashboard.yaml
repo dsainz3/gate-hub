@@ -27,6 +27,28 @@ views:
             content: |
               ## Snapshot Overview
               Quick status tiles using core kiosk sensors.
+          - type: markdown
+            content: >
+              ### Mode Status
+
+              {% set modes = [
+                {'label': 'Holiday Mode Active', 'entity': 'binary_sensor.holiday_mode_active'},
+                {'label': 'Holiday Mode Override', 'entity': 'input_boolean.holiday_mode_manual'},
+                {'label': 'Huskers Automations Enabled', 'entity': 'input_boolean.huskers_automations_enabled'},
+                {'label': 'Huskers Game Mode', 'entity': 'input_boolean.huskers_game_mode'},
+                {'label': 'Huskers Test Mode', 'entity': 'input_boolean.huskers_test_mode'},
+                {'label': 'F1 Automations Enabled', 'entity': 'input_boolean.f1_automations_enabled'},
+                {'label': 'F1 Race Mode', 'entity': 'input_boolean.f1_race_mode'},
+                {'label': 'F1 Test Mode', 'entity': 'input_boolean.f1_test_mode'}
+              ] %}
+              {% for mode in modes %}
+              {% set state = states(mode.entity) %}
+              {% if state in ['on', 'off'] -%}
+              - **{{ mode.label }}:** {{ 'Enabled' if state == 'on' else 'Disabled' }}
+              {% else -%}
+              - **{{ mode.label }}:** {{ state | title }}
+              {% endif %}
+              {% endfor %}
 
           - type: markdown
             content: |

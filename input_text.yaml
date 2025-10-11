@@ -21,3 +21,15 @@ network_dashboard_latency_source:
   icon: mdi:speedometer
   initial: ''
   mode: text
+
+bug_tracker_open:
+  name: Bug Tracker Open Issues
+  icon: mdi:bug
+  initial: ''
+  mode: text
+
+bug_tracker_quashed:
+  name: Bug Tracker Quashed Issues
+  icon: mdi:bug-check
+  initial: ''
+  mode: text

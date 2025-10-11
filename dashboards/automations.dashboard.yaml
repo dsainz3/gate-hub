@@ -34,6 +34,28 @@ views:
               action: navigate
               navigation_path: /logbook
       - type: markdown
+        content: >
+          ## 🎚️ Mode Status
+
+          {% set modes = [
+            {'label': 'Holiday Mode Active', 'entity': 'binary_sensor.holiday_mode_active'},
+            {'label': 'Holiday Mode Override', 'entity': 'input_boolean.holiday_mode_manual'},
+            {'label': 'Huskers Automations Enabled', 'entity': 'input_boolean.huskers_automations_enabled'},
+            {'label': 'Huskers Game Mode', 'entity': 'input_boolean.huskers_game_mode'},
+            {'label': 'Huskers Test Mode', 'entity': 'input_boolean.huskers_test_mode'},
+            {'label': 'F1 Automations Enabled', 'entity': 'input_boolean.f1_automations_enabled'},
+            {'label': 'F1 Race Mode', 'entity': 'input_boolean.f1_race_mode'},
+            {'label': 'F1 Test Mode', 'entity': 'input_boolean.f1_test_mode'}
+          ] %}
+          {% for mode in modes %}
+          {% set state = states(mode.entity) %}
+          {% if state in ['on', 'off'] -%}
+          - **{{ mode.label }}:** {{ 'Enabled' if state == 'on' else 'Disabled' }}
+          {% else -%}
+          - **{{ mode.label }}:** {{ state | title }}
+          {% endif %}
+          {% endfor %}
+      - type: markdown
         content: "## 🏈 Huskers Game Flow"
       - type: entities
         title: Huskers — Enable/Disable
@@ -42,8 +64,8 @@ views:
           - automation.huskers_showtime_at_t_20
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
-          - automation.huskers_game_mode_enable_window
-          - automation.huskers_game_mode_disable_window
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
       - type: entities
         title: Huskers — Last Triggered
         show_header_toggle: false
@@ -61,11 +83,11 @@ views:
             attribute: last_triggered
             name: Postgame Cleanup — last_triggered
           - type: attribute
-            entity: automation.huskers_game_mode_enable_window
+            entity: automation.huskers_enable_game_mode_window
             attribute: last_triggered
             name: Enable Window — last_triggered
           - type: attribute
-            entity: automation.huskers_game_mode_disable_window
+            entity: automation.huskers_disable_game_mode_window
             attribute: last_triggered
             name: Disable Window — last_triggered
       - type: grid
@@ -103,7 +125,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.huskers_game_mode_enable_window
+                entity_id: automation.huskers_enable_game_mode_window
           - type: button
             name: Trigger Disable Window
             icon: mdi:calendar-remove
@@ -111,7 +133,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.huskers_game_mode_disable_window
+                entity_id: automation.huskers_disable_game_mode_window
       - type: markdown
         content: "## 💡 Lighting Schedules"
       - type: entities
@@ -119,12 +141,12 @@ views:
         show_header_toggle: false
         entities:
           - automation.evening_lights_at_sunset
-          - automation.exterior_front_garage_on_sunset
-          - automation.night_mode_at_midnight
-          - automation.early_morning_lights_0330
-          - automation.interior_lights_sunrise_off
-          - automation.exterior_lights_sunrise_off
-          - automation.exterior_lights_cloudy_daytime
+          - automation.lighting_exterior_front_garage_on_sunset
+          - automation.lighting_night_mode_at_midnight
+          - automation.early_morning_lights_03_30
+          - automation.interior_lights_off_15_minutes_after_sunrise
+          - automation.lighting_morning_lights_off_sunrise
+          - automation.lighting_daytime_cloudy_exterior
           - automation.exterior_led_monthly_effect
       - type: entities
         title: Lighting — Last Triggered
@@ -135,27 +157,27 @@ views:
             attribute: last_triggered
             name: Sunset Interior — last_triggered
           - type: attribute
-            entity: automation.exterior_front_garage_on_sunset
+            entity: automation.lighting_exterior_front_garage_on_sunset
             attribute: last_triggered
             name: Sunset Exterior — last_triggered
           - type: attribute
-            entity: automation.night_mode_at_midnight
+            entity: automation.lighting_night_mode_at_midnight
             attribute: last_triggered
             name: Night Mode — last_triggered
           - type: attribute
-            entity: automation.early_morning_lights_0330
+            entity: automation.early_morning_lights_03_30
             attribute: last_triggered
             name: 03:30 Wake — last_triggered
           - type: attribute
-            entity: automation.interior_lights_sunrise_off
+            entity: automation.interior_lights_off_15_minutes_after_sunrise
             attribute: last_triggered
             name: Interior Sunrise Off — last_triggered
           - type: attribute
-            entity: automation.exterior_lights_sunrise_off
+            entity: automation.lighting_morning_lights_off_sunrise
             attribute: last_triggered
             name: Exterior Sunrise Off — last_triggered
           - type: attribute
-            entity: automation.exterior_lights_cloudy_daytime
+            entity: automation.lighting_daytime_cloudy_exterior
             attribute: last_triggered
             name: Cloudy Daytime — last_triggered
           - type: attribute
@@ -181,7 +203,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.exterior_front_garage_on_sunset
+                entity_id: automation.lighting_exterior_front_garage_on_sunset
           - type: button
             name: Trigger Night Mode
             icon: mdi:weather-night
@@ -189,7 +211,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.night_mode_at_midnight
+                entity_id: automation.lighting_night_mode_at_midnight
           - type: button
             name: Trigger 03:30 Wake
             icon: mdi:clock-time-three
@@ -197,7 +219,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.early_morning_lights_0330
+                entity_id: automation.early_morning_lights_03_30
           - type: button
             name: Trigger Interior Sunrise Off
             icon: mdi:white-balance-sunny
@@ -205,7 +227,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.interior_lights_sunrise_off
+                entity_id: automation.interior_lights_off_15_minutes_after_sunrise
           - type: button
             name: Trigger Exterior Sunrise Off
             icon: mdi:weather-sunny-off
@@ -213,7 +235,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.exterior_lights_sunrise_off
+                entity_id: automation.lighting_morning_lights_off_sunrise
           - type: button
             name: Trigger Cloudy Daytime
             icon: mdi:weather-cloudy-alert
@@ -221,7 +243,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.exterior_lights_cloudy_daytime
+                entity_id: automation.lighting_daytime_cloudy_exterior
           - type: button
             name: Trigger Monthly LED Effect
             icon: mdi:led-strip-variant
@@ -236,23 +258,23 @@ views:
         title: Agenda Planner — Enable/Disable
         show_header_toggle: false
         entities:
-          - automation.agenda_planner_initialize_defaults
-          - automation.agenda_planner_set_all_day_flag
-          - automation.agenda_planner_auto_end_adjust
+          - automation.agenda_planner_refresh_defaults_on_startup
+          - automation.agenda_planner_toggle_due_time_on_all_day_flag
+          - automation.agenda_planner_auto_adjust_end_time
       - type: entities
         title: Agenda Planner — Last Triggered
         show_header_toggle: false
         entities:
           - type: attribute
-            entity: automation.agenda_planner_initialize_defaults
+            entity: automation.agenda_planner_refresh_defaults_on_startup
             attribute: last_triggered
             name: Initialize Defaults — last_triggered
           - type: attribute
-            entity: automation.agenda_planner_set_all_day_flag
+            entity: automation.agenda_planner_toggle_due_time_on_all_day_flag
             attribute: last_triggered
             name: Set All-Day Flag — last_triggered
           - type: attribute
-            entity: automation.agenda_planner_auto_end_adjust
+            entity: automation.agenda_planner_auto_adjust_end_time
             attribute: last_triggered
             name: Auto End Adjust — last_triggered
       - type: grid
@@ -266,7 +288,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.agenda_planner_initialize_defaults
+                entity_id: automation.agenda_planner_refresh_defaults_on_startup
           - type: button
             name: Trigger Set All-Day Flag
             icon: mdi:calendar-check
@@ -274,7 +296,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.agenda_planner_set_all_day_flag
+                entity_id: automation.agenda_planner_toggle_due_time_on_all_day_flag
           - type: button
             name: Trigger Auto End Adjust
             icon: mdi:calendar-sync
@@ -282,24 +304,24 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.agenda_planner_auto_end_adjust
+                entity_id: automation.agenda_planner_auto_adjust_end_time
       - type: markdown
         content: "## 🏁 F1 Race Control"
       - type: entities
         title: F1 — Enable/Disable
         show_header_toggle: false
         entities:
-          - automation.f1_race_mode_enable
+          - automation.f1_enable_race_mode
           - automation.f1_lights_out_showtime
           - automation.f1_track_status_watch
-          - automation.f1_chequered_flag_celeb
-          - automation.f1_race_mode_disable
+          - automation.f1_chequered_flag_celebration
+          - automation.f1_disable_race_mode
       - type: entities
         title: F1 — Last Triggered
         show_header_toggle: false
         entities:
           - type: attribute
-            entity: automation.f1_race_mode_enable
+            entity: automation.f1_enable_race_mode
             attribute: last_triggered
             name: Race Mode Enable — last_triggered
           - type: attribute
@@ -311,11 +333,11 @@ views:
             attribute: last_triggered
             name: Track Status Watch — last_triggered
           - type: attribute
-            entity: automation.f1_chequered_flag_celeb
+            entity: automation.f1_chequered_flag_celebration
             attribute: last_triggered
             name: Chequered Flag Celeb — last_triggered
           - type: attribute
-            entity: automation.f1_race_mode_disable
+            entity: automation.f1_disable_race_mode
             attribute: last_triggered
             name: Race Mode Disable — last_triggered
       - type: grid
@@ -329,7 +351,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.f1_race_mode_enable
+                entity_id: automation.f1_enable_race_mode
           - type: button
             name: Trigger Lights Out
             icon: mdi:lightning-bolt
@@ -353,7 +375,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.f1_chequered_flag_celeb
+                entity_id: automation.f1_chequered_flag_celebration
           - type: button
             name: Trigger Race Mode Disable
             icon: mdi:stop-circle-outline
@@ -361,7 +383,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.f1_race_mode_disable
+                entity_id: automation.f1_disable_race_mode
       - type: markdown
         content: "## 🎉 Seasonal & Holiday"
       - type: entities
@@ -370,7 +392,8 @@ views:
         entities:
           - automation.activate_halloween_exterior_lights
           - automation.deactivate_halloween_exterior_lights
-          - automation.holiday_mode_manual_reset
+          - automation.holiday_mode_reset_manual_override
+          - automation.holiday_mode_11_30_pm_reset
       - type: entities
         title: Seasonal — Last Triggered
         show_header_toggle: false
@@ -384,9 +407,13 @@ views:
             attribute: last_triggered
             name: Deactivate Halloween — last_triggered
           - type: attribute
-            entity: automation.holiday_mode_manual_reset
+            entity: automation.holiday_mode_reset_manual_override
             attribute: last_triggered
             name: Holiday Reset — last_triggered
+          - type: attribute
+            entity: automation.holiday_mode_11_30_pm_reset
+            attribute: last_triggered
+            name: 23:30 Reset — last_triggered
       - type: grid
         square: false
         columns: 3
@@ -414,30 +441,53 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.holiday_mode_manual_reset
+                entity_id: automation.holiday_mode_reset_manual_override
+          - type: button
+            name: Trigger 23:30 Reset
+            icon: mdi:clock-time-eleven
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.holiday_mode_11_30_pm_reset
+      - type: markdown
+        content: >
+          ## 🐞 Bug Tracker
+
+          {% set open_bugs = states('input_text.bug_tracker_open') | default('', true) %}
+          {% set quashed_bugs = states('input_text.bug_tracker_quashed') | default('', true) %}
+          **Open Bugs:** {{ open_bugs if open_bugs | trim else 'None' }}
+
+          **Quashed Bugs:** {{ quashed_bugs if quashed_bugs | trim else 'None' }}
+      - type: entities
+        title: Bug Tracker — Manage
+        show_header_toggle: false
+        entities:
+          - input_text.bug_tracker_open
+          - input_text.bug_tracker_quashed
       - type: markdown
         content: "## 🛡️ Safety & Environment"
       - type: entities
         title: Safety/Env — Enable/Disable
         show_header_toggle: false
         entities:
-          - automation.burner_plugs_off_2300
-          - automation.humidor_plug_temp_control
-          - automation.weather_alert_notify
+          - automation.safety_turn_off_burner_plugs_at_11_00_pm
+          - automation.humidor_plug_temperature_control
+          - automation.weather_severe_alert_notification
       - type: entities
         title: Safety/Env — Last Triggered
         show_header_toggle: false
         entities:
           - type: attribute
-            entity: automation.burner_plugs_off_2300
+            entity: automation.safety_turn_off_burner_plugs_at_11_00_pm
             attribute: last_triggered
             name: Burner Plugs Off 23:00 — last_triggered
           - type: attribute
-            entity: automation.humidor_plug_temp_control
+            entity: automation.humidor_plug_temperature_control
             attribute: last_triggered
             name: Humidor Temp Control — last_triggered
           - type: attribute
-            entity: automation.weather_alert_notify
+            entity: automation.weather_severe_alert_notification
             attribute: last_triggered
             name: Weather Alert Notify — last_triggered
       - type: grid
@@ -451,7 +501,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.burner_plugs_off_2300
+                entity_id: automation.safety_turn_off_burner_plugs_at_11_00_pm
           - type: button
             name: Trigger Humidor Control
             icon: mdi:thermometer
@@ -459,7 +509,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.humidor_plug_temp_control
+                entity_id: automation.humidor_plug_temperature_control
           - type: button
             name: Trigger Weather Alert Notify
             icon: mdi:weather-lightning
@@ -467,37 +517,38 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.weather_alert_notify
+                entity_id: automation.weather_severe_alert_notification
       - type: logbook
         title: Logbook — Automations Activity
         entities:
           - automation.huskers_showtime_at_t_20
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
-          - automation.huskers_game_mode_enable_window
-          - automation.huskers_game_mode_disable_window
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
           - automation.evening_lights_at_sunset
-          - automation.exterior_front_garage_on_sunset
-          - automation.night_mode_at_midnight
-          - automation.early_morning_lights_0330
-          - automation.interior_lights_sunrise_off
-          - automation.exterior_lights_sunrise_off
-          - automation.exterior_lights_cloudy_daytime
+          - automation.lighting_exterior_front_garage_on_sunset
+          - automation.lighting_night_mode_at_midnight
+          - automation.early_morning_lights_03_30
+          - automation.interior_lights_off_15_minutes_after_sunrise
+          - automation.lighting_morning_lights_off_sunrise
+          - automation.lighting_daytime_cloudy_exterior
           - automation.exterior_led_monthly_effect
-          - automation.agenda_planner_initialize_defaults
-          - automation.agenda_planner_set_all_day_flag
-          - automation.agenda_planner_auto_end_adjust
-          - automation.f1_race_mode_enable
+          - automation.agenda_planner_refresh_defaults_on_startup
+          - automation.agenda_planner_toggle_due_time_on_all_day_flag
+          - automation.agenda_planner_auto_adjust_end_time
+          - automation.f1_enable_race_mode
           - automation.f1_lights_out_showtime
           - automation.f1_track_status_watch
-          - automation.f1_chequered_flag_celeb
-          - automation.f1_race_mode_disable
+          - automation.f1_chequered_flag_celebration
+          - automation.f1_disable_race_mode
           - automation.activate_halloween_exterior_lights
           - automation.deactivate_halloween_exterior_lights
-          - automation.holiday_mode_manual_reset
-          - automation.burner_plugs_off_2300
-          - automation.humidor_plug_temp_control
-          - automation.weather_alert_notify
+          - automation.holiday_mode_reset_manual_override
+          - automation.holiday_mode_11_30_pm_reset
+          - automation.safety_turn_off_burner_plugs_at_11_00_pm
+          - automation.humidor_plug_temperature_control
+          - automation.weather_severe_alert_notification
 
   - title: Scenes
     path: autos-scenes
