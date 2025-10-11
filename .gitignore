@@ -58,7 +58,7 @@ custom_components/zigbee2mqtt/coordinator_backup.json
 custom_components/zigbee2mqtt/coordinator_backup.local.json
 custom_components/bhyve/pybhyve/devices.json
 custom_components/bhyve/pybhyve/devices.local.json
-custom_components/
+
 
 # Project-specific helpers
 govee_learning.yaml
