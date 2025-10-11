@@ -41,7 +41,7 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 - **Core platform:** Home Assistant OS with supervised add-ons, developed remotely via VS Code as documented in `docs/reference/infrastructure.md`.
 - **Integrations:** Zigbee2MQTT, MQTT, TP-Link Deco mesh monitoring, BLE sensors, Wunderground PWS, Govee lighting, TeamTracker sports data.
 - **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, media lab controls for Plex + Fire TV, plus the Automations & Scenes console for operators.
-- **Themes:** Football Team palette variables in `themes.yaml` provide consistent branding across dashboards. The docs call out where to adjust colours and typography for your team.
+- **Themes:** Football Team palette variables live in `packages/huskers.yaml` so the Huskers package owns the entire experience. The docs call out where to adjust colours and typography for your team.
 
 ---
 

@@ -1714,86 +1714,152 @@ frontend:
     Huskers Cream:
       modes:
         light:
+          # Brand palette exported as custom properties
           --huskers-cream: "#FDF3E7"
           --huskers-scarlet: "#E41C38"
           --huskers-black: "#000000"
           --huskers-ink: "#111111"
           --huskers-muted: "#5c5c5c"
+          --ha-theme-color-scarlet: "#E41C38"
+          --ha-theme-color-cream: "#FDF3E7"
+          --ha-theme-color-dark: "#111111"
+          --ha-theme-color-gray: "#4c4c4c"
 
-          primary-background-color: var(--huskers-cream)
-          card-background-color: "#FFF9F0"
-          app-header-background-color: "#E41C38"
-          app-header-text-color: "#000000"
-          app-header-icon-color: "#000000"
-          app-header-button-text-color: "#000000"
-          header-icon-color: "#000000"
-          mdc-theme-primary: "#E41C38"
-          mdc-theme-on-primary: "#000000"
+          # Base application surfaces
+          primary-background-color: var(--ha-theme-color-cream)
+          secondary-background-color: "#fff8ec"
+          card-background-color: "#fffaf1"
+          paper-card-background-color: "#fffaf1"
+          app-header-background-color: var(--ha-theme-color-scarlet)
+          app-header-text-color: var(--ha-theme-color-cream)
+          app-header-icon-color: var(--ha-theme-color-cream)
+          app-header-button-text-color: var(--ha-theme-color-cream)
+          header-icon-color: var(--ha-theme-color-cream)
+          sidebar-background-color: var(--ha-theme-color-cream)
+          sidebar-icon-color: var(--ha-theme-color-dark)
+          sidebar-text-color: var(--ha-theme-color-dark)
+          sidebar-selected-icon-color: var(--ha-theme-color-scarlet)
+          sidebar-selected-text-color: var(--ha-theme-color-scarlet)
+          divider-color: "rgba(17, 17, 17, 0.1)"
 
-          primary-color: "#E41C38"
-          accent-color: "#000000"
-          text-primary-color: var(--huskers-ink)
-          primary-text-color: var(--huskers-ink)
-          secondary-text-color: var(--huskers-muted)
-          disabled-text-color: "#9b9b9b"
+          # Typography & state colors
+          primary-text-color: var(--ha-theme-color-dark)
+          secondary-text-color: var(--ha-theme-color-gray)
+          text-primary-color: var(--ha-theme-color-dark)
+          disabled-text-color: "rgba(17, 17, 17, 0.4)"
 
-          state-icon-color: var(--huskers-black)
-          state-icon-active-color: "#E41C38"
+          # Emphasis and accent colours
+          primary-color: var(--ha-theme-color-scarlet)
+          light-primary-color: "#ffd6d6"
+          accent-color: var(--ha-theme-color-dark)
+          state-icon-color: var(--ha-theme-color-dark)
+          state-icon-active-color: var(--ha-theme-color-scarlet)
           state-unavailable-color: "#9b9b9b"
+          paper-item-icon-color: var(--ha-theme-color-dark)
+          paper-item-icon-active-color: var(--ha-theme-color-scarlet)
 
-          label-badge-background-color: "#FFF4E6"
-          label-badge-text-color: var(--huskers-ink)
-          paper-item-icon-color: var(--huskers-black)
-          paper-item-icon-active-color: "#E41C38"
+          # Buttons, controls, and MWC theme values
+          switch-checked-color: var(--ha-theme-color-scarlet)
+          switch-unchecked-color: var(--ha-theme-color-dark)
+          switch-checked-button-color: var(--ha-theme-color-cream)
+          switch-unchecked-button-color: var(--ha-theme-color-cream)
+          slider-color: var(--ha-theme-color-scarlet)
+          slider-secondary-color: "rgba(228,28,56,0.2)"
+          mdc-theme-primary: var(--ha-theme-color-scarlet)
+          mdc-theme-secondary: var(--ha-theme-color-dark)
+          mdc-theme-on-primary: var(--ha-theme-color-cream)
+          mdc-theme-on-secondary: var(--ha-theme-color-cream)
+          mdc-theme-surface: var(--card-background-color)
+          mdc-theme-on-surface: var(--primary-text-color)
 
+          # Cards and layout polish
           ha-card-border-radius: "16px"
           ha-card-border-color: "rgba(0,0,0,0.12)"
-          ha-card-box-shadow: "0 2px 12px rgba(0,0,0,0.08)"
-          divider-color: "rgba(0,0,0,0.06)"
-          app-header-border-bottom: "1px solid #000000"
-
-          slider-color: "#E41C38"
-          slider-secondary-color: "rgba(228,28,56,0.2)"
-
+          ha-card-box-shadow: "0px 4px 12px rgba(0,0,0,0.08)"
+          app-header-border-bottom: "1px solid var(--ha-theme-color-dark)"
+          label-badge-background-color: "#FFF4E6"
+          label-badge-text-color: var(--ha-theme-color-dark)
           markdown-code-background-color: "#FFF2E6"
           table-row-background-color: "#FFF7EC"
           table-row-alternative-background-color: "#FFF2E0"
 
-          # vars used in your markdown card styles
-          --huskers-scoreboard-border: "1px solid rgba(0,0,0,0.12)"
-          --huskers-scoreboard-shadow: "0 6px 18px rgba(0,0,0,0.12)"
+          # Huskers-specific CSS hooks
+          --huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
+          --huskers-scoreboard-shadow: "0 10px 20px rgba(0,0,0,0.12)"
+          --huskers-score-color: var(--ha-theme-color-scarlet)
+          --huskers-text-primary: var(--ha-theme-color-dark)
+          --huskers-text-secondary: var(--ha-theme-color-gray)
 
         dark:
+          # Brand palette exported as custom properties
           --huskers-cream: "#1F1A18"
           --huskers-scarlet: "#FF3A52"
           --huskers-black: "#E0E0E0"
           --huskers-ink: "#F2F2F2"
           --huskers-muted: "#C8C8C8"
+          --ha-theme-color-scarlet: "#FF3A52"
+          --ha-theme-color-cream: "#1F1A18"
+          --ha-theme-color-dark: "#F2F2F2"
+          --ha-theme-color-gray: "#C8C8C8"
 
-          primary-background-color: var(--huskers-cream)
+          # Base application surfaces
+          primary-background-color: var(--ha-theme-color-cream)
+          secondary-background-color: "#1b1614"
           card-background-color: "#26201D"
-          app-header-background-color: "#FF3A52"
+          paper-card-background-color: "#26201D"
+          app-header-background-color: var(--ha-theme-color-scarlet)
           app-header-text-color: "#0A0A0A"
           app-header-icon-color: "#0A0A0A"
           app-header-button-text-color: "#0A0A0A"
           header-icon-color: "#0A0A0A"
-          mdc-theme-primary: "#FF3A52"
-          mdc-theme-on-primary: "#0A0A0A"
+          sidebar-background-color: "#1b1614"
+          sidebar-icon-color: var(--ha-theme-color-dark)
+          sidebar-text-color: var(--ha-theme-color-dark)
+          sidebar-selected-icon-color: var(--ha-theme-color-scarlet)
+          sidebar-selected-text-color: var(--ha-theme-color-scarlet)
+          divider-color: "rgba(255,255,255,0.08)"
 
-          primary-color: "#FF3A52"
-          accent-color: "#E0E0E0"
-          primary-text-color: var(--huskers-ink)
-          secondary-text-color: var(--huskers-muted)
+          # Typography & state colours
+          primary-text-color: var(--ha-theme-color-dark)
+          secondary-text-color: var(--ha-theme-color-gray)
+          text-primary-color: var(--ha-theme-color-dark)
           disabled-text-color: "#9b9b9b"
 
-          state-icon-color: "#E0E0E0"
-          state-icon-active-color: "#FF3A52"
+          # Emphasis and accents
+          primary-color: var(--ha-theme-color-scarlet)
+          accent-color: var(--huskers-black)
+          state-icon-color: var(--huskers-black)
+          state-icon-active-color: var(--ha-theme-color-scarlet)
+          paper-item-icon-color: var(--huskers-black)
+          paper-item-icon-active-color: var(--ha-theme-color-scarlet)
 
+          # Buttons, controls, and MWC theme values
+          switch-checked-color: var(--ha-theme-color-scarlet)
+          switch-unchecked-color: var(--huskers-black)
+          switch-checked-button-color: "#0A0A0A"
+          switch-unchecked-button-color: "#0A0A0A"
+          slider-color: var(--ha-theme-color-scarlet)
+          slider-secondary-color: "rgba(255,58,82,0.35)"
+          mdc-theme-primary: var(--ha-theme-color-scarlet)
+          mdc-theme-secondary: var(--huskers-black)
+          mdc-theme-on-primary: "#0A0A0A"
+          mdc-theme-on-secondary: "#0A0A0A"
+          mdc-theme-surface: var(--card-background-color)
+          mdc-theme-on-surface: var(--primary-text-color)
+
+          # Cards and layout polish
           ha-card-border-radius: "16px"
           ha-card-border-color: "rgba(255,255,255,0.12)"
           ha-card-box-shadow: "0 2px 12px rgba(0,0,0,0.35)"
-          divider-color: "rgba(255,255,255,0.08)"
+          label-badge-background-color: "#251d1a"
+          label-badge-text-color: var(--ha-theme-color-dark)
+          markdown-code-background-color: "#2e2522"
+          table-row-background-color: "#2b221f"
+          table-row-alternative-background-color: "#241c19"
 
-          # vars used in your markdown card styles
-          --huskers-scoreboard-border: "1px solid rgba(255,255,255,0.12)"
-          --huskers-scoreboard-shadow: "0 6px 18px rgba(0,0,0,0.35)"
+          # Huskers-specific CSS hooks
+          --huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
+          --huskers-scoreboard-shadow: "0 10px 24px rgba(0,0,0,0.35)"
+          --huskers-score-color: var(--ha-theme-color-scarlet)
+          --huskers-text-primary: var(--ha-theme-color-dark)
+          --huskers-text-secondary: var(--ha-theme-color-gray)

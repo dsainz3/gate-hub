@@ -10,7 +10,7 @@
   - Completed so far:
     - Split Huskers Team Tracker into Game Day and Team & Data views for better layout.
     - Converted scoreboard and markdown styling to theme CSS variables.
-    - Updated `themes.yaml` with scarlet header, black icons, cream surfaces, and MDC overrides (`mdc-theme-primary`, `mdc-theme-on-primary`).
+    - Updated the Huskers package theme block in `packages/huskers.yaml` with scarlet header, black icons, cream surfaces, and MDC overrides (`mdc-theme-primary`, `mdc-theme-on-primary`).
     - Normalized line endings and passed `yamllint` on dashboard/theme files.
     - Added repo TODO tracker with context.
   - Next steps / resume plan:
