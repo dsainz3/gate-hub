@@ -1,0 +1,15 @@
+[Unit]
+Description=Home Assistant Dashboard Automation
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/config/dashboard_automation/.env
+WorkingDirectory=/config/dashboard_automation
+ExecStart=/bin/bash /config/dashboard_automation/run.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

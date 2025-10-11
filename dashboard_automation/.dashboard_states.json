@@ -1,0 +1,9 @@
+{
+  "/homeassistant/dashboards/automations.dashboard.yaml": "b46264068983c96515fb9c851ed98708",
+  "/homeassistant/dashboards/f1.dashboard.yaml": "c773e3be3f3e00a018e742730ba39ed7",
+  "/homeassistant/dashboards/holiday.dashboard.yaml": "c4cc82e2ae41b95f643732f49f9161b2",
+  "/homeassistant/dashboards/huskers.dashboard.yaml": "3d51a0da66235910a3c78ccb175af92e",
+  "/homeassistant/dashboards/kiosk.dashboard.yaml": "750082bd21bf044a11bc17f60a39afa2",
+  "/homeassistant/dashboards/network.dashboard.yaml": "9a60988c37bbcc723c684a77ae00ab88",
+  "/homeassistant/dashboards/weather.dashboard.yaml": "afb6536050a9f75805314b30b965875b"
+}
