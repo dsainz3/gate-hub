@@ -100,9 +100,9 @@ class DashboardSpec:
         full_page = bool(data.get("full_page", False))
         file_name = data.get("file_name")
         sources_raw = data.get("sources", ())
-        if isinstance(sources_raw, str | os.PathLike[str]):
-            sources_list = [str(sources_raw)]
-        else:
+        try:
+            sources_list = [str(os.fspath(sources_raw))]
+        except TypeError:
             sources_list = [str(item) for item in sources_raw]
         sources_display = tuple(sources_list)
         sources = tuple(
