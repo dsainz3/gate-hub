@@ -1,0 +1,81 @@
+dashboards:
+  - slug: automations-dashboard
+    title: Automations Dashboard Snapshot
+    path: lovelace-automations-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: automations-dashboard.png
+    sources:
+      - dashboards/automations.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/automations-dashboard.md
+
+  - slug: f1-dashboard
+    title: F1 Dashboard Snapshot
+    path: lovelace-f1-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: f1-dashboard.png
+    sources:
+      - dashboards/f1.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/f1-dashboard.md
+
+  - slug: holiday-dashboard
+    title: Holiday Dashboard Snapshot
+    path: lovelace-holiday-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: holiday-dashboard.png
+    sources:
+      - dashboards/holiday.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/holiday-dashboard.md
+
+  - slug: huskers-dashboard
+    title: Huskers Dashboard Snapshot
+    path: lovelace-huskers-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: huskers-dashboard.png
+    sources:
+      - dashboards/huskers.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/huskers-dashboard.md
+
+  - slug: kiosk-dashboard
+    title: Kiosk Dashboard Snapshot
+    path: lovelace-kiosk-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: kiosk-dashboard.png
+    sources:
+      - dashboards/kiosk.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/kiosk-dashboard.md
+
+  - slug: network-dashboard
+    title: Network Dashboard Snapshot
+    path: lovelace-network-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: network-dashboard.png
+    sources:
+      - dashboards/network.dashboard.yaml
+      - dashboards/includes/network_history
+    markdown: docs/reference/dashboard-snapshots/network-dashboard.md
+
+  - slug: weather-dashboard
+    title: Weather Dashboard Snapshot
+    path: lovelace-weather-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: weather-dashboard.png
+    sources:
+      - dashboards/weather.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/weather-dashboard.md
+
+  - slug: support-test-dashboard
+    title: Support Test Dashboard Snapshot
+    path: lovelace-support-test-dashboard
+    wait_selector: "hui-view"
+    full_page: true
+    file_name: support-test-dashboard.png
+    sources:
+      - dashboards/_support/test_resources.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/support-test-dashboard.md

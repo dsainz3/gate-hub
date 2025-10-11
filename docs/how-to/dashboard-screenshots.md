@@ -20,7 +20,7 @@ Capturing fresh dashboard screenshots for MkDocs manually is tedious and error p
    export HASS_BASE_URL="https://homeassistant.example.com"
    ```
 
-3. Copy `docs/how-to/dashboard-screenshot-plan.example.yaml` to a working configuration file and customise it to match your dashboards:
+3. Copy `docs/how-to/dashboard-screenshot-plan.example.yaml` to a working configuration file and customise it to match your dashboards (see `docs/how-to/dashboard-screenshot-plan.yaml` for the live plan tracked in this repo):
 
    ```bash
    cp docs/how-to/dashboard-screenshot-plan.example.yaml docs/how-to/dashboard-screenshot-plan.yaml
