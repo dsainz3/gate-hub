@@ -41,7 +41,7 @@ Highlights
 - **Lighting macros**: launch the dual-cream 45 s chase, trigger the Hail Varsity burst, or fall back to the all-scarlet scene.
 - **Game Essentials** card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from `input_boolean.huskers_use_manual_score`/`input_boolean.huskers_use_manual_kickoff`.
 - **Tailgate Countdown** markdown wrapped in `binary_sensor.huskers_tailgate_window` so it only renders 24 h before kickoff through 30 min post-game.
-- **In-Game Situation** markdown gated by `binary_sensor.huskers_is_live_espn`, focused on football context (clock, down/distance, drive, timeouts, win probability).
+- **In-Game Situation** markdown gated by `binary_sensor.huskers_is_live_espn`, focused on football context (clock, down/distance, drive, timeouts, win probability). The live sensor now treats ESPN strings such as “End of 1st Quarter” and overtime descriptors as active phases so the Last Play card stays visible through intermissions.
 
 Usage Notes
 - Manual kickoffs propagate through `sensor.huskers_kickoff_in_effective`; the countdown card automatically respects `input_boolean.huskers_use_manual_kickoff` and `input_number.huskers_kickoff_in_manual`.

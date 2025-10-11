@@ -1388,11 +1388,31 @@ template:
           {% set status = states('sensor.huskers_game_status_espn') %}
           {{ status in ['Pre-Game', 'Postponed', 'Delayed', 'Warmup'] }}
 
-      - name: huskers_is_live_espn
-        unique_id: huskers_is_live_espn
-        state: >-
-          {% set status = states('sensor.huskers_game_status_espn') %}
-          {{ status in ['In Progress', 'Halftime', '1st Quarter', '2nd Quarter', '3rd Quarter', '4th Quarter', 'Overtime', 'End Period'] }}
+        - name: huskers_is_live_espn
+          unique_id: huskers_is_live_espn
+          state: >-
+            {% set status = states('sensor.huskers_game_status_espn') %}
+            {% set normalized = (status | string).lower() %}
+            {% set keywords = [
+              'in progress',
+              'quarter',
+              'halftime',
+              'overtime',
+              'end period',
+              'endperiod',
+              'end of',
+              'suspended'
+            ] %}
+            {% set is_live = false %}
+            {% if status not in [None, '', 'unknown', 'unavailable'] %}
+              {% for marker in keywords %}
+                {% if marker in normalized %}
+                  {% set is_live = true %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            {{ is_live }}
 
       - name: huskers_is_postgame_espn
         unique_id: huskers_is_postgame_espn
