@@ -43,28 +43,28 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 - **ID** `night_mode_at_midnight`
 - **Entity** `automation.lighting_night_mode_at_midnight`
 - **Trigger**: Time equals `00:00:00`.
-- **Guards**: Pauses while `binary_sensor.holiday_mode_active` is `on` to honour holiday scenes.
+- **Guards**: Pauses while `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_lighting_hold` is `on` so holiday scenography and game mode stay in control.
 - **Actions**: Powers down interior/exterior fixtures and leaves permanent LEDs glowing at 20%.
 
 ### Lighting: Early Morning Gentle Wake (3:30 AM) (`automations.yaml:105`)
 - **ID** `early_morning_lights_0330`
 - **Entity** `automation.early_morning_lights_03_30`
 - **Trigger**: Time equals `03:30:00`.
-- **Guards**: Suppressed if `binary_sensor.holiday_mode_active` is `on`.
+- **Guards**: Suppressed if `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Softly lights interior spaces (10%, warm) and exterior fixtures (10%, cool); boosts permanent LEDs to 50%.
 
 ### Lighting: Morning Lights Off (Sunrise + 15 min) (`automations.yaml:148`)
 - **ID** `interior_lights_sunrise_off`
 - **Entity** `automation.interior_lights_off_15_minutes_after_sunrise`
 - **Trigger**: Sunrise +15 minutes.
-- **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` or `binary_sensor.huskers_light_show_active` is `on`.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active`, `binary_sensor.huskers_light_show_active`, or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Fades sunroom, living room, and dining room lights off.
 
 ### Lighting: Exterior Front & Garage Off (Sunrise) (`automations.yaml:171`)
 - **ID** `exterior_lights_sunrise_off`
 - **Entity** `automation.lighting_morning_lights_off_sunrise`
 - **Trigger**: Sunrise +5 minutes.
-- **Guards**: Skips while `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_light_show_active` is `on`.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active`, `binary_sensor.huskers_light_show_active`, or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Turns off porch, garage, and permanent outdoor lights.
 
 ### LED: Monthly Effect Scheduler (`automations.yaml:205`)

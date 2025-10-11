@@ -25,6 +25,17 @@ views:
                 - sensor.espn_cfb_scoreboard
                 - sensor.espn_nebraska_schedule
 
+      - type: conditional
+        conditions:
+          - entity: input_boolean.huskers_game_mode
+            state: 'on'
+        card:
+          type: markdown
+          title: Game Mode Active
+          content: |-
+            ### GO BIG RED!
+            Husker Game Mode is live — let the show run point.
+
       - type: horizontal-stack
         cards:
           - type: button
