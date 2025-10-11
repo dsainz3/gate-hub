@@ -1,2 +1,15 @@
-null
-...
+reolink_backyard_advanced_controls:
+  name: Backyard Camera Advanced Controls
+  icon: mdi:tune-vertical
+
+reolink_argus_advanced_controls:
+  name: Argus Camera Advanced Controls
+  icon: mdi:cctv
+
+reolink_garage_advanced_controls:
+  name: Garage Camera Advanced Controls
+  icon: mdi:tune-vertical
+
+reolink_hub_diagnostics:
+  name: Reolink Hub Diagnostics
+  icon: mdi:server
