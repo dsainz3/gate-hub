@@ -25,7 +25,7 @@ This guide documents the Football Team dashboards delivered in `dashboards/huske
     type: module
   ```
 - **ESPN REST sensors** from `packages/huskers_everything.yaml`, including the conference standings endpoint (`sports.core.api.espn.com/.../groups/5/standings/0`). Replace the group id if your league differs.
-- Apply the `Huskers Cream` theme (defined in `themes.yaml`) so the Football Team CSS variables resolve correctly, or copy the palette and create your own theme variant (see comments in the theme file).
+- Apply the `Huskers Cream` theme (defined inside `packages/huskers.yaml`) so the Football Team CSS variables resolve correctly, or copy the palette and create your own theme variant (see comments in the package theme block).
 
 Reload themes after deployment via **Developer Tools → YAML → Reload themes** so the custom color variables are available.
 
