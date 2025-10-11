@@ -1,9 +1,9 @@
 Huskers Cream:
   # Huskers Colors
-  ha-theme-color-scarlet: "#d00000"
-  ha-theme-color-cream: "#fdf5e6"
-  ha-theme-color-dark: "#111111"
-  ha-theme-color-gray: "#4c4c4c"
+  --ha-theme-color-scarlet: "#d00000"
+  --ha-theme-color-cream: "#fdf5e6"
+  --ha-theme-color-dark: "#111111"
+  --ha-theme-color-gray: "#4c4c4c"
 
   # Base Colors
   primary-color: var(--ha-theme-color-scarlet)
@@ -53,8 +53,8 @@ Huskers Cream:
   mdc-theme-on-surface: var(--primary-text-color)
 
   # Scoreboard Custom Variables
-  huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
-  huskers-scoreboard-shadow: "0 10px 20px rgba(0,0,0,0.12)"
-  huskers-score-color: var(--ha-theme-color-scarlet)
-  huskers-text-primary: var(--ha-theme-color-dark)
-  huskers-text-secondary: var(--ha-theme-color-gray)
+  --huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
+  --huskers-scoreboard-shadow: "0 10px 20px rgba(0,0,0,0.12)"
+  --huskers-score-color: var(--ha-theme-color-scarlet)
+  --huskers-text-primary: var(--ha-theme-color-dark)
+  --huskers-text-secondary: var(--ha-theme-color-gray)
