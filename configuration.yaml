@@ -53,6 +53,7 @@ recorder:
       - scene
       - light
       - input_boolean
+      - sensor
     entities: !secret recorder_include_entities
 
 logger:

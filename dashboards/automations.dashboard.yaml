@@ -34,6 +34,28 @@ views:
               action: navigate
               navigation_path: /logbook
       - type: markdown
+        content: >
+          ## 🎚️ Mode Status
+
+          {% set modes = [
+            {'label': 'Holiday Mode Active', 'entity': 'binary_sensor.holiday_mode_active'},
+            {'label': 'Holiday Mode Override', 'entity': 'input_boolean.holiday_mode_manual'},
+            {'label': 'Huskers Automations Enabled', 'entity': 'input_boolean.huskers_automations_enabled'},
+            {'label': 'Huskers Game Mode', 'entity': 'input_boolean.huskers_game_mode'},
+            {'label': 'Huskers Test Mode', 'entity': 'input_boolean.huskers_test_mode'},
+            {'label': 'F1 Automations Enabled', 'entity': 'input_boolean.f1_automations_enabled'},
+            {'label': 'F1 Race Mode', 'entity': 'input_boolean.f1_race_mode'},
+            {'label': 'F1 Test Mode', 'entity': 'input_boolean.f1_test_mode'}
+          ] %}
+          {% for mode in modes %}
+          {% set state = states(mode.entity) %}
+          {% if state in ['on', 'off'] -%}
+          - **{{ mode.label }}:** {{ 'Enabled' if state == 'on' else 'Disabled' }}
+          {% else -%}
+          - **{{ mode.label }}:** {{ state | title }}
+          {% endif %}
+          {% endfor %}
+      - type: markdown
         content: "## 🏈 Huskers Game Flow"
       - type: entities
         title: Huskers — Enable/Disable
@@ -371,6 +393,7 @@ views:
           - automation.activate_halloween_exterior_lights
           - automation.deactivate_halloween_exterior_lights
           - automation.holiday_mode_reset_manual_override
+          - automation.holiday_mode_11_30_pm_reset
       - type: entities
         title: Seasonal — Last Triggered
         show_header_toggle: false
@@ -387,6 +410,10 @@ views:
             entity: automation.holiday_mode_reset_manual_override
             attribute: last_triggered
             name: Holiday Reset — last_triggered
+          - type: attribute
+            entity: automation.holiday_mode_11_30_pm_reset
+            attribute: last_triggered
+            name: 23:30 Reset — last_triggered
       - type: grid
         square: false
         columns: 3
@@ -415,6 +442,29 @@ views:
               service: automation.trigger
               target:
                 entity_id: automation.holiday_mode_reset_manual_override
+          - type: button
+            name: Trigger 23:30 Reset
+            icon: mdi:clock-time-eleven
+            tap_action:
+              action: call-service
+              service: automation.trigger
+              target:
+                entity_id: automation.holiday_mode_11_30_pm_reset
+      - type: markdown
+        content: >
+          ## 🐞 Bug Tracker
+
+          {% set open_bugs = states('input_text.bug_tracker_open') | default('', true) %}
+          {% set quashed_bugs = states('input_text.bug_tracker_quashed') | default('', true) %}
+          **Open Bugs:** {{ open_bugs if open_bugs | trim else 'None' }}
+
+          **Quashed Bugs:** {{ quashed_bugs if quashed_bugs | trim else 'None' }}
+      - type: entities
+        title: Bug Tracker — Manage
+        show_header_toggle: false
+        entities:
+          - input_text.bug_tracker_open
+          - input_text.bug_tracker_quashed
       - type: markdown
         content: "## 🛡️ Safety & Environment"
       - type: entities
@@ -495,6 +545,7 @@ views:
           - automation.activate_halloween_exterior_lights
           - automation.deactivate_halloween_exterior_lights
           - automation.holiday_mode_reset_manual_override
+          - automation.holiday_mode_11_30_pm_reset
           - automation.safety_turn_off_burner_plugs_at_11_00_pm
           - automation.humidor_plug_temperature_control
           - automation.weather_severe_alert_notification
