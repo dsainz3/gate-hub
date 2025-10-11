@@ -49,6 +49,10 @@
   - Current dashboard and automations rely on core sensors that are not yet exposed (`sensor.f1_session_status`, `sensor.f1_track_weather`, `sensor.f1_weather`, `sensor.f1_race_lap_count`, `binary_sensor.f1_safety_car`).
   - Re-enable the F1 Sensor config entry and ensure these entities are registered so the Network/F1 dashboards stop warning.
   - Update `dashboards/f1-dashboard.yaml` once telemetry is back to include standings, weather, and race-control metrics.
+- [ ] Automate dashboard screenshot refresh
+  - Ensure Playwright captures run successfully in CI/Docker using `HA_BASE_URL`/`HA_TOKEN`.
+  - Resolve remaining secret/env handling so the wrapper works without manual intervention.
+  - Document a reliable path for capturing and committing refreshed assets.
 
 ## Completed Items
 - [x] Split Huskers Team Tracker dashboard into separate Game Day and Team & Data views for clarity.

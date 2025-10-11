@@ -10,6 +10,10 @@ dashboards:
       height: 1080
     full_page: true
     file_name: default-dashboard.png
+    sources:
+      - dashboards/default.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/default.md
+    title: Default Dashboard Snapshot
   - slug: kiosk
     path: kiosks/gate-hub
     wait_selector: "hui-view"
@@ -17,3 +21,7 @@ dashboards:
       width: 1440
       height: 900
     full_page: true
+    sources:
+      - dashboards/kiosk.dashboard.yaml
+    markdown: docs/reference/dashboard-snapshots/kiosk.md
+    title: Kiosk Dashboard Snapshot
