@@ -140,13 +140,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--base-url",
-        default=os.environ.get("HASS_BASE_URL"),
-        help="Base URL for the Home Assistant instance (can come from HASS_BASE_URL).",
+        default=os.environ.get("HA_BASE_URL")
+        or os.environ.get("HASS_BASE_URL"),
+        help="Base URL for the Home Assistant instance "
+        "(can come from HA_BASE_URL or HASS_BASE_URL).",
     )
     parser.add_argument(
         "--token",
-        default=os.environ.get("HASS_LONG_LIVED_TOKEN"),
-        help="Long-lived access token (can come from HASS_LONG_LIVED_TOKEN).",
+        default=os.environ.get("HA_TOKEN")
+        or os.environ.get("HASS_LONG_LIVED_TOKEN"),
+        help="Long-lived access token (can come from HA_TOKEN or HASS_LONG_LIVED_TOKEN).",
     )
     parser.add_argument(
         "--output-dir",

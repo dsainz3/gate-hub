@@ -16,8 +16,8 @@ Capturing fresh dashboard screenshots for MkDocs manually is tedious and error p
 2. Create a long-lived access token for an account with read access to the dashboards that will be captured. Store the token securely (for example, in `~/.bashrc` or a secrets manager) and export it before running the script:
 
    ```bash
-   export HASS_LONG_LIVED_TOKEN="<token>"
-   export HASS_BASE_URL="https://homeassistant.example.com"
+   export HA_TOKEN="<token>"
+   export HA_BASE_URL="https://homeassistant.example.com"
    ```
 
 3. Copy `docs/how-to/dashboard-screenshot-plan.example.yaml` to a working configuration file and customise it to match your dashboards (see `docs/how-to/dashboard-screenshot-plan.yaml` for the live plan tracked in this repo):
@@ -45,7 +45,7 @@ poetry run python scripts/capture_dashboard_screenshots.py \
 * `--config` points to the YAML plan created in the previous step.
 * `--output-dir` determines where the PNG files are written (the directory is created if required).
 * `--markdown-dir` controls where the generated Markdown trackers live (created automatically).
-* The script reads `HASS_BASE_URL` and `HASS_LONG_LIVED_TOKEN` from the environment when the corresponding CLI flags are omitted. You can also pass `--base-url` and `--token` explicitly.
+* The script reads `HA_BASE_URL`/`HA_TOKEN` (or the legacy `HASS_BASE_URL`/`HASS_LONG_LIVED_TOKEN`) from the environment when the corresponding CLI flags are omitted. You can also pass `--base-url` and `--token` explicitly.
 * Pass `--force` to bypass change detection and refresh every dashboard regardless of source file timestamps.
 
 Behind the scenes the script uses the token to authenticate, reuses the generated storage state for each dashboard, and saves one screenshot per entry. Sensitive values are only read from the environment/CLI and tokens are redacted from log output so they never land in terminal history. A `--headful` switch is available for debugging flows locally and `--slow-mo` delays actions when diagnosing rendering issues.
