@@ -51,7 +51,7 @@
   - id: night_mode_at_midnight
     alias: 'Lighting: Night Mode'
     description: >
-      Turns off most interior/accent lights and dims exterior LED to 20%.
+      Turns off most interior/accent lights and dims exterior LED to 20% unless the Husker lighting hold is active.
     mode: single
     trigger:
       - platform: time
@@ -62,6 +62,8 @@
           - condition: state
             entity_id: binary_sensor.holiday_mode_active
             state: 'on'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
         target:
@@ -72,7 +74,7 @@
   - id: early_morning_lights_0330
     alias: 'Lighting: Early Morning Gentle Wake'
     description: >
-      Soft ambient lighting for early risers.
+      Soft ambient lighting for early risers unless the Husker lighting hold is active.
     mode: single
     trigger:
       - platform: time
@@ -83,6 +85,8 @@
           - condition: state
             entity_id: binary_sensor.holiday_mode_active
             state: 'on'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
         target:
@@ -93,7 +97,7 @@
   - id: interior_lights_sunrise_off
     alias: 'Lighting: Morning Interior Off'
     description: >
-      Turns off ambient interior lighting after sunrise unless the Husker light show is running.
+      Turns off ambient interior lighting after sunrise unless the Husker light show or lighting hold is active.
     mode: single
     trigger:
       - platform: sun
@@ -108,6 +112,8 @@
       - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
         target:
@@ -118,7 +124,7 @@
   - id: exterior_lights_sunrise_off
     alias: 'Lighting: Morning Exterior Off'
     description: >
-      Turns off the front porch and garage lights a few minutes after sunrise unless the Husker light show is running.
+      Turns off the front porch and garage lights a few minutes after sunrise unless the Husker light show or lighting hold is active.
     mode: single
     trigger:
       - platform: sun
@@ -133,6 +139,8 @@
       - condition: state
         entity_id: binary_sensor.huskers_light_show_active
         state: 'off'
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
         target:
