@@ -27,6 +27,9 @@ Capturing fresh dashboard screenshots for MkDocs manually is tedious and error p
    ```
 
    Each entry provides the Lovelace path, viewport, and wait strategy for a dashboard. The example shows two dashboards captured at different resolutions.
+   - `sources` lists the YAML (or include) files that should trigger a fresh capture when they change.
+   - `markdown` defines where the per-dashboard tracker will be written (defaults to `docs/reference/dashboard-snapshots/<slug>.md` when omitted).
+   - `title` lets you override the human-friendly heading used in the generated Markdown.
 
 ## Running the capture script
 
@@ -35,14 +38,21 @@ Run the capture tool with Poetry so that the dependencies resolve correctly:
 ```bash
 poetry run python scripts/capture_dashboard_screenshots.py \
   --config docs/how-to/dashboard-screenshot-plan.yaml \
-  --output-dir docs/assets/screenshots
+  --output-dir docs/assets/screenshots \
+  --markdown-dir docs/reference/dashboard-snapshots
 ```
 
 * `--config` points to the YAML plan created in the previous step.
 * `--output-dir` determines where the PNG files are written (the directory is created if required).
+* `--markdown-dir` controls where the generated Markdown trackers live (created automatically).
 * The script reads `HASS_BASE_URL` and `HASS_LONG_LIVED_TOKEN` from the environment when the corresponding CLI flags are omitted. You can also pass `--base-url` and `--token` explicitly.
+* Pass `--force` to bypass change detection and refresh every dashboard regardless of source file timestamps.
 
 Behind the scenes the script uses the token to authenticate, reuses the generated storage state for each dashboard, and saves one screenshot per entry. Sensitive values are only read from the environment/CLI and tokens are redacted from log output so they never land in terminal history. A `--headful` switch is available for debugging flows locally and `--slow-mo` delays actions when diagnosing rendering issues.
+
+### Change detection and Markdown trackers
+
+On each run the tool compares the mtime of every file listed under `sources` with the existing screenshot. When a source is newer (or the PNG is missing) a new capture is taken; otherwise the dashboard is skipped. Every captured dashboard is paired with a Markdown summary that records the screenshot path, SHA-256 hash, and last updated timestamp—ideal for MkDocs changelogs or PR diffs. The Markdown location defaults to `docs/reference/dashboard-snapshots/` but can be overridden per entry or via `--markdown-dir`.
 
 ## Security considerations
 
