@@ -82,8 +82,26 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
+      - name: Cache Poetry downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: poetry-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            poetry-${{ runner.os }}-
+
+      - name: Cache virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-
+
       - name: Install dependencies
-        run: poetry install --with dev --no-interaction --sync
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install --with dev --no-interaction --sync
 
       - name: Run pytest
         run: poetry run pytest
