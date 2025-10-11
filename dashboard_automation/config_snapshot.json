@@ -1,0 +1,13 @@
+{
+  "ha_url": "http://supervisor/core",
+  "ha_token_present": false,
+  "config_path": "/config",
+  "dashboards_path": "/config/dashboards",
+  "screenshots_path": "/config/www/dashboard_screenshots",
+  "docs_path": "/config/docs/dashboards",
+  "check_interval": 300,
+  "state_file": "/config/dashboard_automation/.dashboard_states.json",
+  "log_level": "INFO",
+  "browserless_url": "http://localhost:3000",
+  "browserless_token_present": false
+}
