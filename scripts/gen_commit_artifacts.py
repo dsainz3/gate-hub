@@ -27,7 +27,7 @@ CONFIG_FOLDERS = {
     "automations.yaml": "Automations",
     "scripts.yaml": "Scripts",
     "scenes.yaml": "Scenes",
-    "themes.yaml": "Themes",
+    "huskers.yaml": "Packages: Huskers",
     "templates.yaml": "Templates",
 }
 
