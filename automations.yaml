@@ -492,37 +492,37 @@
                                       Applied {{ target_effect or "unknown effect" }} for month {{ current_month }}
                                       (scene {{ target_scene or "not used" }})
                                 - stop: 'LED monthly effect applied'
-                              default:
-                                - service: logbook.log
-                                  data:
-                                    name: LED Monthly Effect
-                                    message: >-
-                                      Retrying {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- light online but effect not confirmed after command (attempt {{ repeat.index }})
-                                - service: homeassistant.update_entity
-                                  target:
-                                    entity_id: '{{ permanent_light }}'
-                                  continue_on_error: true
+                          default:
+                            - service: logbook.log
+                              data:
+                                name: LED Monthly Effect
+                                message: >-
+                                  Retrying {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- light online but effect not confirmed after command (attempt {{ repeat.index }})
+                            - service: homeassistant.update_entity
+                              target:
+                                entity_id: '{{ permanent_light }}'
+                              continue_on_error: true
                       else:
                         - service: logbook.log
                           data:
                             name: LED Monthly Effect
                             message: >-
                               Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- light unavailable (attempt {{ repeat.index }})
-                default:
-                  - service: logbook.log
-                    data:
-                      name: LED Monthly Effect
-                      message: >-
-                        Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing from list (attempt {{ repeat.index }})
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ has_value(permanent_light) }}"
-                        sequence:
-                          - service: homeassistant.update_entity
-                            target:
-                              entity_id: '{{ permanent_light }}'
-                            continue_on_error: true
+              default:
+                - service: logbook.log
+                  data:
+                    name: LED Monthly Effect
+                    message: >-
+                      Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing from list (attempt {{ repeat.index }})
+                - choose:
+                    - conditions:
+                        - condition: template
+                          value_template: "{{ has_value(permanent_light) }}"
+                      sequence:
+                        - service: homeassistant.update_entity
+                          target:
+                            entity_id: '{{ permanent_light }}'
+                          continue_on_error: true
             - delay: '00:00:10'
       - if:
           - condition: template
