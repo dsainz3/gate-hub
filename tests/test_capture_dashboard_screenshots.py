@@ -22,6 +22,7 @@ sys.modules.setdefault(
 sys.modules.setdefault("playwright.sync_api", _playwright_stub)
 
 import scripts.capture_dashboard_screenshots as capture_module  # noqa: E402
+import scripts.run_dashboard_captures as capture_runner_module  # noqa: E402
 from scripts.capture_dashboard_screenshots import (  # noqa: E402
     DEFAULT_VIEWPORT,
     DashboardSpec,
@@ -268,6 +269,95 @@ def test_main_smoke_and_skip(
     assert close_calls == [True, True]
     assert screenshot_path.exists()
     assert markdown_path.exists()
+
+
+def test_runner_uses_secrets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    secrets_path = tmp_path / "secrets.yaml"
+    secrets_path.write_text(
+        textwrap.dedent(
+            """
+            dashboard_capture_base_url: http://example.invalid
+            dashboard_capture_token: token-123
+            """
+        ),
+        encoding="utf-8",
+    )
+    plan = tmp_path / "plan.yaml"
+    plan.write_text(
+        "dashboards:\n  - slug: one\n    path: lovelace/one\n",
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "shots"
+    markdown_dir = tmp_path / "docs"
+
+    captured: dict[str, list[str]] = {}
+
+    def fake_capture_main(args: list[str]) -> int:
+        captured["args"] = args
+        return 0
+
+    monkeypatch.setattr(
+        capture_runner_module,
+        "capture_main",
+        fake_capture_main,
+    )
+
+    exit_code = capture_runner_module.run(
+        [
+            "--plan",
+            str(plan),
+            "--output-dir",
+            str(output_dir),
+            "--markdown-dir",
+            str(markdown_dir),
+            "--secrets",
+            str(secrets_path),
+            "--log-level",
+            "DEBUG",
+            "--slow-mo",
+            "100",
+            "--force",
+        ]
+    )
+
+    assert exit_code == 0
+    args = captured["args"]
+    assert "--config" in args
+    assert "--output-dir" in args
+    assert "--markdown-dir" in args
+    assert "--base-url" in args
+    assert "--token" in args
+    assert "--force" in args
+    assert "--slow-mo" in args
+    assert "--log-level" in args
+    assert args[args.index("--base-url") + 1] == "http://example.invalid"
+    assert args[args.index("--token") + 1] == "token-123"
+
+
+def test_runner_requires_secrets(tmp_path: Path) -> None:
+    secrets_path = tmp_path / "secrets.yaml"
+    secrets_path.write_text("{}", encoding="utf-8")
+    plan = tmp_path / "plan.yaml"
+    plan.write_text(
+        "dashboards:\n  - slug: one\n    path: lovelace/one\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(KeyError):
+        capture_runner_module.run(
+            [
+                "--plan",
+                str(plan),
+                "--output-dir",
+                str(tmp_path / "shots"),
+                "--markdown-dir",
+                str(tmp_path / "docs"),
+                "--secrets",
+                str(secrets_path),
+            ]
+        )
 
 
 @pytest.mark.parametrize(
