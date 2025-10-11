@@ -60,6 +60,113 @@ data:
 - **Effect unavailable** → verify the monthly effect exists in `light.permanent_outdoor_lights`’ `effect_list`.
 - **Automation conflict** → ensure the Husker lighting hold sensors allow the automation (see [Automation Catalog](../../reference/automations.md)).
 
+## Hardening Against Reboots
+
+Home Assistant restarts can leave the permanent strip stuck on its last effect
+until the next midnight run. Mirror the production automation so the monthly
+effect reapplies as soon as the system comes back online **and** whenever the
+light recovers from an MQTT outage:
+
+```yaml
+automation:
+  - id: exterior_led_monthly_effect
+    alias: "LED: Monthly Effect Scheduler"
+    trigger:
+      - platform: time
+        at: "00:00:01"
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: light.permanent_outdoor_lights
+        from: "unavailable"
+      - platform: state
+        entity_id: light.permanent_outdoor_lights
+        from: "unknown"
+    action:
+      - alias: "Wait for the strip to publish effects"
+        wait_for_trigger:
+          - platform: template
+            value_template: >-
+              {% set effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+              {{ 'LED-August' in effects }}
+        timeout: "00:05:00"
+        continue_on_timeout: true
+      - alias: "Retry until the monthly effect sticks"
+        repeat:
+          count: 6
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: template
+                      value_template: >-
+                        {% set effects = state_attr('light.permanent_outdoor_lights', 'effect_list') or [] %}
+                        {{ 'LED-August' in effects }}
+                  sequence:
+                    - service: scene.turn_on
+                      target:
+                        entity_id: scene.lighting_led_effect_august
+                      continue_on_error: true
+                    - service: light.turn_on
+                      target:
+                        entity_id: light.permanent_outdoor_lights
+                      data:
+                        effect: LED-August
+                      continue_on_error: true
+                    - wait_template: "{{ state_attr('light.permanent_outdoor_lights', 'effect') == 'LED-August' }}"
+                      timeout: "00:00:20"
+                      continue_on_timeout: true
+                    - choose:
+                        - conditions:
+                            - condition: template
+                              value_template: "{{ state_attr('light.permanent_outdoor_lights', 'effect') == 'LED-August' }}"
+                          sequence:
+                            - stop: "LED monthly effect applied"
+                default:
+                  - service: homeassistant.update_entity
+                    target:
+                      entity_id: light.permanent_outdoor_lights
+                    continue_on_error: true
+            - delay: "00:00:10"
+      - condition: template
+        value_template: "{{ state_attr('light.permanent_outdoor_lights', 'effect') == 'LED-August' }}"
+      - service: logbook.log
+        data:
+          name: "LED Monthly Effect"
+          message: "Applied LED-August after restart"
+```
+
+The extra state triggers fire when the MQTT light flips from `unknown`/`unavailable`
+to an actual value, so the automation self-heals after a power blip. The retry
+loop keeps poking Home Assistant to refresh the effect list and re-apply the
+monthly effect up to six times, logging success (or the final skip message)
+after each attempt. Adjust the effect name, scene, and retry count to match your
+installation.
+
+## Automation Status Audit
+
+`packages/automation_watchdog.yaml` exposes `sensor.automation_status_audit`, a
+system-wide template sensor that runs every five minutes (plus on Home
+Assistant start and automation reloads). It walks every automation in the
+environment, compares the current `on`/`off` state to the expected baseline,
+and records a JSON snapshot containing each automation’s friendly name, mode,
+concurrency counters, last trigger time, and whether the entity was ignored.
+
+Use the helper groups exported alongside the sensor to fine-tune expectations:
+
+- Add automations that should remain off (for example, seasonal routines) to
+  `group.automation_watchdog_expected_off` so the audit treats `off` as the
+  desired state.
+- Place experimental or noisy automations in
+  `group.automation_watchdog_ignored` to exclude them entirely from the
+  comparison.
+
+Whenever an automation deviates from its expected state, the
+`automation.automation_watchdog_alert` automation writes a Logbook entry with
+the same `issues_summary` string exposed on the sensor. Reviewing the sensor’s
+`automations` attribute provides a point-in-time comparison of every checked
+entity so you can reconcile the log entry with the actual Home Assistant state
+without wading through YAML definitions.
+
 ## Related Docs
 - [Husker Dashboard Guide](../huskers/dashboard.md)
 - [Automation Catalog](../../reference/automations.md)

@@ -1,0 +1,137 @@
+# Monitors every automation for expected state alignment and exposes audit metadata.
+
+group:
+  automation_watchdog_expected_off:
+    name: Automation Watchdog · Expected Off
+    icon: mdi:power-off
+    entities: []
+  automation_watchdog_ignored:
+    name: Automation Watchdog · Ignored
+    icon: mdi:eye-off
+    entities: []
+
+template:
+  - trigger:
+      - platform: homeassistant
+        event: start
+      - platform: event
+        event_type: automation_reloaded
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: state
+        entity_id:
+          - group.automation_watchdog_expected_off
+          - group.automation_watchdog_ignored
+    sensor:
+      - name: Automation Status Audit
+        unique_id: automation_status_audit
+        icon: mdi:playlist-check
+        variables:
+          automation_audit_snapshot: >-
+            {% set expected_off = state_attr('group.automation_watchdog_expected_off', 'entity_id') or [] %}
+            {% set ignored = state_attr('group.automation_watchdog_ignored', 'entity_id') or [] %}
+            {% set ns = namespace(snapshots=[], mismatches=[], disabled=[]) %}
+            {% for automation in states.automation | sort(attribute='name') %}
+              {% set entity_id = automation.entity_id %}
+              {% set expected_state = 'off' if entity_id in expected_off else 'on' %}
+              {% set actual_state = automation.state %}
+              {% set automation_mode = state_attr(entity_id, 'mode') or 'single' %}
+              {% set current_runs = state_attr(entity_id, 'current') %}
+              {% set max_runs = state_attr(entity_id, 'max') %}
+              {% set last_triggered = state_attr(entity_id, 'last_triggered') %}
+              {% set snapshot = {
+                'entity_id': entity_id,
+                'name': automation.name,
+                'state': actual_state,
+                'expected_state': expected_state,
+                'ignored': entity_id in ignored,
+                'mode': automation_mode,
+                'current_runs': current_runs,
+                'max_runs': max_runs,
+                'last_triggered': last_triggered
+              } %}
+              {% set ns.snapshots = ns.snapshots + [snapshot] %}
+              {% if entity_id in ignored %}
+                {% continue %}
+              {% endif %}
+              {% if actual_state != expected_state %}
+                {% set mismatch = {
+                  'entity_id': entity_id,
+                  'name': automation.name,
+                  'expected_state': expected_state,
+                  'actual_state': actual_state
+                } %}
+                {% set ns.mismatches = ns.mismatches + [mismatch] %}
+                {% if expected_state == 'on' %}
+                  {% set ns.disabled = ns.disabled + [entity_id] %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ {
+              'snapshots': ns.snapshots,
+              'mismatches': ns.mismatches,
+              'disabled': ns.disabled,
+              'expected_off': expected_off,
+              'ignored': ignored
+            } | to_json }}
+        state: >-
+          {% set audit = automation_audit_snapshot | from_json %}
+          {% if audit.mismatches %}
+            issues
+          {% else %}
+            ok
+          {% endif %}
+        attributes:
+          checked_at: '{{ now().isoformat() }}'
+          total_automations: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.snapshots | length }}
+          total_checked: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ (audit.snapshots | selectattr('ignored', 'equalto', false) | list) | length }}
+          total_ignored: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.ignored | length }}
+          disabled: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.disabled | to_json }}
+          unexpected_states: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.mismatches | to_json }}
+          expected_off: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.expected_off | to_json }}
+          ignored: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.ignored | to_json }}
+          issues_summary: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {% if audit.mismatches %}
+              {% set summaries = [] %}
+              {% for mismatch in audit.mismatches %}
+                {% set label = mismatch.name if mismatch.name else mismatch.entity_id %}
+                {% set summaries = summaries + [label ~ ': expected ' ~ mismatch.expected_state ~ ', actual ' ~ mismatch.actual_state] %}
+              {% endfor %}
+              {{ summaries | join(' — ') }}
+            {% else %}
+              All automations match their expected states
+            {% endif %}
+          automations: >-
+            {% set audit = automation_audit_snapshot | from_json %}
+            {{ audit.snapshots | to_json }}
+automation:
+  - id: automation_watchdog_alert
+    alias: 'System: Automation Watchdog Alert'
+    description: 'Logs when the automation audit finds state mismatches.'
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.automation_status_audit
+        to: 'issues'
+    action:
+      - service: logbook.log
+        data:
+          name: Automation Watchdog
+          message: >-
+            {{ state_attr('sensor.automation_status_audit', 'issues_summary') }}
+          entity_id: sensor.automation_status_audit

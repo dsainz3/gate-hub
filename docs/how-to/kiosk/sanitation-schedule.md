@@ -80,4 +80,29 @@ The card updates automatically once the command-line sensor populates.
 3. Verify kiosk sensors show actual dates instead of `unknown`.
 4. Refresh the kiosk dashboard to see the Sanitation Schedule markdown card.
 
+## Hardening Against Reboots
+
+When Home Assistant restarts, dashboards can briefly show `unknown` while the
+command-line sensor waits for its next polling window. Add a lightweight
+automation that refreshes the entity on startup so the kiosk view repopulates
+immediately after a reboot:
+
+```yaml
+automation:
+  - id: kiosk_refresh_sanitation_schedule_on_startup
+    alias: Kiosk · Refresh sanitation schedule on HA start
+    mode: single
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - service: homeassistant.update_entity
+        target:
+          entity_id: sensor.gretna_sanitation_schedule
+```
+
+The command-line sensor reruns as soon as Home Assistant finishes booting, the
+template sensors update with the new JSON payload, and the kiosk dashboard stays
+populated even if the host reboots outside the normal polling window.
+
 When adding future cards, keep this block near the top of the Snapshot view to preserve the high-level overview.
