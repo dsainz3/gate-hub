@@ -10,6 +10,12 @@
       light.light_theater_left:
         state: 'off'
 
+  - id: huskers_sunroom_chase
+    name: Huskers Sunroom Chase
+    entities:
+      script.sunroom_segments_chase:
+        state: 'on'
+
   - id: lighting_evening_sunset_interior
     name: Lighting – Evening Sunset (Interior)
     entities:

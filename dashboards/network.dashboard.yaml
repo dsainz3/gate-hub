@@ -4,141 +4,145 @@ views:
     path: network
     icon: mdi:access-point-network
     cards:
-      - type: markdown
-        content: >-
-          {% macro fmt(value, precision=1, unit='') -%}
-            {%- if value in ['unknown', 'unavailable', None] -%}
-              –
-            {%- else -%}
-              {%- set num = (value | float(0)) | round(precision) -%}
-              {%- if precision == 0 -%}
-                {{ num | int }}{{ ' ' ~ unit if unit else '' }}
-              {%- else -%}
-                {{ num }}{{ ' ' ~ unit if unit else '' }}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endmacro %}
-          {% macro trend(current, reference, unit='') -%}
-            {%- if current in ['unknown', 'unavailable', None] or reference in ['unknown', 'unavailable', None] -%}
-              –
-            {%- else -%}
-              {%- set ref = reference | float(0) -%}
-              {%- if ref == 0 -%}
-                –
-              {%- else -%}
-                {%- set diff = (current | float(0)) - ref -%}
-                {%- if diff > 0 -%}
-                  ↑ {{ diff | round(1) }}{{ unit }}
-                {%- elif diff < 0 -%}
-                  ↓ {{ (diff | abs) | round(1) }}{{ unit }}
+      - type: grid
+        columns: 1
+        square: false
+        cards:
+          - type: markdown
+            content: >-
+              {% macro fmt(value, precision=1, unit='') -%}
+                {%- if value in ['unknown', 'unavailable', None] -%}
+                  –
                 {%- else -%}
-                  → 0{{ unit }}
+                  {%- set num = (value | float(0)) | round(precision) -%}
+                  {%- if precision == 0 -%}
+                    {{ num | int }}{{ ' ' ~ unit if unit else '' }}
+                  {%- else -%}
+                    {{ num }}{{ ' ' ~ unit if unit else '' }}
+                  {%- endif -%}
                 {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endmacro %}
-          {% macro trend_compare(current, reference, trend_unit='', fmt_unit='', precision=1, label=None) -%}
-            {%- set t = trend(current, reference, trend_unit) -%}
-            {%- if t == '–' -%}
-              –
-            {%- elif reference in ['unknown', 'unavailable', None] -%}
-              {{ t }}
-            {%- else -%}
-              {%- set lbl = label if label not in [None, 'unavailable'] else 'baseline' -%}
-              {{ t }} vs {{ lbl }} {{ fmt(reference, precision, fmt_unit) }}
-            {%- endif -%}
-          {%- endmacro %}
-          {% set invalid = ['unknown', 'unavailable', None] %}
-          {% set last_speedtest = state_attr('sensor.network_status_summary', 'last_speedtest') %}
-          {% set last_label = 'pending runs' %}
-          {% if last_speedtest not in invalid %}
-            {% set dt = as_datetime(last_speedtest) %}
-            {% if dt %}
-              {% set last_label = as_timestamp(dt) | timestamp_custom('%b %-d, %Y %-I:%M %p %Z', True) %}
-            {% endif %}
-          {% endif %}
-          {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
-          {% if reachability_state in invalid %}
-            {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
-          {% endif %}
-          {% set reachability = reachability_state == 'on' %}
-          {% set clients_total = state_attr('sensor.deco_network_health', 'clients_total') %}
-          {% set latency_live = states('sensor.internet_latency') %}
-          {% set latency_source = 'Internet latency' %}
-          {% if latency_live in invalid %}
-            {% set latency_live = states('sensor.speedtest_ping') %}
-            {% set latency_source = 'Speedtest ping' %}
-          {% endif %}
-          {% set latency_ref = states('sensor.internet_latency_baseline') %}
-          {% set latency_ref_label = state_attr('sensor.internet_latency_baseline', 'source_label') %}
-          {% if latency_ref in invalid %}
-            {% set latency_ref = states('sensor.speedtest_ping_baseline') %}
-            {% set latency_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
-          {% endif %}
-          {% set download_ref = states('sensor.speedtest_download_baseline') %}
-          {% set download_ref_label = state_attr('sensor.speedtest_download_baseline', 'source_label') %}
-          {% set upload_ref = states('sensor.speedtest_upload_baseline') %}
-          {% set upload_ref_label = state_attr('sensor.speedtest_upload_baseline', 'source_label') %}
-          {% set ping_ref = states('sensor.speedtest_ping_baseline') %}
-          {% set ping_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
-          {% set deco_down_ref = states('sensor.deco_total_down_baseline') %}
-          {% set deco_down_ref_label = state_attr('sensor.deco_total_down_baseline', 'source_label') %}
-          {% set deco_up_ref = states('sensor.deco_total_up_baseline') %}
-          {% set deco_up_ref_label = state_attr('sensor.deco_total_up_baseline', 'source_label') %}
-          {% set latency_trend = trend_compare(latency_live, latency_ref, ' ms', 'ms', 1, latency_ref_label) %}
-          {% set download_trend = trend_compare(states('sensor.speedtest_download'), download_ref, ' Mbps', 'Mbps', 1, download_ref_label) %}
-          {% set upload_trend = trend_compare(states('sensor.speedtest_upload'), upload_ref, ' Mbps', 'Mbps', 1, upload_ref_label) %}
-          {% set ping_trend = trend_compare(states('sensor.speedtest_ping'), ping_ref, ' ms', 'ms', 1, ping_ref_label) %}
-          {% set deco_down_trend = trend_compare(states('sensor.deco_total_down_mbps'), deco_down_ref, ' Mbps', 'Mbps', 2, deco_down_ref_label) %}
-          {% set deco_up_trend = trend_compare(states('sensor.deco_total_up_mbps'), deco_up_ref, ' Mbps', 'Mbps', 2, deco_up_ref_label) %}
-          {% if latency_live in invalid %}
-            {% set ping_status = 'unavailable' %}
-          {% elif reachability %}
-            {% set ping_status = 'reachable' %}
-          {% else %}
-            {% set ping_status = 'reachable (monitor flagged offline)' %}
-          {% endif %}
-          {% set latency_1h = states('sensor.internet_latency_1h_avg') %}
-          {% if latency_1h in invalid %}
-            {% set latency_1h = latency_live %}
-          {% endif %}
-          {% set latency_24h = states('sensor.internet_latency_24h_avg') %}
-          {% if latency_24h in invalid %}
-            {% set latency_24h = latency_ref %}
-          {% endif %}
-          {% set latency_7d = states('sensor.internet_latency_7d_avg') %}
-          {% if latency_7d in invalid %}
-            {% set latency_7d = latency_ref %}
-          {% endif %}
-          {% set latency_30d = states('sensor.internet_latency_30d_avg') %}
-          {% if latency_30d in invalid %}
-            {% set latency_30d = latency_ref %}
-          {% endif %}
-          ## Network Snapshot
-          **Status:** {{ states('sensor.network_status_summary') | title }} · {{ states('sensor.network_performance_summary') | title }}
+              {%- endmacro %}
+              {% macro trend(current, reference, unit='') -%}
+                {%- if current in ['unknown', 'unavailable', None] or reference in ['unknown', 'unavailable', None] -%}
+                  –
+                {%- else -%}
+                  {%- set ref = reference | float(0) -%}
+                  {%- if ref == 0 -%}
+                    –
+                  {%- else -%}
+                    {%- set diff = (current | float(0)) - ref -%}
+                    {%- if diff > 0 -%}
+                      ↑ {{ diff | round(1) }}{{ unit }}
+                    {%- elif diff < 0 -%}
+                      ↓ {{ (diff | abs) | round(1) }}{{ unit }}
+                    {%- else -%}
+                      → 0{{ unit }}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endmacro %}
+              {% macro trend_compare(current, reference, trend_unit='', fmt_unit='', precision=1, label=None) -%}
+                {%- set t = trend(current, reference, trend_unit) -%}
+                {%- if t == '–' -%}
+                  –
+                {%- elif reference in ['unknown', 'unavailable', None] -%}
+                  {{ t }}
+                {%- else -%}
+                  {%- set lbl = label if label not in [None, 'unavailable'] else 'baseline' -%}
+                  {{ t }} vs {{ lbl }} {{ fmt(reference, precision, fmt_unit) }}
+                {%- endif -%}
+              {%- endmacro %}
+              {% set invalid = ['unknown', 'unavailable', None] %}
+              {% set last_speedtest = state_attr('sensor.network_status_summary', 'last_speedtest') %}
+              {% set last_label = 'pending runs' %}
+              {% if last_speedtest not in invalid %}
+                {% set dt = as_datetime(last_speedtest) %}
+                {% if dt %}
+                  {% set last_label = as_timestamp(dt) | timestamp_custom('%b %-d, %Y %-I:%M %p %Z', True) %}
+                {% endif %}
+              {% endif %}
+              {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
+              {% if reachability_state in invalid %}
+                {% set reachability_state = states('binary_sensor.internet_reachability_2') %}
+              {% endif %}
+              {% set reachability = reachability_state == 'on' %}
+              {% set clients_total = state_attr('sensor.deco_network_health', 'clients_total') %}
+              {% set latency_live = states('sensor.internet_latency') %}
+              {% set latency_source = 'Internet latency' %}
+              {% if latency_live in invalid %}
+                {% set latency_live = states('sensor.speedtest_ping') %}
+                {% set latency_source = 'Speedtest ping' %}
+              {% endif %}
+              {% set latency_ref = states('sensor.internet_latency_baseline') %}
+              {% set latency_ref_label = state_attr('sensor.internet_latency_baseline', 'source_label') %}
+              {% if latency_ref in invalid %}
+                {% set latency_ref = states('sensor.speedtest_ping_baseline') %}
+                {% set latency_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
+              {% endif %}
+              {% set download_ref = states('sensor.speedtest_download_baseline') %}
+              {% set download_ref_label = state_attr('sensor.speedtest_download_baseline', 'source_label') %}
+              {% set upload_ref = states('sensor.speedtest_upload_baseline') %}
+              {% set upload_ref_label = state_attr('sensor.speedtest_upload_baseline', 'source_label') %}
+              {% set ping_ref = states('sensor.speedtest_ping_baseline') %}
+              {% set ping_ref_label = state_attr('sensor.speedtest_ping_baseline', 'source_label') %}
+              {% set deco_down_ref = states('sensor.deco_total_down_baseline') %}
+              {% set deco_down_ref_label = state_attr('sensor.deco_total_down_baseline', 'source_label') %}
+              {% set deco_up_ref = states('sensor.deco_total_up_baseline') %}
+              {% set deco_up_ref_label = state_attr('sensor.deco_total_up_baseline', 'source_label') %}
+              {% set latency_trend = trend_compare(latency_live, latency_ref, ' ms', 'ms', 1, latency_ref_label) %}
+              {% set download_trend = trend_compare(states('sensor.speedtest_download'), download_ref, ' Mbps', 'Mbps', 1, download_ref_label) %}
+              {% set upload_trend = trend_compare(states('sensor.speedtest_upload'), upload_ref, ' Mbps', 'Mbps', 1, upload_ref_label) %}
+              {% set ping_trend = trend_compare(states('sensor.speedtest_ping'), ping_ref, ' ms', 'ms', 1, ping_ref_label) %}
+              {% set deco_down_trend = trend_compare(states('sensor.deco_total_down_mbps'), deco_down_ref, ' Mbps', 'Mbps', 2, deco_down_ref_label) %}
+              {% set deco_up_trend = trend_compare(states('sensor.deco_total_up_mbps'), deco_up_ref, ' Mbps', 'Mbps', 2, deco_up_ref_label) %}
+              {% if latency_live in invalid %}
+                {% set ping_status = 'unavailable' %}
+              {% elif reachability %}
+                {% set ping_status = 'reachable' %}
+              {% else %}
+                {% set ping_status = 'reachable (monitor flagged offline)' %}
+              {% endif %}
+              {% set latency_1h = states('sensor.internet_latency_1h_avg') %}
+              {% if latency_1h in invalid %}
+                {% set latency_1h = latency_live %}
+              {% endif %}
+              {% set latency_24h = states('sensor.internet_latency_24h_avg') %}
+              {% if latency_24h in invalid %}
+                {% set latency_24h = latency_ref %}
+              {% endif %}
+              {% set latency_7d = states('sensor.internet_latency_7d_avg') %}
+              {% if latency_7d in invalid %}
+                {% set latency_7d = latency_ref %}
+              {% endif %}
+              {% set latency_30d = states('sensor.internet_latency_30d_avg') %}
+              {% if latency_30d in invalid %}
+                {% set latency_30d = latency_ref %}
+              {% endif %}
+              ## Network Snapshot
+              **Status:** {{ states('sensor.network_status_summary') | title }} · {{ states('sensor.network_performance_summary') | title }}
 
-          **Ping:** {{ fmt(latency_live) }} ms {{ ping_status }}  {{ latency_trend }}
+              **Ping:** {{ fmt(latency_live) }} ms {{ ping_status }}  {{ latency_trend }}
 
-          **Speedtest:** ↓ {{ fmt(states('sensor.speedtest_download'), 1, 'Mbps') }}
-          ({{ download_trend }}) · ↑ {{ fmt(states('sensor.speedtest_upload'), 1, 'Mbps') }}
-          ({{ upload_trend }}) ·
-          Ping {{ fmt(states('sensor.speedtest_ping'), 1, 'ms') }}
-          ({{ ping_trend }})
+              **Speedtest:** ↓ {{ fmt(states('sensor.speedtest_download'), 1, 'Mbps') }}
+              ({{ download_trend }}) · ↑ {{ fmt(states('sensor.speedtest_upload'), 1, 'Mbps') }}
+              ({{ upload_trend }}) ·
+              Ping {{ fmt(states('sensor.speedtest_ping'), 1, 'ms') }}
+              ({{ ping_trend }})
 
-          **Deco Throughput:** ↓ {{ fmt(states('sensor.deco_total_down_mbps'), 2, 'Mbps') }}
-          ({{ deco_down_trend }}) ·
-          ↑ {{ fmt(states('sensor.deco_total_up_mbps'), 2, 'Mbps') }}
-          ({{ deco_up_trend }}) ·
-          Clients {{ fmt(states('sensor.deco_client_count'), 0) }}
-          {% if clients_total is not none %}/ {{ clients_total }}{% endif %}
-          ({{ states('sensor.deco_network_health') | title }})
+              **Deco Throughput:** ↓ {{ fmt(states('sensor.deco_total_down_mbps'), 2, 'Mbps') }}
+              ({{ deco_down_trend }}) ·
+              ↑ {{ fmt(states('sensor.deco_total_up_mbps'), 2, 'Mbps') }}
+              ({{ deco_up_trend }}) ·
+              Clients {{ fmt(states('sensor.deco_client_count'), 0) }}
+              {% if clients_total is not none %}/ {{ clients_total }}{% endif %}
+              ({{ states('sensor.deco_network_health') | title }})
 
-          **Latency averages:** 1h {{ fmt(latency_1h) }} ms·
-          24h {{ fmt(latency_24h) }} ms·
-          7d {{ fmt(latency_7d) }} ms·
-          30d {{ fmt(latency_30d) }} ms
+              **Latency averages:** 1h {{ fmt(latency_1h) }} ms·
+              24h {{ fmt(latency_24h) }} ms·
+              7d {{ fmt(latency_7d) }} ms·
+              30d {{ fmt(latency_30d) }} ms
 
-          **Last Speed Test:** {{ last_label }}
+              **Last Speed Test:** {{ last_label }}
       - type: grid
         columns: 3
         square: false
@@ -160,15 +164,15 @@ views:
             name: Live latency
             color: '#039be5'
           - type: tile
-            entity: sensor.speedtest_download
+            entity: sensor.speedtest_download_last_good
             name: Download Mbps
             color: '#3949ab'
           - type: tile
-            entity: sensor.speedtest_upload
+            entity: sensor.speedtest_upload_last_good
             name: Upload Mbps
             color: '#8d6e63'
           - type: tile
-            entity: sensor.speedtest_ping
+            entity: sensor.speedtest_ping_last_good
             name: Speedtest ping
             color: '#ef6c00'
           - type: tile
@@ -233,7 +237,6 @@ views:
                 graph_span: 24h
                 span:
                   end: hour
-                chart_type: area
                 yaxis:
                   - min: 0
                 apex_config:
@@ -249,10 +252,12 @@ views:
                   - entity: sensor.deco_total_down_mbps
                     name: Down
                     color: '#26a69a'
+                    type: area
                     float_precision: 2
                   - entity: sensor.deco_total_up_mbps
                     name: Up
                     color: '#7e57c2'
+                    type: area
                     float_precision: 2
           - type: vertical-stack
             cards:
@@ -275,15 +280,17 @@ views:
                   legend:
                     show: true
                 series:
-                  - entity: sensor.speedtest_download
+                  - entity: sensor.speedtest_download_last_good
                     name: Download
                     color: '#3949ab'
+                    yaxis_id: primary
                     float_precision: 1
-                  - entity: sensor.speedtest_upload
+                  - entity: sensor.speedtest_upload_last_good
                     name: Upload
                     color: '#8d6e63'
+                    yaxis_id: primary
                     float_precision: 1
-                  - entity: sensor.speedtest_ping
+                  - entity: sensor.speedtest_ping_last_good
                     name: Ping
                     color: '#ef6c00'
                     type: line
@@ -300,6 +307,7 @@ views:
                   yellow: 60
                   red: 120
               - type: button
+                entity: sensor.speedtest_ping_last_good
                 name: Run Speedtest Now
                 icon: mdi:speedometer
                 tap_action:
@@ -314,6 +322,8 @@ views:
                   action: none
       - type: markdown
         title: Rolling averages
+        layout_options:
+          grid_column: 1 / -1
         content: >-
           {% macro fmt(val, unit='') -%}
             {%- if val in [None, 'unknown', 'unavailable'] -%}
@@ -358,7 +368,7 @@ views:
           {{ row('Deco ↓', 'deco_down', 'Mbps') }}
           {{ row('Deco ↑', 'deco_up', 'Mbps') }}
           {% else %}
-          _Rolling statistics unavailable_
+          _Metrics unavailable_
           {% endif %}
       - type: custom:auto-entities
         show_empty: false
@@ -412,14 +422,21 @@ views:
   - title: History
     path: network-history
     icon: mdi:chart-line
+    max_columns: 6
+    layout:
+      width: full
     cards:
       - type: markdown
+        layout_options:
+          grid_column: 1 / -1
         content: >-
           ## Historical Trends
 
           Short, medium, and long term views with mixed chart styles for a fuller
           picture of performance.
       - type: grid
+        layout_options:
+          grid_column: 1 / -1
         columns: 3
         square: false
         cards:
@@ -463,7 +480,6 @@ views:
                 graph_span: 24h
                 span:
                   end: hour
-                chart_type: area
                 yaxis:
                   - min: 0
                 apex_config:
@@ -479,10 +495,12 @@ views:
                   - entity: sensor.deco_total_down_mbps
                     name: Down
                     color: '#26a69a'
+                    type: area
                     float_precision: 2
                   - entity: sensor.deco_total_up_mbps
                     name: Up
                     color: '#7e57c2'
+                    type: area
                     float_precision: 2
               - type: custom:apexcharts-card
                 header:
@@ -491,10 +509,6 @@ views:
                 graph_span: 7d
                 span:
                   end: day
-                chart_type: column
-                group_by:
-                  duration: 12h
-                  func: last
                 yaxis:
                   - min: 0
                 apex_config:
@@ -507,11 +521,19 @@ views:
                   - entity: sensor.speedtest_download
                     name: Download
                     color: '#3949ab'
+                    type: column
                     float_precision: 1
+                    group_by:
+                      duration: 12h
+                      func: last
                   - entity: sensor.speedtest_upload
                     name: Upload
                     color: '#8d6e63'
+                    type: column
                     float_precision: 1
+                    group_by:
+                      duration: 12h
+                      func: last
           - type: vertical-stack
             cards:
               - type: markdown
@@ -552,10 +574,6 @@ views:
                 graph_span: 7d
                 span:
                   end: day
-                chart_type: area
-                group_by:
-                  duration: 3h
-                  func: avg
                 yaxis:
                   - min: 0
                 apex_config:
@@ -571,11 +589,19 @@ views:
                   - entity: sensor.deco_total_down_mbps
                     name: Down
                     color: '#26a69a'
+                    type: area
                     float_precision: 2
+                    group_by:
+                      duration: 3h
+                      func: avg
                   - entity: sensor.deco_total_up_mbps
                     name: Up
                     color: '#7e57c2'
+                    type: area
                     float_precision: 2
+                    group_by:
+                      duration: 3h
+                      func: avg
               - type: history-graph
                 title: Clients online (7d)
                 hours_to_show: 168
@@ -593,10 +619,6 @@ views:
                 graph_span: 30d
                 span:
                   end: day
-                chart_type: area
-                group_by:
-                  duration: 6h
-                  func: avg
                 yaxis:
                   - min: 0
                 apex_config:
@@ -612,17 +634,27 @@ views:
                   - entity: sensor.internet_latency
                     name: Current
                     color: '#1e88e5'
+                    type: area
                     float_precision: 1
+                    group_by:
+                      duration: 6h
+                      func: avg
                   - entity: sensor.internet_latency_7d_avg
                     name: 7d avg
                     color: '#43a047'
                     type: line
                     float_precision: 1
+                    group_by:
+                      duration: 6h
+                      func: avg
                   - entity: sensor.internet_latency_30d_avg
                     name: 30d avg
                     color: '#fdd835'
                     type: line
                     float_precision: 1
+                    group_by:
+                      duration: 6h
+                      func: avg
               - type: custom:apexcharts-card
                 header:
                   title: Speedtest cadence
@@ -630,10 +662,6 @@ views:
                 graph_span: 30d
                 span:
                   end: day
-                chart_type: column
-                group_by:
-                  duration: 1d
-                  func: avg
                 yaxis:
                   - min: 0
                 apex_config:
@@ -646,11 +674,19 @@ views:
                   - entity: sensor.speedtest_download
                     name: Download
                     color: '#3949ab'
+                    type: column
                     float_precision: 1
+                    group_by:
+                      duration: 1d
+                      func: avg
                   - entity: sensor.speedtest_upload
                     name: Upload
                     color: '#8d6e63'
+                    type: column
                     float_precision: 1
+                    group_by:
+                      duration: 1d
+                      func: avg
               - type: statistics-graph
                 title: Ping averages (30d)
                 chart_type: line
