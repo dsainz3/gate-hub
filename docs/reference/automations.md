@@ -70,9 +70,9 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 ### LED: Monthly Effect Scheduler (`automations.yaml:205`)
 - **ID** `exterior_led_monthly_effect`
 - **Entity** `automation.exterior_led_monthly_effect`
-- **Triggers**: Time `00:00:01` daily and Home Assistant start.
-- **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and confirms the requested `effect` exists in `light.permanent_outdoor_lights`.
-- **Actions**: Waits up to two minutes for the permanent outdoor light effect list to load after startup, applies the month-specific effect when available, and logs success or a skip if the effect never appears. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
+- **Triggers**: Time `00:00:01` daily, Home Assistant start, and the permanent strip returning from `unknown`/`unavailable`.
+- **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and continually verifies the requested `effect` exists in `light.permanent_outdoor_lights`.
+- **Actions**: Waits up to five minutes for the effect list to repopulate, retries the scene/effect application up to six times (refreshing the entity between attempts), stops once the effect is confirmed, and logs the outcome. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
 
 ### Climate: Humidor Temperature Control (`automations.yaml:251`)
 - **ID** `humidor_plug_temp_control`
@@ -134,6 +134,13 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Guards**: Huskers automations + game mode `on`.
 - **Actions**: Stops chase scripts in parallel and records cleanup completion.
 - **Notes**: The supporting status sensor stores a `status_source` attribute (`scoreboard` or `schedule`). If ESPN’s live feed disappears immediately after the game, the fallback schedule entry keeps the sensor in `Final` so this automation still fires once the postgame window expires.
+
+### Football Team: Automation Watchdog Alert (`packages/huskers_everything.yaml:1194`)
+- **ID** `huskers_automation_watchdog_alert`
+- **Trigger**: `sensor.huskers_automation_status_audit` changes to `issues` after the five-minute audit runs.
+- **Guards**: None; fires whenever the audit flags disabled automations or mismatched modes.
+- **Actions**: Writes a Logbook entry with the audit summary so on-call staff can compare against the sensor’s trigger snapshot.
+- **Notes**: The audit sensor aggregates trigger states, helper booleans, and expected modes for all football automations so the alert message always references the latest snapshot.
 
 ---
 
