@@ -67,6 +67,7 @@ dashboard_capture_token: YOUR_LONG_LIVED_TOKEN
 ```
 
 The wrapper reads those keys, forwards them to `capture_dashboard_screenshots.py`, and supports the same switches (`--headful`, `--slow-mo`, `--force`, and `--log-level`).
+If you prefer to keep credentials out of the secrets file, set `HA_BASE_URL` and `HA_TOKEN` (or the legacy `HASS_*` equivalents) in the environment instead—the wrapper falls back to those variables automatically.
 
 ### Change detection and Markdown trackers
 

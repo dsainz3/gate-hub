@@ -10,6 +10,7 @@ exporting of environment variables before each run.
 from __future__ import annotations
 
 import argparse
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -139,14 +140,31 @@ def run(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     secrets = load_secrets(args.secrets)
-    try:
-        base_url = str(secrets[args.base_url_key])
-        token = str(secrets[args.token_key])
-    except KeyError as exc:  # pragma: no cover - defensive
+
+    base_url_raw = (
+        secrets.get(args.base_url_key)
+        or os.environ.get("HA_BASE_URL")
+        or os.environ.get("HASS_BASE_URL")
+    )
+    token_raw = (
+        secrets.get(args.token_key)
+        or os.environ.get("HA_TOKEN")
+        or os.environ.get("HASS_LONG_LIVED_TOKEN")
+    )
+
+    if base_url_raw is None:
         raise KeyError(
-            f"Missing '{exc.args[0]}' in {args.secrets}. "
-            "Add the value or override --base-url-key/--token-key."
-        ) from exc
+            f"Missing '{args.base_url_key}' in {args.secrets} and HA_BASE_URL/HASS_BASE_URL env vars. "
+            "Add the value or override --base-url-key."
+        )
+    if token_raw is None:
+        raise KeyError(
+            f"Missing '{args.token_key}' in {args.secrets} and HA_TOKEN/HASS_LONG_LIVED_TOKEN env vars. "
+            "Add the value or override --token-key."
+        )
+
+    base_url = str(base_url_raw)
+    token = str(token_raw)
 
     if not base_url:
         raise ValueError(
