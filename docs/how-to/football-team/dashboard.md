@@ -37,6 +37,7 @@ Purpose: Fan-facing board with real-time game context.
 Highlights
 - **TeamTracker hero card** summarising clock, score, probability, and win/loss context.
 - **Quick actions** to refresh ESPN endpoints (`sensor.husker_team`, `sensor.espn_cfb_scoreboard`, `sensor.espn_nebraska_schedule`).
+- **Game mode controls** to manually start or stop `input_boolean.huskers_game_mode` without hunting through Settings. The stop button now restores the pre-show lighting snapshot that is captured at kickoff.
 - **Lighting macros**: launch the dual-cream 45 s chase, trigger the Hail Varsity burst, or fall back to the all-scarlet scene.
 - **Game Essentials** card showing kickoff ISO, venue, TV network, betting line, and manual override flags sourced from `input_boolean.huskers_use_manual_score`/`input_boolean.huskers_use_manual_kickoff`.
 - **Tailgate Countdown** markdown wrapped in `binary_sensor.huskers_tailgate_window` so it only renders 24 h before kickoff through 30 min post-game.
@@ -81,6 +82,7 @@ Usage Notes
 
 ## Operations Checklist
 - Use **Refresh Game Data** before kickoff or when ESPN phases feel stale.
+- Use **Start Game Mode**/**Stop Game Mode** from the Game Day quick actions when you need to manually override the automation window (for example, cancelling a rain delay or shutting things down early). Stopping the mode also reapplies the pre-game lighting snapshot so you land back in normal house lighting.
 - Toggle `input_boolean.huskers_test_mode` to simulate game phases without waiting for live data.
 - Monitor `binary_sensor.huskers_light_show_active` while running lighting scripts; the sidebar icon warns if shows fail to shut down post-game.
 - Validate the Big Ten standings table weekly during the season; ESPN occasionally changes payload structure—adjust `packages/huskers_everything.yaml` accordingly.

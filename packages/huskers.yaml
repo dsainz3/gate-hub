@@ -1688,6 +1688,13 @@ automation:
                   - service: script.turn_on
                     target:
                       entity_id: script.huskers_chase_speed_stop
+        default:
+          - service: scene.turn_on
+            target:
+              entity_id:
+                - scene.huskers_before_chase
+                - scene.huskers_before_burst
+            continue_on_error: true
       - service: logbook.log
         data:
           name: Huskers Automation
@@ -1695,7 +1702,7 @@ automation:
             {% if cleanup_required %}
               Postgame cleanup completed (loops stopped, state restored)
             {% else %}
-              Postgame cleanup skipped (no active Husker light show)
+              Postgame cleanup restored snapshots (no active Husker light show)
             {% endif %}
           entity_id: automation.huskers_postgame_cleanup
 
