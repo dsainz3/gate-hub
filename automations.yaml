@@ -550,3 +550,36 @@
         data:
           name: Safety Automation
           message: Nightly burner plug shutoff completed
+
+  - id: reolink_warmup_on_start
+    alias: 'Reolink: Warm Camera Streams at Startup'
+    description: >
+      Sequentially primes Reolink camera streams after Home Assistant restarts to avoid heavy simultaneous loads.
+    mode: single
+    trigger:
+      - platform: homeassistant
+        event: start
+    variables:
+      reolink_cameras:
+        - camera.backyard_camera_fluent
+        - camera.argus_pt_ultra_fluent
+        - camera.garage_cam_fluent
+      warmup_delay: '00:00:05'
+    action:
+      - repeat:
+          for_each: "{{ reolink_cameras }}"
+          sequence:
+            - variables:
+                camera_slug: "{{ repeat.item.split('.')[-1] }}"
+            - service: camera.snapshot
+              target:
+                entity_id: "{{ repeat.item }}"
+              data:
+                filename: "/config/www/reolink_warmup/{{ camera_slug }}.jpg"
+            - delay: "{{ warmup_delay }}"
+      - service: homeassistant.update_entity
+        target:
+          entity_id:
+            - binary_sensor.backyard_camera_motion
+            - binary_sensor.argus_pt_ultra_motion
+            - binary_sensor.garage_cam_motion
