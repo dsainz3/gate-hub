@@ -8,8 +8,17 @@ template:
         device_class: connectivity
         # ONLINE when we have a recent speedtest and non-zero ping & reasonable download
         state: >-
-          {% set ping = states('sensor.speedtest_ping') | float(0) %}
-          {% set down = states('sensor.speedtest_download') | float(0) %}
+          {% set invalid = ['unknown', 'unavailable', None, ''] %}
+          {% set ping_source = states('sensor.speedtest_ping') %}
+          {% if ping_source in invalid %}
+            {% set ping_source = states('sensor.speedtest_ping_last_good') %}
+          {% endif %}
+          {% set ping = ping_source | float(0) %}
+          {% set down_source = states('sensor.speedtest_download') %}
+          {% if down_source in invalid %}
+            {% set down_source = states('sensor.speedtest_download_last_good') %}
+          {% endif %}
+          {% set down = down_source | float(0) %}
           {% set entity = states.sensor.speedtest_download %}
           {% set last_changed = entity.last_changed if entity is not none else none %}
           {% set last_ts = as_timestamp(last_changed) if last_changed is not none else none %}
@@ -17,9 +26,24 @@ template:
           {% set healthy = ping > 0 and down > 1 and (age is none or age < 7200) %}
           {{ 'on' if healthy else 'off' }}
         attributes:
-          ping_ms: "{{ states('sensor.speedtest_ping') | float(0) }}"
-          download_mbps: "{{ states('sensor.speedtest_download') | float(0) }}"
-          upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) }}"
+          ping_ms: >-
+            {% set value = states('sensor.speedtest_ping') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
+            {{ value | float(0) }}
+          download_mbps: >-
+            {% set value = states('sensor.speedtest_download') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_download_last_good') %}
+            {% endif %}
+            {{ value | float(0) }}
+          upload_mbps: >-
+            {% set value = states('sensor.speedtest_upload') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_upload_last_good') %}
+            {% endif %}
+            {{ value | float(0) }}
           last_result_changed: >-
             {% set entity = states.sensor.speedtest_download %}
             {{ entity.last_changed if entity is not none else none }}
@@ -88,14 +112,15 @@ template:
             {{ ping | round(1) }}
           {% else %}
             {% set fallback = states('sensor.speedtest_ping_baseline') %}
+            {% if fallback in ['unknown', 'unavailable', None] %}
+              {% set fallback = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
             {% if fallback not in ['unknown', 'unavailable', None] %}
               {{ fallback | float | round(1) }}
+            {% elif ping is not none and ping > 0 %}
+              {{ ping | round(1) }}
             {% else %}
-              {% if ping is not none and ping > 0 %}
-                {{ ping | round(1) }}
-              {% else %}
-                {{ none }}
-              {% endif %}
+              {{ none }}
             {% endif %}
           {% endif %}
       - name: Network Status Summary
@@ -132,6 +157,9 @@ template:
               {% set latency = states('sensor.internet_latency_baseline') %}
             {% endif %}
             {% if latency in ['unknown', 'unavailable', None] %}
+              {% set latency = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
+            {% if latency in ['unknown', 'unavailable', None] %}
               {% set latency = states('sensor.speedtest_ping') %}
             {% endif %}
             {% if latency in ['unknown', 'unavailable', None] %}
@@ -139,9 +167,24 @@ template:
             {% else %}
               {{ latency | float | round(1) }}
             {% endif %}
-          speedtest_ping_ms: "{{ states('sensor.speedtest_ping') | float(0) | round(1) }}"
-          speedtest_download_mbps: "{{ states('sensor.speedtest_download') | float(0) | round(1) }}"
-          speedtest_upload_mbps: "{{ states('sensor.speedtest_upload') | float(0) | round(1) }}"
+          speedtest_ping_ms: >-
+            {% set value = states('sensor.speedtest_ping') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
+            {{ value | float(0) | round(1) }}
+          speedtest_download_mbps: >-
+            {% set value = states('sensor.speedtest_download') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_download_last_good') %}
+            {% endif %}
+            {{ value | float(0) | round(1) }}
+          speedtest_upload_mbps: >-
+            {% set value = states('sensor.speedtest_upload') %}
+            {% if value in ['unknown', 'unavailable', None, ''] %}
+              {% set value = states('sensor.speedtest_upload_last_good') %}
+            {% endif %}
+            {{ value | float(0) | round(1) }}
           deco_down_mbps: "{{ states('sensor.deco_total_down_mbps') | float(0) }}"
           deco_up_mbps: "{{ states('sensor.deco_total_up_mbps') | float(0) }}"
           nodes_online: "{{ states('sensor.deco_node_count') }}"
@@ -204,6 +247,99 @@ template:
         attributes:
           source_entity: "{{ latency_source if latency_source else 'unknown' }}"
           source_state: "{{ latency_state }}"
+      - name: Speedtest Download (Last Good)
+        unique_id: network_speedtest_download_last_good
+        unit_of_measurement: Mbps
+        device_class: data_rate
+        state_class: measurement
+        state: >-
+          {% set invalid = ['unknown', 'unavailable', None, ''] %}
+          {% set current = states('sensor.speedtest_download') %}
+          {% if current not in invalid %}
+            {{ current | float(0) | round(2) }}
+          {% else %}
+            {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_download_mbps') %}
+            {% if fallback in invalid %}
+              {% set fallback = states('sensor.speedtest_download_baseline') %}
+            {% endif %}
+            {{ fallback | float(0) | round(2) if fallback not in invalid else none }}
+          {% endif %}
+        attributes:
+          source_entity: >-
+            {% set invalid = ['unknown', 'unavailable', None, ''] %}
+            {% set current = states('sensor.speedtest_download') %}
+            {% if current not in invalid %}
+              sensor.speedtest_download
+            {% else %}
+              {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_download_mbps') %}
+              {% if fallback in invalid %}
+                sensor.speedtest_download_baseline
+              {% else %}
+                sensor.network_status_summary
+              {% endif %}
+            {% endif %}
+      - name: Speedtest Upload (Last Good)
+        unique_id: network_speedtest_upload_last_good
+        unit_of_measurement: Mbps
+        device_class: data_rate
+        state_class: measurement
+        state: >-
+          {% set invalid = ['unknown', 'unavailable', None, ''] %}
+          {% set current = states('sensor.speedtest_upload') %}
+          {% if current not in invalid %}
+            {{ current | float(0) | round(2) }}
+          {% else %}
+            {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_upload_mbps') %}
+            {% if fallback in invalid %}
+              {% set fallback = states('sensor.speedtest_upload_baseline') %}
+            {% endif %}
+            {{ fallback | float(0) | round(2) if fallback not in invalid else none }}
+          {% endif %}
+        attributes:
+          source_entity: >-
+            {% set invalid = ['unknown', 'unavailable', None, ''] %}
+            {% set current = states('sensor.speedtest_upload') %}
+            {% if current not in invalid %}
+              sensor.speedtest_upload
+            {% else %}
+              {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_upload_mbps') %}
+              {% if fallback in invalid %}
+                sensor.speedtest_upload_baseline
+              {% else %}
+                sensor.network_status_summary
+              {% endif %}
+            {% endif %}
+      - name: Speedtest Ping (Last Good)
+        unique_id: network_speedtest_ping_last_good
+        unit_of_measurement: ms
+        device_class: duration
+        state_class: measurement
+        state: >-
+          {% set invalid = ['unknown', 'unavailable', None, ''] %}
+          {% set current = states('sensor.speedtest_ping') %}
+          {% if current not in invalid %}
+            {{ current | float(0) | round(2) }}
+          {% else %}
+            {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_ping_ms') %}
+            {% if fallback in invalid %}
+              {% set fallback = states('sensor.speedtest_ping_baseline') %}
+            {% endif %}
+            {{ fallback | float(0) | round(2) if fallback not in invalid else none }}
+          {% endif %}
+        attributes:
+          source_entity: >-
+            {% set invalid = ['unknown', 'unavailable', None, ''] %}
+            {% set current = states('sensor.speedtest_ping') %}
+            {% if current not in invalid %}
+              sensor.speedtest_ping
+            {% else %}
+              {% set fallback = state_attr('sensor.network_status_summary', 'speedtest_ping_ms') %}
+              {% if fallback in invalid %}
+                sensor.speedtest_ping_baseline
+              {% else %}
+                sensor.network_status_summary
+              {% endif %}
+            {% endif %}
       - name: Speedtest Last Run
         unique_id: network_speedtest_last_run
         device_class: timestamp
@@ -777,19 +913,31 @@ template:
           {% if latency_ref is not none and latency_ref > 0 and latency > latency_ref * 1.25 %}
             {% set alerts = alerts + ['latency'] %}
           {% endif %}
-          {% set download = states('sensor.speedtest_download') | float(0) %}
+          {% set download_state = states('sensor.speedtest_download') %}
+          {% if download_state in ['unknown', 'unavailable', None, ''] %}
+            {% set download_state = states('sensor.speedtest_download_last_good') %}
+          {% endif %}
+          {% set download = download_state | float(0) %}
           {% set download_ref_state = states('sensor.speedtest_download_1h_avg') %}
           {% set download_ref = download_ref_state | float if download_ref_state not in invalid else None %}
           {% if download_ref is not none and download_ref > 0 and download < download_ref * 0.75 %}
             {% set alerts = alerts + ['download'] %}
           {% endif %}
-          {% set upload = states('sensor.speedtest_upload') | float(0) %}
+          {% set upload_state = states('sensor.speedtest_upload') %}
+          {% if upload_state in ['unknown', 'unavailable', None, ''] %}
+            {% set upload_state = states('sensor.speedtest_upload_last_good') %}
+          {% endif %}
+          {% set upload = upload_state | float(0) %}
           {% set upload_ref_state = states('sensor.speedtest_upload_1h_avg') %}
           {% set upload_ref = upload_ref_state | float if upload_ref_state not in invalid else None %}
           {% if upload_ref is not none and upload_ref > 0 and upload < upload_ref * 0.75 %}
             {% set alerts = alerts + ['upload'] %}
           {% endif %}
-          {% set ping = states('sensor.speedtest_ping') | float(0) %}
+          {% set ping_state = states('sensor.speedtest_ping') %}
+          {% if ping_state in ['unknown', 'unavailable', None, ''] %}
+            {% set ping_state = states('sensor.speedtest_ping_last_good') %}
+          {% endif %}
+          {% set ping = ping_state | float(0) %}
           {% set ping_ref_state = states('sensor.speedtest_ping_1h_avg') %}
           {% set ping_ref = ping_ref_state | float if ping_ref_state not in invalid else None %}
           {% if ping_ref is not none and ping_ref > 0 and ping > ping_ref * 1.25 %}
@@ -818,19 +966,31 @@ template:
             {% if latency_ref is not none and latency_ref > 0 and latency > latency_ref * 1.25 %}
               {% set alerts = alerts + ['latency'] %}
             {% endif %}
-            {% set download = states('sensor.speedtest_download') | float(0) %}
+            {% set download_state = states('sensor.speedtest_download') %}
+            {% if download_state in invalid %}
+              {% set download_state = states('sensor.speedtest_download_last_good') %}
+            {% endif %}
+            {% set download = download_state | float(0) %}
             {% set download_ref_state = states('sensor.speedtest_download_1h_avg') %}
             {% set download_ref = download_ref_state | float if download_ref_state not in invalid else None %}
             {% if download_ref is not none and download_ref > 0 and download < download_ref * 0.75 %}
               {% set alerts = alerts + ['download'] %}
             {% endif %}
-            {% set upload = states('sensor.speedtest_upload') | float(0) %}
+            {% set upload_state = states('sensor.speedtest_upload') %}
+            {% if upload_state in invalid %}
+              {% set upload_state = states('sensor.speedtest_upload_last_good') %}
+            {% endif %}
+            {% set upload = upload_state | float(0) %}
             {% set upload_ref_state = states('sensor.speedtest_upload_1h_avg') %}
             {% set upload_ref = upload_ref_state | float if upload_ref_state not in invalid else None %}
             {% if upload_ref is not none and upload_ref > 0 and upload < upload_ref * 0.75 %}
               {% set alerts = alerts + ['upload'] %}
             {% endif %}
-            {% set ping = states('sensor.speedtest_ping') | float(0) %}
+            {% set ping_state = states('sensor.speedtest_ping') %}
+            {% if ping_state in invalid %}
+              {% set ping_state = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
+            {% set ping = ping_state | float(0) %}
             {% set ping_ref_state = states('sensor.speedtest_ping_1h_avg') %}
             {% set ping_ref = ping_ref_state | float if ping_ref_state not in invalid else None %}
             {% if ping_ref is not none and ping_ref > 0 and ping > ping_ref * 1.25 %}
@@ -864,6 +1024,9 @@ template:
             {% set latency_baseline = latency_1h %}
             {% set latency_baseline_label = '1h avg' if latency_1h is not none else 'unavailable' %}
             {% set download_state = states('sensor.speedtest_download') %}
+            {% if download_state in invalid %}
+              {% set download_state = states('sensor.speedtest_download_last_good') %}
+            {% endif %}
             {% set download = download_state | float if download_state not in invalid else None %}
             {% set download_1h_state = states('sensor.speedtest_download_1h_avg') %}
             {% set download_1h = download_1h_state | float if download_1h_state not in invalid else None %}
@@ -876,6 +1039,9 @@ template:
             {% set download_baseline = download_1h %}
             {% set download_baseline_label = '1h avg' if download_1h is not none else 'unavailable' %}
             {% set upload_state = states('sensor.speedtest_upload') %}
+            {% if upload_state in invalid %}
+              {% set upload_state = states('sensor.speedtest_upload_last_good') %}
+            {% endif %}
             {% set upload = upload_state | float if upload_state not in invalid else None %}
             {% set upload_1h_state = states('sensor.speedtest_upload_1h_avg') %}
             {% set upload_1h = upload_1h_state | float if upload_1h_state not in invalid else None %}
@@ -888,6 +1054,9 @@ template:
             {% set upload_baseline = upload_1h %}
             {% set upload_baseline_label = '1h avg' if upload_1h is not none else 'unavailable' %}
             {% set ping_state = states('sensor.speedtest_ping') %}
+            {% if ping_state in invalid %}
+              {% set ping_state = states('sensor.speedtest_ping_last_good') %}
+            {% endif %}
             {% set ping = ping_state | float if ping_state not in invalid else None %}
             {% set ping_1h_state = states('sensor.speedtest_ping_1h_avg') %}
             {% set ping_1h = ping_1h_state | float if ping_1h_state not in invalid else None %}
