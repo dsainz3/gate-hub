@@ -3,58 +3,58 @@ Huskers Cream:
   ha-theme-color-scarlet: "#d00000"
   ha-theme-color-cream: "#fdf5e6"
   ha-theme-color-dark: "#111111"
-  ha-theme-color-gray: "#dddddd"
+  ha-theme-color-gray: "#4c4c4c"
 
   # Base Colors
   primary-color: var(--ha-theme-color-scarlet)
-  accent-color: var(--ha-theme-color-cream)
-  light-primary-color: "#ffcccc"
-  primary-background-color: var(--ha-theme-color-dark)
-  secondary-background-color: "#1a1a1a"
-  divider-color: "rgba(255, 255, 255, 0.2)"
+  accent-color: var(--ha-theme-color-dark)
+  light-primary-color: "#ffd6d6"
+  primary-background-color: var(--ha-theme-color-cream)
+  secondary-background-color: "#fff8ec"
+  divider-color: "rgba(17, 17, 17, 0.1)"
 
   # Text Colors
-  primary-text-color: var(--ha-theme-color-cream)
+  primary-text-color: var(--ha-theme-color-dark)
   secondary-text-color: var(--ha-theme-color-gray)
-  text-primary-color: var(--ha-theme-color-cream)
-  disabled-text-color: "rgba(253, 245, 230, 0.5)"
+  text-primary-color: var(--ha-theme-color-dark)
+  disabled-text-color: "rgba(17, 17, 17, 0.4)"
 
   # Header/App Bar
   app-header-background-color: var(--ha-theme-color-scarlet)
   app-header-text-color: var(--ha-theme-color-cream)
 
   # Sidebar
-  sidebar-background-color: var(--ha-theme-color-dark)
-  sidebar-icon-color: var(--ha-theme-color-cream)
-  sidebar-text-color: var(--ha-theme-color-cream)
+  sidebar-background-color: var(--ha-theme-color-cream)
+  sidebar-icon-color: var(--ha-theme-color-dark)
+  sidebar-text-color: var(--ha-theme-color-dark)
   sidebar-selected-icon-color: var(--ha-theme-color-scarlet)
   sidebar-selected-text-color: var(--ha-theme-color-scarlet)
 
   # Cards
-  card-background-color: "#222222"
-  paper-card-background-color: "#222222"
+  card-background-color: "#fffaf1"
+  paper-card-background-color: "#fffaf1"
   ha-card-border-radius: "16px"
-  ha-card-box-shadow: "0px 0px 15px rgba(208,0,0,0.6)"
+  ha-card-box-shadow: "0px 4px 12px rgba(0,0,0,0.08)"
 
   # Buttons & Controls
-  paper-item-icon-color: var(--ha-theme-color-cream)
+  paper-item-icon-color: var(--ha-theme-color-dark)
   paper-item-icon-active-color: var(--ha-theme-color-scarlet)
   switch-checked-color: var(--ha-theme-color-scarlet)
-  switch-unchecked-color: var(--ha-theme-color-cream)
+  switch-unchecked-color: var(--ha-theme-color-dark)
   switch-checked-button-color: var(--ha-theme-color-cream)
-  switch-unchecked-button-color: var(--ha-theme-color-dark)
+  switch-unchecked-button-color: var(--ha-theme-color-cream)
 
   # Material Design Components
   mdc-theme-primary: var(--ha-theme-color-scarlet)
-  mdc-theme-secondary: var(--ha-theme-color-cream)
+  mdc-theme-secondary: var(--ha-theme-color-dark)
   mdc-theme-on-primary: var(--ha-theme-color-cream)
-  mdc-theme-on-secondary: var(--ha-theme-color-dark)
+  mdc-theme-on-secondary: var(--ha-theme-color-cream)
   mdc-theme-surface: var(--card-background-color)
   mdc-theme-on-surface: var(--primary-text-color)
 
   # Scoreboard Custom Variables
   huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
-  huskers-scoreboard-shadow: "0 10px 20px rgba(0,0,0,0.15)"
+  huskers-scoreboard-shadow: "0 10px 20px rgba(0,0,0,0.12)"
   huskers-score-color: var(--ha-theme-color-scarlet)
   huskers-text-primary: var(--ha-theme-color-dark)
   huskers-text-secondary: var(--ha-theme-color-gray)
