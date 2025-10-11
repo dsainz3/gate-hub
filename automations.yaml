@@ -169,6 +169,8 @@
         before: sunset
       - condition: template
         value_template: "{{ cloud_coverage_available }}"
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     variables:
       cloud_coverage_raw: "{{ states('sensor.openweathermap_cloud_coverage') }}"
       cloud_coverage_available: >-
