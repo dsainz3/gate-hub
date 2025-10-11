@@ -1,6 +1,7 @@
 # Huskers – LED Test
 - title: Huskers – LED Test
   path: husker-led-test
+  theme: Huskers Cream
   icon: mdi:led-strip-variant
   badges: []
   cards:
