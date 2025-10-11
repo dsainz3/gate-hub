@@ -73,7 +73,7 @@ Highlights
 - **Lighting control grid** that surfaces every interior and exterior fixture touched by the Football Team shows for quick overrides.
 
 Usage Notes
-- Snapshot scenes (`scene.huskers_before_chase`, `scene.huskers_before_burst`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
+- Snapshot scenes (`scene.huskers_before_chase_snapshot`, `scene.huskers_before_burst_snapshot`) stay visible even after restarts so you can resnapshot or re-run shows without editing the dashboard.
 - The scene catalog on this view is curated; add new Football Team presets here as needed and mirror them in the global Scenes view so they remain accessible from the Automations console.
 - Use the automation last-triggered timestamps to confirm the daily schedule fired; if an entry stays blank, check for disabled automations in Home Assistant Settings → Automations.
 - The chase scripts drive the eight fixture group at 80 % brightness while locking the permanent LEDs at 100 %; open the light more-info dialog to confirm the strip picked up `LED-Gametime` during shows.

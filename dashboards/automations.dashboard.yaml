@@ -61,7 +61,7 @@ views:
         title: Huskers — Enable/Disable
         show_header_toggle: false
         entities:
-          - automation.huskers_showtime_at_t_20
+          - automation.huskers_pregame_showtime_t_20_minutes
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
           - automation.huskers_enable_game_mode_window
@@ -71,7 +71,7 @@ views:
         show_header_toggle: false
         entities:
           - type: attribute
-            entity: automation.huskers_showtime_at_t_20
+            entity: automation.huskers_pregame_showtime_t_20_minutes
             attribute: last_triggered
             name: Showtime T-20 — last_triggered
           - type: attribute
@@ -101,7 +101,7 @@ views:
               action: call-service
               service: automation.trigger
               target:
-                entity_id: automation.huskers_showtime_at_t_20
+                entity_id: automation.huskers_pregame_showtime_t_20_minutes
           - type: button
             name: Trigger TD Burst
             icon: mdi:football
@@ -521,7 +521,7 @@ views:
       - type: logbook
         title: Logbook — Automations Activity
         entities:
-          - automation.huskers_showtime_at_t_20
+          - automation.huskers_pregame_showtime_t_20_minutes
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
           - automation.huskers_enable_game_mode_window
@@ -567,32 +567,32 @@ views:
         columns: 3
         cards:
           - type: button
-            entity: scene.huskers_before_chase
+            entity: scene.huskers_before_chase_snapshot
             name: Huskers Before Chase
             icon: mdi:stadium
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.huskers_before_chase
+                entity_id: scene.huskers_before_chase_snapshot
           - type: button
-            entity: scene.huskers_before_burst
+            entity: scene.huskers_before_burst_snapshot
             name: Huskers Before Burst
             icon: mdi:firework
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.huskers_before_burst
+                entity_id: scene.huskers_before_burst_snapshot
           - type: button
-            entity: scene.huskers_seven_all_scarlet
+            entity: scene.huskers_seven_all_scarlet_base
             name: Huskers Scarlet
             icon: mdi:alpha-h-circle
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.huskers_seven_all_scarlet
+                entity_id: scene.huskers_seven_all_scarlet_base
       - type: markdown
         content: "## 🏎️ F1 Race Day"
       - type: grid
@@ -669,14 +669,14 @@ views:
               target:
                 entity_id: scene.lighting_evening_sunset_interior
           - type: button
-            entity: scene.lighting_early_morning_gentle_wake
+            entity: scene.lighting_early_morning_gentle_wake_interior_exterior
             name: Early Gentle Wake
             icon: mdi:weather-sunset-up
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_early_morning_gentle_wake
+                entity_id: scene.lighting_early_morning_gentle_wake_interior_exterior
           - type: button
             entity: scene.lighting_morning_exterior_off
             name: Morning Exterior Off
@@ -696,14 +696,14 @@ views:
               target:
                 entity_id: scene.lighting_morning_interior_off
           - type: button
-            entity: scene.lighting_night_mode
+            entity: scene.lighting_night_mode_interior_exterior
             name: Night Mode
             icon: mdi:weather-night
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_night_mode
+                entity_id: scene.lighting_night_mode_interior_exterior
       - type: markdown
         content: "## 🌈 Lighting Presets — LED Effects"
       - type: grid
@@ -711,86 +711,86 @@ views:
         columns: 3
         cards:
           - type: button
-            entity: scene.lighting_led_effect_january
+            entity: scene.lighting_exterior_led_effect_january
             name: LED Effect · January
             icon: mdi:snowflake
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_january
+                entity_id: scene.lighting_exterior_led_effect_january
           - type: button
-            entity: scene.lighting_led_effect_february
+            entity: scene.lighting_exterior_led_effect_february
             name: LED Effect · February
             icon: mdi:heart
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_february
+                entity_id: scene.lighting_exterior_led_effect_february
           - type: button
-            entity: scene.lighting_led_effect_march
+            entity: scene.lighting_exterior_led_effect_march
             name: LED Effect · March
             icon: mdi:leaf
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_march
+                entity_id: scene.lighting_exterior_led_effect_march
           - type: button
-            entity: scene.lighting_led_effect_april
+            entity: scene.lighting_exterior_led_effect_april
             name: LED Effect · April
             icon: mdi:flower-tulip
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_april
+                entity_id: scene.lighting_exterior_led_effect_april
           - type: button
-            entity: scene.lighting_led_effect_august
+            entity: scene.lighting_exterior_led_effect_august
             name: LED Effect · August
             icon: mdi:weather-sunny-alert
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_august
+                entity_id: scene.lighting_exterior_led_effect_august
           - type: button
-            entity: scene.lighting_led_effect_halloween
+            entity: scene.lighting_exterior_led_effect_halloween
             name: LED Effect · Halloween
             icon: mdi:halloween
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_halloween
+                entity_id: scene.lighting_exterior_led_effect_halloween
           - type: button
-            entity: scene.lighting_led_effect_patriotic
+            entity: scene.lighting_exterior_led_effect_patriotic
             name: LED Effect · Patriotic
             icon: mdi:flag-variant
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_patriotic
+                entity_id: scene.lighting_exterior_led_effect_patriotic
           - type: button
-            entity: scene.lighting_led_effect_thanksgiving
+            entity: scene.lighting_exterior_led_effect_thanksgiving
             name: LED Effect · Thanksgiving
             icon: mdi:food-turkey
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_thanksgiving
+                entity_id: scene.lighting_exterior_led_effect_thanksgiving
           - type: button
-            entity: scene.lighting_led_effect_christmas
+            entity: scene.lighting_exterior_led_effect_christmas
             name: LED Effect · Christmas
             icon: mdi:string-lights
             tap_action:
               action: call-service
               service: scene.turn_on
               target:
-                entity_id: scene.lighting_led_effect_christmas
+                entity_id: scene.lighting_exterior_led_effect_christmas
       - type: markdown
         content: "## ❄️ Climate & Safety"
       - type: grid
