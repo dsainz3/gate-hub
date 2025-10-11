@@ -142,31 +142,6 @@ monthly effect up to six times, logging success (or the final skip message)
 after each attempt. Adjust the effect name, scene, and retry count to match your
 installation.
 
-## Automation Status Audit
-
-`packages/automation_watchdog.yaml` exposes `sensor.automation_status_audit`, a
-system-wide template sensor that runs every five minutes (plus on Home
-Assistant start and automation reloads). It walks every automation in the
-environment, compares the current `on`/`off` state to the expected baseline,
-and records a JSON snapshot containing each automation’s friendly name, mode,
-concurrency counters, last trigger time, and whether the entity was ignored.
-
-Use the helper groups exported alongside the sensor to fine-tune expectations:
-
-- Add automations that should remain off (for example, seasonal routines) to
-  `group.automation_watchdog_expected_off` so the audit treats `off` as the
-  desired state.
-- Place experimental or noisy automations in
-  `group.automation_watchdog_ignored` to exclude them entirely from the
-  comparison.
-
-Whenever an automation deviates from its expected state, the
-`automation.automation_watchdog_alert` automation writes a Logbook entry with
-the same `issues_summary` string exposed on the sensor. Reviewing the sensor’s
-`automations` attribute provides a point-in-time comparison of every checked
-entity so you can reconcile the log entry with the actual Home Assistant state
-without wading through YAML definitions.
-
 ## Related Docs
 - [Husker Dashboard Guide](../huskers/dashboard.md)
 - [Automation Catalog](../../reference/automations.md)

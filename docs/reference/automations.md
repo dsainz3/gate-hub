@@ -135,12 +135,12 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Actions**: Stops chase scripts in parallel and records cleanup completion.
 - **Notes**: The supporting status sensor stores a `status_source` attribute (`scoreboard` or `schedule`). If ESPN’s live feed disappears immediately after the game, the fallback schedule entry keeps the sensor in `Final` so this automation still fires once the postgame window expires.
 
-### System: Automation Watchdog Alert (`packages/automation_watchdog.yaml:64`)
-- **ID** `automation_watchdog_alert`
-- **Trigger**: `sensor.automation_status_audit` changes to `issues` after the five-minute sweep.
-- **Guards**: None; executes whenever the audit detects automations that are not in their expected `on`/`off` state.
-- **Actions**: Logs a summary string to the Logbook (`Automation Watchdog`) describing every mismatch so operators can reconcile against the sensor attributes.
-- **Notes**: The paired template sensor examines every automation, honours the helper groups for expected-off and ignored entities, and exposes a JSON snapshot (`automations` attribute) for drill-down investigations.
+### Football Team: Automation Watchdog Alert (`packages/huskers_everything.yaml:1194`)
+- **ID** `huskers_automation_watchdog_alert`
+- **Trigger**: `sensor.huskers_automation_status_audit` changes to `issues` after the five-minute audit runs.
+- **Guards**: None; fires whenever the audit flags disabled automations or mismatched modes.
+- **Actions**: Writes a Logbook entry with the audit summary so on-call staff can compare against the sensor’s trigger snapshot.
+- **Notes**: The audit sensor aggregates trigger states, helper booleans, and expected modes for all football automations so the alert message always references the latest snapshot.
 
 ---
 
