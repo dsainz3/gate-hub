@@ -41,42 +41,49 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 
 ### Lighting: Night Mode at Midnight (`automations.yaml:65`)
 - **ID** `night_mode_at_midnight`
+- **Entity** `automation.lighting_night_mode_at_midnight`
 - **Trigger**: Time equals `00:00:00`.
 - **Guards**: Pauses while `binary_sensor.holiday_mode_active` is `on` to honour holiday scenes.
 - **Actions**: Powers down interior/exterior fixtures and leaves permanent LEDs glowing at 20%.
 
 ### Lighting: Early Morning Gentle Wake (3:30 AM) (`automations.yaml:105`)
 - **ID** `early_morning_lights_0330`
+- **Entity** `automation.early_morning_lights_03_30`
 - **Trigger**: Time equals `03:30:00`.
 - **Guards**: Suppressed if `binary_sensor.holiday_mode_active` is `on`.
 - **Actions**: Softly lights interior spaces (10%, warm) and exterior fixtures (10%, cool); boosts permanent LEDs to 50%.
 
 ### Lighting: Morning Lights Off (Sunrise + 15 min) (`automations.yaml:148`)
 - **ID** `interior_lights_sunrise_off`
+- **Entity** `automation.interior_lights_off_15_minutes_after_sunrise`
 - **Trigger**: Sunrise +15 minutes.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` or `binary_sensor.huskers_light_show_active` is `on`.
 - **Actions**: Fades sunroom, living room, and dining room lights off.
 
 ### Lighting: Exterior Front & Garage Off (Sunrise) (`automations.yaml:171`)
 - **ID** `exterior_lights_sunrise_off`
+- **Entity** `automation.lighting_morning_lights_off_sunrise`
 - **Trigger**: Sunrise +5 minutes.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_light_show_active` is `on`.
 - **Actions**: Turns off porch, garage, and permanent outdoor lights.
 
 ### LED: Monthly Effect Scheduler (`automations.yaml:205`)
 - **ID** `exterior_led_monthly_effect`
+- **Entity** `automation.exterior_led_monthly_effect`
 - **Triggers**: Time `00:00:01` daily and Home Assistant start.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and confirms the requested `effect` exists in `light.permanent_outdoor_lights`.
 - **Actions**: Waits up to two minutes for the permanent outdoor light effect list to load after startup, applies the month-specific effect when available, and logs success or a skip if the effect never appears. See [Husker LED MQTT Controls](../how-to/lighting/husker-led-mqtt.md) for manual overrides.
 
 ### Climate: Humidor Temperature Control (`automations.yaml:251`)
 - **ID** `humidor_plug_temp_control`
+- **Entity** `automation.humidor_plug_temperature_control`
 - **Triggers**: Temperature at `sensor.hygrometer_humidor_temperature` > 74°F for 2 minutes, or < 70°F for 1 minute.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active` is `on` and uses a template safeguard so the plug toggles only when necessary.
 - **Actions**: Switches `switch.plug_humidor` on/off and logs temperature + humidity snapshots.
 
 ### Safety: Nightly Burner Plug Shutoff (`automations.yaml:296`)
 - **ID** `burner_plugs_off_2300`
+- **Entity** `automation.safety_turn_off_burner_plugs_at_11_00_pm`
 - **Trigger**: Time equals `23:00:00`.
 - **Guards**: Does not run while `binary_sensor.holiday_mode_active` is `on` to respect manual/holiday overrides.
 - **Actions**: Turns off all burner plugs, pushes a persistent notification, and records a logbook entry.
@@ -85,6 +92,7 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 
 ### Weather: Severe Alert → Notification (`packages/weather_dashboard_package.yaml:223`)
 - **ID** `weather_alert_notify`
+- **Entity** `automation.weather_severe_alert_notification`
 - **Trigger**: Any state change on `sensor.nws_alerts`.
 - **Guards**: Requires `input_boolean.weather_notifications_enabled` to be `on`.
 - **Actions**: Creates a persistent notification summarising the incoming alert.
@@ -95,18 +103,21 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 
 ### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
 - **ID** `huskers_game_mode_enable_window`
+- **Entity** `automation.huskers_enable_game_mode_window`
 - **Triggers**: `sensor.huskers_kickoff_in_effective` < 121 for ≥1 minute, or ESPN pregame/live binary sensors turning `on`.
 - **Guards**: Game mode currently `off` and evidence of an upcoming or active game.
 - **Actions**: Enables `input_boolean.huskers_game_mode` and logs kickoff timing.
 
 ### Football Team: Disable Game Mode Window (`packages/huskers_everything.yaml:1038`)
 - **ID** `huskers_game_mode_disable_window`
+- **Entity** `automation.huskers_disable_game_mode_window`
 - **Triggers**: Postgame ESPN sensor `on` for 2 hours, or kickoff timer > 120 for ≥5 minutes.
 - **Guards**: Game mode `on`, ESPN pregame and live sensors both `off`.
 - **Actions**: Disables `input_boolean.huskers_game_mode` and logs the change.
 
 ### Football Team: Pregame Showtime (T-20 Minutes) (`packages/huskers_everything.yaml:1072`)
 - **ID** `huskers_showtime_at_t_20`
+- **Entity** `automation.huskers_pregame_showtime_t_20_minutes`
 - **Trigger**: Kickoff timer between 19–21 minutes for >5 seconds.
 - **Guards**: Huskers automations enabled, game mode `on`, ESPN pregame `on` (or test mode), and chase scripts idle.
 - **Actions**: Launches `script.huskers_chase30_start` (dual-cream, 45 s loop; interior group at 80 % brightness, permanent LEDs pinned at 100 %) and logs the start event.
