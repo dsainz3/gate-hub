@@ -142,23 +142,6 @@ monthly effect up to six times, logging success (or the final skip message)
 after each attempt. Adjust the effect name, scene, and retry count to match your
 installation.
 
-## Automation Status Audit
-
-The Husker package now exports `sensor.huskers_automation_status_audit`, a
-triggered template that runs every five minutes (and on automation reloads) to
-snapshot the state, mode, and critical triggers for every football lighting
-automation. Its attributes expose a JSON payload listing each automation,
-whether it is enabled, and the current value for dependencies such as kickoff
-timers, ESPN live flags, and chase loop scripts. The primary state reports `ok`
-when everything matches the expected configuration or `issues` if a dependency
-falls out of alignment.
-
-Pairing the sensor is `automation.huskers_automation_watchdog_alert`, which
-logs a clear message to the Logbook whenever the audit surfaces a disabled
-automation or an unexpected mode value. The message mirrors the
-`issues_summary` attribute so you can compare the problematic entity IDs
-against the live trigger snapshot without digging through YAML.
-
 ## Related Docs
 - [Husker Dashboard Guide](../huskers/dashboard.md)
 - [Automation Catalog](../../reference/automations.md)
