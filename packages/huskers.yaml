@@ -1381,6 +1381,165 @@ template:
             {% else %}
               Big Ten standings unavailable
             {% endif %}
+
+  - trigger:
+      - platform: homeassistant
+        event: start
+      - platform: event
+        event_type: automation_reloaded
+      - platform: time_pattern
+        minutes: '/5'
+    sensor:
+      - name: huskers_automation_status_audit
+        unique_id: huskers_automation_status_audit
+        icon: mdi:playlist-check
+        variables:
+          automation_matrix: >-
+            {{ [
+              {
+                "entity_id": "automation.huskers_game_mode_enable_window",
+                "expected_mode": "single",
+                "triggers": [
+                  "sensor.huskers_kickoff_in_effective",
+                  "sensor.huskers_kickoff_in_2",
+                  "binary_sensor.huskers_is_pregame_espn",
+                  "binary_sensor.huskers_is_live_espn",
+                  "input_boolean.huskers_automations_enabled",
+                  "input_boolean.huskers_game_mode",
+                  "input_boolean.huskers_use_manual_kickoff"
+                ]
+              },
+              {
+                "entity_id": "automation.huskers_game_mode_disable_window",
+                "expected_mode": "single",
+                "triggers": [
+                  "sensor.huskers_kickoff_in_effective",
+                  "binary_sensor.huskers_is_pregame_espn",
+                  "binary_sensor.huskers_is_live_espn",
+                  "binary_sensor.huskers_is_postgame_espn",
+                  "input_boolean.huskers_game_mode"
+                ]
+              },
+              {
+                "entity_id": "automation.huskers_showtime_at_t_20",
+                "expected_mode": "single",
+                "triggers": [
+                  "sensor.huskers_kickoff_in_effective",
+                  "binary_sensor.huskers_is_pregame_espn",
+                  "input_boolean.huskers_automations_enabled",
+                  "input_boolean.huskers_game_mode",
+                  "input_boolean.huskers_test_mode",
+                  "script.huskers_chase30_loop",
+                  "script.huskers_chase_speed_loop"
+                ]
+              },
+              {
+                "entity_id": "automation.huskers_td_burst_on_score",
+                "expected_mode": "single",
+                "triggers": [
+                  "sensor.huskers_our_score_effective",
+                  "input_boolean.huskers_automations_enabled",
+                  "input_boolean.huskers_game_mode"
+                ]
+              },
+              {
+                "entity_id": "automation.huskers_postgame_cleanup",
+                "expected_mode": "single",
+                "triggers": [
+                  "binary_sensor.huskers_is_postgame_espn",
+                  "input_boolean.huskers_game_mode",
+                  "binary_sensor.huskers_light_show_active",
+                  "script.huskers_chase30_loop",
+                  "script.huskers_chase_speed_loop"
+                ]
+              }
+            ] | to_json }}
+        state: >-
+          {% set matrix = automation_matrix | from_json %}
+          {% set disabled = [] %}
+          {% set mode_mismatches = [] %}
+          {% for entry in matrix %}
+            {% if not is_state(entry.entity_id, 'on') %}
+              {% set disabled = disabled + [entry.entity_id] %}
+            {% endif %}
+            {% set actual_mode = state_attr(entry.entity_id, 'mode') %}
+            {% if entry.expected_mode and actual_mode != entry.expected_mode %}
+              {% set mode_mismatches = mode_mismatches + [entry.entity_id ~ ' (expected ' ~ entry.expected_mode ~ ', actual ' ~ (actual_mode or 'unknown') ~ ')'] %}
+            {% endif %}
+          {% endfor %}
+          {% if disabled or mode_mismatches %}
+            issues
+          {% else %}
+            ok
+          {% endif %}
+        attributes:
+          checked_at: '{{ now().isoformat() }}'
+          disabled: >-
+            {% set matrix = automation_matrix | from_json %}
+            {% set disabled = [] %}
+            {% for entry in matrix %}
+              {% if not is_state(entry.entity_id, 'on') %}
+                {% set disabled = disabled + [entry.entity_id] %}
+              {% endif %}
+            {% endfor %}
+            {{ disabled | to_json }}
+          mode_mismatches: >-
+            {% set matrix = automation_matrix | from_json %}
+            {% set mismatches = [] %}
+            {% for entry in matrix %}
+              {% set actual_mode = state_attr(entry.entity_id, 'mode') %}
+              {% if entry.expected_mode and actual_mode != entry.expected_mode %}
+                {% set mismatches = mismatches + [{
+                  'entity_id': entry.entity_id,
+                  'expected': entry.expected_mode,
+                  'actual': actual_mode or 'unknown'
+                }] %}
+              {% endif %}
+            {% endfor %}
+            {{ mismatches | to_json }}
+          issues_summary: >-
+            {% set matrix = automation_matrix | from_json %}
+            {% set disabled = [] %}
+            {% set mismatches = [] %}
+            {% for entry in matrix %}
+              {% if not is_state(entry.entity_id, 'on') %}
+                {% set disabled = disabled + [entry.entity_id] %}
+              {% endif %}
+              {% set actual_mode = state_attr(entry.entity_id, 'mode') %}
+              {% if entry.expected_mode and actual_mode != entry.expected_mode %}
+                {% set mismatches = mismatches + [entry.entity_id ~ ' (expected ' ~ entry.expected_mode ~ ', actual ' ~ (actual_mode or 'unknown') ~ ')'] %}
+              {% endif %}
+            {% endfor %}
+            {% set parts = [] %}
+            {% if disabled %}
+              {% set parts = parts + ['Disabled: ' ~ disabled | join(', ')] %}
+            {% endif %}
+            {% if mismatches %}
+              {% set parts = parts + ['Mode mismatch: ' ~ mismatches | join('; ')] %}
+            {% endif %}
+            {{ parts | join(' — ') if parts else 'All automations enabled with expected modes' }}
+          automations: >-
+            {% set matrix = automation_matrix | from_json %}
+            {% set snapshots = [] %}
+            {% for entry in matrix %}
+              {% set trigger_states = [] %}
+              {% for trig in entry.triggers %}
+                {% set trigger_states = trigger_states + [{
+                  'entity_id': trig,
+                  'state': states(trig)
+                }] %}
+              {% endfor %}
+              {% set snapshots = snapshots + [{
+                'entity_id': entry.entity_id,
+                'state': states(entry.entity_id),
+                'expected_mode': entry.expected_mode,
+                'mode': state_attr(entry.entity_id, 'mode'),
+                'last_triggered': state_attr(entry.entity_id, 'last_triggered'),
+                'current_runs': state_attr(entry.entity_id, 'current'),
+                'triggers': trigger_states
+              }] %}
+            {% endfor %}
+            {{ snapshots | to_json }}
   - binary_sensor:
       - name: huskers_is_pregame_espn
         unique_id: huskers_is_pregame_espn
@@ -1725,6 +1884,22 @@ automation:
               Postgame cleanup restored snapshots (no active Husker light show)
             {% endif %}
           entity_id: automation.huskers_postgame_cleanup
+
+  - id: huskers_automation_watchdog_alert
+    alias: 'Huskers: Automation Watchdog Alert'
+    description: 'Logs when the five-minute audit detects disabled automations or unexpected modes.'
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.huskers_automation_status_audit
+        to: 'issues'
+    action:
+      - service: logbook.log
+        data:
+          name: Huskers Automation Watchdog
+          message: >-
+            {{ state_attr('sensor.huskers_automation_status_audit', 'issues_summary') }}
+          entity_id: sensor.huskers_automation_status_audit
 
 # packages/huskers_everything.yaml
 # …your existing content above…
