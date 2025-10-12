@@ -38,14 +38,15 @@ frontend:
           link-color: "#b88a00"
 
           # Header and surfaces
-          app-header-background-color: "#2f2412"
-          app-header-text-color: "#fdf6d8"
-          app-header-button-text-color: "#fdf6d8"
-          app-header-icon-color: "#fdf6d8"
+          app-header-background-color: "#000000"
+          app-header-text-color: "#f6d47a"
+          app-header-button-text-color: "#f6d47a"
+          app-header-icon-color: "#f6d47a"
           header-height: 64px
-          ha-card-border-width: 0
+          ha-card-border-width: 1px
+          ha-card-border-color: "#0d0d0d"
           ha-card-border-radius: 16px
-          ha-card-box-shadow: "0px 18px 36px rgba(47, 36, 18, 0.08)"
+          ha-card-box-shadow: "0px 18px 36px rgba(0, 0, 0, 0.18)"
           ha-chip-border-radius: 12px
           input-fill-color: "#efe3c6"
           input-ink-color: "#2f2412"
@@ -61,12 +62,15 @@ frontend:
           mush-card-secondary-background: "#f3ead2"
           mush-card-primary-text-color: "#2f2412"
           mush-card-secondary-text-color: "#6b5730"
+          mush-card-border-radius: 16px
+          mush-card-border-width: 1px
+          mush-card-border-color: "#0d0d0d"
           mush-icon-border-radius: 12px
           mush-control-border-radius: 12px
           mush-chip-border-radius: 12px
           mush-chip-background: "#f0e3bf"
           mush-chip-text-color: "#2f2412"
-          mush-chip-icon-color: "#b88a00"
+          mush-chip-icon-color: "#1a1a1a"
           mush-rgb-primary: 200, 160, 40
           mush-rgb-accent: 212, 175, 55
           mush-rgb-info: 134, 108, 60
@@ -104,14 +108,15 @@ frontend:
           link-color: "#f6d47a"
 
           # Header and surfaces
-          app-header-background-color: "#d4af37"
-          app-header-text-color: "#1a160c"
-          app-header-button-text-color: "#1a160c"
-          app-header-icon-color: "#1a160c"
+          app-header-background-color: "#000000"
+          app-header-text-color: "#e0c068"
+          app-header-button-text-color: "#e0c068"
+          app-header-icon-color: "#e0c068"
           header-height: 64px
-          ha-card-border-width: 0
+          ha-card-border-width: 1px
+          ha-card-border-color: "#000000"
           ha-card-border-radius: 16px
-          ha-card-box-shadow: "0px 18px 36px rgba(0, 0, 0, 0.35)"
+          ha-card-box-shadow: "0px 18px 36px rgba(0, 0, 0, 0.45)"
           ha-chip-border-radius: 12px
           input-fill-color: "#2f2612"
           input-ink-color: "#fdf6d8"
@@ -127,6 +132,9 @@ frontend:
           mush-card-secondary-background: "#241d0f"
           mush-card-primary-text-color: "#fdf6d8"
           mush-card-secondary-text-color: "#dcc890"
+          mush-card-border-radius: 16px
+          mush-card-border-width: 1px
+          mush-card-border-color: "#000000"
           mush-icon-border-radius: 12px
           mush-control-border-radius: 12px
           mush-chip-border-radius: 12px

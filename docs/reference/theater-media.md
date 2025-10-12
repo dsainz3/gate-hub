@@ -40,7 +40,7 @@ Friendly names and icons for the player, remote, and scripts are defined in the 
 
 ## Dashboard Wiring
 
-The Support · Test Resources dashboard now follows the 2025 design profile showcased in the new Home Assistant dashboard preview, backed by the gold-accented **Support Test Gold** theme to keep captures consistent with the showcase palette. The **Plex · Theater** view (`dashboards/_support/test_resources.dashboard.yaml`) uses the sections layout to group controls and telemetry clearly:
+The Support · Test Resources dashboard now follows the 2025 design profile showcased in the new Home Assistant dashboard preview, backed by the gold-accented **Support Test Gold** theme with a black application banner and black-trimmed cards to keep captures consistent with the refreshed palette. The **Plex · Theater** view (`dashboards/_support/test_resources.dashboard.yaml`) uses the sections layout to group controls and telemetry clearly:
 
 1. **Theater Status** – Mushroom media player and template cards summarise the Fire TV state, foreground app, and Plex session count, complemented by chips that surface the last update and client reachability.
 2. **Quick Controls** – A responsive grid of Mushroom template cards mapped to the helper scripts for launching Plex, toggling playback, returning home, powering off, and forcing a Plex client rescan.
