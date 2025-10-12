@@ -2007,6 +2007,13 @@ frontend:
           mush-rgb-state-switch: 228, 28, 56
           mush-rgb-state-media-player: 228, 28, 56
 
+          # Huskers-specific CSS hooks
+          --huskers-scoreboard-border: "3px solid var(--ha-theme-color-scarlet)"
+          --huskers-scoreboard-shadow: "0 22px 40px -26px var(--huskers-shadow-primary), 0 18px 28px -28px var(--huskers-shadow-secondary)"
+          --huskers-score-color: var(--ha-theme-color-scarlet)
+          --huskers-text-primary: var(--ha-theme-color-dark)
+          --huskers-text-secondary: var(--ha-theme-color-gray)
+
         dark:
           # Brand palette tuned for dark backgrounds
           --huskers-cream: "#FDF3E7"
