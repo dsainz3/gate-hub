@@ -1,12 +1,31 @@
 # .ci/run_hass_check.py
 import contextlib
 import importlib.util
+import os
 import platform
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 from shutil import which
+
+_HA_PACKAGE = os.environ.get("HA_CHECK_PACKAGE", "homeassistant")
+
+
+def _ensure_homeassistant() -> bool:
+    """Install Home Assistant locally when the module is missing."""
+
+    if _module_available("homeassistant"):
+        return True
+
+    print("[ha-check] Installing Home Assistant Python package…", flush=True)
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", _HA_PACKAGE])
+    except subprocess.CalledProcessError:
+        print("[ha-check] Failed to install Home Assistant via pip; falling back to Docker.", flush=True)
+        return False
+
+    return _module_available("homeassistant")
 
 repo = Path.cwd().resolve()
 fake = repo / ".ci" / "fakesecrets.yaml"
@@ -108,7 +127,9 @@ if not real.exists():
 try:
     system = platform.system().lower()
     if system.startswith("win"):
-        if which("docker"):
+        if _ensure_homeassistant():
+            run_local_py()
+        elif which("docker"):
             run_via_docker()
         elif which("wsl"):
             # sanity check: is HA available in WSL?
@@ -137,7 +158,7 @@ try:
             )
     else:
         # Linux/macOS
-        if _module_available("homeassistant"):
+        if _ensure_homeassistant():
             run_local_py()
         elif which("docker"):
             run_via_docker()
