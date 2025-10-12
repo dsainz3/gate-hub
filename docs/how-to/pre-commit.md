@@ -20,7 +20,7 @@ Follow this guide to keep local commits aligned with CI enforcement. Hooks live 
 - `trailing-whitespace`, `end-of-file-fixer`, `mixed-line-ending`, `check-yaml` from `pre-commit-hooks` keep whitespace, line endings, and schemas consistent.
 - `yamllint` enforces the style guide defined in `.yamllint.yml`.
 - `ruff` (lint + autofix) and `ruff-format` maintain Python quality.
-- `hass-config-check` wraps `.ci/run_hass_check.py` to mirror the Home Assistant validation performed in CI (rerun locally or via `ha core check` for deeper investigation).
+- `hass-config-check` wraps `.ci/run_hass_check.py` to mirror the Home Assistant validation performed in CI (rerun locally or via `ha core check` for deeper investigation). The helper now installs the Home Assistant Python package into the hook's virtualenv when available and falls back to Docker only when necessary, keeping local and CI runs faster after the initial environment bootstrap.
 
 ## Setup
 
