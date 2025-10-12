@@ -3,7 +3,7 @@ title: Football Team Dashboard Guide
 summary: Configure and operate the Football Team-focused Lovelace dashboards.
 status: active
 category: how-to
-updated: 2025-10-10
+updated: 2025-10-12
 owner: playbook-team
 tags:
   - lovelace
@@ -25,7 +25,7 @@ This guide documents the Football Team dashboards delivered in `dashboards/huske
     type: module
   ```
 - **ESPN REST sensors** from `packages/huskers_everything.yaml`, including the conference standings endpoint (`sports.core.api.espn.com/.../groups/5/standings/0`). Replace the group id if your league differs.
-- Apply the `Huskers Cream` theme (defined inside `packages/huskers.yaml`) so the Football Team CSS variables resolve correctly, or copy the palette and create your own theme variant (see comments in the package theme block).
+- Apply the `Huskers Cream` theme (defined inside `packages/huskers.yaml`) so the Football Team CSS variables resolve correctly, or copy the palette and create your own theme variant (see comments in the package theme block). The palette now standardises a cream background, black accent surfaces, and scarlet gradient shadows that the dashboards expect.
 
 Reload themes after deployment via **Developer Tools → YAML → Reload themes** so the custom color variables are available.
 
