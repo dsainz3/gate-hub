@@ -5,11 +5,26 @@ views:
     icon: mdi:test-tube
     type: sections
     theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
     max_columns: 3
     sections:
       - type: grid
         title: Resource Smoke Tests
+        columns: 2
         cards:
+          - type: custom:mushroom-title-card
+            title: Smoke Test Readiness
+            subtitle: Validate helper resources before running regression jobs.
+            alignment: center
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-chips-card
             alignment: center
             chips:
@@ -25,18 +40,32 @@ views:
                 icon: mdi:auto-fix
                 icon_color: green
                 content: auto-entities
+              - type: template
+                icon: mdi:palette-swatch
+                icon_color: >-
+                  {{ 'green' if is_state('input_boolean.theme_loader_status', 'on') else 'amber' }}
+                content: Theme helpers
+                tap_action:
+                  action: more-info
+                  entity: input_boolean.theme_loader_status
+            view_layout:
+              column_span: 2
           - type: markdown
             content: >-
               ### Purpose
 
-              Use this view to confirm that helper resources and custom cards load
-              before running screenshot captures or UI regression tests. The
-              sections-based layout mirrors the 2025 design profile showcased in
-              the new dashboard preview.
+              Confirm that custom cards, layout helpers, and supporting entities
+              are available before capturing screenshots or running UI
+              regression tests. The hero strip keeps quick status pills front and
+              centre while the inventory below surfaces live sensor data.
+            view_layout:
+              column_span: 2
           - type: custom:auto-entities
+            show_empty: false
             card:
               type: entities
               title: Sensor inventory (sample)
+              state_color: true
               show_header_toggle: false
             card_param: entities
             filter:
@@ -51,6 +80,8 @@ views:
             sort:
               method: friendly_name
             limit: 12
+            view_layout:
+              column_span: 2
       - type: grid
         title: Lighting Lab
         columns: 2
@@ -62,11 +93,18 @@ views:
             primary: Start Halloween Lights
             secondary: Kick off the animated holiday lighting scene.
             layout: vertical
+            fill_container: true
+            multiline_secondary: true
             tap_action:
               action: call-service
               service: script.turn_on
               target:
                 entity_id: script.test_halloween
+            card_mod:
+              style: |
+                ha-card {
+                  --mush-icon-size: 56px;
+                }
           - type: custom:mushroom-template-card
             entity: script.test_halloween
             icon: mdi:stop-circle
@@ -74,11 +112,36 @@ views:
             primary: Stop Halloween Lights
             secondary: Halt the animation immediately for quick resets.
             layout: vertical
+            fill_container: true
+            multiline_secondary: true
             tap_action:
               action: call-service
               service: script.turn_off
               target:
                 entity_id: script.test_halloween
+            card_mod:
+              style: |
+                ha-card {
+                  --mush-icon-size: 56px;
+                }
+          - type: custom:mushroom-template-card
+            icon: mdi:lightbulb-multiple-outline
+            icon_color: blue
+            primary: Scene Preview Slot
+            secondary: Reserve this bay for upcoming dimmer sliders or preview
+              scenes as additional tests are added.
+            layout: vertical
+            fill_container: true
+            tap_action:
+              action: none
+            view_layout:
+              column_span: 2
+            card_mod:
+              style: |
+                ha-card {
+                  --mush-icon-size: 48px;
+                  opacity: 0.8;
+                }
           - type: markdown
             content: >-
               #### Test Notes
@@ -87,24 +150,38 @@ views:
               holiday lighting package. Run a full start/stop cycle before
               enabling seasonal automations or capturing dashboards so the
               animation and scripts remain verified.
+            view_layout:
+              column_span: 2
   - title: Plex · Theater
     path: support-test-plex
     icon: mdi:plex
     type: sections
     theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-plex-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-plex-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-plex-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-plex-fg, var(--app-header-icon-color));
+        }
     max_columns: 2
     sections:
       - type: grid
         title: Theater Status
+        columns: 2
         cards:
           - type: custom:mushroom-media-player-card
             entity: media_player.basement_fire_tv
             name: Basement Theater Fire TV
             use_media_info: true
             show_volume_level: true
-            layout: vertical
+            layout: horizontal
+            fill_container: true
             tap_action:
               action: more-info
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: binary_sensor.basement_theater_active
             icon: mdi:movie-open
@@ -114,9 +191,21 @@ views:
               {{ 'Theater Active' if is_state('binary_sensor.basement_theater_active', 'on') else 'Theater Idle' }}
             secondary: >-
               Fire TV: {{ states('sensor.basement_theater_media_status') }} · App:
-              {{ state_attr('sensor.basement_theater_media_status', 'app_name') }} ·
-              Plex sessions: {{ states('sensor.plex_server_sessions') }}
-            layout: vertical
+              {{ state_attr('sensor.basement_theater_media_status', 'app_name') or 'unknown' }}
+            layout: horizontal
+            fill_container: true
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-template-card
+            entity: sensor.plex_server_sessions
+            icon: mdi:plex
+            icon_color: amber
+            primary: Plex Sessions
+            secondary: >-
+              Active streams: {{ states('sensor.plex_server_sessions') }} ·
+              Client online: {{ 'Yes' if is_state('media_player.basement_fire_tv', 'on') else 'No' }}
+            layout: horizontal
+            fill_container: true
             tap_action:
               action: more-info
           - type: custom:mushroom-chips-card
@@ -138,70 +227,64 @@ views:
                   {{ 'green' if is_state('binary_sensor.basement_theater_active', 'on') else 'grey' }}
                 content: >-
                   {{ 'Client online' if is_state('media_player.basement_fire_tv', 'on') else 'Client idle' }}
+            view_layout:
+              column_span: 2
       - type: grid
         title: Quick Controls
-        columns: 3
         cards:
-          - type: custom:mushroom-template-card
-            entity: script.basement_fire_tv_launch_plex
-            icon: mdi:television-play
-            icon_color: indigo
-            primary: Launch Plex
-            secondary: Wake the Fire TV and open the Plex client.
-            layout: vertical
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.basement_fire_tv_launch_plex
-          - type: custom:mushroom-template-card
-            entity: script.basement_fire_tv_play_pause
-            icon: mdi:play-pause
-            icon_color: deep-orange
-            primary: Play/Pause
-            secondary: Toggle playback on the Fire TV client.
-            layout: vertical
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.basement_fire_tv_play_pause
-          - type: custom:mushroom-template-card
-            entity: script.basement_fire_tv_home
-            icon: mdi:remote-tv
-            icon_color: teal
-            primary: Fire TV Home
-            secondary: Send a Home command for navigation resets.
-            layout: vertical
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.basement_fire_tv_home
-          - type: custom:mushroom-template-card
-            entity: script.basement_fire_tv_power_off
-            icon: mdi:television-off
-            icon_color: red
-            primary: Power Off
-            secondary: Turn off the basement Fire TV entirely.
-            layout: vertical
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.basement_fire_tv_power_off
-          - type: custom:mushroom-template-card
-            entity: script.plex_refresh_clients
-            icon: mdi:update
-            icon_color: amber
-            primary: Refresh Plex
-            secondary: Trigger a client discovery scan.
-            layout: vertical
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.plex_refresh_clients
+          - type: custom:mushroom-chips-card
+            alignment: start
+            chips:
+              - type: template
+                icon: mdi:television-play
+                icon_color: indigo
+                content: Launch Plex
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_launch_plex
+              - type: template
+                icon: mdi:play-pause
+                icon_color: deep-orange
+                content: Play/Pause
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_play_pause
+              - type: template
+                icon: mdi:remote-tv
+                icon_color: teal
+                content: Fire TV Home
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_home
+              - type: template
+                icon: mdi:television-off
+                icon_color: red
+                content: Power Off
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.basement_fire_tv_power_off
+              - type: template
+                icon: mdi:update
+                icon_color: amber
+                content: Refresh Plex
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  target:
+                    entity_id: script.plex_refresh_clients
+          - type: markdown
+            content: >-
+              Use the chips above for rapid control during regression tests. The
+              Launch and Power controls wake or shut down the Fire TV, while the
+              refresh button forces a Plex client discovery sweep.
       - type: grid
         title: Telemetry
         cards:
@@ -226,7 +309,8 @@ views:
             icon_color: amber
             primary: Plex Scan Clients
             secondary: Press to refresh the Plex integration roster.
-            layout: vertical
+            layout: horizontal
+            fill_container: true
             tap_action:
               action: call-service
               service: button.press
