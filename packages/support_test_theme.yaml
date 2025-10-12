@@ -1,0 +1,152 @@
+###############################################################################
+# Support · Test Resources dashboard theme package
+#
+# Provides a gold-accented theme tuned for the Support · Test Resources views
+# so regression captures mirror the design profile showcased in the preview
+# dashboard. The palette is defined inline to keep the package self-contained
+# for the test bench workspace.
+###############################################################################
+
+frontend:
+  themes:
+    Support Test Gold:
+      modes:
+        light:
+          # Base palette
+          primary-color: "#b88a00"
+          light-primary-color: "#ffd166"
+          accent-color: "#d4af37"
+          primary-background-color: "#f8f3e6"
+          secondary-background-color: "#f0ead7"
+          card-background-color: "#fdf8ec"
+          paper-card-background-color: "#fdf8ec"
+          divider-color: "#d8c99b"
+
+          # Text and iconography
+          primary-text-color: "#2f2412"
+          secondary-text-color: "#6b5730"
+          text-primary-color: "#2f2412"
+          disabled-text-color: "#a9956b"
+          paper-item-icon-color: "#8c7a4f"
+          paper-item-icon-active-color: "#d4af37"
+          state-icon-color: "#8c7a4f"
+          state-icon-active-color: "#d4af37"
+          sidebar-text-color: "#2f2412"
+          sidebar-icon-color: "#8c7a4f"
+          sidebar-selected-text-color: "#2f2412"
+          sidebar-selected-icon-color: "#d4af37"
+          link-color: "#b88a00"
+
+          # Header and surfaces
+          app-header-background-color: "#000000"
+          app-header-text-color: "#f6d47a"
+          app-header-button-text-color: "#f6d47a"
+          app-header-icon-color: "#f6d47a"
+          header-height: 64px
+          ha-card-border-width: 1px
+          ha-card-border-color: "#0d0d0d"
+          ha-card-border-radius: 16px
+          ha-card-box-shadow: "0px 18px 36px rgba(0, 0, 0, 0.18)"
+          ha-chip-border-radius: 12px
+          input-fill-color: "#efe3c6"
+          input-ink-color: "#2f2412"
+          switch-checked-button-color: "#d4af37"
+          switch-checked-track-color: "#f3dd9a"
+          switch-unchecked-button-color: "#c8b37a"
+          switch-unchecked-track-color: "#e9dec0"
+
+          # Mushroom cards
+          mush-spacing: 12px
+          mush-title-font-weight: 600
+          mush-card-primary-background: "#fdf8ec"
+          mush-card-secondary-background: "#f3ead2"
+          mush-card-primary-text-color: "#2f2412"
+          mush-card-secondary-text-color: "#6b5730"
+          mush-card-border-radius: 16px
+          mush-card-border-width: 1px
+          mush-card-border-color: "#0d0d0d"
+          mush-icon-border-radius: 12px
+          mush-control-border-radius: 12px
+          mush-chip-border-radius: 12px
+          mush-chip-background: "#f0e3bf"
+          mush-chip-text-color: "#2f2412"
+          mush-chip-icon-color: "#1a1a1a"
+          mush-rgb-primary: 200, 160, 40
+          mush-rgb-accent: 212, 175, 55
+          mush-rgb-info: 134, 108, 60
+          mush-rgb-success: 114, 150, 74
+          mush-rgb-warning: 217, 137, 0
+          mush-rgb-danger: 181, 77, 62
+          mush-rgb-state-entity: 200, 160, 40
+          mush-rgb-state-switch: 212, 175, 55
+          mush-rgb-state-media-player: 212, 175, 55
+
+        dark:
+          # Base palette
+          primary-color: "#e0c068"
+          light-primary-color: "#f6d47a"
+          accent-color: "#f6d47a"
+          primary-background-color: "#1a160c"
+          secondary-background-color: "#241d0f"
+          card-background-color: "#2d2311"
+          paper-card-background-color: "#2d2311"
+          divider-color: "#3b3119"
+
+          # Text and iconography
+          primary-text-color: "#fdf6d8"
+          secondary-text-color: "#dcc890"
+          text-primary-color: "#fdf6d8"
+          disabled-text-color: "#8b7a52"
+          paper-item-icon-color: "#bfa05a"
+          paper-item-icon-active-color: "#f6d47a"
+          state-icon-color: "#bfa05a"
+          state-icon-active-color: "#f6d47a"
+          sidebar-text-color: "#fdf6d8"
+          sidebar-icon-color: "#bfa05a"
+          sidebar-selected-text-color: "#f6d47a"
+          sidebar-selected-icon-color: "#f6d47a"
+          link-color: "#f6d47a"
+
+          # Header and surfaces
+          app-header-background-color: "#000000"
+          app-header-text-color: "#e0c068"
+          app-header-button-text-color: "#e0c068"
+          app-header-icon-color: "#e0c068"
+          header-height: 64px
+          ha-card-border-width: 1px
+          ha-card-border-color: "#000000"
+          ha-card-border-radius: 16px
+          ha-card-box-shadow: "0px 18px 36px rgba(0, 0, 0, 0.45)"
+          ha-chip-border-radius: 12px
+          input-fill-color: "#2f2612"
+          input-ink-color: "#fdf6d8"
+          switch-checked-button-color: "#f6d47a"
+          switch-checked-track-color: "#5a471f"
+          switch-unchecked-button-color: "#7c6936"
+          switch-unchecked-track-color: "#3f341a"
+
+          # Mushroom cards
+          mush-spacing: 12px
+          mush-title-font-weight: 600
+          mush-card-primary-background: "#2d2311"
+          mush-card-secondary-background: "#241d0f"
+          mush-card-primary-text-color: "#fdf6d8"
+          mush-card-secondary-text-color: "#dcc890"
+          mush-card-border-radius: 16px
+          mush-card-border-width: 1px
+          mush-card-border-color: "#000000"
+          mush-icon-border-radius: 12px
+          mush-control-border-radius: 12px
+          mush-chip-border-radius: 12px
+          mush-chip-background: "#3a2f18"
+          mush-chip-text-color: "#f6d47a"
+          mush-chip-icon-color: "#f6d47a"
+          mush-rgb-primary: 229, 198, 118
+          mush-rgb-accent: 244, 210, 129
+          mush-rgb-info: 196, 166, 110
+          mush-rgb-success: 173, 198, 130
+          mush-rgb-warning: 250, 169, 79
+          mush-rgb-danger: 222, 112, 102
+          mush-rgb-state-entity: 229, 198, 118
+          mush-rgb-state-switch: 244, 210, 129
+          mush-rgb-state-media-player: 244, 210, 129

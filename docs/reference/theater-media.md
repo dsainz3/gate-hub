@@ -40,14 +40,14 @@ Friendly names and icons for the player, remote, and scripts are defined in the 
 
 ## Dashboard Wiring
 
-The Support · Test Resources dashboard adds a dedicated **Plex · Theater** view (`dashboards/_support/test_resources.dashboard.yaml`) to exercise the package:
+The Support · Test Resources dashboard now follows the 2025 design profile showcased in the new Home Assistant dashboard preview, backed by the gold-accented **Support Test Gold** theme with a black application banner and black-trimmed cards to keep captures consistent with the refreshed palette. The **Plex · Theater** view (`dashboards/_support/test_resources.dashboard.yaml`) now rotates through a richer assortment of modern cards:
 
-1. **Status row** – Mushroom media player card (Fire TV) plus a template card that surfaces the active/idle state, running app, and Plex session summary.
-2. **Controls grid** – Buttons mapped to the scripts above for launching Plex, play/pause, returning home, powering off, and forcing a Plex client rescan.
-3. **Telemetry entities** – Current state, Plex server session count, raw Plex sensor, and the scan button for quick access.
-4. **Media browser** – Lovelace media browser card targeting `media_player.plex_plex_for_android_tv_aftgazl` so testers can launch titles straight from the dashboard.
+1. **Playback Overview** – A `custom:swipe-card` carousel combines Mushroom and Mini Media Player cards with a styled picture entity so testers can swipe between transport, metadata, and artwork contexts.
+2. **Engagement Metrics** – ApexCharts and history graphs chart Plex session density alongside the Fire TV activity sensor, with an auto-entities Mushroom card surfacing the heartbeat sensors that power the analytics.
+3. **Client Controls** – Mixed Mushroom template and `custom:button-card` actions provide one-tap access to Fire TV scripts, Plex client scans, and the server update entity, complete with styled hold actions for advanced flows.
+4. **Library & Notes** – A `custom:tabbed-card` exposes the Plex media browser, a dynamically generated watch list tab, and embedded support notes so testers can document findings without leaving the dashboard.
 
-Keep the Fire TV online (Plex app open at least once) before loading the view so the client entity appears and the media browser renders without configuration errors.
+Keep the Fire TV online (launch the Plex app at least once) before loading the view so the client entity appears and the media browser renders without configuration errors.
 
 ## Operational Checklist
 1. After updating the package, reload Home Assistant packages or restart Core so template sensors and scripts are registered.
