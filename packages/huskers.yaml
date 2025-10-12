@@ -2119,5 +2119,3 @@ frontend:
           --huskers-score-color: var(--ha-theme-color-scarlet)
           --huskers-text-primary: var(--ha-theme-color-dark)
           --huskers-text-secondary: var(--ha-theme-color-gray)
-
-
