@@ -42,6 +42,10 @@ frontend:
           app-header-text-color: "#f6d47a"
           app-header-button-text-color: "#f6d47a"
           app-header-icon-color: "#f6d47a"
+          --support-test-header-test-bench-bg: "#000000"
+          --support-test-header-test-bench-fg: "#f6d47a"
+          --support-test-header-plex-bg: "#1a1a1a"
+          --support-test-header-plex-fg: "#f6d47a"
           header-height: 64px
           ha-card-border-width: 1px
           ha-card-border-color: "#0d0d0d"
@@ -112,6 +116,10 @@ frontend:
           app-header-text-color: "#e0c068"
           app-header-button-text-color: "#e0c068"
           app-header-icon-color: "#e0c068"
+          --support-test-header-test-bench-bg: "#000000"
+          --support-test-header-test-bench-fg: "#e0c068"
+          --support-test-header-plex-bg: "#101010"
+          --support-test-header-plex-fg: "#e0c068"
           header-height: 64px
           ha-card-border-width: 1px
           ha-card-border-color: "#000000"

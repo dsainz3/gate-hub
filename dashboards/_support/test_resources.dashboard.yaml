@@ -5,6 +5,14 @@ views:
     icon: mdi:test-tube
     type: sections
     theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
     max_columns: 3
     sections:
       - type: grid
@@ -148,6 +156,14 @@ views:
     icon: mdi:plex
     type: sections
     theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-plex-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-plex-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-plex-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-plex-fg, var(--app-header-icon-color));
+        }
     max_columns: 2
     sections:
       - type: grid
