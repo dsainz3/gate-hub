@@ -3,7 +3,7 @@ title: Automation Catalog
 summary: Authoritative list of automations with triggers, guards, and actions for the gate-hub Home Assistant deployment.
 status: active
 category: reference
-updated: 2025-10-10
+updated: 2025-10-14
 owner: automation-team
 tags:
   - home-assistant
@@ -141,6 +141,22 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Guards**: None; fires whenever the audit flags disabled automations or mismatched modes.
 - **Actions**: Writes a Logbook entry with the audit summary so on-call staff can compare against the sensor’s trigger snapshot.
 - **Notes**: The audit sensor aggregates trigger states, helper booleans, and expected modes for all football automations so the alert message always references the latest snapshot.
+
+## Automation Watchdog Package (`packages/automation_watchdog.yaml`)
+
+### System: Automation Watchdog Alert (`packages/automation_watchdog.yaml:293`)
+- **ID** `automation_watchdog_alert`
+- **Trigger**: `sensor.automation_status_audit` turns to `issues` when any automation’s enabled state diverges from the expected groups.
+- **Guards**: None. The sensor filters out ignored automations and surfaces only true mismatches.
+- **Actions**: Logs a summary to the Logbook with the audit’s `issues_summary` attribute for rapid troubleshooting.
+- **Notes**: The paired template sensor snapshots every automation, grouping expected-off and ignored entries for manual review in the Watchdog dashboard.
+
+### System: Specialized Mode Alert (`packages/automation_watchdog.yaml:308`)
+- **ID** `specialized_mode_alert`
+- **Trigger**: `sensor.specialized_mode_audit` switches to `issues` after the Huskers, F1, or Holiday mode helpers violate their expected timelines.
+- **Guards**: None; this watchdog relies on the audit sensor’s built-in logic to suppress noise when helpers are disabled or idle.
+- **Actions**: Emits a Logbook entry with the audit summary describing which mode is misaligned and why.
+- **Notes**: The specialized audit records reasoning strings for each helper so on-call staff immediately see whether a manual override, stale ESPN data, or race hold timer is responsible.
 
 ---
 
