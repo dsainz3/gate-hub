@@ -119,6 +119,176 @@ template:
           automations: >-
             {% set audit = automation_audit_snapshot | from_json %}
             {{ audit.snapshots | to_json }}
+  - trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: state
+        entity_id:
+          - input_boolean.holiday_mode_manual
+          - input_boolean.huskers_game_mode
+          - input_boolean.huskers_test_mode
+          - input_boolean.huskers_automations_enabled
+          - input_boolean.huskers_use_manual_kickoff
+          - binary_sensor.huskers_is_pregame_espn
+          - binary_sensor.huskers_is_live_espn
+          - binary_sensor.huskers_is_postgame_espn
+          - binary_sensor.huskers_light_show_active
+          - sensor.huskers_kickoff_in_effective
+          - sensor.huskers_kickoff_in_2
+          - input_boolean.f1_race_mode
+          - input_boolean.f1_test_mode
+          - input_boolean.f1_automations_enabled
+          - binary_sensor.f1_is_pre_race_window
+          - binary_sensor.f1_is_race_live
+          - binary_sensor.f1_is_race_wrap
+          - input_number.f1_chequered_hold_minutes
+    sensor:
+      - name: Specialized Mode Audit
+        unique_id: specialized_mode_audit
+        icon: mdi:alert-decagram
+        variables:
+          mode_matrix: >-
+            {% set entries = [] %}
+            {% set now_ts = as_timestamp(now()) %}
+
+            {% set holiday_state = states('input_boolean.holiday_mode_manual') %}
+            {% set entries = entries + [{
+              'entity_id': 'input_boolean.holiday_mode_manual',
+              'name': 'Holiday Mode Override',
+              'state': holiday_state,
+              'expected_state': 'off',
+              'reason_on': 'Manual holiday override engaged; confirm it is still required.',
+              'reason_off': 'Override idle; calendar drives holiday mode.'
+            }] %}
+
+            {% set huskers_auto = is_state('input_boolean.huskers_automations_enabled', 'on') %}
+            {% set huskers_manual = is_state('input_boolean.huskers_use_manual_kickoff', 'on') %}
+            {% set huskers_has_next = state_attr('sensor.huskers_kickoff_in_2', 'has_next_game') | default(false) %}
+            {% set huskers_minutes = states('sensor.huskers_kickoff_in_effective') | float(999) %}
+            {% set huskers_pre = (huskers_manual or huskers_has_next) and huskers_minutes >= 0 and huskers_minutes <= 20 %}
+            {% set huskers_live = is_state('binary_sensor.huskers_is_live_espn', 'on') %}
+            {% set huskers_show = is_state('binary_sensor.huskers_light_show_active', 'on') %}
+            {% set huskers_post = is_state('binary_sensor.huskers_is_postgame_espn', 'on') %}
+            {% set huskers_post_recent = huskers_post and (now_ts - as_timestamp(states.binary_sensor.huskers_is_postgame_espn.last_changed, 0)) <= 1200 %}
+            {% set huskers_expected_on = huskers_auto and (huskers_pre or huskers_live or huskers_post_recent or huskers_show) %}
+            {% set entries = entries + [{
+              'entity_id': 'input_boolean.huskers_game_mode',
+              'name': 'Huskers Game Mode',
+              'state': states('input_boolean.huskers_game_mode'),
+              'expected_state': 'on' if huskers_expected_on else 'off',
+              'reason_on': 'Pregame, live, postgame grace, or Husker show active.',
+              'reason_off': 'No active Huskers window detected; mode should idle.'
+            }] %}
+
+            {% set entries = entries + [{
+              'entity_id': 'input_boolean.huskers_test_mode',
+              'name': 'Huskers Test Mode',
+              'state': states('input_boolean.huskers_test_mode'),
+              'expected_state': 'off',
+              'reason_on': 'Manual testing should be temporary; disable after use.',
+              'reason_off': 'Testing mode idle.'
+            }] %}
+
+            {% set f1_auto = is_state('input_boolean.f1_automations_enabled', 'on') %}
+            {% set f1_pre = is_state('binary_sensor.f1_is_pre_race_window', 'on') %}
+            {% set f1_live = is_state('binary_sensor.f1_is_race_live', 'on') %}
+            {% set f1_wrap = is_state('binary_sensor.f1_is_race_wrap', 'on') %}
+            {% set f1_hold_minutes = states('input_number.f1_chequered_hold_minutes') | int(10) %}
+            {% set f1_hold_seconds = (f1_hold_minutes if f1_hold_minutes > 0 else 10) * 60 %}
+            {% set f1_wrap_recent = f1_wrap and (now_ts - as_timestamp(states.binary_sensor.f1_is_race_wrap.last_changed, 0)) <= f1_hold_seconds %}
+            {% set f1_expected_on = f1_auto and (f1_pre or f1_live or f1_wrap_recent) %}
+            {% set entries = entries + [{
+              'entity_id': 'input_boolean.f1_race_mode',
+              'name': 'F1 Race Mode',
+              'state': states('input_boolean.f1_race_mode'),
+              'expected_state': 'on' if f1_expected_on else 'off',
+              'reason_on': 'Race window active or chequered flag hold underway.',
+              'reason_off': 'No race activity detected; race mode should be idle.'
+            }] %}
+
+            {% set entries = entries + [{
+              'entity_id': 'input_boolean.f1_test_mode',
+              'name': 'F1 Test Mode',
+              'state': states('input_boolean.f1_test_mode'),
+              'expected_state': 'off',
+              'reason_on': 'Manual testing should be temporary; disable after use.',
+              'reason_off': 'Testing mode idle.'
+            }] %}
+
+            {{ entries | to_json }}
+        state: >-
+          {% set modes = mode_matrix | from_json %}
+          {% set issues = [] %}
+          {% for mode in modes %}
+            {% set actual = mode['state'] %}
+            {% set expected = mode['expected_state'] %}
+            {% if actual not in ['on', 'off'] %}
+              {% set issues = issues + [mode['name']] %}
+            {% elif expected in ['on', 'off'] and actual != expected %}
+              {% set issues = issues + [mode['name']] %}
+            {% endif %}
+          {% endfor %}
+          {{ 'issues' if issues else 'ok' }}
+        attributes:
+          checked_at: '{{ now().isoformat() }}'
+          total_modes: >-
+            {% set modes = mode_matrix | from_json %}
+            {{ modes | length }}
+          mismatches: >-
+            {% set modes = mode_matrix | from_json %}
+            {% set issues = [] %}
+            {% for mode in modes %}
+              {% set actual = mode['state'] %}
+              {% set expected = mode['expected_state'] %}
+              {% set entity_id = mode['entity_id'] %}
+              {% set name = mode['name'] %}
+              {% if actual not in ['on', 'off'] %}
+                {% set message = 'State is ' ~ (actual | default('unknown', true)) %}
+                {% set issues = issues + [{
+                  'entity_id': entity_id,
+                  'name': name,
+                  'state': actual,
+                  'expected_state': expected,
+                  'issue': message
+                }] %}
+              {% elif expected in ['on', 'off'] and actual != expected %}
+                {% set reason_key = 'reason_' ~ expected %}
+                {% set details = mode[reason_key] if reason_key in mode else '' %}
+                {% set message = details if details else 'Expected ' ~ expected ~ ', actual ' ~ actual %}
+                {% set issues = issues + [{
+                  'entity_id': entity_id,
+                  'name': name,
+                  'state': actual,
+                  'expected_state': expected,
+                  'issue': message
+                }] %}
+              {% endif %}
+            {% endfor %}
+            {{ issues | to_json }}
+          issues_summary: >-
+            {% set modes = mode_matrix | from_json %}
+            {% set summaries = [] %}
+            {% for mode in modes %}
+              {% set actual = mode['state'] %}
+              {% set expected = mode['expected_state'] %}
+              {% set name = mode['name'] %}
+              {% if actual not in ['on', 'off'] %}
+                {% set summaries = summaries + [name ~ ': state is ' ~ (actual | default('unknown', true))] %}
+              {% elif expected in ['on', 'off'] and actual != expected %}
+                {% set reason_key = 'reason_' ~ expected %}
+                {% set details = mode[reason_key] if reason_key in mode else '' %}
+                {% if details %}
+                  {% set summaries = summaries + [name ~ ': ' ~ details] %}
+                {% else %}
+                  {% set summaries = summaries + [name ~ ': expected ' ~ expected ~ ', actual ' ~ actual] %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ summaries | join(' — ') if summaries else 'All specialized modes match expected states' }}
+          modes: >-
+            {{ mode_matrix }}
 automation:
   - id: automation_watchdog_alert
     alias: 'System: Automation Watchdog Alert'
@@ -135,3 +305,18 @@ automation:
           message: >-
             {{ state_attr('sensor.automation_status_audit', 'issues_summary') }}
           entity_id: sensor.automation_status_audit
+  - id: specialized_mode_alert
+    alias: 'System: Specialized Mode Alert'
+    description: 'Logs when the specialized mode audit finds unexpected states.'
+    mode: single
+    trigger:
+      - platform: state
+        entity_id: sensor.specialized_mode_audit
+        to: 'issues'
+    action:
+      - service: logbook.log
+        data:
+          name: Specialized Mode Watchdog
+          message: >-
+            {{ state_attr('sensor.specialized_mode_audit', 'issues_summary') }}
+          entity_id: sensor.specialized_mode_audit
