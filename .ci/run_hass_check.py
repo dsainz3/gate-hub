@@ -20,12 +20,18 @@ def _ensure_homeassistant() -> bool:
 
     print("[ha-check] Installing Home Assistant Python package…", flush=True)
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", _HA_PACKAGE])
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", _HA_PACKAGE]
+        )
     except subprocess.CalledProcessError:
-        print("[ha-check] Failed to install Home Assistant via pip; falling back to Docker.", flush=True)
+        print(
+            "[ha-check] Failed to install Home Assistant via pip; falling back to Docker.",
+            flush=True,
+        )
         return False
 
     return _module_available("homeassistant")
+
 
 repo = Path.cwd().resolve()
 fake = repo / ".ci" / "fakesecrets.yaml"
