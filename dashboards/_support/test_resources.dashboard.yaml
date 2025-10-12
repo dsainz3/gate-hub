@@ -128,8 +128,7 @@ views:
             icon: mdi:lightbulb-multiple-outline
             icon_color: blue
             primary: Scene Preview Slot
-            secondary: Reserve this bay for upcoming dimmer sliders or preview
-              scenes as additional tests are added.
+            secondary: Reserve this bay for upcoming dimmer sliders or preview scenes as additional tests are added.
             layout: vertical
             fill_container: true
             tap_action:
