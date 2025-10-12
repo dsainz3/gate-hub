@@ -1,153 +1,247 @@
 title: Support · Test Resources
 views:
-  - title: Test
+  - title: Test Bench
     path: support-test
-    cards:
-      - type: custom:layout-card
-        layout_type: custom:grid-layout
-        layout:
-          grid-template-columns: repeat(2, 1fr)
-        cards:
-          - type: markdown
-            content: "✅ layout-card.js loaded"
-          - type: markdown
-            content: "✅ grid-layout.js loaded"
-      - type: custom:auto-entities
-        card:
-          type: entities
-          title: "✅ auto-entities loaded"
-        filter:
-          include:
-            - entity_id: sensor.*
-          exclude:
-            - domain: weather
+    icon: mdi:test-tube
+    type: sections
+    theme: Mushroom Shadow
+    max_columns: 3
+    sections:
       - type: grid
-        title: Halloween Lights
-        columns: 2
-        square: false
+        title: Resource Smoke Tests
         cards:
-          - type: button
+          - type: custom:mushroom-chips-card
+            alignment: center
+            chips:
+              - type: template
+                icon: mdi:check-circle
+                icon_color: green
+                content: layout-card.js
+              - type: template
+                icon: mdi:check-circle
+                icon_color: green
+                content: grid-layout.js
+              - type: template
+                icon: mdi:auto-fix
+                icon_color: green
+                content: auto-entities
+          - type: markdown
+            content: >-
+              ### Purpose
+
+              Use this view to confirm that helper resources and custom cards load
+              before running screenshot captures or UI regression tests. The
+              sections-based layout mirrors the 2025 design profile showcased in
+              the new dashboard preview.
+          - type: custom:auto-entities
+            card:
+              type: entities
+              title: Sensor inventory (sample)
+              show_header_toggle: false
+            card_param: entities
+            filter:
+              include:
+                - domain: sensor
+                  options:
+                    secondary_info: last-changed
+              exclude:
+                - domain: weather
+                - state: unavailable
+                - state: unknown
+            sort:
+              method: friendly_name
+            limit: 12
+      - type: grid
+        title: Lighting Lab
+        columns: 2
+        cards:
+          - type: custom:mushroom-template-card
             entity: script.test_halloween
-            name: Start Halloween Lights
             icon: mdi:play-circle
+            icon_color: orange
+            primary: Start Halloween Lights
+            secondary: Kick off the animated holiday lighting scene.
+            layout: vertical
             tap_action:
               action: call-service
               service: script.turn_on
               target:
                 entity_id: script.test_halloween
-          - type: button
+          - type: custom:mushroom-template-card
             entity: script.test_halloween
-            name: Stop Halloween Lights
             icon: mdi:stop-circle
+            icon_color: red
+            primary: Stop Halloween Lights
+            secondary: Halt the animation immediately for quick resets.
+            layout: vertical
             tap_action:
               action: call-service
               service: script.turn_off
               target:
                 entity_id: script.test_halloween
+          - type: markdown
+            content: >-
+              #### Test Notes
+
+              These helpers exercise the `script.test_halloween` routine from the
+              holiday lighting package. Run a full start/stop cycle before
+              enabling seasonal automations or capturing dashboards so the
+              animation and scripts remain verified.
   - title: Plex · Theater
     path: support-test-plex
     icon: mdi:plex
-    cards:
-      - type: vertical-stack
+    type: sections
+    theme: Mushroom Shadow
+    max_columns: 2
+    sections:
+      - type: grid
+        title: Theater Status
+        cards:
+          - type: custom:mushroom-media-player-card
+            entity: media_player.basement_fire_tv
+            name: Basement Theater Fire TV
+            use_media_info: true
+            show_volume_level: true
+            layout: vertical
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-template-card
+            entity: binary_sensor.basement_theater_active
+            icon: mdi:movie-open
+            icon_color: >-
+              {{ 'orange' if is_state('binary_sensor.basement_theater_active', 'on') else 'grey' }}
+            primary: >-
+              {{ 'Theater Active' if is_state('binary_sensor.basement_theater_active', 'on') else 'Theater Idle' }}
+            secondary: >-
+              Fire TV: {{ states('sensor.basement_theater_media_status') }} · App:
+              {{ state_attr('sensor.basement_theater_media_status', 'app_name') }} ·
+              Plex sessions: {{ states('sensor.plex_server_sessions') }}
+            layout: vertical
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-chips-card
+            alignment: start
+            chips:
+              - type: template
+                icon: mdi:chart-timeline-variant
+                icon_color: blue
+                content: >-
+                  Last change · {{ state_attr('sensor.basement_theater_media_status', 'last_changed') or 'unknown' }}
+              - type: template
+                icon: mdi:plex
+                icon_color: amber
+                content: >-
+                  Sessions · {{ states('sensor.plex_server_sessions') }}
+              - type: template
+                icon: mdi:access-point-network
+                icon_color: >-
+                  {{ 'green' if is_state('binary_sensor.basement_theater_active', 'on') else 'grey' }}
+                content: >-
+                  {{ 'Client online' if is_state('media_player.basement_fire_tv', 'on') else 'Client idle' }}
+      - type: grid
+        title: Quick Controls
+        columns: 3
+        cards:
+          - type: custom:mushroom-template-card
+            entity: script.basement_fire_tv_launch_plex
+            icon: mdi:television-play
+            icon_color: indigo
+            primary: Launch Plex
+            secondary: Wake the Fire TV and open the Plex client.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.basement_fire_tv_launch_plex
+          - type: custom:mushroom-template-card
+            entity: script.basement_fire_tv_play_pause
+            icon: mdi:play-pause
+            icon_color: deep-orange
+            primary: Play/Pause
+            secondary: Toggle playback on the Fire TV client.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.basement_fire_tv_play_pause
+          - type: custom:mushroom-template-card
+            entity: script.basement_fire_tv_home
+            icon: mdi:remote-tv
+            icon_color: teal
+            primary: Fire TV Home
+            secondary: Send a Home command for navigation resets.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.basement_fire_tv_home
+          - type: custom:mushroom-template-card
+            entity: script.basement_fire_tv_power_off
+            icon: mdi:television-off
+            icon_color: red
+            primary: Power Off
+            secondary: Turn off the basement Fire TV entirely.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.basement_fire_tv_power_off
+          - type: custom:mushroom-template-card
+            entity: script.plex_refresh_clients
+            icon: mdi:update
+            icon_color: amber
+            primary: Refresh Plex
+            secondary: Trigger a client discovery scan.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.plex_refresh_clients
+      - type: grid
+        title: Telemetry
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: sensor.basement_theater_media_status
+            name: Fire TV Status
+            icon: mdi:television-classic
+            layout: horizontal
+          - type: custom:mushroom-entity-card
+            entity: sensor.plex_server_sessions
+            name: Plex Sessions
+            icon: mdi:plex
+            layout: horizontal
+          - type: custom:mushroom-entity-card
+            entity: sensor.plex
+            name: Plex Raw Sensor
+            icon: mdi:database
+            layout: horizontal
+          - type: custom:mushroom-template-card
+            entity: button.plex_scan_clients
+            icon: mdi:plex
+            icon_color: amber
+            primary: Plex Scan Clients
+            secondary: Press to refresh the Plex integration roster.
+            layout: vertical
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.plex_scan_clients
+      - type: grid
+        title: Library
         cards:
           - type: markdown
-            content: |
-              ## Plex & Basement Theater
-              Quick controls and telemetry for the new Plex server and basement Fire TV client.
-          - type: grid
-            columns: 2
-            square: false
-            cards:
-              - type: custom:mushroom-media-player-card
-                entity: media_player.basement_fire_tv
-                name: Basement Theater Fire TV
-                use_media_info: true
-                show_volume_level: true
-                tap_action:
-                  action: more-info
-              - type: custom:mushroom-template-card
-                entity: binary_sensor.basement_theater_active
-                primary: >-
-                  {{ iif(is_state('binary_sensor.basement_theater_active', 'on'), 'Theater Active', 'Theater Idle') }}
-                secondary: |-
-                  Fire TV: {{ states('sensor.basement_theater_media_status') }} · App: {{ state_attr('sensor.basement_theater_media_status', 'app_name') }}
-                  Plex sessions: {{ states('sensor.plex_server_sessions') }}
-                icon: mdi:movie-open
-                icon_color: >-
-                  {{ iif(is_state('binary_sensor.basement_theater_active', 'on'), 'orange', 'grey') }}
-                tap_action:
-                  action: more-info
-          - type: markdown
-            content: |
-              ### Controls
-              Manage playback, navigation, and power for the theater client.
-          - type: grid
-            columns: 5
-            square: false
-            cards:
-              - type: button
-                entity: script.basement_fire_tv_launch_plex
-                name: Launch Plex
-                icon: mdi:television-play
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_launch_plex
-              - type: button
-                entity: script.basement_fire_tv_play_pause
-                name: Play/Pause
-                icon: mdi:play-pause
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_play_pause
-              - type: button
-                entity: script.basement_fire_tv_home
-                name: Fire TV Home
-                icon: mdi:remote-tv
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_home
-              - type: button
-                entity: script.basement_fire_tv_power_off
-                name: Power Off
-                icon: mdi:television-off
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_power_off
-              - type: button
-                entity: script.plex_refresh_clients
-                name: Refresh Plex
-                icon: mdi:plex
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.plex_refresh_clients
-          - type: markdown
-            content: |
-              ### Telemetry
-              Live status from the Fire TV client and Plex server.
-          - type: entities
-            entities:
-              - entity: sensor.basement_theater_media_status
-                name: Fire TV Status
-              - entity: sensor.plex_server_sessions
-                name: Plex Sessions
-              - entity: sensor.plex
-                name: Plex Raw Sensor
-              - entity: button.plex_scan_clients
-                name: Plex Scan Clients
-          - type: markdown
-            content: |
-              ### Plex Library
-              Browse the Plex library and launch playback directly on the theater Fire TV.
+            content: >-
+              ### Plex Library Browser
+
+              Browse the Plex catalogue directly from this dashboard when testing
+              new client behaviours. Launch titles on the basement Fire TV with a
+              single tap.
           - type: media-browser
-            title: Plex Library Browser
             entity: media_player.plex_plex_for_android_tv_aftgazl
+            title: Plex Library Browser
