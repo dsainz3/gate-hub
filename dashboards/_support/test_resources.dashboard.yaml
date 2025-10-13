@@ -17,7 +17,7 @@ views:
     sections:
       - type: grid
         title: Mission Control
-        columns: 4
+        columns: 3
         cards:
           - type: custom:mushroom-title-card
             title: Support Lab · Modern Showcase
@@ -27,7 +27,7 @@ views:
               action: more-info
               entity: sensor.agenda_planner_summary
             view_layout:
-              column_span: 2
+              column_span: 3
           - type: custom:mushroom-chips-card
             alignment: start
             chips:
@@ -87,7 +87,11 @@ views:
                   action: more-info
                   entity: sensor.f1_next_race_name
             view_layout:
-              column_span: 2
+              column_span: 3
+      - type: grid
+        title: Live Highlights
+        columns: 3
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.huskers_game_phase_label
             icon: mdi:scoreboard-outline
@@ -117,8 +121,10 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
-            view_layout:
-              column_span: 2
+      - type: grid
+        title: Systems Pulse
+        columns: 3
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.network_performance_summary
             icon: mdi:chart-areaspline
@@ -139,33 +145,6 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
-            view_layout:
-              column_span: 2
-          - type: custom:mushroom-template-card
-            entity: sensor.outdoor_temperature_wx
-            icon: mdi:home-thermometer
-            icon_color: amber
-            primary: >-
-              Outdoor {{ states('sensor.outdoor_temperature_wx') }}°F
-            secondary: >-
-              Humidity {{ states('sensor.outdoor_humidity_wx') }}% · Feels like {{ states('sensor.temperature') }}°F
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            view_layout:
-              column_span: 2
-          - type: custom:mushroom-template-card
-            entity: sensor.kiosk_snapshot_aux_readout
-            icon: mdi:chart-timeline-variant
-            icon_color: teal
-            primary: Interior snapshot
-            secondary: >-
-              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights On {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            view_layout:
-              column_span: 2
           - type: custom:mushroom-template-card
             entity: binary_sensor.kiosk_automations_have_issues
             icon: mdi:toggle-switch
@@ -177,8 +156,6 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
-            view_layout:
-              column_span: 2
           - type: custom:mushroom-template-card
             entity: input_boolean.holiday_mode_manual
             icon: mdi:calendar-heart
@@ -189,8 +166,31 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
-            view_layout:
-              column_span: 2
+      - type: grid
+        title: Environment Snapshot
+        columns: 2
+        cards:
+          - type: custom:mushroom-template-card
+            entity: sensor.outdoor_temperature_wx
+            icon: mdi:home-thermometer
+            icon_color: amber
+            primary: >-
+              Outdoor {{ states('sensor.outdoor_temperature_wx') }}°F
+            secondary: >-
+              Humidity {{ states('sensor.outdoor_humidity_wx') }}% · Feels like {{ states('sensor.temperature') }}°F
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_snapshot_aux_readout
+            icon: mdi:chart-timeline-variant
+            icon_color: teal
+            primary: Interior snapshot
+            secondary: >-
+              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights On {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
   - title: Environment & Comfort
     path: support-test-environment
     icon: mdi:leaf-circle
