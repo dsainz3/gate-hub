@@ -17,6 +17,26 @@
 Automated summary pending. Run the **Repository metrics** workflow to populate.
 <!-- METRICS:END -->
 
+## Repo Metrics & Devices Dashboard
+
+The new Lovelace package at `dashboards/repo-metrics.dashboard.yaml` turns the repository
+itself into a first-class “device” within Home Assistant. The dashboard is built from two
+complementary intentions:
+
+1. **Operational awareness for the home.** Core KPI chips surface lights-on counts,
+   stale sensors, network latency, and firmware updates in one glance while area views
+   keep lighting, climate, and safety controls organised. The layout lives entirely in
+   version control so pull requests review both behaviour and presentation.
+2. **Engineering telemetry for the repo.** A dedicated GitHub Metrics view displays the
+   generated charts under `/local/metrics`, workflow status, and highlight sensors that
+   read from `packages/repo_metrics.yaml`. Run the “Repository metrics” GitHub Action—or
+   the in-dashboard “Run GitHub Metrics” chip—to regenerate the assets and refresh the
+   Overview badges.
+
+Together these views anchor the observability story: daily operations stay visible from
+the Overview while long-term engineering signals live a tap away. See
+`docs/repo_metrics_dashboard.md` for installation and customisation guidance.
+
 Gate Hub is my learning lab for becoming a hypermodern development engineer. What started as a set of ad-hoc Home Assistant tweaks now operates like a product team project: infrastructure is versioned, documentation is intentional, and automations ship with CI guardrails. This repository captures the journey from the early experimentation days to the current platform and surfaces the skills I am building along the way. Wherever you see “Football Team” in the documentation, swap in your own club branding and entity IDs—the configuration remains opinionated, but every guide explains how to customise it safely.
 
 ---

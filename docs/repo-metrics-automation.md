@@ -18,8 +18,7 @@ Home Assistant dashboard integration.
 - Writes a `summary.json` companion that powers the Home Assistant package
   sensors.
 
-Run locally with (supplying `GITHUB_TOKEN` unlocks richer metrics, but the
-script will fall back to unauthenticated REST requests if omitted):
+Run locally with:
 
 ```bash
 GITHUB_TOKEN=ghp_example python scripts/metrics.py \
@@ -30,63 +29,6 @@ GITHUB_TOKEN=ghp_example python scripts/metrics.py \
   --summary-html \
   --update-readme
 ```
-
-### Running directly on Home Assistant OS
-
-You can execute the generator from the HAOS **Terminal & SSH** add-on as long
-as the add-on has `python3` available:
-
-1. Open the terminal add-on and switch into your configuration directory:
-   ```bash
-   cd /config
-   ```
-2. (First run only) ensure Python dependencies are present. The official SSH
-   add-on ships with `python3`, `pip`, and a writable `/config`, so install the
-   required packages once:
-   ```bash
-   pip3 install --user requests matplotlib markdown
-   ```
-3. Run the script using the same command shown above. The `/config` checkout is
-   equivalent to the repository root, so invoke:
-   ```bash
-   GITHUB_TOKEN=<optional_personal_token> python3 scripts/metrics.py \
-     --repo dsainz3/gate-hub \
-     --output www/metrics \
-     --markdown \
-     --html \
-     --summary-html \
-     --update-readme
-   ```
-
-The command writes results to `/config/www/metrics/`, which surfaces in the UI
-under `/local/metrics/` without additional steps. If the add-on is locked down
-and cannot install Python packages, run the script inside the provided GitHub
-Actions workflow instead.
-
-### Running on Windows
-
-The generator also works on Windows as long as Python 3.11 (or newer) is
-installed. PowerShell steps:
-
-1. Install the dependencies (first run only):
-   ```powershell
-   py -m pip install --user requests matplotlib markdown
-   ```
-2. From the repository root, execute the script. The `py` launcher selects the
-   matching Python installation automatically:
-   ```powershell
-   $env:GITHUB_TOKEN="<optional_personal_token>"
-   py scripts/metrics.py `
-     --repo dsainz3/gate-hub `
-     --output www/metrics `
-     --markdown `
-     --html `
-     --summary-html `
-     --update-readme
-   ```
-
-Outputs are written beneath `www\metrics\`. When served through Home Assistant
-or any static host, reference them as `/local/metrics/...` in Lovelace cards.
 
 ## .github/workflows/repo-metrics.yml
 
@@ -126,7 +68,7 @@ or any static host, reference them as `/local/metrics/...` in Lovelace cards.
 ## Validation checklist
 
 1. After the workflow runs, confirm the assets resolve via:
-   - `https://<ha-host>/local/metrics/commits_per_week.svg`
+   - `https://<ha-host>/local/metrics/commits_per_week.png`
    - `https://<ha-host>/local/metrics/metrics.html`
    - `https://<ha-host>/local/metrics/summary.html`
 2. Reload the Lovelace resources to ensure the new dashboard picks up the
@@ -136,11 +78,11 @@ or any static host, reference them as `/local/metrics/...` in Lovelace cards.
 
 ## Troubleshooting tips
 
-- Placeholder charts indicate the workflow ran without GitHub authentication –
-  provide `REPO_METRICS_TOKEN` (or allow the default `GITHUB_TOKEN`) with
-  `repo` and `actions:read` scopes to unlock commit diff statistics.
+- Missing charts usually mean the workflow could not authenticate to GitHub –
+  ensure `REPO_METRICS_TOKEN` (or the default `GITHUB_TOKEN`) is granted the
+  `repo` and `actions:read` scopes.
 - If the dashboard still shows cached images, add a cache-busting query string
-  such as `/local/metrics/commits_per_week.svg?v={{ states('sensor.date') }}` in
+  such as `/local/metrics/commits_per_week.png?v={{ states('sensor.date') }}` in
   the Lovelace card configuration.
 - Expose the `summary.json` as a REST sensor (instead of command line) if you
   prefer asynchronous updates or want to serve it to other systems.
