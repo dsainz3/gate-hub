@@ -63,6 +63,31 @@ under `/local/metrics/` without additional steps. If the add-on is locked down
 and cannot install Python packages, run the script inside the provided GitHub
 Actions workflow instead.
 
+### Running on Windows
+
+The generator also works on Windows as long as Python 3.11 (or newer) is
+installed. PowerShell steps:
+
+1. Install the dependencies (first run only):
+   ```powershell
+   py -m pip install --user requests matplotlib markdown
+   ```
+2. From the repository root, execute the script. The `py` launcher selects the
+   matching Python installation automatically:
+   ```powershell
+   $env:GITHUB_TOKEN="<optional_personal_token>"
+   py scripts/metrics.py `
+     --repo dsainz3/gate-hub `
+     --output www/metrics `
+     --markdown `
+     --html `
+     --summary-html `
+     --update-readme
+   ```
+
+Outputs are written beneath `www\metrics\`. When served through Home Assistant
+or any static host, reference them as `/local/metrics/...` in Lovelace cards.
+
 ## .github/workflows/repo-metrics.yml
 
 ```yaml
