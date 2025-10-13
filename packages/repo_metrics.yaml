@@ -4,6 +4,14 @@
 # scripts/metrics.py. The sensor can be used in automations, badges or other
 # dashboards to display high-level GitHub stats.
 
+input_text:
+  github_repo_metrics_auth_header:
+    name: GitHub Metrics Auth Header
+    icon: mdi:key-chain
+    max: 255
+    mode: password
+    initial: ""
+
 command_line:
   - sensor:
       name: GitHub Repo Metrics Summary
