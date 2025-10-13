@@ -14,7 +14,7 @@ Usage example (matching the scheduled workflow):
 Environment variables:
     GITHUB_TOKEN (required)
 
-The script is intentionally light on third-party dependencies – only
+The script is intentionally light on third-party dependencies - only
 ``requests``, ``matplotlib`` and ``markdown`` are required.
 """
 
@@ -25,15 +25,14 @@ import datetime as dt
 import json
 import math
 import os
-from collections import Counter, defaultdict
+from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
 
 import matplotlib
 
-
-# Home Assistant executes this in a headless environment – Agg is a safe
+# Home Assistant executes this in a headless environment - Agg is a safe
 # non-interactive backend.
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -41,12 +40,16 @@ import requests
 
 try:
     import markdown  # type: ignore
-except Exception:  # pragma: no cover - the workflow ensures ``markdown`` exists
+except (
+    Exception
+):  # pragma: no cover - the workflow ensures ``markdown`` exists
     markdown = None
 
 
 GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
-ACTIONS_URL_TEMPLATE = "https://api.github.com/repos/{owner}/{repo}/actions/runs"
+ACTIONS_URL_TEMPLATE = (
+    "https://api.github.com/repos/{owner}/{repo}/actions/runs"
+)
 
 
 @dataclass
@@ -64,8 +67,8 @@ class Commit:
 class PullRequest:
     number: int
     created_at: dt.datetime
-    closed_at: Optional[dt.datetime]
-    merged_at: Optional[dt.datetime]
+    closed_at: dt.datetime | None
+    merged_at: dt.datetime | None
     additions: int
     deletions: int
     changed_files: int
@@ -73,23 +76,29 @@ class PullRequest:
 
 @dataclass
 class WorkflowRun:
-    conclusion: Optional[str]
+    conclusion: str | None
     created_at: dt.datetime
 
 
 class GitHubMetricsClient:
     """Small helper around the GitHub GraphQL + REST APIs."""
 
-    def __init__(self, token: str, session: Optional[requests.Session] = None) -> None:
+    def __init__(
+        self, token: str, session: requests.Session | None = None
+    ) -> None:
         self._token = token
         self._session = session or requests.Session()
-        self._session.headers.update({
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "repo-metrics-automation",
-        })
+        self._session.headers.update(
+            {
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/vnd.github+json",
+                "User-Agent": "repo-metrics-automation",
+            }
+        )
 
-    def graphql(self, query: str, variables: Dict[str, object]) -> Dict[str, object]:
+    def graphql(
+        self, query: str, variables: dict[str, object]
+    ) -> dict[str, object]:
         response = self._session.post(
             GRAPHQL_ENDPOINT,
             json={"query": query, "variables": variables},
@@ -135,7 +144,7 @@ class GitHubMetricsClient:
         }
         """
 
-        cursor: Optional[str] = None
+        cursor: str | None = None
         page = 100
         while True:
             data = self.graphql(
@@ -205,7 +214,7 @@ class GitHubMetricsClient:
         }
         """
 
-        cursor: Optional[str] = None
+        cursor: str | None = None
         page = 50
         while True:
             data = self.graphql(
@@ -217,10 +226,7 @@ class GitHubMetricsClient:
                     "cursor": cursor,
                 },
             )
-            pr_data = (
-                data.get("repository", {})
-                .get("pullRequests", {})
-            )
+            pr_data = data.get("repository", {}).get("pullRequests", {})
             if not pr_data:
                 return
 
@@ -230,13 +236,11 @@ class GitHubMetricsClient:
                 )
                 if created_at < since:
                     return
-                closed_at = (
-                    node.get("closedAt")
-                    and dt.datetime.fromisoformat(node["closedAt"].replace("Z", "+00:00"))
+                closed_at = node.get("closedAt") and dt.datetime.fromisoformat(
+                    node["closedAt"].replace("Z", "+00:00")
                 )
-                merged_at = (
-                    node.get("mergedAt")
-                    and dt.datetime.fromisoformat(node["mergedAt"].replace("Z", "+00:00"))
+                merged_at = node.get("mergedAt") and dt.datetime.fromisoformat(
+                    node["mergedAt"].replace("Z", "+00:00")
                 )
                 yield PullRequest(
                     number=node["number"],
@@ -253,8 +257,10 @@ class GitHubMetricsClient:
                 break
             cursor = page_info.get("endCursor")
 
-    def list_workflow_runs(self, owner: str, repo: str, since: dt.datetime) -> List[WorkflowRun]:
-        runs: List[WorkflowRun] = []
+    def list_workflow_runs(
+        self, owner: str, repo: str, since: dt.datetime
+    ) -> list[WorkflowRun]:
+        runs: list[WorkflowRun] = []
         page = 1
         while True:
             response = self._session.get(
@@ -276,7 +282,10 @@ class GitHubMetricsClient:
                         created_at=created_at,
                     )
                 )
-            if not payload.get("workflow_runs") or len(payload["workflow_runs"]) < 100:
+            if (
+                not payload.get("workflow_runs")
+                or len(payload["workflow_runs"]) < 100
+            ):
                 break
             page += 1
         return runs
@@ -295,14 +304,16 @@ def iso_date(value: dt.datetime) -> dt.date:
     return value.date()
 
 
-def sum_period(values: Iterable[Tuple[dt.datetime, int]], bucket_fn) -> Dict[dt.date, int]:
-    counter: Dict[dt.date, int] = defaultdict(int)
+def sum_period(
+    values: Iterable[tuple[dt.datetime, int]], bucket_fn
+) -> dict[dt.date, int]:
+    counter: dict[dt.date, int] = defaultdict(int)
     for timestamp, count in values:
         counter[bucket_fn(timestamp)] += count
     return dict(sorted(counter.items()))
 
 
-def rolling_delta(series: Dict[dt.date, int], periods: int = 3) -> float:
+def rolling_delta(series: dict[dt.date, int], periods: int = 3) -> float:
     if not series:
         return 0.0
     ordered = list(series.values())
@@ -315,7 +326,9 @@ def rolling_delta(series: Dict[dt.date, int], periods: int = 3) -> float:
     return (recent - previous) / previous
 
 
-def summarise_trend(values: List[Tuple[dt.datetime, int]], window: int) -> Dict[str, float]:
+def summarise_trend(
+    values: list[tuple[dt.datetime, int]], window: int
+) -> dict[str, float]:
     if not values:
         return {"current": 0, "previous": 0, "delta": 0.0}
     sorted_values = sorted(values, key=lambda item: item[0])
@@ -323,7 +336,9 @@ def summarise_trend(values: List[Tuple[dt.datetime, int]], window: int) -> Dict[
     cutoff_previous = cutoff_current - dt.timedelta(days=window)
 
     current = sum(v for ts, v in sorted_values if ts >= cutoff_current)
-    previous = sum(v for ts, v in sorted_values if cutoff_previous <= ts < cutoff_current)
+    previous = sum(
+        v for ts, v in sorted_values if cutoff_previous <= ts < cutoff_current
+    )
     delta = 0.0
     if previous:
         delta = (current - previous) / previous
@@ -343,7 +358,9 @@ def ensure_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def plot_series(title: str, series: Dict[dt.date, int], output: Path, ylabel: str) -> None:
+def plot_series(
+    title: str, series: dict[dt.date, int], output: Path, ylabel: str
+) -> None:
     if not series:
         return
     dates = list(series.keys())
@@ -360,13 +377,16 @@ def plot_series(title: str, series: Dict[dt.date, int], output: Path, ylabel: st
     plt.close()
 
 
-def plot_failure_rate(title: str, series: Dict[dt.date, Tuple[int, int]], output: Path) -> None:
+def plot_failure_rate(
+    title: str, series: dict[dt.date, tuple[int, int]], output: Path
+) -> None:
     if not series:
         return
     dates = list(series.keys())
     totals = [total for total, _ in series.values()]
     failure_rates = [
-        (failures / total) * 100 if total else 0 for total, failures in series.values()
+        (failures / total) * 100 if total else 0
+        for total, failures in series.values()
     ]
 
     fig, ax1 = plt.subplots(figsize=(10, 5))
@@ -374,7 +394,13 @@ def plot_failure_rate(title: str, series: Dict[dt.date, Tuple[int, int]], output
     ax1.set_ylabel("Workflow runs")
 
     ax2 = ax1.twinx()
-    ax2.plot(dates, failure_rates, color="#b15928", marker="o", label="Failure rate (%)")
+    ax2.plot(
+        dates,
+        failure_rates,
+        color="#b15928",
+        marker="o",
+        label="Failure rate (%)",
+    )
     ax2.set_ylabel("Failure rate (%)")
     ax2.set_ylim(0, max(5, max(failure_rates) * 1.2))
 
@@ -387,17 +413,17 @@ def plot_failure_rate(title: str, series: Dict[dt.date, Tuple[int, int]], output
 def format_markdown_report(
     repo: str,
     generated_at: dt.datetime,
-    commit_weekly: Dict[dt.date, int],
-    contributor_weekly: Dict[dt.date, int],
-    revert_weekly: Dict[dt.date, int],
-    failure_weekly: Dict[dt.date, Tuple[int, int]],
+    commit_weekly: dict[dt.date, int],
+    contributor_weekly: dict[dt.date, int],
+    revert_weekly: dict[dt.date, int],
+    failure_weekly: dict[dt.date, tuple[int, int]],
     pr_latency_days: float,
     pr_churn: float,
     lines_added: int,
     lines_deleted: int,
-    daily_trend: Dict[str, float],
-    weekly_trend: Dict[str, float],
-    monthly_trend: Dict[str, float],
+    daily_trend: dict[str, float],
+    weekly_trend: dict[str, float],
+    monthly_trend: dict[str, float],
 ) -> str:
     lines = [
         f"# Repository metrics for `{repo}`",
@@ -431,7 +457,9 @@ def format_markdown_report(
 
 def format_html_report(markdown_content: str, inline_css: bool = False) -> str:
     if markdown is None:
-        raise RuntimeError("The markdown package is required to build the HTML report")
+        raise RuntimeError(
+            "The markdown package is required to build the HTML report"
+        )
 
     html_body = markdown.markdown(markdown_content, extensions=["tables"])
     if not inline_css:
@@ -476,9 +504,10 @@ th, td { padding: 0.4rem 0.8rem; border: 1px solid #9993; }
 """
 
 
-def format_summary_html(highlights: Dict[str, object]) -> str:
+def format_summary_html(highlights: dict[str, object]) -> str:
     rows = "".join(
-        f"<tr><th>{name}</th><td>{value}</td></tr>" for name, value in highlights.items()
+        f"<tr><th>{name}</th><td>{value}</td></tr>"
+        for name, value in highlights.items()
     )
     return f"""<!DOCTYPE html>
 <html lang=\"en\">
@@ -502,7 +531,7 @@ def format_summary_html(highlights: Dict[str, object]) -> str:
 """
 
 
-def update_readme_summary(readme_path: Path, summary_lines: List[str]) -> None:
+def update_readme_summary(readme_path: Path, summary_lines: list[str]) -> None:
     start_marker = "<!-- METRICS:START -->"
     end_marker = "<!-- METRICS:END -->"
 
@@ -524,11 +553,11 @@ def update_readme_summary(readme_path: Path, summary_lines: List[str]) -> None:
 
 def build_summary_lines(
     generated_at: dt.datetime,
-    daily: Dict[str, float],
-    weekly: Dict[str, float],
-    monthly: Dict[str, float],
+    daily: dict[str, float],
+    weekly: dict[str, float],
+    monthly: dict[str, float],
     latency_days: float,
-) -> List[str]:
+) -> list[str]:
     return [
         "## Repository health snapshot",
         f"_Updated {generated_at.isoformat()}Z_",
@@ -541,15 +570,44 @@ def build_summary_lines(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate GitHub metrics for Home Assistant dashboards")
-    parser.add_argument("--repo", required=True, help="Repository in owner/name format")
-    parser.add_argument("--output", default="www/metrics", help="Directory for generated assets")
-    parser.add_argument("--markdown", action="store_true", help="Render a Markdown report")
-    parser.add_argument("--html", action="store_true", help="Render an HTML report")
-    parser.add_argument("--inline-css", action="store_true", help="Include inline CSS in the HTML report")
-    parser.add_argument("--summary-html", action="store_true", help="Create a compact summary.html snippet")
-    parser.add_argument("--update-readme", action="store_true", help="Inject a summary into README.md between metric markers")
-    parser.add_argument("--lookback-days", type=int, default=120, help="How many days of history to analyse")
+    parser = argparse.ArgumentParser(
+        description="Generate GitHub metrics for Home Assistant dashboards"
+    )
+    parser.add_argument(
+        "--repo", required=True, help="Repository in owner/name format"
+    )
+    parser.add_argument(
+        "--output",
+        default="www/metrics",
+        help="Directory for generated assets",
+    )
+    parser.add_argument(
+        "--markdown", action="store_true", help="Render a Markdown report"
+    )
+    parser.add_argument(
+        "--html", action="store_true", help="Render an HTML report"
+    )
+    parser.add_argument(
+        "--inline-css",
+        action="store_true",
+        help="Include inline CSS in the HTML report",
+    )
+    parser.add_argument(
+        "--summary-html",
+        action="store_true",
+        help="Create a compact summary.html snippet",
+    )
+    parser.add_argument(
+        "--update-readme",
+        action="store_true",
+        help="Inject a summary into README.md between metric markers",
+    )
+    parser.add_argument(
+        "--lookback-days",
+        type=int,
+        default=120,
+        help="How many days of history to analyse",
+    )
     args = parser.parse_args()
 
     token = os.environ.get("GITHUB_TOKEN")
@@ -557,7 +615,9 @@ def main() -> None:
         raise SystemExit("GITHUB_TOKEN environment variable is required")
 
     owner, repo_name = args.repo.split("/", 1)
-    since = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc) - dt.timedelta(days=args.lookback_days)
+    since = dt.datetime.utcnow().replace(tzinfo=dt.UTC) - dt.timedelta(
+        days=args.lookback_days
+    )
 
     client = GitHubMetricsClient(token)
     commits = list(client.iter_commit_history(owner, repo_name, since))
@@ -570,8 +630,8 @@ def main() -> None:
     weekly_counts = sum_period(commit_daily_points, start_of_week)
     monthly_counts = sum_period(commit_daily_points, start_of_month)
 
-    contributors_weekly: Dict[dt.date, int] = defaultdict(int)
-    weekly_authors: Dict[dt.date, set] = defaultdict(set)
+    contributors_weekly: dict[dt.date, int] = defaultdict(int)
+    weekly_authors: dict[dt.date, set] = defaultdict(set)
     for commit in commits:
         week = start_of_week(commit.committed_at)
         weekly_authors[week].add(commit.author)
@@ -586,12 +646,18 @@ def main() -> None:
     ]
     revert_weekly = sum_period(revert_weekly_points, start_of_week)
 
-    failure_weekly: Dict[dt.date, Tuple[int, int]] = defaultdict(lambda: (0, 0))
+    failure_weekly: dict[dt.date, tuple[int, int]] = defaultdict(
+        lambda: (0, 0)
+    )
     for run in workflow_runs:
         week = start_of_week(run.created_at)
         total, failed = failure_weekly[week]
         total += 1
-        if run.conclusion and run.conclusion.lower() not in {"success", "neutral", "skipped"}:
+        if run.conclusion and run.conclusion.lower() not in {
+            "success",
+            "neutral",
+            "skipped",
+        }:
             failed += 1
         failure_weekly[week] = (total, failed)
     failure_weekly = dict(sorted(failure_weekly.items()))
@@ -625,7 +691,7 @@ def main() -> None:
     weekly_trend = summarise_trend(commit_daily_points, window=7)
     monthly_trend = summarise_trend(commit_daily_points, window=30)
 
-    generated_at = dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc)
+    generated_at = dt.datetime.utcnow().replace(tzinfo=dt.UTC)
 
     output_dir = Path(args.output)
     ensure_directory(output_dir)
@@ -634,6 +700,18 @@ def main() -> None:
         "Commits per week",
         weekly_counts,
         output_dir / "commits_per_week.png",
+        "Commits",
+    )
+    plot_series(
+        "Commits per day",
+        daily_counts,
+        output_dir / "commits_per_day.png",
+        "Commits",
+    )
+    plot_series(
+        "Commits per month",
+        monthly_counts,
+        output_dir / "commits_per_month.png",
         "Commits",
     )
     plot_series(
@@ -671,10 +749,14 @@ def main() -> None:
     )
 
     if args.markdown:
-        (output_dir / "metrics.md").write_text(markdown_report, encoding="utf-8")
+        (output_dir / "metrics.md").write_text(
+            markdown_report, encoding="utf-8"
+        )
 
     if args.html:
-        html_report = format_html_report(markdown_report, inline_css=args.inline_css)
+        html_report = format_html_report(
+            markdown_report, inline_css=args.inline_css
+        )
         (output_dir / "metrics.html").write_text(html_report, encoding="utf-8")
 
     highlights = {
@@ -699,7 +781,9 @@ def main() -> None:
 
     if args.summary_html:
         summary_html = format_summary_html(highlights)
-        (output_dir / "summary.html").write_text(summary_html, encoding="utf-8")
+        (output_dir / "summary.html").write_text(
+            summary_html, encoding="utf-8"
+        )
 
     if args.update_readme:
         summary_lines = build_summary_lines(
@@ -714,4 +798,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
