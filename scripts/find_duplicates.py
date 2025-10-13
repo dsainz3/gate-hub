@@ -137,7 +137,9 @@ def _collect_from_mapping(
                             context=(*context, domain, key, attribute),
                         )
                     )
-            _collect_nested(domain, value, (*context, domain, key), file_path, records)
+            _collect_nested(
+                domain, value, (*context, domain, key), file_path, records
+            )
 
 
 def _collect_from_sequence(
@@ -172,11 +174,19 @@ def _collect_nested(
     for nested_key, nested_value in data.items():
         if nested_key in DOMAINS_TO_KEYS and isinstance(nested_value, Mapping):
             _collect_from_mapping(
-                nested_key, nested_value, (*context, nested_key), file_path, records
+                nested_key,
+                nested_value,
+                (*context, nested_key),
+                file_path,
+                records,
             )
         elif nested_key in DOMAINS_TO_KEYS and _is_sequence(nested_value):
             _collect_from_sequence(
-                nested_key, nested_value, (*context, nested_key), file_path, records
+                nested_key,
+                nested_value,
+                (*context, nested_key),
+                file_path,
+                records,
             )
 
 
@@ -192,15 +202,23 @@ def _collect_domains(
                 if "frontend" in context or "command_line" in context:
                     continue
                 if isinstance(value, Mapping):
-                    _collect_from_mapping(key, value, context, file_path, records)
+                    _collect_from_mapping(
+                        key, value, context, file_path, records
+                    )
                 elif _is_sequence(value):
-                    _collect_from_sequence(key, value, context, file_path, records)
+                    _collect_from_sequence(
+                        key, value, context, file_path, records
+                    )
             if isinstance(value, Mapping) or _is_sequence(value):
-                _collect_domains(value, (*context, str(key)), file_path, records)
+                _collect_domains(
+                    value, (*context, str(key)), file_path, records
+                )
     elif _is_sequence(obj):
         for index, item in enumerate(obj):
             if isinstance(item, Mapping) or _is_sequence(item):
-                _collect_domains(item, (*context, f"[{index}]"), file_path, records)
+                _collect_domains(
+                    item, (*context, f"[{index}]"), file_path, records
+                )
 
 
 def scan_for_duplicates(root: Path) -> tuple[Occurrences, list[str]]:
@@ -210,7 +228,9 @@ def scan_for_duplicates(root: Path) -> tuple[Occurrences, list[str]]:
     for yaml_file in sorted(iter_yaml_files(root)):
         try:
             with yaml_file.open("r", encoding="utf-8") as handle:
-                documents = tuple(yaml.load_all(handle, Loader=IgnoreUnknownLoader))
+                documents = tuple(
+                    yaml.load_all(handle, Loader=IgnoreUnknownLoader)
+                )
         except yaml.YAMLError as exc:  # pragma: no cover - defensive logging
             errors.append(f"{yaml_file.relative_to(root)} :: {exc}")
             continue
@@ -223,7 +243,9 @@ def scan_for_duplicates(root: Path) -> tuple[Occurrences, list[str]]:
     return records, errors
 
 
-def render_report(root: Path, records: Occurrences, errors: Sequence[str]) -> str:
+def render_report(
+    root: Path, records: Occurrences, errors: Sequence[str]
+) -> str:
     timestamp = dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC")
     lines: list[str] = [
         "# Duplicate entity report",
@@ -248,9 +270,7 @@ def render_report(root: Path, records: Occurrences, errors: Sequence[str]) -> st
         for value, occurrences in sorted(duplicate_values.items()):
             lines.append(f"- `{value}`")
             for occurrence in occurrences:
-                lines.append(
-                    f"  - {occurrence.format(root)}"
-                )
+                lines.append(f"  - {occurrence.format(root)}")
             lines.append("")
 
     if not duplicates_found:
