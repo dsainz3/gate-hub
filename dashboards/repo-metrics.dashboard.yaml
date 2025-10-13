@@ -1,0 +1,45 @@
+title: Repository Metrics
+views:
+  - title: GitHub Trends
+    path: repo-metrics
+    icon: mdi:github
+    badges: []
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Repository analytics
+              The charts and reports below are generated automatically from the
+              `dsainz3/gate-hub` GitHub repository. Assets are stored under
+              `/config/www/metrics/` and exposed via `/local/metrics/`.
+
+          - type: horizontal-stack
+            cards:
+              - type: picture
+                image: /local/metrics/commits_per_week.png
+                tap_action:
+                  action: more-info
+              - type: picture
+                image: /local/metrics/contributors_per_week.png
+                tap_action:
+                  action: more-info
+
+          - type: horizontal-stack
+            cards:
+              - type: picture
+                image: /local/metrics/reverts_per_week.png
+                tap_action:
+                  action: more-info
+              - type: picture
+                image: /local/metrics/ci_failure_rate.png
+                tap_action:
+                  action: more-info
+
+          - type: iframe
+            url: /local/metrics/metrics.html
+            aspect_ratio: 100%
+
+          - type: iframe
+            url: /local/metrics/summary.html
+            aspect_ratio: 35%
