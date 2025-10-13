@@ -180,7 +180,7 @@ template:
 
 lovelace:
   dashboards:
-    repo_metrics_dashboard:
+    repo-metrics-dashboard-package:
       mode: storage
       title: Repo Metrics & Devices
       icon: mdi:view-dashboard-outline
