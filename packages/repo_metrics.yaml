@@ -4,11 +4,48 @@
 # scripts/metrics.py. The sensor can be used in automations, badges or other
 # dashboards to display high-level GitHub stats.
 
+input_text:
+  github_repo_metrics_auth_header:
+    name: GitHub Metrics Auth Header
+    icon: mdi:key-chain
+    max: 255
+    mode: password
+    initial: ""
+
 command_line:
   - sensor:
       name: GitHub Repo Metrics Summary
       unique_id: github_repo_metrics_summary
-      command: "cat /config/www/metrics/summary.json"
+      command: >-
+        python3 - <<'PY'
+        import json
+        from pathlib import Path
+
+        path = Path('/config/www/metrics/summary.json')
+        base = {
+            'status': 'pending',
+            'message': 'Run metrics workflow to populate summary.json',
+            'highlights': {},
+            'lines_added': 0,
+            'lines_deleted': 0,
+            'contributors_last_week': 0,
+        }
+
+        try:
+            data = json.loads(path.read_text())
+        except FileNotFoundError:
+            data = base | {
+                'status': 'missing',
+                'message': 'summary.json not found',
+            }
+        except Exception as exc:  # noqa: BLE001
+            data = base | {
+                'status': 'error',
+                'message': f'Failed to read summary.json: {exc}',
+            }
+
+        print(json.dumps(data))
+        PY
       scan_interval: 3600
       value_template: "{{ value_json.highlights['Weekly commits'] | default('n/a') }}"
       json_attributes:
@@ -17,6 +54,27 @@ command_line:
         - lines_added
         - lines_deleted
         - contributors_last_week
+        - status
+        - message
+
+rest_command:
+  github_repo_metrics_dispatch:
+    url: https://api.github.com/repos/dsainz3/gate-hub/actions/workflows/repo-metrics.yml/dispatches
+    method: POST
+    headers:
+      Authorization: >-
+        {% set header = states('input_text.github_repo_metrics_auth_header') | trim %}
+        {% if header not in ['unknown', 'unavailable', ''] %}
+          {{ header }}
+        {% endif %}
+      Accept: application/vnd.github+json
+      X-GitHub-Api-Version: '2022-11-28'
+    content_type: application/json
+    payload: >-
+      {
+        "ref": "main"
+      }
+    timeout: 30
 
 template:
   - sensor:
@@ -27,3 +85,49 @@ template:
           {{ state_attr('sensor.github_repo_metrics_summary', 'contributors_last_week') | default(0) }}
         availability: >-
           {{ state_attr('sensor.github_repo_metrics_summary', 'contributors_last_week') is not none }}
+      - name: GitHub Metrics Status
+        unique_id: github_repo_metrics_status
+        icon: mdi:github
+        state: >-
+          {{ state_attr('sensor.github_repo_metrics_summary', 'status') | default('pending') }}
+        availability: >-
+          {{ state_attr('sensor.github_repo_metrics_summary', 'status') is not none }}
+      - name: GitHub Metrics Message
+        unique_id: github_repo_metrics_message
+        icon: mdi:information-outline
+        state: >-
+          {{ state_attr('sensor.github_repo_metrics_summary', 'message') | default('Awaiting metrics workflow run') }}
+        availability: >-
+          {{ state_attr('sensor.github_repo_metrics_summary', 'message') is not none }}
+      - name: GitHub Weekly Commits Highlight
+        unique_id: github_repo_metrics_weekly_commits_highlight
+        icon: mdi:chart-line
+        state: >-
+          {% set highlights = state_attr('sensor.github_repo_metrics_summary', 'highlights') %}
+          {{ highlights.get('Weekly commits') if highlights else 'Run metrics workflow' }}
+        availability: >-
+          {% set highlights = state_attr('sensor.github_repo_metrics_summary', 'highlights') %}
+          {{ highlights is not none }}
+
+script:
+  trigger_github_repo_metrics_workflow:
+    alias: 'GitHub: Trigger Repo Metrics Workflow'
+    description: Manually dispatches the GitHub Actions workflow that refreshes repository metrics artefacts.
+    sequence:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states('input_text.github_repo_metrics_auth_header') not in ['', 'unknown', 'unavailable'] }}
+            sequence:
+              - service: rest_command.github_repo_metrics_dispatch
+              - service: logbook.log
+                data:
+                  name: GitHub Metrics
+                  message: Manual dispatch requested for repo-metrics workflow.
+        default:
+          - service: logbook.log
+            data:
+              name: GitHub Metrics
+              message: Repo metrics workflow dispatch skipped – configure the GitHub auth header helper first.
+    mode: single
