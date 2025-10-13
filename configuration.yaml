@@ -191,4 +191,11 @@ lovelace:
       show_in_sidebar: true
       filename: dashboards/_support/test_resources.dashboard.yaml
 
+    repo-metrics-dashboard:
+      mode: yaml
+      title: Repository Metrics
+      icon: mdi:github
+      show_in_sidebar: true
+      filename: dashboards/repo-metrics.dashboard.yaml
+
 media_source:
