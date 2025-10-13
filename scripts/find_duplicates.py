@@ -17,12 +17,12 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 from collections import defaultdict
+from collections.abc import Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, DefaultDict, Iterable, Iterator, Mapping, Sequence
+from typing import Any
 
 import yaml
-
 
 # --- YAML loading helpers --------------------------------------------------
 
@@ -95,7 +95,7 @@ class Occurrence:
         return f"{relative_file} :: {context_str}"
 
 
-Occurrences = DefaultDict[tuple[str, str], DefaultDict[str, list[Occurrence]]]
+Occurrences = defaultdict[tuple[str, str], defaultdict[str, list[Occurrence]]]
 
 
 def iter_yaml_files(root: Path) -> Iterator[Path]:
@@ -110,7 +110,7 @@ def iter_yaml_files(root: Path) -> Iterator[Path]:
 
 def _is_sequence(value: Any) -> bool:
     return isinstance(value, Sequence) and not isinstance(
-        value, (str, bytes, bytearray)
+        value, str | bytes | bytearray
     )
 
 
@@ -125,7 +125,7 @@ def _collect_from_mapping(
         if not isinstance(key, str):
             continue
         records[(domain, "entity_id")][key].append(
-            Occurrence(file=file_path, context=context + (domain, key))
+            Occurrence(file=file_path, context=(*context, domain, key))
         )
         if isinstance(value, Mapping):
             for attribute in DOMAINS_TO_KEYS.get(domain, ()):  # type: ignore[index]
@@ -134,10 +134,10 @@ def _collect_from_mapping(
                     records[(domain, attribute)][attr_value].append(
                         Occurrence(
                             file=file_path,
-                            context=context + (domain, key, attribute),
+                            context=(*context, domain, key, attribute),
                         )
                     )
-            _collect_nested(domain, value, context + (domain, key), file_path, records)
+            _collect_nested(domain, value, (*context, domain, key), file_path, records)
 
 
 def _collect_from_sequence(
@@ -150,12 +150,12 @@ def _collect_from_sequence(
     for index, item in enumerate(items):
         if not isinstance(item, Mapping):
             continue
-        entry_context = context + (domain, f"item[{index}]")
+        entry_context = (*context, domain, f"item[{index}]")
         for key in DOMAINS_TO_KEYS.get(domain, ()):  # type: ignore[index]
             value = item.get(key)
             if isinstance(value, str) and value:
                 records[(domain, key)][value].append(
-                    Occurrence(file=file_path, context=entry_context + (key,))
+                    Occurrence(file=file_path, context=(*entry_context, key))
                 )
         _collect_nested(domain, item, entry_context, file_path, records)
 
@@ -172,11 +172,11 @@ def _collect_nested(
     for nested_key, nested_value in data.items():
         if nested_key in DOMAINS_TO_KEYS and isinstance(nested_value, Mapping):
             _collect_from_mapping(
-                nested_key, nested_value, context + (nested_key,), file_path, records
+                nested_key, nested_value, (*context, nested_key), file_path, records
             )
         elif nested_key in DOMAINS_TO_KEYS and _is_sequence(nested_value):
             _collect_from_sequence(
-                nested_key, nested_value, context + (nested_key,), file_path, records
+                nested_key, nested_value, (*context, nested_key), file_path, records
             )
 
 
@@ -195,16 +195,12 @@ def _collect_domains(
                     _collect_from_mapping(key, value, context, file_path, records)
                 elif _is_sequence(value):
                     _collect_from_sequence(key, value, context, file_path, records)
-            if isinstance(value, Mapping):
-                _collect_domains(value, context + (str(key),), file_path, records)
-            elif _is_sequence(value):
-                _collect_domains(value, context + (str(key),), file_path, records)
+            if isinstance(value, Mapping) or _is_sequence(value):
+                _collect_domains(value, (*context, str(key)), file_path, records)
     elif _is_sequence(obj):
         for index, item in enumerate(obj):
-            if isinstance(item, Mapping):
-                _collect_domains(item, context + (f"[{index}]",), file_path, records)
-            elif _is_sequence(item):
-                _collect_domains(item, context + (f"[{index}]",), file_path, records)
+            if isinstance(item, Mapping) or _is_sequence(item):
+                _collect_domains(item, (*context, f"[{index}]"), file_path, records)
 
 
 def scan_for_duplicates(root: Path) -> tuple[Occurrences, list[str]]:
@@ -222,7 +218,7 @@ def scan_for_duplicates(root: Path) -> tuple[Occurrences, list[str]]:
         for doc in documents:
             if doc is None:
                 continue
-            _collect_domains(doc, tuple(), yaml_file, records)
+            _collect_domains(doc, (), yaml_file, records)
 
     return records, errors
 
