@@ -33,7 +33,7 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
    `configuration.yaml`.
 3. Restart Home Assistant so the template sensors and dashboard registration load.
 4. Open **Settings → Dashboards** – a new sidebar entry titled **Repo Metrics & Devices**
-   (path `/repo`) appears after the restart.
+   (path `/repo-metrics`) appears after the restart.
 
 ## Card dependencies
 

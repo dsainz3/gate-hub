@@ -186,7 +186,7 @@ lovelace:
       icon: mdi:view-dashboard-outline
       show_in_sidebar: true
       require_admin: false
-      url_path: repo
+      url_path: repo-metrics
       config:
         title: Repo Metrics & Devices
         views:
@@ -221,35 +221,35 @@ lovelace:
                     content: "{{ states('sensor.repo_lights_on_total') }} Lights"
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/lighting
+                      navigation_path: /repo-metrics/lighting
                   - type: template
                     entity: sensor.repo_devices_offline_total
                     icon: mdi:lan-disconnect
                     content: "{{ states('sensor.repo_devices_offline_total') }} Offline"
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: template
                     entity: sensor.repo_low_battery_total
                     icon: mdi:battery-alert
                     content: "{{ states('sensor.repo_low_battery_total') }} Low Batt"
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: template
                     entity: sensor.repo_updates_available_total
                     icon: mdi:update
                     content: "{{ states('sensor.repo_updates_available_total') }} Updates"
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: template
                     entity: sensor.speedtest_ping
                     icon: mdi:speedometer
                     content: "Ping {{ states('sensor.speedtest_ping') | default('–') }} ms"
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/network
+                      navigation_path: /repo-metrics/network
                   - type: template
                     entity: sensor.repo_next_calendar_event
                     icon: mdi:calendar-clock
@@ -262,7 +262,7 @@ lovelace:
                       {% endif %}
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/scenes-scripts
+                      navigation_path: /repo-metrics/scenes-scripts
               - type: grid
                 columns: 3
                 square: false
@@ -273,35 +273,35 @@ lovelace:
                     icon: mdi:lightbulb-group
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/lighting
+                      navigation_path: /repo-metrics/lighting
                   - type: custom:mushroom-entity-card
                     entity: sensor.repo_devices_offline_total
                     name: Devices Offline
                     icon: mdi:alert-circle
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: custom:mushroom-entity-card
                     entity: sensor.repo_stale_sensors_total
                     name: Stale Sensors
                     icon: mdi:timer-sand
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: custom:mushroom-entity-card
                     entity: sensor.repo_low_battery_total
                     name: Low Battery
                     icon: mdi:battery-alert
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: custom:mushroom-entity-card
                     entity: sensor.repo_updates_available_total
                     name: Updates Available
                     icon: mdi:update
                     tap_action:
                       action: navigate
-                      navigation_path: /repo/safety
+                      navigation_path: /repo-metrics/safety
                   - type: custom:mushroom-template-card
                     primary: >-
                       {% set weather = state_attr('sensor.repo_primary_weather', 'source_entity') %}
