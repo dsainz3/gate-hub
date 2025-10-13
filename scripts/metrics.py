@@ -171,10 +171,12 @@ class GitHubMetricsClient:
                 committed_at = dt.datetime.fromisoformat(
                     node["committedDate"].replace("Z", "+00:00")
                 )
+                author_info = node.get("author") or {}
+                user_info = author_info.get("user") or {}
                 author = (
-                    node.get("author", {}).get("user", {}).get("login")
-                    or node.get("author", {}).get("name")
-                    or node.get("author", {}).get("email")
+                    user_info.get("login")
+                    or author_info.get("name")
+                    or author_info.get("email")
                     or "unknown"
                 )
                 yield Commit(
