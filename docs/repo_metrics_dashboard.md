@@ -39,12 +39,13 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
    `repo-metrics-dashboard` (hyphenated slug) that points to
    `dashboards/repo-metrics.dashboard.yaml`, uses `mode: yaml`, and sets the title/icon you
    prefer (the package expects **Repo Metrics & Devices** with `mdi:view-dashboard-outline`).
-4. Add a new secret named `github_repo_metrics_auth_header` to `secrets.yaml` with the
-   value `Bearer <your_personal_access_token>`. The token needs `repo` and `actions:read`
-   scopes so Home Assistant can dispatch the metrics workflow through the GitHub API.
-   (See **Manual GitHub workflow trigger** below for details.)
-5. Restart Home Assistant, then open **Settings → Dashboards** – the sidebar entry titled
+4. Restart Home Assistant, then open **Settings → Dashboards** – the sidebar entry titled
    **Repo Metrics & Devices** launches the refreshed layout at `/lovelace/repo-metrics-dashboard`.
+5. Go to **Settings → Devices & Services → Helpers** and edit the newly created
+   **GitHub Metrics Auth Header** helper. Set its value to `Bearer <your_personal_access_token>`.
+   The token requires `repo` and `actions:read` scopes so Home Assistant can dispatch the
+   metrics workflow through the GitHub API. (See **Manual GitHub workflow trigger** below for
+   extra context.)
 
 ## Card dependencies
 
@@ -100,12 +101,15 @@ preferred high-contrast theme and increase Mushroom spacing via
 
 ## Manual GitHub workflow trigger
 
-- **Secret** – Define `github_repo_metrics_auth_header: "Bearer ghp_..."` in
-  `secrets.yaml`. This token is only used for the dispatch call and can reuse the
-  `REPO_METRICS_TOKEN` you already configured for GitHub Actions.
+- **Helper value** – Set the **GitHub Metrics Auth Header** helper to
+  `Bearer ghp_...`. This token is only used for the dispatch call and can reuse the
+  `REPO_METRICS_TOKEN` configured for your GitHub Actions workflow. If you prefer to
+  manage tokens through `secrets.yaml`, replace the helper's `initial:` value in
+  `packages/repo_metrics.yaml` with `!secret github_repo_metrics_auth_header`.
 - **Script** – Run the "GitHub: Trigger Repo Metrics Workflow" script (available via the
   Run Metrics Workflow chip, the Scripts panel, or Assist). Home Assistant sends a
-  `workflow_dispatch` request to `repo-metrics.yml` targeting the `main` branch.
+  `workflow_dispatch` request to `repo-metrics.yml` targeting the `main` branch when the
+  helper contains a token; otherwise it logs a reminder in the Logbook.
 - **Outcome** – GitHub spins up the existing workflow which regenerates the charts and
   HTML under `www/metrics`, commits them to the `automation/repo-metrics` branch, and
   opens/updates the PR for review. Once merged, Home Assistant will read the refreshed

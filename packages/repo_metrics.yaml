@@ -4,6 +4,13 @@
 # scripts/metrics.py. The sensor can be used in automations, badges or other
 # dashboards to display high-level GitHub stats.
 
+input_text:
+  github_repo_metrics_auth_header:
+    name: GitHub Metrics Auth Header
+    icon: mdi:key-chain
+    max: 255
+    initial: ""
+
 command_line:
   - sensor:
       name: GitHub Repo Metrics Summary
@@ -54,7 +61,11 @@ rest_command:
     url: https://api.github.com/repos/dsainz3/gate-hub/actions/workflows/repo-metrics.yml/dispatches
     method: POST
     headers:
-      Authorization: !secret github_repo_metrics_auth_header
+      Authorization: >-
+        {% set header = states('input_text.github_repo_metrics_auth_header') %}
+        {% if header not in ['unknown', 'unavailable', ''] %}
+          {{ header }}
+        {% endif %}
       Accept: application/vnd.github+json
       X-GitHub-Api-Version: '2022-11-28'
     content_type: application/json
@@ -102,9 +113,20 @@ script:
     alias: 'GitHub: Trigger Repo Metrics Workflow'
     description: Manually dispatches the GitHub Actions workflow that refreshes repository metrics artefacts.
     sequence:
-      - service: rest_command.github_repo_metrics_dispatch
-      - service: logbook.log
-        data:
-          name: GitHub Metrics
-          message: Manual dispatch requested for repo-metrics workflow.
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: >-
+                  {{ states('input_text.github_repo_metrics_auth_header') not in ['', 'unknown', 'unavailable'] }}
+            sequence:
+              - service: rest_command.github_repo_metrics_dispatch
+              - service: logbook.log
+                data:
+                  name: GitHub Metrics
+                  message: Manual dispatch requested for repo-metrics workflow.
+        default:
+          - service: logbook.log
+            data:
+              name: GitHub Metrics
+              message: Repo metrics workflow dispatch skipped – configure the GitHub auth header helper first.
     mode: single
