@@ -185,8 +185,11 @@ class GitHubMetricsClient:
 
             for edge in history.get("edges", []):
                 node = edge.get("node", {})
+                committed_raw = node.get("committedDate")
+                if not committed_raw:
+                    continue
                 committed_at = dt.datetime.fromisoformat(
-                    node["committedDate"].replace("Z", "+00:00")
+                    committed_raw.replace("Z", "+00:00")
                 )
                 author_info = node.get("author") or {}
                 author_user = author_info.get("user") or {}
@@ -197,10 +200,10 @@ class GitHubMetricsClient:
                     or "unknown"
                 )
                 yield Commit(
-                    sha=node["oid"],
+                    sha=node.get("oid", ""),
                     committed_at=committed_at,
                     author=author,
-                    message=node.get("messageHeadline", ""),
+                    message=node.get("messageHeadline") or "",
                     additions=node.get("additions") or 0,
                     deletions=node.get("deletions") or 0,
                     changed_files=node.get("changedFiles") or 0,
