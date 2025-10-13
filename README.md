@@ -11,6 +11,12 @@
 ![YAML: prettier+yamllint](https://img.shields.io/badge/yaml-prettier%20%2B%20yamllint-blue)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 
+## Repository Metrics Summary
+
+<!-- METRICS:START -->
+Automated summary pending. Run the **Repository metrics** workflow to populate.
+<!-- METRICS:END -->
+
 Gate Hub is my learning lab for becoming a hypermodern development engineer. What started as a set of ad-hoc Home Assistant tweaks now operates like a product team project: infrastructure is versioned, documentation is intentional, and automations ship with CI guardrails. This repository captures the journey from the early experimentation days to the current platform and surfaces the skills I am building along the way. Wherever you see “Football Team” in the documentation, swap in your own club branding and entity IDs—the configuration remains opinionated, but every guide explains how to customise it safely.
 
 ---
