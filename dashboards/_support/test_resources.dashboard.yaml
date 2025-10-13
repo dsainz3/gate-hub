@@ -129,7 +129,8 @@ views:
             primary: >-
               Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
             secondary: >-
-              {{ states('sensor.f1_next_race_location') }} · Lights out {{ as_timestamp(states('sensor.f1_lights_out_local')) | timestamp_custom('%b %-d %-I:%M %p', True) if states('sensor.f1_lights_out_local') not in ['unknown', 'unavailable'] else 'TBA' }}
+              {{ states('sensor.f1_next_race_location') }} · Lights out
+              {{ as_timestamp(states('sensor.f1_lights_out_local')) | timestamp_custom('%b %-d %-I:%M %p', True) if states('sensor.f1_lights_out_local') not in ['unknown', 'unavailable'] else 'TBA' }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -323,7 +324,9 @@ views:
               {% endif %}
             primary: Client mix
             secondary: >-
-              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }} · Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
+              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest
+              {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }} · Wired
+              {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -487,7 +490,9 @@ views:
               {% endif %}
             primary: Automation audit
             secondary: >-
-              System {{ states('sensor.automation_status_audit') | default('unknown', true) }} · Specialized {{ states('sensor.specialized_mode_audit') | default('unknown', true) }} · Huskers {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
+              System {{ states('sensor.automation_status_audit') | default('unknown', true) }} · Specialized
+              {{ states('sensor.specialized_mode_audit') | default('unknown', true) }} · Huskers
+              {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -498,7 +503,8 @@ views:
               {{ 'green' if states('sensor.kiosk_automations_problem_count') | int(0) == 0 else 'red' }}
             primary: Kiosk diagnostics
             secondary: >-
-              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm {{ states('sensor.humidor_system_status') }}
+              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm
+              {{ states('sensor.humidor_system_status') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
