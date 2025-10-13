@@ -7,17 +7,28 @@ significantly faster on CI or developer laptops.
 
 ## TL;DR
 
-1. `export GITHUB_TOKEN=<your token>`
+1. `printf 'github_token: <your token>\n' >> secrets.yaml`
 2. `docker build -f docker/Dockerfile.metrics -t gate-hub-metrics .`
-3. `docker run --rm -e GITHUB_TOKEN -v "$(pwd)/www/metrics:/app/www/metrics" gate-hub-metrics --repo dsainz3/gate-hub --output www/metrics --markdown --html --summary-html`
+3. `docker run --rm -v "$(pwd)/secrets.yaml:/app/secrets.yaml:ro" -v "$(pwd)/www/metrics:/app/www/metrics" gate-hub-metrics --repo dsainz3/gate-hub --output www/metrics --markdown --html --summary-html`
 
 The following sections expand on each step and include optional flags.
 
 ## Prerequisites
 
 - Docker 20.10 or newer installed locally.
-- A GitHub personal access token with `repo` scope stored in an environment
-  variable called `GITHUB_TOKEN`.
+- A GitHub personal access token with `repo` scope stored in `secrets.yaml`
+  under the key `github_token`.
+
+If you already keep a `secrets.yaml` for Home Assistant, add the new entry to it:
+
+```yaml
+github_token: YOUR_GITHUB_PAT
+```
+
+The metrics script also understands the legacy
+`github_repo_metrics_auth_header` key, trimming the `Bearer` prefix
+automatically. If you would rather store the credentials elsewhere, point the
+container (or the local script) at the path with `--secrets /path/to/secrets`.
 
 ## Build the image
 
@@ -26,15 +37,15 @@ The following sections expand on each step and include optional flags.
 docker build -f docker/Dockerfile.metrics -t gate-hub-metrics .
 ```
 
-The Dockerfile installs the three libraries required by the metrics script
-(`requests`, `matplotlib` and `markdown`) and uses the repository copy baked
-into the image.
+The Dockerfile installs the Python libraries required by the metrics script
+(`requests`, `matplotlib`, `markdown` and `pyyaml` for parsing secrets) and
+uses the repository copy baked into the image.
 
 ## Run the metrics scan
 
 ```bash
 docker run --rm \
-  -e GITHUB_TOKEN \
+  -v "$(pwd)/secrets.yaml:/app/secrets.yaml:ro" \
   -v "$(pwd)/www/metrics:/app/www/metrics" \
   gate-hub-metrics \
   --repo dsainz3/gate-hub \
@@ -54,7 +65,7 @@ To mirror the behaviour of the scheduled GitHub Action, pass the
 
 ```bash
 docker run --rm \
-  -e GITHUB_TOKEN \
+  -v "$(pwd)/secrets.yaml:/app/secrets.yaml:ro" \
   -v "$(pwd)/www/metrics:/app/www/metrics" \
   gate-hub-metrics \
   --repo dsainz3/gate-hub \

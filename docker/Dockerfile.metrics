@@ -11,7 +11,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml poetry.lock* ./
-RUN pip install --no-cache-dir "requests" "matplotlib" "markdown"
+RUN pip install --no-cache-dir "requests" "matplotlib" "markdown" "pyyaml"
 
 COPY scripts/ ./scripts/
 COPY README.md ./README.md
