@@ -22,6 +22,9 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
 - **Scenes & Scripts** – Quick-launch chips for Huskers shows, Kiosk power toggles,
   Plex client refresh, and curated auto-entities sections for Huskers, lighting, and
   media scripts alongside scene collections.
+- **GitHub Metrics** – Highlights from `sensor.github_repo_metrics_summary`, weekly
+  contributor counts, and inline charts (commits, contributors, CI health) sourced
+  from `/local/metrics/` assets with a quick link to the generated HTML summary.
 - **Area drill-downs** – Office, Living Room, Kitchen, Bedroom, and Garage views use
   wildcard filters so every entity tagged with those room names (lights, sensors,
   switches, helpers) renders automatically.
@@ -67,6 +70,9 @@ that match your HACS configuration (typically `/hacsfiles/...`).
 - **Scene/script groupings** – Each auto-entities card filters by entity-id prefixes
   (`scene.huskers_*`, `script.kiosk_*`, etc.). Update the globs to mirror any naming
   conventions you introduce.
+- **GitHub metrics assets** – Ensure your CI pipeline refreshes `/www/metrics` so the
+  summary sensor and SVG charts stay current. The GitHub view falls back to guidance
+  text until the workflow populates `summary.json`.
 
 ## Kiosk and TV usage
 
