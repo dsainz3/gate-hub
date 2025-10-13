@@ -1,7 +1,7 @@
 title: Support · Test Resources
 views:
-  - title: Modern Demo
-    path: support-test-modern
+  - title: Quick Glance
+    path: support-test-quick
     icon: mdi:view-dashboard-outline
     type: sections
     theme: Support Test Gold
@@ -17,7 +17,7 @@ views:
     sections:
       - type: grid
         title: Mission Control
-        columns: 4
+        columns: 3
         cards:
           - type: custom:mushroom-title-card
             title: Support Lab · Modern Showcase
@@ -27,7 +27,7 @@ views:
               action: more-info
               entity: sensor.agenda_planner_summary
             view_layout:
-              column_span: 2
+              column_span: 3
           - type: custom:mushroom-chips-card
             alignment: start
             chips:
@@ -87,7 +87,11 @@ views:
                   action: more-info
                   entity: sensor.f1_next_race_name
             view_layout:
-              column_span: 2
+              column_span: 3
+      - type: grid
+        title: Live Highlights
+        columns: 3
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.huskers_game_phase_label
             icon: mdi:scoreboard-outline
@@ -104,6 +108,23 @@ views:
               entity: sensor.huskers_series_summary
             view_layout:
               column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.f1_next_race_name
+            icon: mdi:calendar-clock
+            icon_color: purple
+            primary: >-
+              Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
+            secondary: |
+              {{ states('sensor.f1_next_race_location') }} · Lights out
+              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
+              {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable'] else 'TBA' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+      - type: grid
+        title: Systems Pulse
+        columns: 3
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.network_performance_summary
             icon: mdi:chart-areaspline
@@ -125,20 +146,68 @@ views:
             fill_container: true
             multiline_secondary: true
           - type: custom:mushroom-template-card
-            entity: sensor.f1_next_race_name
-            icon: mdi:calendar-clock
-            icon_color: purple
-            primary: >-
-              Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
-            secondary: |
-              {{ states('sensor.f1_next_race_location') }} · Lights out
-              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
-              {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable'] else 'TBA' }}
+            entity: binary_sensor.kiosk_automations_have_issues
+            icon: mdi:toggle-switch
+            icon_color: >-
+              {{ 'green' if is_state('binary_sensor.kiosk_automations_have_issues', 'off') else 'red' }}
+            primary: Automation health
+            secondary: >-
+              Relays snapshot · Issues {{ states('sensor.kiosk_automations_problem_count') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: input_boolean.holiday_mode_manual
+            icon: mdi:calendar-heart
+            icon_color: pink
+            primary: Holiday mode status
+            secondary: >-
+              Manual override {{ 'enabled' if is_state('input_boolean.holiday_mode_manual', 'on') else 'off' }} · Next holiday {{ states('sensor.next_us_holiday') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
       - type: grid
-        title: Environment & Comfort
+        title: Environment Snapshot
+        columns: 2
+        cards:
+          - type: custom:mushroom-template-card
+            entity: sensor.outdoor_temperature_wx
+            icon: mdi:home-thermometer
+            icon_color: amber
+            primary: >-
+              Outdoor {{ states('sensor.outdoor_temperature_wx') }}°F
+            secondary: >-
+              Humidity {{ states('sensor.outdoor_humidity_wx') }}% · Feels like {{ states('sensor.temperature') }}°F
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_snapshot_aux_readout
+            icon: mdi:chart-timeline-variant
+            icon_color: teal
+            primary: Interior snapshot
+            secondary: >-
+              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights On {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+  - title: Environment & Comfort
+    path: support-test-environment
+    icon: mdi:leaf-circle
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
+    max_columns: 4
+    sections:
+      - type: grid
+        title: Atmosphere Trends
         columns: 4
         cards:
           - type: custom:apexcharts-card
@@ -195,6 +264,10 @@ views:
                 group_by:
                   duration: 30min
                   func: avg
+      - type: grid
+        title: Precision Zones
+        columns: 4
+        cards:
           - type: custom:mushroom-entity-card
             entity: sensor.hygrometer_humidor_temperature
             name: Humidor temperature
@@ -227,16 +300,65 @@ views:
               {% endif %}
           - type: custom:mushroom-template-card
             entity: sensor.kiosk_snapshot_aux_readout
-            icon: mdi:chart-timeline-variant
+            icon: mdi:home-analytics
             icon_color: teal
-            primary: Interior snapshot
+            primary: Interior systems readout
             secondary: >-
-              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights On {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+              {{ states('sensor.kiosk_snapshot_aux_readout') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+  - title: Network Pulse
+    path: support-test-network
+    icon: mdi:access-point-network
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
+    max_columns: 4
+    sections:
+      - type: grid
+        title: Connectivity Overview
+        columns: 4
+        cards:
+          - type: custom:mushroom-template-card
+            entity: sensor.deco_total_down_mbps
+            icon: mdi:access-point-network
+            icon_color: blue
+            primary: Deco mesh throughput
+            secondary: |
+              ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps
+              ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps
+              Nodes {{ states('sensor.deco_node_count') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.network_performance_summary
+            icon: mdi:chart-bell-curve
+            icon_color: >-
+              {% if states('sensor.network_performance_summary') == 'excellent' %}
+                green
+              {% elif states('sensor.network_performance_summary') == 'degraded' %}
+                amber
+              {% else %}
+                teal
+              {% endif %}
+            primary: Client mix
+            secondary: |-
+              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }}
+              Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
       - type: grid
-        title: Network Pulse
+        title: Performance History
         columns: 4
         cards:
           - type: custom:apexcharts-card
@@ -304,37 +426,141 @@ views:
                 group_by:
                   duration: 6h
                   func: avg
+  - title: Sports & Events
+    path: support-test-sports
+    icon: mdi:stadium-variant
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
+    max_columns: 4
+    sections:
+      - type: grid
+        title: Game Day Radar
+        columns: 4
+        cards:
+          - type: custom:mushroom-chips-card
+            alignment: start
+            chips:
+              - type: template
+                entity: sensor.huskers_game_phase_label
+                icon: mdi:football
+                icon_color: >-
+                  {% if is_state('sensor.huskers_game_phase_label', 'Live') %}
+                    red
+                  {% elif is_state('sensor.huskers_game_phase_label', 'Final') %}
+                    blue-grey
+                  {% else %}
+                    grey
+                  {% endif %}
+                content: >-
+                  Phase · {{ states('sensor.huskers_game_phase_label') }}
+              - type: template
+                entity: sensor.huskers_series_summary
+                icon: mdi:account-group
+                icon_color: red
+                content: >-
+                  Series · {{ states('sensor.huskers_series_summary') }}
+              - type: template
+                entity: binary_sensor.f1_is_race_week
+                icon: mdi:flag-checkered
+                icon_color: >-
+                  {{ 'purple' if is_state('binary_sensor.f1_is_race_week', 'on') else 'grey' }}
+                content: >-
+                  Race Week · {{ states('binary_sensor.f1_is_race_week') | title }}
+              - type: template
+                entity: sensor.f1_next_race_round
+                icon: mdi:counter
+                icon_color: purple
+                content: >-
+                  Round {{ states('sensor.f1_next_race_round') }}
+            view_layout:
+              column_span: 4
+      - type: grid
+        title: Scoreboard & Storylines
+        columns: 4
+        cards:
           - type: custom:mushroom-template-card
-            entity: sensor.deco_total_down_mbps
-            icon: mdi:access-point-network
-            icon_color: blue
-            primary: Deco mesh throughput
-            secondary: |
-              ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps
-              ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps
-              Nodes {{ states('sensor.deco_node_count') }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-          - type: custom:mushroom-template-card
-            entity: sensor.network_performance_summary
-            icon: mdi:chart-bell-curve
-            icon_color: >-
-              {% if states('sensor.network_performance_summary') == 'excellent' %}
-                green
-              {% elif states('sensor.network_performance_summary') == 'degraded' %}
-                amber
-              {% else %}
-                teal
-              {% endif %}
-            primary: Client mix
+            entity: sensor.huskers_game_phase_label
+            icon: mdi:scoreboard-outline
+            icon_color: red
+            primary: >-
+              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
             secondary: >-
-              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest
-              {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }} · Wired
-              {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
+              {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            tap_action:
+              action: more-info
+              entity: sensor.huskers_series_summary
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.huskers_series_summary
+            icon: mdi:clipboard-text-clock
+            icon_color: red
+            primary: Series storyline
+            secondary: >-
+              {{ states('sensor.huskers_series_summary') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+      - type: grid
+        title: Race Weekend Outlook
+        columns: 4
+        cards:
+          - type: custom:mushroom-template-card
+            entity: sensor.f1_next_race_name
+            icon: mdi:calendar-clock
+            icon_color: purple
+            primary: >-
+              Next F1 · {{ states('sensor.f1_next_race_name') }}
+            secondary: |
+              {{ states('sensor.f1_next_race_location') }}
+              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
+              Lights out {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable'] else 'TBA' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.f1_next_race_sprint
+            icon: mdi:timer-outline
+            icon_color: >-
+              {{ 'amber' if is_state('sensor.f1_next_race_sprint', 'Sprint') else 'blue-grey' }}
+            primary: Weekend highlights
+            secondary: >-
+              Sprint {{ states('sensor.f1_next_race_sprint') | default('—', true) }} · Session {{ states('sensor.f1_next_session_name') | default('TBA', true) }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+  - title: Operations Center
+    path: support-test-operations
+    icon: mdi:lightning-bolt
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+        }
+    max_columns: 4
+    sections:
       - type: grid
         title: Lighting & Scenes
         columns: 4
@@ -420,27 +646,6 @@ views:
             icon: mdi:power-plug
             layout: vertical
             fill_container: true
-          - type: custom:mushroom-template-card
-            entity: binary_sensor.kiosk_automations_have_issues
-            icon: mdi:toggle-switch
-            icon_color: >-
-              {{ 'green' if is_state('binary_sensor.kiosk_automations_have_issues', 'off') else 'red' }}
-            primary: Automation health
-            secondary: >-
-              Relays snapshot · Issues {{ states('sensor.kiosk_automations_problem_count') }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-          - type: custom:mushroom-template-card
-            entity: input_boolean.holiday_mode_manual
-            icon: mdi:calendar-heart
-            icon_color: pink
-            primary: Holiday mode status
-            secondary: >-
-              Manual override {{ 'enabled' if is_state('input_boolean.holiday_mode_manual', 'on') else 'off' }} · Next holiday {{ states('sensor.next_us_holiday') }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
       - type: grid
         title: Automations & Checks
         columns: 4
@@ -508,8 +713,7 @@ views:
               {{ 'green' if states('sensor.kiosk_automations_problem_count') | int(0) == 0 else 'red' }}
             primary: Kiosk diagnostics
             secondary: >-
-              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm
-              {{ states('sensor.humidor_system_status') }}
+              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm {{ states('sensor.humidor_system_status') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
