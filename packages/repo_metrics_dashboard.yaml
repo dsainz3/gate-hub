@@ -28,20 +28,28 @@ template:
         unit_of_measurement: devices
         state: >-
           {% set tracked_domains = ['binary_sensor', 'sensor', 'switch', 'light', 'climate', 'fan', 'cover', 'device_tracker'] %}
-          {{ states | selectattr('domain', 'in', tracked_domains)
-                     | selectattr('state', 'in', ['unavailable', 'unknown', 'offline'])
-                     | list | count }}
+          {% set counter = namespace(total=0) %}
+          {% for item in states %}
+            {% if item.domain in tracked_domains and item.state in ['unavailable', 'unknown', 'offline'] %}
+              {% set counter.total = counter.total + 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ counter.total }}
       - name: Repo Stale Sensors Total
         unique_id: repo_stale_sensors_total
         icon: mdi:timer-sand
         unit_of_measurement: sensors
         state: >-
           {% set threshold = now() - timedelta(hours=6) %}
-          {% set tracked_domains = ['sensor', 'binary_sensor'] %}
-          {{ states | selectattr('domain', 'in', tracked_domains)
-                     | selectattr('state', 'not in', ['unavailable', 'unknown'])
-                     | selectattr('last_changed', 'lt', threshold)
-                     | list | count }}
+          {% set counter = namespace(total=0) %}
+          {% for item in states %}
+            {% if item.domain in ['sensor', 'binary_sensor'] %}
+              {% if item.state not in ['unavailable', 'unknown'] and item.last_changed < threshold %}
+                {% set counter.total = counter.total + 1 %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ counter.total }}
       - name: Repo Low Battery Total
         unique_id: repo_low_battery_total
         icon: mdi:battery-alert
@@ -49,8 +57,8 @@ template:
         state: >-
           {% set threshold = 30 %}
           {% set counter = namespace(total=0) %}
-          {% for ent in states | selectattr('attributes.device_class', 'equalto', 'battery') %}
-            {% if ent.state not in ['unavailable', 'unknown', 'None'] %}
+          {% for ent in states %}
+            {% if ent.attributes.device_class == 'battery' and ent.state not in ['unavailable', 'unknown', none] %}
               {% if ent.domain == 'binary_sensor' and ent.state == 'on' %}
                 {% set counter.total = counter.total + 1 %}
               {% elif ent.domain != 'binary_sensor' and ent.state | float(100) < threshold %}
@@ -69,27 +77,45 @@ template:
         unique_id: repo_primary_weather
         icon: mdi:weather-partly-cloudy
         state: >-
-          {% set weather = states.weather | map(attribute='entity_id') | list | first %}
-          {% if weather %}
-            {{ states(weather) }}
+          {% set configured = states('input_text.weather_pws_entity') %}
+          {% set configured = configured if configured not in ['', 'unknown', 'unavailable', none] else none %}
+          {% set fallback = states.weather | map(attribute='entity_id') | list | first %}
+          {% set weather_entity = configured if configured else fallback %}
+          {% if weather_entity %}
+            {{ states(weather_entity) }}
           {% else %}
             unknown
           {% endif %}
         attributes:
           source_entity: >-
-            {% set weather = states.weather | map(attribute='entity_id') | list | first %}
-            {{ weather if weather else none }}
+            {% set configured = states('input_text.weather_pws_entity') %}
+            {% if configured in ['', 'unknown', 'unavailable', none] %}
+              {% set configured = none %}
+            {% endif %}
+            {% set fallback = states.weather | map(attribute='entity_id') | list | first %}
+            {% set weather_entity = configured if configured else fallback %}
+            {{ weather_entity if weather_entity else none }}
           temperature: >-
-            {% set weather = states.weather | map(attribute='entity_id') | list | first %}
-            {% if weather %}
-              {{ state_attr(weather, 'temperature') }}
+            {% set configured = states('input_text.weather_pws_entity') %}
+            {% if configured in ['', 'unknown', 'unavailable', none] %}
+              {% set configured = none %}
+            {% endif %}
+            {% set fallback = states.weather | map(attribute='entity_id') | list | first %}
+            {% set weather_entity = configured if configured else fallback %}
+            {% if weather_entity %}
+              {{ state_attr(weather_entity, 'temperature') }}
             {% else %}
               {{ none }}
             {% endif %}
           humidity: >-
-            {% set weather = states.weather | map(attribute='entity_id') | list | first %}
-            {% if weather %}
-              {{ state_attr(weather, 'humidity') }}
+            {% set configured = states('input_text.weather_pws_entity') %}
+            {% if configured in ['', 'unknown', 'unavailable', none] %}
+              {% set configured = none %}
+            {% endif %}
+            {% set fallback = states.weather | map(attribute='entity_id') | list | first %}
+            {% set weather_entity = configured if configured else fallback %}
+            {% if weather_entity %}
+              {{ state_attr(weather_entity, 'humidity') }}
             {% else %}
               {{ none }}
             {% endif %}
@@ -295,25 +321,72 @@ lovelace:
                     tap_action:
                       action: more-info
                     multiline_secondary: true
-              - type: horizontal-stack
+              - type: grid
+                columns: 2
+                square: false
                 cards:
-                  - type: weather-forecast
-                    entity: weather.forecast_home
-                    name: Home Forecast
-                  - type: custom:apexcharts-card
-                    experimental:
-                      color_threshold: true
-                    header:
-                      show: true
-                      title: Network Latency
-                    series:
-                      - entity: sensor.speedtest_ping
-                        name: Ping
-                        type: line
-                        stroke_width: 2
-                        show:
-                          extremas: true
-                    graph_span: 24h
+                  - type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-template-card
+                        primary: Weather Snapshot
+                        secondary: >-
+                          {% set src = state_attr('sensor.repo_primary_weather', 'source_entity') %}
+                          {% if src %}
+                            {{ states(src) | title }} · {{ state_attr(src, 'temperature') }}°F · {{ state_attr(src, 'humidity') }}% RH
+                          {% else %}
+                            No primary weather entity detected
+                          {% endif %}
+                        icon: mdi:weather-partly-cloudy
+                        multiline_secondary: true
+                      - type: entities
+                        title: Weather Highlights
+                        show_header_toggle: false
+                        entities:
+                          - entity: sensor.outdoor_temperature_wx
+                            name: Outdoor Temperature
+                          - entity: sensor.outdoor_humidity_wx
+                            name: Outdoor Humidity
+                          - entity: sensor.outdoor_wind_speed_wx
+                            name: Wind Speed
+                          - entity: sensor.outdoor_pressure_wx
+                            name: Pressure
+                  - type: vertical-stack
+                    cards:
+                      - type: custom:mushroom-template-card
+                        primary: Network Snapshot
+                        secondary: >-
+                          Ping {{ states('sensor.speedtest_ping') | default('–') }} ms ·
+                          Down {{ states('sensor.speedtest_download') | default('–') }} Mbps ·
+                          Up {{ states('sensor.speedtest_upload') | default('–') }} Mbps
+                        icon: mdi:speedometer
+                        multiline_secondary: true
+                      - type: custom:apexcharts-card
+                        experimental:
+                          color_threshold: true
+                        header:
+                          show: true
+                          title: Speedtest Latency (24h)
+                        graph_span: 24h
+                        series:
+                          - entity: sensor.speedtest_ping
+                            name: Ping
+                            type: line
+                            stroke_width: 2
+                            show:
+                              extremas: true
+              - type: custom:mushroom-template-card
+                primary: Next on the Calendar
+                secondary: >-
+                  {% set title = states('sensor.repo_next_calendar_event') %}
+                  {% set start = state_attr('sensor.repo_next_calendar_event', 'start_time') %}
+                  {% if title not in ['none', 'unknown', 'unavailable'] and start %}
+                    {{ title }} · {{ as_datetime(start).strftime('%b %d, %I:%M %p') }}
+                  {% elif title not in ['none', 'unknown', 'unavailable'] %}
+                    {{ title }} · date tbd
+                  {% else %}
+                    No upcoming events detected
+                  {% endif %}
+                icon: mdi:calendar-clock
               - type: custom:auto-entities
                 card:
                   type: entities
@@ -371,8 +444,12 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Office
-                      domain: light
+                    - domain: light
+                      entity_id: light.*office*
+                    - domain: switch
+                      entity_id: switch.*office*
+                  exclude:
+                    - entity_id: light.all_lights
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -381,14 +458,16 @@ lovelace:
               - type: custom:auto-entities
                 card:
                   type: entities
-                  title: Living Room Lighting
+                  title: Living & Sunroom Lighting
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Living Room
-                      domain: light
-                    - area: Sunroom
-                      domain: light
+                    - domain: light
+                      entity_id: light.livingroom*
+                    - domain: light
+                      entity_id: light.sunroom*
+                    - domain: light
+                      entity_id: light.diningroom*
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -397,16 +476,18 @@ lovelace:
               - type: custom:auto-entities
                 card:
                   type: entities
-                  title: Bedroom Lighting
+                  title: Bedrooms Lighting
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Bedroom
-                      domain: light
-                    - area: Primary Bedroom
-                      domain: light
-                    - area: Guest Bedroom
-                      domain: light
+                    - domain: light
+                      entity_id: light.light_ari
+                    - domain: light
+                      entity_id: light.light_guest_room
+                    - domain: light
+                      entity_id: light.light_parents
+                    - domain: light
+                      entity_id: light.light_attic
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -419,10 +500,12 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Kitchen
-                      domain: light
-                    - area: Dining Room
-                      domain: light
+                    - domain: light
+                      entity_id: light.kitchen*
+                    - domain: light
+                      entity_id: light.dining*
+                    - domain: light
+                      entity_id: light.sunroom*
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -435,12 +518,12 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Garage
-                      domain: light
-                    - area: Exterior
-                      domain: light
-                    - area: Front Porch
-                      domain: light
+                    - domain: light
+                      entity_id: light.garage*
+                    - domain: light
+                      entity_id: light.front_porch*
+                    - domain: light
+                      entity_id: light.permanent_outdoor*
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -524,28 +607,27 @@ lovelace:
                   ignore_case: true
                 show_empty: false
                 unique: true
-              - type: custom:auto-entities
-                card:
-                  type: custom:apexcharts-card
-                  header:
-                    show: true
-                    title: Climate Trends (24h)
-                  graph_span: 24h
-                  all_series_config:
-                    stroke_width: 2
-                  series:
-                    - entity: sensor.sunroom_temperature
-                      name: Sunroom Temp
-                    - entity: sensor.living_room_temperature
-                      name: Living Room Temp
-                    - entity: sensor.outdoor_temperature
-                      name: Outdoor Temp
-                filter:
-                  include:
-                    - entity_id: sensor.sunroom_temperature
-                    - entity_id: sensor.living_room_temperature
-                    - entity_id: sensor.outdoor_temperature
-                show_empty: false
+              - type: custom:mushroom-entity-card
+                entity: binary_sensor.kiosk_humidor_out_of_band
+                name: Humidor Out of Band
+                icon: mdi:thermometer-alert
+              - type: custom:apexcharts-card
+                header:
+                  show: true
+                  title: Climate Trends (24h)
+                graph_span: 24h
+                all_series_config:
+                  stroke_width: 2
+                series:
+                  - entity: sensor.outdoor_temperature_wx
+                    name: Outdoor
+                    type: line
+                  - entity: sensor.hygrometer_humidor_temperature
+                    name: Humidor
+                    type: line
+                  - entity: sensor.kneplatt72_temperature
+                    name: Weather Station
+                    type: line
           - title: Safety & Power
             path: safety
             icon: mdi:shield-home
@@ -590,7 +672,8 @@ lovelace:
                     - domain: sensor
                       attributes:
                         device_class: battery
-                      state: '< 30'
+                      numeric_state:
+                        below: 30
                     - domain: binary_sensor
                       attributes:
                         device_class: battery
@@ -632,6 +715,16 @@ lovelace:
                   Up {{ states('sensor.speedtest_upload') | default('–') }} Mbps
                 icon: mdi:speedometer
                 multiline_secondary: true
+              - type: entities
+                title: Network Status Helpers
+                show_header_toggle: false
+                entities:
+                  - entity: sensor.network_status_summary
+                    name: Status Summary
+                  - entity: sensor.speedtest_last_run
+                    name: Last Speedtest
+                  - entity: binary_sensor.internet_reachability_2
+                    name: Internet Reachability
               - type: custom:apexcharts-card
                 header:
                   show: true
@@ -681,49 +774,68 @@ lovelace:
                 alignment: start
                 chips:
                   - type: template
-                    icon: mdi:party-popper
-                    entity: scene.huskers_sunroom_chase
-                    content: Huskers Chase
+                    icon: mdi:stadium-variant
+                    entity: script.huskers_hail_burst_8s
+                    content: Huskers Burst
                     tap_action:
                       action: call-service
-                      service: scene.turn_on
-                      data:
-                        entity_id: scene.huskers_sunroom_chase
+                      service: script.turn_on
+                      target:
+                        entity_id: script.huskers_hail_burst_8s
                   - type: template
-                    icon: mdi:lightbulb-multiple
-                    entity: scene.lighting_daytime_cloudy_interior
-                    content: Cloudy Interior
+                    icon: mdi:lightbulb-alert
+                    entity: script.kiosk_stop_all_huskers_shows
+                    content: Stop Huskers Shows
                     tap_action:
                       action: call-service
-                      service: scene.turn_on
-                      data:
-                        entity_id: scene.lighting_daytime_cloudy_interior
+                      service: script.turn_on
+                      target:
+                        entity_id: script.kiosk_stop_all_huskers_shows
                   - type: template
-                    icon: mdi:lightbulb-cfl
-                    entity: scene.lighting_daytime_cloudy_exterior
-                    content: Cloudy Exterior
+                    icon: mdi:lightbulb-group
+                    entity: script.kiosk_all_lights_on
+                    content: Kiosk Lights On
                     tap_action:
                       action: call-service
-                      service: scene.turn_on
-                      data:
-                        entity_id: scene.lighting_daytime_cloudy_exterior
+                      service: script.turn_on
+                      target:
+                        entity_id: script.kiosk_all_lights_on
                   - type: template
-                    icon: mdi:play-circle
+                    icon: mdi:lightbulb-group-off
+                    entity: script.kiosk_all_lights_off
+                    content: Kiosk Lights Off
+                    tap_action:
+                      action: call-service
+                      service: script.turn_on
+                      target:
+                        entity_id: script.kiosk_all_lights_off
+                  - type: template
+                    icon: mdi:lightbulb-auto
                     entity: script.sunroom_segments_chase
-                    content: Sunroom Chase Script
+                    content: Sunroom Chase
                     tap_action:
                       action: call-service
                       service: script.turn_on
                       target:
                         entity_id: script.sunroom_segments_chase
+                  - type: template
+                    icon: mdi:plex
+                    entity: script.plex_refresh_clients
+                    content: Plex Refresh
+                    tap_action:
+                      action: call-service
+                      service: script.turn_on
+                      target:
+                        entity_id: script.plex_refresh_clients
               - type: custom:auto-entities
                 card:
                   type: entities
-                  title: All Scenes
+                  title: Huskers Scenes
                   show_header_toggle: false
                 filter:
                   include:
                     - domain: scene
+                      entity_id: scene.huskers_*
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -732,11 +844,74 @@ lovelace:
               - type: custom:auto-entities
                 card:
                   type: entities
-                  title: Scripts
+                  title: Lighting Daypart Scenes
+                  show_header_toggle: false
+                filter:
+                  include:
+                    - domain: scene
+                      entity_id: scene.lighting_*
+                sort:
+                  method: friendly_name
+                  ignore_case: true
+                show_empty: false
+                unique: true
+              - type: custom:auto-entities
+                card:
+                  type: entities
+                  title: Climate & Utility Scenes
+                  show_header_toggle: false
+                filter:
+                  include:
+                    - domain: scene
+                      entity_id: scene.climate_*
+                    - domain: scene
+                      entity_id: scene.safety_*
+                sort:
+                  method: friendly_name
+                  ignore_case: true
+                show_empty: false
+                unique: true
+              - type: custom:auto-entities
+                card:
+                  type: entities
+                  title: Huskers Scripts
                   show_header_toggle: false
                 filter:
                   include:
                     - domain: script
+                      entity_id: script.huskers_*
+                sort:
+                  method: friendly_name
+                  ignore_case: true
+                show_empty: false
+                unique: true
+              - type: custom:auto-entities
+                card:
+                  type: entities
+                  title: Kiosk & Lighting Scripts
+                  show_header_toggle: false
+                filter:
+                  include:
+                    - domain: script
+                      entity_id: script.kiosk_*
+                    - domain: script
+                      entity_id: script.sunroom_segments_chase
+                    - domain: script
+                      entity_id: script.test_halloween
+                sort:
+                  method: friendly_name
+                  ignore_case: true
+                show_empty: false
+                unique: true
+              - type: custom:auto-entities
+                card:
+                  type: entities
+                  title: Media & Utilities Scripts
+                  show_header_toggle: false
+                filter:
+                  include:
+                    - domain: script
+                      entity_id: script.plex_*
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -756,7 +931,8 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Office
+                    - entity_id: '*office*'
+                    - entity_id: '*theater*'
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -776,8 +952,9 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Living Room
-                    - area: Sunroom
+                    - entity_id: '*livingroom*'
+                    - entity_id: '*sunroom*'
+                    - entity_id: '*diningroom*'
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -797,8 +974,9 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Kitchen
-                    - area: Dining Room
+                    - entity_id: '*kitchen*'
+                    - entity_id: '*dining*'
+                    - entity_id: '*pantry*'
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -818,9 +996,9 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Bedroom
-                    - area: Primary Bedroom
-                    - area: Guest Bedroom
+                    - entity_id: '*bedroom*'
+                    - entity_id: '*ari*'
+                    - entity_id: '*guest*'
                 sort:
                   method: friendly_name
                   ignore_case: true
@@ -840,8 +1018,9 @@ lovelace:
                   show_header_toggle: false
                 filter:
                   include:
-                    - area: Garage
-                    - area: Exterior
+                    - entity_id: '*garage*'
+                    - entity_id: '*permanent_outdoor*'
+                    - entity_id: '*front_porch*'
                 sort:
                   method: friendly_name
                   ignore_case: true
