@@ -351,8 +351,9 @@ views:
                 teal
               {% endif %}
             primary: Client mix
-            secondary: >-
-              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }} · Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
+            secondary: |-
+              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }}
+              Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
