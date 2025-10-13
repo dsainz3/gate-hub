@@ -746,6 +746,20 @@ views:
             Awaiting first metrics workflow run
           {% endif %}
         multiline_secondary: true
+      - type: custom:mushroom-template-card
+        icon: mdi:information-outline
+        primary: Workflow Status
+        secondary: >-
+          {% set status = state_attr('sensor.github_repo_metrics_summary', 'status') %}
+          {% set message = state_attr('sensor.github_repo_metrics_summary', 'message') %}
+          {% if status %}
+            Status: {{ status | title }}{% if message %} — {{ message }}{% endif %}
+          {% elif message %}
+            {{ message }}
+          {% else %}
+            Metrics workflow has not populated status details yet.
+          {% endif %}
+        multiline_secondary: true
       - type: grid
         columns: 2
         square: false
@@ -833,10 +847,24 @@ views:
               action: none
             double_tap_action:
               action: none
+      - type: entities
+        title: GitHub Sensors
+        show_header_toggle: false
+        entities:
+          - entity: sensor.github_repo_metrics_summary
+            name: Repo Metrics Summary
+          - entity: sensor.github_repo_metrics_weekly_contributors
+            name: Weekly Contributors
       - type: grid
         columns: 2
         square: false
         cards:
+          - type: picture
+            image: /local/metrics/commits_per_day.svg
+            alt_text: Commits per Day
+            tap_action:
+              action: url
+              url_path: /local/metrics/commits_per_day.svg
           - type: picture
             image: /local/metrics/commits_per_week.svg
             alt_text: Commits per Week
@@ -856,11 +884,23 @@ views:
               action: url
               url_path: /local/metrics/contributors_per_week.svg
           - type: picture
+            image: /local/metrics/reverts_per_week.svg
+            alt_text: Reverts per Week
+            tap_action:
+              action: url
+              url_path: /local/metrics/reverts_per_week.svg
+          - type: picture
             image: /local/metrics/ci_failure_rate.svg
             alt_text: CI Failure Rate
             tap_action:
               action: url
               url_path: /local/metrics/ci_failure_rate.svg
+      - type: markdown
+        title: Keeping Metrics Fresh
+        content: |-
+          * Ensure the `metrics` GitHub workflow runs on a schedule or via manual dispatch to refresh `www/metrics/summary.json` and the SVG charts.
+          * The `sensor.github_repo_metrics_summary` command line integration reads from `/config/www/metrics/summary.json`; sync that path if Home Assistant runs in another container or volume.
+          * Suggested cadence: nightly during active development cycles, or weekly when the project is in maintenance mode.
   - title: Office
     path: office
     icon: mdi:chair-rolling

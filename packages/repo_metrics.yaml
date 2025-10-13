@@ -17,6 +17,8 @@ command_line:
         - lines_added
         - lines_deleted
         - contributors_last_week
+        - status
+        - message
 
 template:
   - sensor:

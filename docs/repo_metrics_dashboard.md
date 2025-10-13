@@ -22,9 +22,10 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
 - **Scenes & Scripts** – Quick-launch chips for Huskers shows, Kiosk power toggles,
   Plex client refresh, and curated auto-entities sections for Huskers, lighting, and
   media scripts alongside scene collections.
-- **GitHub Metrics** – Highlights from `sensor.github_repo_metrics_summary`, weekly
-  contributor counts, and inline charts (commits, contributors, CI health) sourced
-  from `/local/metrics/` assets with a quick link to the generated HTML summary.
+- **GitHub Metrics** – Workflow status messaging, highlights from
+  `sensor.github_repo_metrics_summary`, weekly contributor counts, and inline charts
+  for commits (day/week/month), contributors, reverts, and CI health sourced from
+  `/local/metrics/` assets with a quick link to the generated HTML summary.
 - **Area drill-downs** – Office, Living Room, Kitchen, Bedroom, and Garage views use
   wildcard filters so every entity tagged with those room names (lights, sensors,
   switches, helpers) renders automatically.
@@ -71,8 +72,13 @@ that match your HACS configuration (typically `/hacsfiles/...`).
   (`scene.huskers_*`, `script.kiosk_*`, etc.). Update the globs to mirror any naming
   conventions you introduce.
 - **GitHub metrics assets** – Ensure your CI pipeline refreshes `/www/metrics` so the
-  summary sensor and SVG charts stay current. The GitHub view falls back to guidance
-  text until the workflow populates `summary.json`.
+  summary sensor and SVG charts stay current. The view now surfaces workflow status,
+  raw sensors, and charts but will fall back to guidance text until the workflow
+  populates `summary.json`.
+- **Command line sensor path** – `sensor.github_repo_metrics_summary` reads directly
+  from `/config/www/metrics/summary.json`. Adjust the `command` path inside
+  `packages/repo_metrics.yaml` if your Home Assistant container mounts the metrics
+  directory elsewhere.
 
 ## Kiosk and TV usage
 
