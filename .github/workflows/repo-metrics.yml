@@ -1,0 +1,64 @@
+name: Repository metrics
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests matplotlib markdown
+
+      - name: Generate repository metrics
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_METRICS_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/metrics.py \
+            --repo dsainz3/gate-hub \
+            --output www/metrics \
+            --markdown \
+            --html \
+            --summary-html \
+            --update-readme
+
+      - name: Prepare artifacts
+        run: |
+          git status --short
+          find www/metrics -maxdepth 1 -type f -print || true
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.REPO_METRICS_TOKEN || secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: refresh repository metrics'
+          title: 'chore: refresh repository metrics'
+          body: |
+            ## Summary
+            - update generated repository metrics artefacts
+
+            ## Testing
+            - metrics automation workflow run
+          branch: automation/repo-metrics
+          delete-branch: true
+          add-paths: |
+            README.md
+            www/metrics/**
