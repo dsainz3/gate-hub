@@ -167,10 +167,26 @@ class GitHubMetricsClient:
                 return
 
             for edge in history.get("edges", []):
-                node = edge.get("node", {})
-                committed_at = dt.datetime.fromisoformat(
-                    node["committedDate"].replace("Z", "+00:00")
-                )
+                node = edge.get("node") or {}
+
+                committed_raw = node.get("committedDate")
+                if not committed_raw:
+                    # Skip records that do not contain the minimum payload we expect.
+                    continue
+
+                try:
+                    committed_at = dt.datetime.fromisoformat(
+                        committed_raw.replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    # Ignore malformed timestamps returned by the API.
+                    continue
+
+                sha = node.get("oid")
+                if not sha:
+                    # Without a SHA there is little value in the commit entry.
+                    continue
+
                 author_info = node.get("author") or {}
                 user_info = author_info.get("user") or {}
                 author = (
@@ -179,8 +195,9 @@ class GitHubMetricsClient:
                     or author_info.get("email")
                     or "unknown"
                 )
+
                 yield Commit(
-                    sha=node["oid"],
+                    sha=sha,
                     committed_at=committed_at,
                     author=author,
                     message=node.get("messageHeadline", ""),
