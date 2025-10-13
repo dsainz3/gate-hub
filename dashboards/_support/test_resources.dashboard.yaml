@@ -117,8 +117,10 @@ views:
                 red
               {% endif %}
             primary: Bandwidth Pulse
-            secondary: >-
-              ↓ {{ states('sensor.speedtest_download') }} Mbps · ↑ {{ states('sensor.speedtest_upload') }} Mbps · Ping {{ states('sensor.speedtest_ping') }} ms
+            secondary: |
+              ↓ {{ states('sensor.speedtest_download') }} Mbps
+              ↑ {{ states('sensor.speedtest_upload') }} Mbps
+              Ping {{ states('sensor.speedtest_ping') }} ms
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -128,9 +130,10 @@ views:
             icon_color: purple
             primary: >-
               Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
-            secondary: >-
+            secondary: |
               {{ states('sensor.f1_next_race_location') }} · Lights out
-              {{ as_timestamp(states('sensor.f1_lights_out_local')) | timestamp_custom('%b %-d %-I:%M %p', True) if states('sensor.f1_lights_out_local') not in ['unknown', 'unavailable'] else 'TBA' }}
+              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
+              {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable'] else 'TBA' }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -306,8 +309,10 @@ views:
             icon: mdi:access-point-network
             icon_color: blue
             primary: Deco mesh throughput
-            secondary: >-
-              ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps · ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps · Nodes {{ states('sensor.deco_node_count') }}
+            secondary: |
+              ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps
+              ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps
+              Nodes {{ states('sensor.deco_node_count') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
@@ -489,10 +494,10 @@ views:
                 amber
               {% endif %}
             primary: Automation audit
-            secondary: >-
-              System {{ states('sensor.automation_status_audit') | default('unknown', true) }} · Specialized
-              {{ states('sensor.specialized_mode_audit') | default('unknown', true) }} · Huskers
-              {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
+            secondary: |
+              System {{ states('sensor.automation_status_audit') | default('unknown', true) }}
+              Specialized {{ states('sensor.specialized_mode_audit') | default('unknown', true) }}
+              Huskers {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
