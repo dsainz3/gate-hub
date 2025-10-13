@@ -12,54 +12,41 @@ Usage example (matching the scheduled workflow):
         --markdown --html --summary-html --update-readme
 
 Environment variables:
-    GITHUB_TOKEN (recommended)
+    GITHUB_TOKEN (required)
 
 The script is intentionally light on third-party dependencies - only
-``requests``, ``matplotlib`` and ``markdown`` are required. When
-``GITHUB_TOKEN`` is unavailable, it falls back to unauthenticated REST requests
-with reduced detail but still produces dashboard artefacts.
+``requests``, ``matplotlib`` and ``markdown`` are required.
 """
 
 from __future__ import annotations
 
 import argparse
 import datetime as dt
-import importlib
 import json
 import math
 import os
-import sys
 from collections import defaultdict
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from types import ModuleType
 
+import matplotlib
+
+# Home Assistant executes this in a headless environment - Agg is a safe
+# non-interactive backend.
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import requests
-from matplotlib.figure import Figure
 
-
-def _load_markdown() -> ModuleType | None:
-    try:
-        return importlib.import_module("markdown")
-    except Exception:  # pragma: no cover
-        # Optional dependency handled upstream.
-        return None
-
-
-IMAGE_FORMAT = "svg"
-
-
-plt.switch_backend("Agg")
-
-
-markdown = _load_markdown()
+try:
+    import markdown  # type: ignore
+except (
+    Exception
+):  # pragma: no cover - the workflow ensures ``markdown`` exists
+    markdown = None
 
 
 GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
-COMMITS_URL_TEMPLATE = "https://api.github.com/repos/{owner}/{repo}/commits"
-PULLS_URL_TEMPLATE = "https://api.github.com/repos/{owner}/{repo}/pulls"
 ACTIONS_URL_TEMPLATE = (
     "https://api.github.com/repos/{owner}/{repo}/actions/runs"
 )
@@ -97,25 +84,21 @@ class GitHubMetricsClient:
     """Small helper around the GitHub GraphQL + REST APIs."""
 
     def __init__(
-        self, token: str | None, session: requests.Session | None = None
+        self, token: str, session: requests.Session | None = None
     ) -> None:
         self._token = token
         self._session = session or requests.Session()
         self._session.headers.update(
             {
+                "Authorization": f"Bearer {token}",
                 "Accept": "application/vnd.github+json",
                 "User-Agent": "repo-metrics-automation",
             }
         )
-        if token:
-            self._session.headers["Authorization"] = f"Bearer {token}"
 
     def graphql(
         self, query: str, variables: dict[str, object]
     ) -> dict[str, object]:
-        if not self._token:
-            raise RuntimeError("GraphQL endpoint requires authentication")
-
         response = self._session.post(
             GRAPHQL_ENDPOINT,
             json={"query": query, "variables": variables},
@@ -127,7 +110,7 @@ class GitHubMetricsClient:
             raise RuntimeError(payload["errors"])
         return payload["data"]
 
-    def _iter_commit_history_graphql(
+    def iter_commit_history(
         self, owner: str, repo: str, since: dt.datetime
     ) -> Iterable[Commit]:
         query = """
@@ -185,25 +168,20 @@ class GitHubMetricsClient:
 
             for edge in history.get("edges", []):
                 node = edge.get("node", {})
-                committed_raw = node.get("committedDate")
-                if not committed_raw:
-                    continue
                 committed_at = dt.datetime.fromisoformat(
-                    committed_raw.replace("Z", "+00:00")
+                    node["committedDate"].replace("Z", "+00:00")
                 )
-                author_info = node.get("author") or {}
-                author_user = author_info.get("user") or {}
                 author = (
-                    author_user.get("login")
-                    or author_info.get("name")
-                    or author_info.get("email")
+                    node.get("author", {}).get("user", {}).get("login")
+                    or node.get("author", {}).get("name")
+                    or node.get("author", {}).get("email")
                     or "unknown"
                 )
                 yield Commit(
-                    sha=node.get("oid", ""),
+                    sha=node["oid"],
                     committed_at=committed_at,
                     author=author,
-                    message=node.get("messageHeadline") or "",
+                    message=node.get("messageHeadline", ""),
                     additions=node.get("additions") or 0,
                     deletions=node.get("deletions") or 0,
                     changed_files=node.get("changedFiles") or 0,
@@ -214,78 +192,7 @@ class GitHubMetricsClient:
                 break
             cursor = page_info.get("endCursor")
 
-    def _iter_commit_history_rest(
-        self, owner: str, repo: str, since: dt.datetime
-    ) -> Iterable[Commit]:
-        page = 1
-        while True:
-            response = self._session.get(
-                COMMITS_URL_TEMPLATE.format(owner=owner, repo=repo),
-                params={
-                    "since": since.isoformat(),
-                    "per_page": 100,
-                    "page": page,
-                },
-                timeout=30,
-            )
-            response.raise_for_status()
-            payload = response.json()
-            if not payload:
-                break
-            for item in payload:
-                commit_payload = item.get("commit", {})
-                author_payload = commit_payload.get("author", {}) or {}
-                committed_at = author_payload.get("date")
-                if not committed_at:
-                    continue
-                committed_dt = dt.datetime.fromisoformat(
-                    committed_at.replace("Z", "+00:00")
-                )
-                if committed_dt < since:
-                    return
-                author_login = None
-                if item.get("author") and item["author"].get("login"):
-                    author_login = item["author"]["login"]
-                author = (
-                    author_login or author_payload.get("name") or "unknown"
-                )
-                message = commit_payload.get("message", "").splitlines()[0]
-                yield Commit(
-                    sha=item.get("sha", ""),
-                    committed_at=committed_dt,
-                    author=author,
-                    message=message,
-                    additions=0,
-                    deletions=0,
-                    changed_files=0,
-                )
-            page += 1
-
-    def iter_commit_history(
-        self, owner: str, repo: str, since: dt.datetime
-    ) -> Iterable[Commit]:
-        if self._token:
-            try:
-                yield from self._iter_commit_history_graphql(
-                    owner, repo, since
-                )
-                return
-            except requests.HTTPError as exc:
-                if exc.response is None or exc.response.status_code not in {
-                    401,
-                    403,
-                }:
-                    raise
-            except RuntimeError:
-                pass
-
-        print(
-            "Falling back to REST commit history (reduced detail).",
-            file=sys.stderr,
-        )
-        yield from self._iter_commit_history_rest(owner, repo, since)
-
-    def _iter_pull_requests_graphql(
+    def iter_pull_requests(
         self, owner: str, repo: str, since: dt.datetime
     ) -> Iterable[PullRequest]:
         query = """
@@ -349,79 +256,6 @@ class GitHubMetricsClient:
             if not page_info.get("hasNextPage"):
                 break
             cursor = page_info.get("endCursor")
-
-    def _iter_pull_requests_rest(
-        self, owner: str, repo: str, since: dt.datetime
-    ) -> Iterable[PullRequest]:
-        page = 1
-        while True:
-            response = self._session.get(
-                PULLS_URL_TEMPLATE.format(owner=owner, repo=repo),
-                params={
-                    "state": "all",
-                    "sort": "created",
-                    "direction": "desc",
-                    "per_page": 100,
-                    "page": page,
-                },
-                timeout=30,
-            )
-            response.raise_for_status()
-            payload = response.json()
-            if not payload:
-                break
-            for item in payload:
-                created_at = dt.datetime.fromisoformat(
-                    item["created_at"].replace("Z", "+00:00")
-                )
-                if created_at < since:
-                    return
-                closed_at = (
-                    dt.datetime.fromisoformat(
-                        item["closed_at"].replace("Z", "+00:00")
-                    )
-                    if item.get("closed_at")
-                    else None
-                )
-                merged_at = (
-                    dt.datetime.fromisoformat(
-                        item["merged_at"].replace("Z", "+00:00")
-                    )
-                    if item.get("merged_at")
-                    else None
-                )
-                yield PullRequest(
-                    number=item["number"],
-                    created_at=created_at,
-                    closed_at=closed_at,
-                    merged_at=merged_at,
-                    additions=item.get("additions", 0),
-                    deletions=item.get("deletions", 0),
-                    changed_files=item.get("changed_files", 0),
-                )
-            page += 1
-
-    def iter_pull_requests(
-        self, owner: str, repo: str, since: dt.datetime
-    ) -> Iterable[PullRequest]:
-        if self._token:
-            try:
-                yield from self._iter_pull_requests_graphql(owner, repo, since)
-                return
-            except requests.HTTPError as exc:
-                if exc.response is None or exc.response.status_code not in {
-                    401,
-                    403,
-                }:
-                    raise
-            except RuntimeError:
-                pass
-
-        print(
-            "Falling back to REST pull request history (reduced detail).",
-            file=sys.stderr,
-        )
-        yield from self._iter_pull_requests_rest(owner, repo, since)
 
     def list_workflow_runs(
         self, owner: str, repo: str, since: dt.datetime
@@ -524,44 +358,29 @@ def ensure_directory(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
-def save_figure(fig: Figure, output: Path) -> None:
-    fig.savefig(output, format=IMAGE_FORMAT, bbox_inches="tight")
-    plt.close(fig)
-
-
-def write_placeholder_chart(title: str, output: Path, message: str) -> None:
-    fig, ax = plt.subplots(figsize=(10, 3))
-    fig.suptitle(title)
-    ax.axis("off")
-    ax.text(0.5, 0.5, message, ha="center", va="center", fontsize=14)
-    fig.tight_layout()
-    save_figure(fig, output)
-
-
 def plot_series(
     title: str, series: dict[dt.date, int], output: Path, ylabel: str
 ) -> None:
     if not series:
-        write_placeholder_chart(title, output, "No data available yet")
         return
     dates = list(series.keys())
     values = list(series.values())
 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(dates, values, marker="o")
-    ax.set_title(title)
-    ax.set_ylabel(ylabel)
-    ax.set_xlabel("Period")
-    ax.grid(True, linestyle="--", alpha=0.3)
-    fig.tight_layout()
-    save_figure(fig, output)
+    plt.figure(figsize=(10, 5))
+    plt.plot(dates, values, marker="o")
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xlabel("Period")
+    plt.grid(True, linestyle="--", alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(output)
+    plt.close()
 
 
 def plot_failure_rate(
     title: str, series: dict[dt.date, tuple[int, int]], output: Path
 ) -> None:
     if not series:
-        write_placeholder_chart(title, output, "No workflow runs in range")
         return
     dates = list(series.keys())
     totals = [total for total, _ in series.values()]
@@ -587,7 +406,8 @@ def plot_failure_rate(
 
     fig.suptitle(title)
     fig.tight_layout()
-    save_figure(fig, output)
+    plt.savefig(output)
+    plt.close(fig)
 
 
 def format_markdown_report(
@@ -618,13 +438,13 @@ def format_markdown_report(
         "",
         "## Charts",
         "",
-        "![Commits per week](./commits_per_week.svg)",
+        "![Commits per week](./commits_per_week.png)",
         "",
-        "![Contributors per week](./contributors_per_week.svg)",
+        "![Contributors per week](./contributors_per_week.png)",
         "",
-        "![Reverts per week](./reverts_per_week.svg)",
+        "![Reverts per week](./reverts_per_week.png)",
         "",
-        "![CI health](./ci_failure_rate.svg)",
+        "![CI health](./ci_failure_rate.png)",
         "",
         "## Pull request quality",
         "",
@@ -792,11 +612,7 @@ def main() -> None:
 
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        print(
-            "Warning: GITHUB_TOKEN is not set. Falling back to unauthenticated "
-            "GitHub API requests with limited detail.",
-            file=sys.stderr,
-        )
+        raise SystemExit("GITHUB_TOKEN environment variable is required")
 
     owner, repo_name = args.repo.split("/", 1)
     since = dt.datetime.utcnow().replace(tzinfo=dt.UTC) - dt.timedelta(
@@ -883,37 +699,37 @@ def main() -> None:
     plot_series(
         "Commits per week",
         weekly_counts,
-        output_dir / "commits_per_week.svg",
+        output_dir / "commits_per_week.png",
         "Commits",
     )
     plot_series(
         "Commits per day",
         daily_counts,
-        output_dir / "commits_per_day.svg",
+        output_dir / "commits_per_day.png",
         "Commits",
     )
     plot_series(
         "Commits per month",
         monthly_counts,
-        output_dir / "commits_per_month.svg",
+        output_dir / "commits_per_month.png",
         "Commits",
     )
     plot_series(
         "Contributors per week",
         contributors_weekly,
-        output_dir / "contributors_per_week.svg",
+        output_dir / "contributors_per_week.png",
         "Contributors",
     )
     plot_series(
         "Reverts per week",
         revert_weekly,
-        output_dir / "reverts_per_week.svg",
+        output_dir / "reverts_per_week.png",
         "Reverts",
     )
     plot_failure_rate(
         "Workflow runs and failure rate",
         failure_weekly,
-        output_dir / "ci_failure_rate.svg",
+        output_dir / "ci_failure_rate.png",
     )
 
     markdown_report = format_markdown_report(

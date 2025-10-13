@@ -193,8 +193,8 @@ lovelace:
 
     repo-metrics-dashboard:
       mode: yaml
-      title: Repository Metrics
-      icon: mdi:github
+      title: Repo Metrics & Devices
+      icon: mdi:view-dashboard-outline
       show_in_sidebar: true
       filename: dashboards/repo-metrics.dashboard.yaml
 
