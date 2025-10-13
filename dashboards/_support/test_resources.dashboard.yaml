@@ -480,6 +480,12 @@ views:
                 icon_color: purple
                 content: >-
                   Round {{ states('sensor.f1_next_race_round') }}
+            view_layout:
+              column_span: 4
+      - type: grid
+        title: Scoreboard & Storylines
+        columns: 4
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.huskers_game_phase_label
             icon: mdi:scoreboard-outline
@@ -494,6 +500,8 @@ views:
             tap_action:
               action: more-info
               entity: sensor.huskers_series_summary
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: sensor.huskers_series_summary
             icon: mdi:clipboard-text-clock
@@ -504,6 +512,12 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 2
+      - type: grid
+        title: Race Weekend Outlook
+        columns: 4
+        cards:
           - type: custom:mushroom-template-card
             entity: sensor.f1_next_race_name
             icon: mdi:calendar-clock
@@ -517,6 +531,8 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: sensor.f1_next_race_sprint
             icon: mdi:timer-outline
@@ -528,6 +544,8 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 2
   - title: Operations Center
     path: support-test-operations
     icon: mdi:lightning-bolt
