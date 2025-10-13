@@ -43,7 +43,8 @@ from matplotlib.figure import Figure
 def _load_markdown() -> ModuleType | None:
     try:
         return importlib.import_module("markdown")
-    except Exception:  # pragma: no cover - optional dependency handled upstream
+    except Exception:  # pragma: no cover
+        # Optional dependency handled upstream.
         return None
 
 
@@ -242,7 +243,9 @@ class GitHubMetricsClient:
                 author_login = None
                 if item.get("author") and item["author"].get("login"):
                     author_login = item["author"]["login"]
-                author = author_login or author_payload.get("name") or "unknown"
+                author = (
+                    author_login or author_payload.get("name") or "unknown"
+                )
                 message = commit_payload.get("message", "").splitlines()[0]
                 yield Commit(
                     sha=item.get("sha", ""),
@@ -260,7 +263,9 @@ class GitHubMetricsClient:
     ) -> Iterable[Commit]:
         if self._token:
             try:
-                yield from self._iter_commit_history_graphql(owner, repo, since)
+                yield from self._iter_commit_history_graphql(
+                    owner, repo, since
+                )
                 return
             except requests.HTTPError as exc:
                 if exc.response is None or exc.response.status_code not in {
@@ -369,12 +374,16 @@ class GitHubMetricsClient:
                 if created_at < since:
                     return
                 closed_at = (
-                    dt.datetime.fromisoformat(item["closed_at"].replace("Z", "+00:00"))
+                    dt.datetime.fromisoformat(
+                        item["closed_at"].replace("Z", "+00:00")
+                    )
                     if item.get("closed_at")
                     else None
                 )
                 merged_at = (
-                    dt.datetime.fromisoformat(item["merged_at"].replace("Z", "+00:00"))
+                    dt.datetime.fromisoformat(
+                        item["merged_at"].replace("Z", "+00:00")
+                    )
                     if item.get("merged_at")
                     else None
                 )
