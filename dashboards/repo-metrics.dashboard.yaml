@@ -699,12 +699,6 @@ views:
               service: script.turn_on
               target:
                 entity_id: script.plex_refresh_clients
-          - type: template
-            icon: mdi:github
-            content: Run GitHub Metrics
-            tap_action:
-              action: call-service
-              service: script.trigger_github_repo_metrics_workflow
       - type: custom:auto-entities
         card:
           type: entities
@@ -802,20 +796,6 @@ views:
       - type: custom:mushroom-title-card
         title: GitHub Metrics Overview
         subtitle: Repository automation highlights and commit trends.
-      - type: custom:mushroom-chips-card
-        alignment: end
-        chips:
-          - type: template
-            icon: mdi:play-circle
-            content: Run Metrics Workflow
-            tap_action:
-              action: call-service
-              service: script.trigger_github_repo_metrics_workflow
-            hold_action:
-              action: url
-              url_path: https://github.com/dsainz3/gate-hub/actions/workflows/repo-metrics.yml
-            double_tap_action:
-              action: none
       - type: custom:mushroom-template-card
         icon: mdi:clock-check
         primary: Metrics Generated
