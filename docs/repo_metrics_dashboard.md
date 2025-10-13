@@ -8,7 +8,7 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
 ## Views delivered
 
 - **Overview** – KPI chips, a six-card indicator grid, weather and network snapshots,
-  and a live calendar teaser for the next household event.
+  GitHub highlights, and a live calendar teaser for the next household event.
 - **Lighting** – Group toggles for the most common light bundles plus dynamic lists
   for office, living spaces, bedrooms, kitchen/dining, and exterior fixtures.
 - **Climate & Environment** – Temperature and humidity sensor catalogues, humidor
@@ -22,10 +22,10 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
 - **Scenes & Scripts** – Quick-launch chips for Huskers shows, Kiosk power toggles,
   Plex client refresh, and curated auto-entities sections for Huskers, lighting, and
   media scripts alongside scene collections.
-- **GitHub Metrics** – Workflow status messaging, highlights from
-  `sensor.github_repo_metrics_summary`, weekly contributor counts, and inline charts
-  for commits (day/week/month), contributors, reverts, and CI health sourced from
-  `/local/metrics/` assets with a quick link to the generated HTML summary.
+- **GitHub Metrics** – Workflow status messaging, highlight sensors,
+  weekly contributor counts, and inline charts for commits (day/week/month),
+  contributors, reverts, and CI health sourced from `/local/metrics/` assets with
+  a quick link to the generated HTML summary.
 - **Area drill-downs** – Office, Living Room, Kitchen, Bedroom, and Garage views use
   wildcard filters so every entity tagged with those room names (lights, sensors,
   switches, helpers) renders automatically.
@@ -57,9 +57,11 @@ that match your HACS configuration (typically `/hacsfiles/...`).
 
 - **Template sensors** – The package defines `sensor.repo_lights_on_total`,
   `sensor.repo_devices_offline_total`, `sensor.repo_stale_sensors_total`,
-  `sensor.repo_low_battery_total`, `sensor.repo_updates_available_total`, and
-  `sensor.repo_primary_weather`. Tweak thresholds (e.g., the 30 % battery limit) or
-  domain lists inside the `template:` block.
+  `sensor.repo_low_battery_total`, `sensor.repo_updates_available_total`,
+  `sensor.repo_primary_weather`, and GitHub helpers such as
+  `sensor.github_repo_metrics_status` and `sensor.github_repo_metrics_weekly_commits_highlight`.
+  Tweak thresholds (e.g., the 30 % battery limit) or domain lists inside the
+  `template:` block.
 - **Weather source** – The weather summary honours `input_text.weather_pws_entity`.
   Set that helper to your preferred `weather.` entity or leave it blank to fall back
   to the first available entity.
@@ -72,9 +74,10 @@ that match your HACS configuration (typically `/hacsfiles/...`).
   (`scene.huskers_*`, `script.kiosk_*`, etc.). Update the globs to mirror any naming
   conventions you introduce.
 - **GitHub metrics assets** – Ensure your CI pipeline refreshes `/www/metrics` so the
-  summary sensor and SVG charts stay current. The view now surfaces workflow status,
-  raw sensors, and charts but will fall back to guidance text until the workflow
-  populates `summary.json`.
+  summary sensor and SVG charts stay current. The overview chips and snapshot
+  cards pull from these sensors and charts, while the dedicated view surfaces
+  workflow status, raw sensors, and charts but will fall back to guidance text
+  until the workflow populates `summary.json`.
 - **Command line sensor path** – `sensor.github_repo_metrics_summary` reads directly
   from `/config/www/metrics/summary.json`. Adjust the `command` path inside
   `packages/repo_metrics.yaml` if your Home Assistant container mounts the metrics

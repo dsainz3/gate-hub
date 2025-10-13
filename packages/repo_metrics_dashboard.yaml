@@ -7,6 +7,12 @@ homeassistant:
       friendly_name: Repo Primary Weather
     sensor.repo_next_calendar_event:
       friendly_name: Repo Next Calendar Event
+    sensor.github_repo_metrics_status:
+      friendly_name: Repo GitHub Workflow Status
+    sensor.github_repo_metrics_message:
+      friendly_name: Repo GitHub Workflow Message
+    sensor.github_repo_metrics_weekly_commits_highlight:
+      friendly_name: Repo GitHub Weekly Commits
 
 
 template:

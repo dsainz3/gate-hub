@@ -61,6 +61,19 @@ views:
               action: navigate
               navigation_path: /repo-metrics/network
           - type: template
+            entity: sensor.github_repo_metrics_summary
+            icon: mdi:github
+            content: >-
+              {% set highlights = state_attr('sensor.github_repo_metrics_summary', 'highlights') %}
+              {% if highlights and highlights.get('Weekly commits') %}
+                {{ highlights.get('Weekly commits') }}
+              {% else %}
+                GitHub Metrics
+              {% endif %}
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/github
+          - type: template
             entity: sensor.repo_next_calendar_event
             icon: mdi:calendar-clock
             content: >-
@@ -131,6 +144,20 @@ views:
             tap_action:
               action: more-info
             multiline_secondary: true
+          - type: custom:mushroom-template-card
+            icon: mdi:github
+            primary: GitHub Weekly Commits
+            secondary: >-
+              {% set highlights = state_attr('sensor.github_repo_metrics_summary', 'highlights') %}
+              {% if highlights and highlights.get('Weekly commits') %}
+                {{ highlights.get('Weekly commits') }}
+              {% else %}
+                Run the repo metrics workflow
+              {% endif %}
+            multiline_secondary: true
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/github
       - type: grid
         columns: 2
         square: false
@@ -182,6 +209,45 @@ views:
                     stroke_width: 2
                     show:
                       extremas: true
+      - type: vertical-stack
+        cards:
+          - type: custom:mushroom-template-card
+            icon: mdi:github
+            primary: GitHub Snapshot
+            secondary: >-
+              {% set highlights = state_attr('sensor.github_repo_metrics_summary', 'highlights') %}
+              {% if highlights and highlights.get('Weekly commits') %}
+                {{ highlights.get('Weekly commits') }}
+              {% else %}
+                Trigger the repo metrics workflow to populate highlights.
+              {% endif %}
+            multiline_secondary: true
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/github
+          - type: custom:mushroom-template-card
+            icon: mdi:information-outline
+            primary: Workflow Status
+            secondary: >-
+              {% set status = states('sensor.github_repo_metrics_status') %}
+              {% set message = states('sensor.github_repo_metrics_message') %}
+              {% if status not in ['unknown', 'unavailable', none] %}
+                Status: {{ status | title }}{% if message not in ['unknown', 'unavailable', none] %} — {{ message }}{% endif %}
+              {% elif message not in ['unknown', 'unavailable', none] %}
+                {{ message }}
+              {% else %}
+                Awaiting metrics workflow run
+              {% endif %}
+            multiline_secondary: true
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/github
+          - type: picture
+            image: /local/metrics/commits_per_week.svg
+            alt_text: GitHub commits per week
+            tap_action:
+              action: url
+              url_path: /local/metrics/commits_per_week.svg
       - type: custom:mushroom-template-card
         primary: Next on the Calendar
         secondary: >-
@@ -855,6 +921,12 @@ views:
             name: Repo Metrics Summary
           - entity: sensor.github_repo_metrics_weekly_contributors
             name: Weekly Contributors
+          - entity: sensor.github_repo_metrics_status
+            name: Workflow Status
+          - entity: sensor.github_repo_metrics_message
+            name: Workflow Message
+          - entity: sensor.github_repo_metrics_weekly_commits_highlight
+            name: Weekly Commits Highlight
       - type: grid
         columns: 2
         square: false
