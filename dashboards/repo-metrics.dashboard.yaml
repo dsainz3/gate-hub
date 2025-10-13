@@ -17,22 +17,22 @@ views:
           - type: horizontal-stack
             cards:
               - type: picture
-                image: /local/metrics/commits_per_week.svg
+                image: /local/metrics/commits_per_week.png
                 tap_action:
                   action: more-info
               - type: picture
-                image: /local/metrics/contributors_per_week.svg
+                image: /local/metrics/contributors_per_week.png
                 tap_action:
                   action: more-info
 
           - type: horizontal-stack
             cards:
               - type: picture
-                image: /local/metrics/reverts_per_week.svg
+                image: /local/metrics/reverts_per_week.png
                 tap_action:
                   action: more-info
               - type: picture
-                image: /local/metrics/ci_failure_rate.svg
+                image: /local/metrics/ci_failure_rate.png
                 tap_action:
                   action: more-info
 

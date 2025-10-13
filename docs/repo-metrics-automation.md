@@ -18,8 +18,7 @@ Home Assistant dashboard integration.
 - Writes a `summary.json` companion that powers the Home Assistant package
   sensors.
 
-Run locally with (supplying `GITHUB_TOKEN` unlocks richer metrics, but the
-script will fall back to unauthenticated REST requests if omitted):
+Run locally with:
 
 ```bash
 GITHUB_TOKEN=ghp_example python scripts/metrics.py \
@@ -69,7 +68,7 @@ GITHUB_TOKEN=ghp_example python scripts/metrics.py \
 ## Validation checklist
 
 1. After the workflow runs, confirm the assets resolve via:
-   - `https://<ha-host>/local/metrics/commits_per_week.svg`
+   - `https://<ha-host>/local/metrics/commits_per_week.png`
    - `https://<ha-host>/local/metrics/metrics.html`
    - `https://<ha-host>/local/metrics/summary.html`
 2. Reload the Lovelace resources to ensure the new dashboard picks up the
@@ -79,11 +78,11 @@ GITHUB_TOKEN=ghp_example python scripts/metrics.py \
 
 ## Troubleshooting tips
 
-- Placeholder charts indicate the workflow ran without GitHub authentication –
-  provide `REPO_METRICS_TOKEN` (or allow the default `GITHUB_TOKEN`) with
-  `repo` and `actions:read` scopes to unlock commit diff statistics.
+- Missing charts usually mean the workflow could not authenticate to GitHub –
+  ensure `REPO_METRICS_TOKEN` (or the default `GITHUB_TOKEN`) is granted the
+  `repo` and `actions:read` scopes.
 - If the dashboard still shows cached images, add a cache-busting query string
-  such as `/local/metrics/commits_per_week.svg?v={{ states('sensor.date') }}` in
+  such as `/local/metrics/commits_per_week.png?v={{ states('sensor.date') }}` in
   the Lovelace card configuration.
 - Expose the `summary.json` as a REST sensor (instead of command line) if you
   prefer asynchronous updates or want to serve it to other systems.
