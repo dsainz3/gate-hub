@@ -1,8 +1,8 @@
 title: Support · Test Resources
 views:
-  - title: Test Bench
-    path: support-test
-    icon: mdi:test-tube
+  - title: Modern Demo
+    path: support-test-modern
+    icon: mdi:view-dashboard-outline
     type: sections
     theme: Support Test Gold
     card_mod:
@@ -13,318 +13,492 @@ views:
           --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
           --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
         }
-    max_columns: 3
+    max_columns: 4
     sections:
       - type: grid
-        title: Resource Smoke Tests
-        columns: 2
+        title: Mission Control
+        columns: 4
         cards:
           - type: custom:mushroom-title-card
-            title: Smoke Test Readiness
-            subtitle: Validate helper resources before running regression jobs.
-            alignment: center
+            title: Support Lab · Modern Showcase
+            subtitle: Curated command centre built from the sample entities.
+            alignment: start
+            tap_action:
+              action: more-info
+              entity: sensor.agenda_planner_summary
             view_layout:
               column_span: 2
           - type: custom:mushroom-chips-card
-            alignment: center
+            alignment: start
             chips:
               - type: template
-                icon: mdi:check-circle
-                icon_color: green
-                content: layout-card.js
-              - type: template
-                icon: mdi:check-circle
-                icon_color: green
-                content: grid-layout.js
-              - type: template
-                icon: mdi:auto-fix
-                icon_color: green
-                content: auto-entities
-              - type: template
-                icon: mdi:palette-swatch
+                entity: weather.forecast_home
+                icon: mdi:weather-partly-cloudy
                 icon_color: >-
-                  {{ 'green' if is_state('input_boolean.theme_loader_status', 'on') else 'amber' }}
-                content: Theme helpers
+                  {% set condition = states('weather.forecast_home') %}
+                  {% if condition in ['sunny', 'clear-night'] %}
+                    amber
+                  {% elif condition in ['cloudy', 'partlycloudy', 'mostlycloudy'] %}
+                    blue-grey
+                  {% elif condition in ['rainy', 'pouring'] %}
+                    blue
+                  {% else %}
+                    teal
+                  {% endif %}
+                content: >-
+                  {{ states('weather.forecast_home') | title }} · {{ states('sensor.temperature') }}°F
                 tap_action:
                   action: more-info
-                  entity: input_boolean.theme_loader_status
-            view_layout:
-              column_span: 2
-          - type: markdown
-            content: >-
-              ### Purpose
-
-              Confirm that custom cards, layout helpers, and supporting entities
-              are available before capturing screenshots or running UI
-              regression tests. The hero strip keeps quick status pills front and
-              centre while the inventory below surfaces live sensor data.
-            view_layout:
-              column_span: 2
-          - type: custom:auto-entities
-            show_empty: false
-            card:
-              type: entities
-              title: Sensor inventory (sample)
-              state_color: true
-              show_header_toggle: false
-            card_param: entities
-            filter:
-              include:
-                - domain: sensor
-                  options:
-                    secondary_info: last-changed
-              exclude:
-                - domain: weather
-                - state: unavailable
-                - state: unknown
-            sort:
-              method: friendly_name
-            limit: 12
-            view_layout:
-              column_span: 2
-      - type: grid
-        title: Lighting Lab
-        columns: 2
-        cards:
-          - type: custom:mushroom-template-card
-            entity: script.test_halloween
-            icon: mdi:play-circle
-            icon_color: orange
-            primary: Start Halloween Lights
-            secondary: Kick off the animated holiday lighting scene.
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            tap_action:
-              action: call-service
-              service: script.turn_on
-              target:
-                entity_id: script.test_halloween
-            card_mod:
-              style: |
-                ha-card {
-                  --mush-icon-size: 56px;
-                }
-          - type: custom:mushroom-template-card
-            entity: script.test_halloween
-            icon: mdi:stop-circle
-            icon_color: red
-            primary: Stop Halloween Lights
-            secondary: Halt the animation immediately for quick resets.
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            tap_action:
-              action: call-service
-              service: script.turn_off
-              target:
-                entity_id: script.test_halloween
-            card_mod:
-              style: |
-                ha-card {
-                  --mush-icon-size: 56px;
-                }
-          - type: custom:mushroom-template-card
-            icon: mdi:lightbulb-multiple-outline
-            icon_color: blue
-            primary: Scene Preview Slot
-            secondary: Reserve this bay for upcoming dimmer sliders or preview scenes as additional tests are added.
-            layout: vertical
-            fill_container: true
-            tap_action:
-              action: none
-            view_layout:
-              column_span: 2
-            card_mod:
-              style: |
-                ha-card {
-                  --mush-icon-size: 48px;
-                  opacity: 0.8;
-                }
-          - type: markdown
-            content: >-
-              #### Test Notes
-
-              These helpers exercise the `script.test_halloween` routine from the
-              holiday lighting package. Run a full start/stop cycle before
-              enabling seasonal automations or capturing dashboards so the
-              animation and scripts remain verified.
-            view_layout:
-              column_span: 2
-  - title: Plex · Theater
-    path: support-test-plex
-    icon: mdi:plex
-    type: sections
-    theme: Support Test Gold
-    card_mod:
-      style: |
-        :host {
-          --app-header-background-color: var(--support-test-header-plex-bg, var(--app-header-background-color));
-          --app-header-text-color: var(--support-test-header-plex-fg, var(--app-header-text-color));
-          --app-header-button-text-color: var(--support-test-header-plex-fg, var(--app-header-button-text-color));
-          --app-header-icon-color: var(--support-test-header-plex-fg, var(--app-header-icon-color));
-        }
-    max_columns: 2
-    sections:
-      - type: grid
-        title: Theater Status
-        columns: 2
-        cards:
-          - type: custom:mushroom-media-player-card
-            entity: media_player.basement_fire_tv
-            name: Basement Theater Fire TV
-            use_media_info: true
-            show_volume_level: true
-            layout: horizontal
-            fill_container: true
-            tap_action:
-              action: more-info
-            view_layout:
-              column_span: 2
-          - type: custom:mushroom-template-card
-            entity: binary_sensor.basement_theater_active
-            icon: mdi:movie-open
-            icon_color: >-
-              {{ 'orange' if is_state('binary_sensor.basement_theater_active', 'on') else 'grey' }}
-            primary: >-
-              {{ 'Theater Active' if is_state('binary_sensor.basement_theater_active', 'on') else 'Theater Idle' }}
-            secondary: >-
-              Fire TV: {{ states('sensor.basement_theater_media_status') }} · App:
-              {{ state_attr('sensor.basement_theater_media_status', 'app_name') or 'unknown' }}
-            layout: horizontal
-            fill_container: true
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-template-card
-            entity: sensor.plex_server_sessions
-            icon: mdi:plex
-            icon_color: amber
-            primary: Plex Sessions
-            secondary: >-
-              Active streams: {{ states('sensor.plex_server_sessions') }} ·
-              Client online: {{ 'Yes' if is_state('media_player.basement_fire_tv', 'on') else 'No' }}
-            layout: horizontal
-            fill_container: true
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-chips-card
-            alignment: start
-            chips:
+                  entity: weather.forecast_home
               - type: template
-                icon: mdi:chart-timeline-variant
-                icon_color: blue
-                content: >-
-                  Last change · {{ state_attr('sensor.basement_theater_media_status', 'last_changed') or 'unknown' }}
-              - type: template
-                icon: mdi:plex
-                icon_color: amber
-                content: >-
-                  Sessions · {{ states('sensor.plex_server_sessions') }}
-              - type: template
-                icon: mdi:access-point-network
+                entity: sensor.network_status_summary
+                icon: mdi:lan-check
                 icon_color: >-
-                  {{ 'green' if is_state('binary_sensor.basement_theater_active', 'on') else 'grey' }}
+                  {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
                 content: >-
-                  {{ 'Client online' if is_state('media_player.basement_fire_tv', 'on') else 'Client idle' }}
+                  Network · {{ states('sensor.network_status_summary') }}
+                tap_action:
+                  action: more-info
+                  entity: sensor.network_status_summary
+              - type: template
+                entity: sensor.huskers_game_phase_label
+                icon: mdi:football-helmet
+                icon_color: >-
+                  {% if states('sensor.huskers_game_phase_label') == 'Final' %}
+                    red
+                  {% elif is_state('sensor.huskers_game_phase_label', 'Live') %}
+                    green
+                  {% else %}
+                    grey
+                  {% endif %}
+                content: >-
+                  Huskers {{ states('sensor.huskers_team_score') }}–{{ states('sensor.huskers_opponent_score_2') }}
+                tap_action:
+                  action: more-info
+                  entity: sensor.huskers_game_detail
+              - type: template
+                entity: binary_sensor.f1_is_race_week
+                icon: mdi:flag-checkered
+                icon_color: >-
+                  {{ 'purple' if is_state('binary_sensor.f1_is_race_week', 'on') else 'grey' }}
+                content: >-
+                  F1 · {{ states('sensor.f1_next_race_name') }}
+                tap_action:
+                  action: more-info
+                  entity: sensor.f1_next_race_name
             view_layout:
               column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.huskers_game_phase_label
+            icon: mdi:scoreboard-outline
+            icon_color: red
+            primary: >-
+              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
+            secondary: >-
+              {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            tap_action:
+              action: more-info
+              entity: sensor.huskers_series_summary
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.network_performance_summary
+            icon: mdi:chart-areaspline
+            icon_color: >-
+              {% set state = states('sensor.network_performance_summary') %}
+              {% if state in ['excellent', 'online'] %}
+                green
+              {% elif state == 'degraded' %}
+                amber
+              {% else %}
+                red
+              {% endif %}
+            primary: Bandwidth Pulse
+            secondary: >-
+              ↓ {{ states('sensor.speedtest_download') }} Mbps · ↑ {{ states('sensor.speedtest_upload') }} Mbps · Ping {{ states('sensor.speedtest_ping') }} ms
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.f1_next_race_name
+            icon: mdi:calendar-clock
+            icon_color: purple
+            primary: >-
+              Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
+            secondary: >-
+              {{ states('sensor.f1_next_race_location') }} · Lights out {{ as_timestamp(states('sensor.f1_lights_out_local')) | timestamp_custom('%b %-d %-I:%M %p', True) if states('sensor.f1_lights_out_local') not in ['unknown', 'unavailable'] else 'TBA' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
       - type: grid
-        title: Quick Controls
+        title: Environment & Comfort
+        columns: 4
+        cards:
+          - type: custom:apexcharts-card
+            header:
+              show: true
+              title: Outdoor comfort trend
+              show_states: true
+            graph_span: 3d
+            now:
+              show: true
+            apex_config:
+              chart:
+                height: 260
+              legend:
+                position: top
+            yaxis:
+              - id: temperature
+                min: 20
+                apex_config:
+                  labels:
+                    formatter: |
+                      function(value) {
+                        return value.toFixed(0) + '°F';
+                      }
+              - id: humidity
+                opposite: true
+                min: 0
+                max: 100
+                apex_config:
+                  labels:
+                    formatter: |
+                      function(value) {
+                        return value.toFixed(0) + '%';
+                      }
+            series:
+              - entity: sensor.outdoor_temperature_wx
+                name: Outdoor temperature
+                type: line
+                stroke_width: 3
+                extend_to: now
+                yaxis_id: temperature
+                color: "#f97316"
+                group_by:
+                  duration: 30min
+                  func: avg
+              - entity: sensor.outdoor_humidity_wx
+                name: Outdoor humidity
+                type: area
+                extend_to: now
+                yaxis_id: humidity
+                color: "#6366f1"
+                opacity: 0.25
+                stroke_width: 2
+                group_by:
+                  duration: 30min
+                  func: avg
+          - type: custom:mushroom-entity-card
+            entity: sensor.hygrometer_humidor_temperature
+            name: Humidor temperature
+            icon: mdi:thermometer
+            layout: horizontal
+            fill_container: true
+            primary_info: state
+            secondary_info: name
+            badge_icon: mdi:chart-line
+            badge_color: >-
+              {% if states('sensor.humidor_system_status') == 'OK' %}
+                green
+              {% else %}
+                amber
+              {% endif %}
+          - type: custom:mushroom-entity-card
+            entity: sensor.hygrometer_humidor_humidity
+            name: Humidor humidity
+            icon: mdi:water-percent
+            layout: horizontal
+            fill_container: true
+            primary_info: state
+            secondary_info: name
+            badge_icon: mdi:shield-alert
+            badge_color: >-
+              {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+                green
+              {% else %}
+                red
+              {% endif %}
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_snapshot_aux_readout
+            icon: mdi:chart-timeline-variant
+            icon_color: teal
+            primary: Interior snapshot
+            secondary: >-
+              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights On {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+      - type: grid
+        title: Network Pulse
+        columns: 4
+        cards:
+          - type: custom:apexcharts-card
+            header:
+              show: true
+              title: Speedtest history
+              show_states: true
+            graph_span: 7d
+            now:
+              show: true
+            apex_config:
+              chart:
+                height: 260
+              legend:
+                position: top
+            yaxis:
+              - id: bandwidth
+                min: 0
+            series:
+              - entity: sensor.speedtest_download
+                name: Download
+                type: column
+                color: "#10b981"
+                stroke_width: 0
+                yaxis_id: bandwidth
+                group_by:
+                  duration: 6h
+                  func: max
+              - entity: sensor.speedtest_upload
+                name: Upload
+                type: column
+                color: "#3b82f6"
+                stroke_width: 0
+                yaxis_id: bandwidth
+                group_by:
+                  duration: 6h
+                  func: max
+          - type: custom:apexcharts-card
+            header:
+              show: true
+              title: Latency watch
+              show_states: true
+            graph_span: 3d
+            now:
+              show: true
+            apex_config:
+              chart:
+                height: 260
+            series:
+              - entity: sensor.internet_latency_2
+                name: Live latency
+                type: line
+                color: "#facc15"
+                stroke_width: 3
+                extend_to: now
+                group_by:
+                  duration: 15min
+                  func: avg
+              - entity: sensor.speedtest_ping
+                name: Speedtest ping
+                type: line
+                color: "#fb7185"
+                stroke_width: 2
+                extend_to: now
+                group_by:
+                  duration: 6h
+                  func: avg
+          - type: custom:mushroom-template-card
+            entity: sensor.deco_total_down_mbps
+            icon: mdi:access-point-network
+            icon_color: blue
+            primary: Deco mesh throughput
+            secondary: >-
+              ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps · ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps · Nodes {{ states('sensor.deco_node_count') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.network_performance_summary
+            icon: mdi:chart-bell-curve
+            icon_color: >-
+              {% if states('sensor.network_performance_summary') == 'excellent' %}
+                green
+              {% elif states('sensor.network_performance_summary') == 'degraded' %}
+                amber
+              {% else %}
+                teal
+              {% endif %}
+            primary: Client mix
+            secondary: >-
+              Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }} · Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+      - type: grid
+        title: Lighting & Scenes
+        columns: 4
+        cards:
+          - type: custom:mushroom-chips-card
+            alignment: start
+            chips:
+              - type: action
+                icon: mdi:weather-sunset
+                icon_color: amber
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_evening_sunset_exterior
+                content: Sunset Exterior
+              - type: action
+                icon: mdi:weather-night
+                icon_color: indigo
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_night_mode_interior_exterior
+                content: Night Mode
+              - type: action
+                icon: mdi:party-popper
+                icon_color: red
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.huskers_sunroom_chase
+                content: Huskers Chase
+              - type: action
+                icon: mdi:pine-tree
+                icon_color: green
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_exterior_led_effect_halloween
+                content: Seasonal
+          - type: custom:mushroom-entity-card
+            entity: light.all_lights
+            name: All lights
+            icon: mdi:lightbulb-group
+            layout: vertical
+            fill_container: true
+            secondary_info: last-changed
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-entity-card
+            entity: light.permanent_outdoor_lights
+            name: Exterior LEDs
+            icon: mdi:string-lights
+            layout: vertical
+            fill_container: true
+            show_brightness_control: true
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-entity-card
+            entity: light.theater_lights
+            name: Theater lights
+            icon: mdi:movie-open
+            layout: vertical
+            fill_container: true
+            show_brightness_control: true
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-entity-card
+            entity: light.sunroom_light
+            name: Sunroom light
+            icon: mdi:white-balance-iridescent
+            layout: vertical
+            fill_container: true
+            show_brightness_control: true
+            tap_action:
+              action: more-info
+          - type: custom:mushroom-entity-card
+            entity: switch.permanent_outdoor_lights_power_switch
+            name: Exterior power
+            icon: mdi:power-plug
+            layout: vertical
+            fill_container: true
+          - type: custom:mushroom-template-card
+            entity: binary_sensor.kiosk_automations_have_issues
+            icon: mdi:toggle-switch
+            icon_color: >-
+              {{ 'green' if is_state('binary_sensor.kiosk_automations_have_issues', 'off') else 'red' }}
+            primary: Automation health
+            secondary: >-
+              Relays snapshot · Issues {{ states('sensor.kiosk_automations_problem_count') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: input_boolean.holiday_mode_manual
+            icon: mdi:calendar-heart
+            icon_color: pink
+            primary: Holiday mode status
+            secondary: >-
+              Manual override {{ 'enabled' if is_state('input_boolean.holiday_mode_manual', 'on') else 'off' }} · Next holiday {{ states('sensor.next_us_holiday') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+      - type: grid
+        title: Automations & Checks
+        columns: 4
         cards:
           - type: custom:mushroom-chips-card
             alignment: start
             chips:
               - type: template
-                icon: mdi:television-play
-                icon_color: indigo
-                content: Launch Plex
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_launch_plex
+                entity: automation.evening_lights_at_sunset
+                icon: mdi:weather-sunset-down
+                icon_color: >-
+                  {{ 'amber' if is_state('automation.evening_lights_at_sunset', 'on') else 'grey' }}
+                content: Evening Sunset
               - type: template
-                icon: mdi:play-pause
-                icon_color: deep-orange
-                content: Play/Pause
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_play_pause
+                entity: automation.huskers_td_burst_on_score
+                icon: mdi:stadium
+                icon_color: >-
+                  {{ 'red' if is_state('automation.huskers_td_burst_on_score', 'on') else 'grey' }}
+                content: Huskers TD
               - type: template
-                icon: mdi:remote-tv
-                icon_color: teal
-                content: Fire TV Home
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_home
-              - type: template
-                icon: mdi:television-off
-                icon_color: red
-                content: Power Off
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.basement_fire_tv_power_off
-              - type: template
-                icon: mdi:update
-                icon_color: amber
-                content: Refresh Plex
-                tap_action:
-                  action: call-service
-                  service: script.turn_on
-                  target:
-                    entity_id: script.plex_refresh_clients
-          - type: markdown
-            content: >-
-              Use the chips above for rapid control during regression tests. The
-              Launch and Power controls wake or shut down the Fire TV, while the
-              refresh button forces a Plex client discovery sweep.
-      - type: grid
-        title: Telemetry
-        cards:
+                entity: automation.weather_severe_alert_notification
+                icon: mdi:weather-hurricane
+                icon_color: >-
+                  {{ 'blue' if is_state('automation.weather_severe_alert_notification', 'on') else 'grey' }}
+                content: Weather Alerts
           - type: custom:mushroom-entity-card
-            entity: sensor.basement_theater_media_status
-            name: Fire TV Status
-            icon: mdi:television-classic
-            layout: horizontal
-          - type: custom:mushroom-entity-card
-            entity: sensor.plex_server_sessions
-            name: Plex Sessions
-            icon: mdi:plex
-            layout: horizontal
-          - type: custom:mushroom-entity-card
-            entity: sensor.plex
-            name: Plex Raw Sensor
-            icon: mdi:database
-            layout: horizontal
-          - type: custom:mushroom-template-card
-            entity: button.plex_scan_clients
-            icon: mdi:plex
-            icon_color: amber
-            primary: Plex Scan Clients
-            secondary: Press to refresh the Plex integration roster.
-            layout: horizontal
+            entity: input_boolean.huskers_automations_enabled
+            name: Huskers automations
+            icon: mdi:football
+            layout: vertical
             fill_container: true
-            tap_action:
-              action: call-service
-              service: button.press
-              target:
-                entity_id: button.plex_scan_clients
-      - type: grid
-        title: Library
-        cards:
-          - type: markdown
-            content: >-
-              ### Plex Library Browser
-
-              Browse the Plex catalogue directly from this dashboard when testing
-              new client behaviours. Launch titles on the basement Fire TV with a
-              single tap.
-          - type: media-browser
-            entity: media_player.plex_plex_for_android_tv_aftgazl
-            title: Plex Library Browser
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.f1_automations_enabled
+            name: F1 automations
+            icon: mdi:flag-variant
+            layout: vertical
+            fill_container: true
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.weather_notifications_enabled
+            name: Weather notifications
+            icon: mdi:weather-partly-lightning
+            layout: vertical
+            fill_container: true
+          - type: custom:mushroom-template-card
+            entity: sensor.automation_status_audit
+            icon: mdi:robot-check
+            icon_color: >-
+              {% if states('sensor.automation_status_audit') in ['ok', 'ready'] %}
+                green
+              {% else %}
+                amber
+              {% endif %}
+            primary: Automation audit
+            secondary: >-
+              System {{ states('sensor.automation_status_audit') | default('unknown', true) }} · Specialized {{ states('sensor.specialized_mode_audit') | default('unknown', true) }} · Huskers {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_automations_problem_count
+            icon: mdi:alert-decagram-outline
+            icon_color: >-
+              {{ 'green' if states('sensor.kiosk_automations_problem_count') | int(0) == 0 else 'red' }}
+            primary: Kiosk diagnostics
+            secondary: >-
+              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm {{ states('sensor.humidor_system_status') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
