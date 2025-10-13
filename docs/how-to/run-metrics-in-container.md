@@ -5,6 +5,14 @@ container. Using a container keeps the host environment clean and allows you to
 reuse cached Python dependencies between runs, which makes repeated scans
 significantly faster on CI or developer laptops.
 
+## TL;DR
+
+1. `export GITHUB_TOKEN=<your token>`
+2. `docker build -f docker/Dockerfile.metrics -t gate-hub-metrics .`
+3. `docker run --rm -e GITHUB_TOKEN -v "$(pwd)/www/metrics:/app/www/metrics" gate-hub-metrics --repo dsainz3/gate-hub --output www/metrics --markdown --html --summary-html`
+
+The following sections expand on each step and include optional flags.
+
 ## Prerequisites
 
 - Docker 20.10 or newer installed locally.
