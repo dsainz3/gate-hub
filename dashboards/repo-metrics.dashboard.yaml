@@ -1,45 +1,834 @@
-title: Repository Metrics
+title: Repo Metrics & Devices
 views:
-  - title: GitHub Trends
-    path: repo-metrics
-    icon: mdi:github
-    badges: []
+  - title: Overview
+    path: overview
+    icon: mdi:view-dashboard
+    theme: default
+    badges:
+      - entity: sensor.repo_lights_on_total
+        name: Lights On
+      - entity: sensor.repo_devices_offline_total
+        name: Devices Offline
+      - entity: sensor.repo_updates_available_total
+        name: Updates Available
+      - entity: sensor.repo_primary_weather
+        name: Weather
+      - entity: sensor.repo_next_calendar_event
+        name: Next Event
+      - entity: sensor.repo_stale_sensors_total
+        name: Stale Sensors
     cards:
-      - type: vertical-stack
+      - type: markdown
+        content: |
+          ## Repo Metrics & Entities — Overview
+          Stay ahead of outages, updates, and environmental signals from a single glance.
+      - type: custom:mushroom-chips-card
+        alignment: center
+        chips:
+          - type: template
+            entity: sensor.repo_lights_on_total
+            icon: mdi:lightbulb-on
+            content: "{{ states('sensor.repo_lights_on_total') }} Lights"
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/lighting
+          - type: template
+            entity: sensor.repo_devices_offline_total
+            icon: mdi:lan-disconnect
+            content: "{{ states('sensor.repo_devices_offline_total') }} Offline"
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: template
+            entity: sensor.repo_low_battery_total
+            icon: mdi:battery-alert
+            content: "{{ states('sensor.repo_low_battery_total') }} Low Batt"
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: template
+            entity: sensor.repo_updates_available_total
+            icon: mdi:update
+            content: "{{ states('sensor.repo_updates_available_total') }} Updates"
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: template
+            entity: sensor.speedtest_ping
+            icon: mdi:speedometer
+            content: "Ping {{ states('sensor.speedtest_ping') | default('–') }} ms"
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/network
+          - type: template
+            entity: sensor.repo_next_calendar_event
+            icon: mdi:calendar-clock
+            content: >-
+              {% set title = states('sensor.repo_next_calendar_event') %}
+              {% if title not in ['none', 'unknown', 'unavailable'] %}
+                {{ title }}
+              {% else %}
+                No upcoming events
+              {% endif %}
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/scenes-scripts
+      - type: grid
+        columns: 3
+        square: false
         cards:
-          - type: markdown
-            content: |
-              ## Repository analytics
-              The charts and reports below are generated automatically from the
-              `dsainz3/gate-hub` GitHub repository. Assets are stored under
-              `/config/www/metrics/` and exposed via `/local/metrics/`.
-
-          - type: horizontal-stack
+          - type: custom:mushroom-entity-card
+            entity: sensor.repo_lights_on_total
+            name: Lights On
+            icon: mdi:lightbulb-group
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/lighting
+          - type: custom:mushroom-entity-card
+            entity: sensor.repo_devices_offline_total
+            name: Devices Offline
+            icon: mdi:alert-circle
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: custom:mushroom-entity-card
+            entity: sensor.repo_stale_sensors_total
+            name: Stale Sensors
+            icon: mdi:timer-sand
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: custom:mushroom-entity-card
+            entity: sensor.repo_low_battery_total
+            name: Low Battery
+            icon: mdi:battery-alert
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: custom:mushroom-entity-card
+            entity: sensor.repo_updates_available_total
+            name: Updates Available
+            icon: mdi:update
+            tap_action:
+              action: navigate
+              navigation_path: /repo-metrics/safety
+          - type: custom:mushroom-template-card
+            primary: >-
+              {% set weather = state_attr('sensor.repo_primary_weather', 'source_entity') %}
+              {% if weather %}
+                {{ states(weather) | title }}
+              {% else %}
+                Weather Unavailable
+              {% endif %}
+            secondary: >-
+              {% set weather = state_attr('sensor.repo_primary_weather', 'source_entity') %}
+              {% if weather %}
+                {{ state_attr(weather, 'temperature') }}° · {{ state_attr(weather, 'humidity') }}% RH
+              {% else %}
+                No weather entity detected
+              {% endif %}
+            icon: mdi:weather-partly-cloudy
+            tap_action:
+              action: more-info
+            multiline_secondary: true
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: vertical-stack
             cards:
-              - type: picture
-                image: /local/metrics/commits_per_week.png
-                tap_action:
-                  action: more-info
-              - type: picture
-                image: /local/metrics/contributors_per_week.png
-                tap_action:
-                  action: more-info
-
-          - type: horizontal-stack
+              - type: custom:mushroom-template-card
+                primary: Weather Snapshot
+                secondary: >-
+                  {% set src = state_attr('sensor.repo_primary_weather', 'source_entity') %}
+                  {% if src %}
+                    {{ states(src) | title }} · {{ state_attr(src, 'temperature') }}°F · {{ state_attr(src, 'humidity') }}% RH
+                  {% else %}
+                    No primary weather entity detected
+                  {% endif %}
+                icon: mdi:weather-partly-cloudy
+                multiline_secondary: true
+              - type: entities
+                title: Weather Highlights
+                show_header_toggle: false
+                entities:
+                  - entity: sensor.outdoor_temperature_wx
+                    name: Outdoor Temperature
+                  - entity: sensor.outdoor_humidity_wx
+                    name: Outdoor Humidity
+                  - entity: sensor.outdoor_wind_speed_wx
+                    name: Wind Speed
+                  - entity: sensor.outdoor_pressure_wx
+                    name: Pressure
+          - type: vertical-stack
             cards:
-              - type: picture
-                image: /local/metrics/reverts_per_week.png
-                tap_action:
-                  action: more-info
-              - type: picture
-                image: /local/metrics/ci_failure_rate.png
-                tap_action:
-                  action: more-info
-
-          - type: iframe
-            url: /local/metrics/metrics.html
-            aspect_ratio: 100%
-
-          - type: iframe
-            url: /local/metrics/summary.html
-            aspect_ratio: 35%
+              - type: custom:mushroom-template-card
+                primary: Network Snapshot
+                secondary: >-
+                  Ping {{ states('sensor.speedtest_ping') | default('–') }} ms · Down {{ states('sensor.speedtest_download') | default('–') }} Mbps · Up {{ states('sensor.speedtest_upload') | default('–') }} Mbps
+                icon: mdi:speedometer
+                multiline_secondary: true
+              - type: custom:apexcharts-card
+                experimental:
+                  color_threshold: true
+                header:
+                  show: true
+                  title: Speedtest Latency (24h)
+                graph_span: 24h
+                series:
+                  - entity: sensor.speedtest_ping
+                    name: Ping
+                    type: line
+                    stroke_width: 2
+                    show:
+                      extremas: true
+      - type: custom:mushroom-template-card
+        primary: Next on the Calendar
+        secondary: >-
+          {% set title = states('sensor.repo_next_calendar_event') %}
+          {% set start = state_attr('sensor.repo_next_calendar_event', 'start_time') %}
+          {% if title not in ['none', 'unknown', 'unavailable'] and start %}
+            {{ title }} · {{ as_datetime(start).strftime('%b %d, %I:%M %p') }}
+          {% elif title not in ['none', 'unknown', 'unavailable'] %}
+            {{ title }} · date tbd
+          {% else %}
+            No upcoming events detected
+          {% endif %}
+        icon: mdi:calendar-clock
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Recent Activity
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+            - domain: switch
+            - domain: sensor
+            - domain: binary_sensor
+            - domain: update
+          exclude:
+            - state: unavailable
+        sort:
+          method: last_changed
+          reverse: true
+        card_param: entities
+        show_empty: false
+        unique: true
+        max: 10
+  - title: Lighting
+    path: lighting
+    icon: mdi:lightbulb-multiple
+    cards:
+      - type: custom:mushroom-title-card
+        title: Lighting by Area
+        subtitle: Quick controls for groups and individual fixtures.
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: custom:mushroom-light-card
+            entity: light.office_lights
+            name: Office Lights
+          - type: custom:mushroom-light-card
+            entity: light.mainfloor_lights
+            name: Mainfloor Lights
+          - type: custom:mushroom-light-card
+            entity: light.front_porch_lights
+            name: Front Porch
+          - type: custom:mushroom-light-card
+            entity: light.garage_lights
+            name: Garage Lights
+          - type: custom:mushroom-light-card
+            entity: light.permanent_outdoor_lights
+            name: Permanent Outdoor Lights
+          - type: custom:mushroom-light-card
+            entity: light.all_lights
+            name: All Lights
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Office Lighting
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+              entity_id: 'light.*office*'
+            - domain: switch
+              entity_id: 'switch.*office*'
+          exclude:
+            - entity_id: light.all_lights
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Living & Sunroom Lighting
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+              entity_id: 'light.livingroom*'
+            - domain: light
+              entity_id: 'light.sunroom*'
+            - domain: light
+              entity_id: 'light.diningroom*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Bedrooms Lighting
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+              entity_id: light.light_ari
+            - domain: light
+              entity_id: light.light_guest_room
+            - domain: light
+              entity_id: light.light_parents
+            - domain: light
+              entity_id: light.light_attic
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Kitchen & Dining Lighting
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+              entity_id: 'light.kitchen*'
+            - domain: light
+              entity_id: 'light.dining*'
+            - domain: light
+              entity_id: 'light.sunroom*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Garage & Exterior Lighting
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: light
+              entity_id: 'light.garage*'
+            - domain: light
+              entity_id: 'light.front_porch*'
+            - domain: light
+              entity_id: 'light.permanent_outdoor*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:mushroom-chips-card
+        alignment: start
+        chips:
+          - type: template
+            entity: scene.lighting_night_mode
+            icon: mdi:lightbulb-night
+            content: Night Mode
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              data:
+                entity_id: scene.lighting_night_mode
+          - type: template
+            entity: scene.lighting_evening_sunset_interior
+            icon: mdi:weather-sunset
+            content: Sunset Interior
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              data:
+                entity_id: scene.lighting_evening_sunset_interior
+          - type: template
+            entity: scene.lighting_evening_sunset_exterior
+            icon: mdi:weather-sunset-down
+            content: Sunset Exterior
+            tap_action:
+              action: call-service
+              service: scene.turn_on
+              data:
+                entity_id: scene.lighting_evening_sunset_exterior
+  - title: Climate & Environment
+    path: climate
+    icon: mdi:thermostat
+    cards:
+      - type: custom:mushroom-title-card
+        title: Comfort & Air Quality
+        subtitle: Thermostats, temps, humidity, and air sensors.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Thermostats
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: climate
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Temperature Sensors
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: sensor
+              device_class: temperature
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Humidity Sensors
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: sensor
+              device_class: humidity
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:mushroom-entity-card
+        entity: binary_sensor.kiosk_humidor_out_of_band
+        name: Humidor Out of Band
+        icon: mdi:thermometer-alert
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Climate Trends (24h)
+        graph_span: 24h
+        all_series_config:
+          stroke_width: 2
+        series:
+          - entity: sensor.outdoor_temperature_wx
+            name: Outdoor
+            type: line
+          - entity: sensor.hygrometer_humidor_temperature
+            name: Humidor
+            type: line
+          - entity: sensor.kneplatt72_temperature
+            name: Weather Station
+            type: line
+  - title: Safety & Power
+    path: safety
+    icon: mdi:shield-home
+    cards:
+      - type: custom:mushroom-title-card
+        title: Safety, Battery & Update Watch
+        subtitle: Keep an eye on offline devices, batteries, and firmware.
+      - type: custom:mushroom-entity-card
+        entity: sensor.repo_devices_offline_total
+        name: Offline Devices
+        icon: mdi:lan-disconnect
+      - type: custom:mushroom-entity-card
+        entity: sensor.repo_low_battery_total
+        name: Low Batteries
+        icon: mdi:battery-alert
+      - type: custom:mushroom-entity-card
+        entity: sensor.repo_updates_available_total
+        name: Updates Available
+        icon: mdi:update
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Offline or Unavailable Devices
+          show_header_toggle: false
+        filter:
+          include:
+            - state: unavailable
+            - state: unknown
+            - state: offline
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Low Battery Sensors (< 30%)
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: sensor
+              attributes:
+                device_class: battery
+              numeric_state:
+                below: 30
+            - domain: binary_sensor
+              attributes:
+                device_class: battery
+              state: 'on'
+          exclude:
+            - state: unknown
+            - state: unavailable
+            - state: 'None'
+        sort:
+          method: state
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Available Updates
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: update
+              state: 'on'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Network
+    path: network
+    icon: mdi:lan
+    cards:
+      - type: custom:mushroom-title-card
+        title: Network Health
+        subtitle: Latency, throughput, and connectivity trends.
+      - type: custom:mushroom-template-card
+        primary: Latency Snapshot
+        secondary: >-
+          Ping {{ states('sensor.speedtest_ping') | default('–') }} ms · Down {{ states('sensor.speedtest_download') | default('–') }} Mbps · Up {{ states('sensor.speedtest_upload') | default('–') }} Mbps
+        icon: mdi:speedometer
+        multiline_secondary: true
+      - type: entities
+        title: Network Status Helpers
+        show_header_toggle: false
+        entities:
+          - entity: sensor.network_status_summary
+            name: Status Summary
+          - entity: sensor.speedtest_last_run
+            name: Last Speedtest
+          - entity: binary_sensor.internet_reachability_2
+            name: Internet Reachability
+      - type: custom:apexcharts-card
+        header:
+          show: true
+          title: Speedtest – 24h
+        graph_span: 24h
+        all_series_config:
+          type: area
+          stroke_width: 2
+          fill_raw: last
+        series:
+          - entity: sensor.speedtest_download
+            name: Download
+            color: '#42a5f5'
+          - entity: sensor.speedtest_upload
+            name: Upload
+            color: '#66bb6a'
+          - entity: sensor.speedtest_ping
+            name: Ping
+            color: '#ef5350'
+            type: line
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Network Devices
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: sensor
+              entity_id: 'sensor.deco*'
+            - domain: binary_sensor
+              entity_id: 'binary_sensor.deco*'
+            - domain: update
+              entity_id: 'update.tp_link_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Scenes & Scripts
+    path: scenes-scripts
+    icon: mdi:play-circle
+    cards:
+      - type: custom:mushroom-title-card
+        title: Scenes & Scripts Hub
+        subtitle: Trigger common lighting moods and routines.
+      - type: custom:mushroom-chips-card
+        alignment: start
+        chips:
+          - type: template
+            entity: script.huskers_hail_burst_8s
+            icon: mdi:stadium-variant
+            content: Huskers Burst
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.huskers_hail_burst_8s
+          - type: template
+            entity: script.kiosk_stop_all_huskers_shows
+            icon: mdi:lightbulb-alert
+            content: Stop Huskers Shows
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_stop_all_huskers_shows
+          - type: template
+            entity: script.kiosk_all_lights_on
+            icon: mdi:lightbulb-group
+            content: Kiosk Lights On
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_all_lights_on
+          - type: template
+            entity: script.kiosk_all_lights_off
+            icon: mdi:lightbulb-group-off
+            content: Kiosk Lights Off
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.kiosk_all_lights_off
+          - type: template
+            entity: script.sunroom_segments_chase
+            icon: mdi:lightbulb-auto
+            content: Sunroom Chase
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.sunroom_segments_chase
+          - type: template
+            entity: script.plex_refresh_clients
+            icon: mdi:plex
+            content: Plex Refresh
+            tap_action:
+              action: call-service
+              service: script.turn_on
+              target:
+                entity_id: script.plex_refresh_clients
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Huskers Scenes
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: scene
+              entity_id: 'scene.huskers_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Lighting Daypart Scenes
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: scene
+              entity_id: 'scene.lighting_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Climate & Utility Scenes
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: scene
+              entity_id: 'scene.climate_*'
+            - domain: scene
+              entity_id: 'scene.safety_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Huskers Scripts
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: script
+              entity_id: 'script.huskers_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Kiosk & Lighting Scripts
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: script
+              entity_id: 'script.kiosk_*'
+            - domain: script
+              entity_id: script.sunroom_segments_chase
+            - domain: script
+              entity_id: script.test_halloween
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Media & Utilities Scripts
+          show_header_toggle: false
+        filter:
+          include:
+            - domain: script
+              entity_id: 'script.plex_*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Office
+    path: office
+    icon: mdi:chair-rolling
+    cards:
+      - type: custom:mushroom-title-card
+        title: Office Overview
+        subtitle: Lighting, climate, and sensors for the Office.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Office Entities
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: '*office*'
+            - entity_id: '*theater*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Living Room
+    path: living-room
+    icon: mdi:sofa
+    cards:
+      - type: custom:mushroom-title-card
+        title: Living Room Overview
+        subtitle: Lights, climate, and sensors grouped by area.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Living Room Entities
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: '*livingroom*'
+            - entity_id: '*sunroom*'
+            - entity_id: '*diningroom*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Kitchen
+    path: kitchen
+    icon: mdi:stove
+    cards:
+      - type: custom:mushroom-title-card
+        title: Kitchen Overview
+        subtitle: Cooking, lighting, and safety signals.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Kitchen & Dining Entities
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: '*kitchen*'
+            - entity_id: '*dining*'
+            - entity_id: '*pantry*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Bedroom
+    path: bedroom
+    icon: mdi:bed-queen
+    cards:
+      - type: custom:mushroom-title-card
+        title: Bedroom Overview
+        subtitle: Comfort and nighttime controls.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Bedroom Entities
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: '*bedroom*'
+            - entity_id: '*ari*'
+            - entity_id: '*guest*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true
+  - title: Garage
+    path: garage
+    icon: mdi:garage-variant
+    cards:
+      - type: custom:mushroom-title-card
+        title: Garage Overview
+        subtitle: Doors, lighting, and power monitoring.
+      - type: custom:auto-entities
+        card:
+          type: entities
+          title: Garage Entities
+          show_header_toggle: false
+        filter:
+          include:
+            - entity_id: '*garage*'
+            - entity_id: '*permanent_outdoor*'
+            - entity_id: '*front_porch*'
+        sort:
+          method: friendly_name
+          ignore_case: true
+        show_empty: false
+        unique: true

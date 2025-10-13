@@ -29,11 +29,14 @@ drill-downs. Template sensors ship alongside the UI so counts such as "lights on
 ## Installation
 
 1. Copy `packages/repo_metrics_dashboard.yaml` into `/config/packages`.
-2. Confirm `homeassistant: packages: !include_dir_named packages` exists in
-   `configuration.yaml`.
-3. Restart Home Assistant so the template sensors and dashboard registration load.
-4. Open **Settings → Dashboards** – a new sidebar entry titled **Repo Metrics & Devices**
-   (path `/repo-metrics`) appears after the restart.
+2. Copy `dashboards/repo-metrics.dashboard.yaml` into `/config/dashboards` (overwrite any
+   existing repo metrics dashboard).
+3. Confirm `configuration.yaml` contains a `lovelace: dashboards:` entry named
+   `repo-metrics-dashboard` (hyphenated slug) that points to
+   `dashboards/repo-metrics.dashboard.yaml`, uses `mode: yaml`, and sets the title/icon you
+   prefer (the package expects **Repo Metrics & Devices** with `mdi:view-dashboard-outline`).
+4. Restart Home Assistant, then open **Settings → Dashboards** – the sidebar entry titled
+   **Repo Metrics & Devices** launches the refreshed layout at `/lovelace/repo-metrics-dashboard`.
 
 ## Card dependencies
 
