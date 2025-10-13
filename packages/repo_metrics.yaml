@@ -9,6 +9,7 @@ input_text:
     name: GitHub Metrics Auth Header
     icon: mdi:key-chain
     max: 255
+    mode: password
     initial: ""
 
 command_line:
@@ -62,7 +63,7 @@ rest_command:
     method: POST
     headers:
       Authorization: >-
-        {% set header = states('input_text.github_repo_metrics_auth_header') %}
+        {% set header = states('input_text.github_repo_metrics_auth_header') | trim %}
         {% if header not in ['unknown', 'unavailable', ''] %}
           {{ header }}
         {% endif %}

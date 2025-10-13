@@ -101,11 +101,13 @@ preferred high-contrast theme and increase Mushroom spacing via
 
 ## Manual GitHub workflow trigger
 
-- **Helper value** – Set the **GitHub Metrics Auth Header** helper to
-  `Bearer ghp_...`. This token is only used for the dispatch call and can reuse the
-  `REPO_METRICS_TOKEN` configured for your GitHub Actions workflow. If you prefer to
-  manage tokens through `secrets.yaml`, replace the helper's `initial:` value in
-  `packages/repo_metrics.yaml` with `!secret github_repo_metrics_auth_header`.
+- **Helper value** – Set the **GitHub Metrics Auth Header** helper (created by
+  `packages/repo_metrics.yaml`) to `Bearer ghp_...`. This token is only used for the
+  dispatch call and can reuse the `REPO_METRICS_TOKEN` configured for your GitHub
+  Actions workflow. Because the helper defaults to a password field, you can paste the
+  bearer token directly in Home Assistant without editing YAML. If you choose to keep
+  the token in `secrets.yaml`, be sure to add the `github_repo_metrics_auth_header`
+  entry there before pointing the helper's `initial:` value at it.
 - **Script** – Run the "GitHub: Trigger Repo Metrics Workflow" script (available via the
   Run Metrics Workflow chip, the Scripts panel, or Assist). Home Assistant sends a
   `workflow_dispatch` request to `repo-metrics.yml` targeting the `main` branch when the
