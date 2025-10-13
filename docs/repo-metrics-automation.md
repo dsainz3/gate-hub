@@ -31,6 +31,38 @@ GITHUB_TOKEN=ghp_example python scripts/metrics.py \
   --update-readme
 ```
 
+### Running directly on Home Assistant OS
+
+You can execute the generator from the HAOS **Terminal & SSH** add-on as long
+as the add-on has `python3` available:
+
+1. Open the terminal add-on and switch into your configuration directory:
+   ```bash
+   cd /config
+   ```
+2. (First run only) ensure Python dependencies are present. The official SSH
+   add-on ships with `python3`, `pip`, and a writable `/config`, so install the
+   required packages once:
+   ```bash
+   pip3 install --user requests matplotlib markdown
+   ```
+3. Run the script using the same command shown above. The `/config` checkout is
+   equivalent to the repository root, so invoke:
+   ```bash
+   GITHUB_TOKEN=<optional_personal_token> python3 scripts/metrics.py \
+     --repo dsainz3/gate-hub \
+     --output www/metrics \
+     --markdown \
+     --html \
+     --summary-html \
+     --update-readme
+   ```
+
+The command writes results to `/config/www/metrics/`, which surfaces in the UI
+under `/local/metrics/` without additional steps. If the add-on is locked down
+and cannot install Python packages, run the script inside the provided GitHub
+Actions workflow instead.
+
 ## .github/workflows/repo-metrics.yml
 
 ```yaml
