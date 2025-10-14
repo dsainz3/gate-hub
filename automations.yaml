@@ -367,6 +367,249 @@
                     data:
                       notification_id: cloudy_daytime_exterior_validation
 
+  - id: exterior_lights_fail_safe_validator
+    alias: 'Lighting: Exterior Fail-safe Validator'
+    description: >
+      Every five minutes ensure key exterior lighting automations have executed and
+      that the front porch, garage, and exterior LED lights align with the most
+      recent automation outcome.
+    mode: single
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: homeassistant
+        event: start
+      - platform: event
+        event_type: automation_reloaded
+    condition:
+      - condition: template
+        value_template: "{{ states('binary_sensor.holiday_mode_active') != 'on' }}"
+      - condition: template
+        value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
+    variables:
+      now_ts: "{{ as_timestamp(now()) }}"
+      midnight_expected_ts: "{{ as_timestamp(today_at('00:00:00')) }}"
+      early_morning_expected_ts: "{{ as_timestamp(today_at('03:30:00')) }}"
+      next_rising_ts: "{{ as_timestamp(state_attr('sun.sun', 'next_rising')) | default(0, true) }}"
+      next_setting_ts: "{{ as_timestamp(state_attr('sun.sun', 'next_setting')) | default(0, true) }}"
+      sunrise_last_ts: "{{ (next_rising_ts - 86400) if next_rising_ts else 0 }}"
+      sunset_last_ts: "{{ (next_setting_ts - 86400) if next_setting_ts else 0 }}"
+      sunrise_expected_ts: "{{ (sunrise_last_ts + 300) if sunrise_last_ts else 0 }}"
+      sunset_expected_ts: "{{ (sunset_last_ts + 300) if sunset_last_ts else 0 }}"
+      husker_show_active: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
+      automations_to_check:
+        - name: Evening Sunset Exterior
+          entity_id: automation.exterior_front_garage_on_sunset
+          expected_ts: "{{ sunset_expected_ts }}"
+          skip: "{{ sunset_expected_ts == 0 }}"
+        - name: Night Mode
+          entity_id: automation.night_mode_at_midnight
+          expected_ts: "{{ midnight_expected_ts }}"
+          skip: 'false'
+        - name: Early Morning Gentle Wake
+          entity_id: automation.early_morning_lights_0330
+          expected_ts: "{{ early_morning_expected_ts }}"
+          skip: 'false'
+        - name: Morning Exterior Off
+          entity_id: automation.exterior_lights_sunrise_off
+          expected_ts: "{{ sunrise_expected_ts }}"
+          skip: "{{ sunrise_expected_ts == 0 or husker_show_active }}"
+      front_entity: light.front_porch_lights
+      garage_entity: light.garage_lights
+      led_entity: light.permanent_outdoor_lights
+      last_evening_ts: "{{ as_timestamp(state_attr('automation.exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true) }}"
+      last_night_ts: "{{ as_timestamp(state_attr('automation.night_mode_at_midnight', 'last_triggered')) | default(0, true) }}"
+      last_early_ts: "{{ as_timestamp(state_attr('automation.early_morning_lights_0330', 'last_triggered')) | default(0, true) }}"
+      last_morning_off_ts: "{{ as_timestamp(state_attr('automation.exterior_lights_sunrise_off', 'last_triggered')) | default(0, true) }}"
+      active_profile: >-
+        {% set triggers = {
+          'evening': last_evening_ts,
+          'night': last_night_ts,
+          'early_morning': last_early_ts,
+          'morning_off': last_morning_off_ts
+        } %}
+        {% set ordered = triggers | dictsort(by='value') %}
+        {% if ordered %}
+          {% set latest = ordered[-1] %}
+          {% if latest[1] and (now_ts - latest[1]) < 90000 %}
+            {{ latest[0] }}
+          {% else %}
+            unknown
+          {% endif %}
+        {% else %}
+          unknown
+        {% endif %}
+    action:
+      - repeat:
+          for_each: "{{ automations_to_check }}"
+          sequence:
+            - variables:
+                automation_entity: "{{ repeat.item.entity_id }}"
+                expected_ts: "{{ repeat.item.expected_ts | float(0) }}"
+                skip_check: "{{ repeat.item.skip | default(false) | string | lower == 'true' }}"
+                last_triggered_ts: "{{ as_timestamp(state_attr(automation_entity, 'last_triggered')) | default(0, true) }}"
+            - if:
+                - condition: template
+                  value_template: >-
+                    {{
+                      skip_check
+                      or expected_ts == 0
+                      or now_ts < expected_ts
+                      or not is_state(automation_entity, 'on')
+                    }}
+              then: []
+              else:
+                - if:
+                    - condition: template
+                      value_template: "{{ last_triggered_ts < expected_ts }}"
+                  then:
+                    - service: automation.trigger
+                      target:
+                        entity_id: "{{ automation_entity }}"
+                    - service: logbook.log
+                      data:
+                        name: Exterior Lighting Fail-safe
+                        message: >-
+                          Re-triggered {{ repeat.item.name }} automation
+                          ({{ automation_entity }}) to catch up on missed run.
+      - variables:
+          front_expected_state: null
+          front_min_brightness: 0
+          front_max_brightness: 0
+          garage_expected_state: null
+          garage_min_brightness: 0
+          garage_max_brightness: 0
+          led_expected_state: null
+          led_min_brightness: 0
+          led_max_brightness: 0
+          corrective_automation: ''
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ active_profile == 'evening' }}"
+            sequence:
+              - variables:
+                  front_expected_state: 'on'
+                  front_min_brightness: 1
+                  front_max_brightness: 90
+                  garage_expected_state: 'on'
+                  garage_min_brightness: 1
+                  garage_max_brightness: 90
+                  led_expected_state: 'on'
+                  led_min_brightness: 90
+                  led_max_brightness: 200
+                  corrective_automation: automation.exterior_front_garage_on_sunset
+          - conditions:
+              - condition: template
+                value_template: "{{ active_profile == 'early_morning' }}"
+            sequence:
+              - variables:
+                  front_expected_state: 'on'
+                  front_min_brightness: 1
+                  front_max_brightness: 90
+                  garage_expected_state: 'on'
+                  garage_min_brightness: 1
+                  garage_max_brightness: 90
+                  led_expected_state: 'on'
+                  led_min_brightness: 90
+                  led_max_brightness: 200
+                  corrective_automation: automation.early_morning_lights_0330
+          - conditions:
+              - condition: template
+                value_template: "{{ active_profile == 'night' }}"
+            sequence:
+              - variables:
+                  front_expected_state: 'off'
+                  garage_expected_state: 'off'
+                  led_expected_state: 'on'
+                  led_min_brightness: 1
+                  led_max_brightness: 110
+                  corrective_automation: automation.night_mode_at_midnight
+          - conditions:
+              - condition: template
+                value_template: "{{ active_profile == 'morning_off' and not husker_show_active }}"
+            sequence:
+              - variables:
+                  front_expected_state: 'off'
+                  garage_expected_state: 'off'
+                  led_expected_state: 'off'
+                  corrective_automation: automation.exterior_lights_sunrise_off
+          - conditions:
+              - condition: template
+                value_template: "{{ active_profile == 'morning_off' and husker_show_active }}"
+            sequence:
+              - variables:
+                  corrective_automation: ''
+      - if:
+          - condition: template
+            value_template: "{{ corrective_automation != '' }}"
+        then:
+          - variables:
+              front_state: "{{ states(front_entity) }}"
+              front_brightness: "{{ state_attr(front_entity, 'brightness') | int(0) }}"
+              garage_state: "{{ states(garage_entity) }}"
+              garage_brightness: "{{ state_attr(garage_entity, 'brightness') | int(0) }}"
+              led_state: "{{ states(led_entity) }}"
+              led_brightness: "{{ state_attr(led_entity, 'brightness') | int(0) }}"
+          - if:
+              - condition: template
+                value_template: >-
+                  {% set needs_front =
+                    front_expected_state == 'on'
+                    and not (
+                      front_state == 'on'
+                      and front_brightness >= front_min_brightness
+                      and front_brightness <= front_max_brightness
+                    )
+                  %}
+                  {% set needs_front =
+                    needs_front
+                    or (
+                      front_expected_state == 'off'
+                      and front_state != 'off'
+                    )
+                  %}
+                  {% set needs_garage =
+                    garage_expected_state == 'on'
+                    and not (
+                      garage_state == 'on'
+                      and garage_brightness >= garage_min_brightness
+                      and garage_brightness <= garage_max_brightness
+                    )
+                  %}
+                  {% set needs_garage =
+                    needs_garage
+                    or (
+                      garage_expected_state == 'off'
+                      and garage_state != 'off'
+                    )
+                  %}
+                  {% set needs_led =
+                    led_expected_state == 'on'
+                    and not (
+                      led_state == 'on'
+                      and led_brightness >= led_min_brightness
+                      and led_brightness <= led_max_brightness
+                    )
+                  %}
+                  {% set needs_led =
+                    needs_led
+                    or (
+                      led_expected_state == 'off'
+                      and led_state != 'off'
+                    )
+                  %}
+                  {{ needs_front or needs_garage or needs_led }}
+            then:
+              - service: automation.trigger
+                target:
+                  entity_id: "{{ corrective_automation }}"
+              - service: logbook.log
+                data:
+                  name: Exterior Lighting Fail-safe
+                  message: >-
+                    Realigned exterior lights for profile {{ active_profile }}
+                    by re-triggering {{ corrective_automation }}.
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'
     description: >
