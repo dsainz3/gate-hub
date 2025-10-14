@@ -354,6 +354,142 @@ template:
             {{ status | upper }}
           {% endif %}
 
+      - name: f1_weekend_sprint_label
+        unique_id: f1_weekend_sprint_label
+        state: >-
+          {% set sprint = state_attr('sensor.f1_next_race', 'sprint_start_local') %}
+          {% if sprint in ['', None, 'unknown', 'unavailable'] %}
+            Standard
+          {% else %}
+            Sprint
+          {% endif %}
+        attributes:
+          sprint_start: >-
+            {{ state_attr('sensor.f1_next_race', 'sprint_start') }}
+          sprint_start_local: >-
+            {{ state_attr('sensor.f1_next_race', 'sprint_start_local') }}
+          sprint_qualifying_start: >-
+            {{ state_attr('sensor.f1_next_race', 'sprint_qualifying_start') }}
+          sprint_qualifying_start_local: >-
+            {{ state_attr('sensor.f1_next_race', 'sprint_qualifying_start_local') }}
+
+      - name: f1_weekend_next_session_name
+        unique_id: f1_weekend_next_session_name
+        state: >-
+          {% set race_entity = 'sensor.f1_next_race' %}
+          {% set sessions = [
+            ('first_practice', 'Free Practice 1'),
+            ('second_practice', 'Free Practice 2'),
+            ('third_practice', 'Free Practice 3'),
+            ('sprint_qualifying', 'Sprint Shootout'),
+            ('sprint', 'Sprint'),
+            ('qualifying', 'Qualifying'),
+            ('race', 'Grand Prix')
+          ] %}
+          {% set now_ts = now() %}
+          {% set next = namespace(name=None, time=None, key=None) %}
+          {% for key, label in sessions %}
+            {% set iso = state_attr(race_entity, key ~ '_start') %}
+            {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+              {% set dt = as_datetime(iso) %}
+              {% if dt and dt > now_ts %}
+                {% if next.time is none or dt < next.time %}
+                  {% set next.time = dt %}
+                  {% set next.name = label %}
+                  {% set next.key = key %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ next.name or 'TBA' }}
+        attributes:
+          next_session_key: >-
+            {% set race_entity = 'sensor.f1_next_race' %}
+            {% set sessions = [
+              ('first_practice', 'Free Practice 1'),
+              ('second_practice', 'Free Practice 2'),
+              ('third_practice', 'Free Practice 3'),
+              ('sprint_qualifying', 'Sprint Shootout'),
+              ('sprint', 'Sprint'),
+              ('qualifying', 'Qualifying'),
+              ('race', 'Grand Prix')
+            ] %}
+            {% set now_ts = now() %}
+            {% set next = namespace(key=None, time=None) %}
+            {% for key, _ in sessions %}
+              {% set iso = state_attr(race_entity, key ~ '_start') %}
+              {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+                {% set dt = as_datetime(iso) %}
+                {% if dt and dt > now_ts %}
+                  {% if next.time is none or dt < next.time %}
+                    {% set next.time = dt %}
+                    {% set next.key = key %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ next.key or '' }}
+          next_session_start: >-
+            {% set race_entity = 'sensor.f1_next_race' %}
+            {% set sessions = [
+              ('first_practice', 'Free Practice 1'),
+              ('second_practice', 'Free Practice 2'),
+              ('third_practice', 'Free Practice 3'),
+              ('sprint_qualifying', 'Sprint Shootout'),
+              ('sprint', 'Sprint'),
+              ('qualifying', 'Qualifying'),
+              ('race', 'Grand Prix')
+            ] %}
+            {% set now_ts = now() %}
+            {% set next = namespace(key=None, time=None) %}
+            {% for key, _ in sessions %}
+              {% set iso = state_attr(race_entity, key ~ '_start') %}
+              {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+                {% set dt = as_datetime(iso) %}
+                {% if dt and dt > now_ts %}
+                  {% if next.time is none or dt < next.time %}
+                    {% set next.time = dt %}
+                    {% set next.key = key %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {% if next.key %}
+              {{ state_attr(race_entity, next.key ~ '_start') or '' }}
+            {% else %}
+              ''
+            {% endif %}
+          next_session_start_local: >-
+            {% set race_entity = 'sensor.f1_next_race' %}
+            {% set sessions = [
+              ('first_practice', 'Free Practice 1'),
+              ('second_practice', 'Free Practice 2'),
+              ('third_practice', 'Free Practice 3'),
+              ('sprint_qualifying', 'Sprint Shootout'),
+              ('sprint', 'Sprint'),
+              ('qualifying', 'Qualifying'),
+              ('race', 'Grand Prix')
+            ] %}
+            {% set now_ts = now() %}
+            {% set next = namespace(key=None, time=None) %}
+            {% for key, _ in sessions %}
+              {% set iso = state_attr(race_entity, key ~ '_start') %}
+              {% if iso not in [None, '', 'unknown', 'unavailable'] %}
+                {% set dt = as_datetime(iso) %}
+                {% if dt and dt > now_ts %}
+                  {% if next.time is none or dt < next.time %}
+                    {% set next.time = dt %}
+                    {% set next.key = key %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {% if next.key %}
+              {{ state_attr(race_entity, next.key ~ '_start_local') or '' }}
+            {% else %}
+              ''
+            {% endif %}
+
   - binary_sensor:
       - name: f1_is_race_week
         unique_id: f1_is_race_week
