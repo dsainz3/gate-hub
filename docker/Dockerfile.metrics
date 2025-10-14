@@ -1,0 +1,19 @@
+# syntax=docker/dockerfile:1
+FROM python:3.11
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+# Install lightweight OS dependencies needed by matplotlib.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml poetry.lock* ./
+RUN pip install --no-cache-dir "requests" "matplotlib" "markdown" "pyyaml"
+
+COPY scripts/ ./scripts/
+COPY README.md ./README.md
+
+ENTRYPOINT ["python", "scripts/metrics.py"]

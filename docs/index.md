@@ -36,6 +36,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [F1 Package & Dashboard](how-to/f1/index.md)
 - [Pre-prod Push Checklist](how-to/pre-prod-checklist.md)
 - [Kiosk Camera Overview](how-to/kiosk/camera-overview.md)
+- [Run Repository Metrics in Docker](how-to/run-metrics-in-container.md)
 
 ## Reference
 - [Automation Catalog](reference/automations.md)

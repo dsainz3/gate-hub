@@ -11,11 +11,14 @@ Usage example (matching the scheduled workflow):
         --output www/metrics \
         --markdown --html --summary-html --update-readme
 
-Environment variables:
-    GITHUB_TOKEN (required)
+Authentication options:
+    - Set the ``GITHUB_TOKEN`` environment variable, or
+    - Store a ``github_token`` (or ``github_repo_metrics_auth_header``) entry in
+      ``secrets.yaml``.
 
-The script is intentionally light on third-party dependencies - only
-``requests``, ``matplotlib`` and ``markdown`` are required.
+The script is intentionally light on third-party dependencies - ``requests``,
+``matplotlib`` and ``markdown`` are required, while ``pyyaml`` is only needed
+when loading credentials from secrets files.
 """
 
 from __future__ import annotations
@@ -39,6 +42,11 @@ import matplotlib.pyplot as plt
 import requests
 
 try:
+    import yaml  # type: ignore
+except Exception:  # pragma: no cover - optional dependency when using secrets
+    yaml = None
+
+try:
     import markdown  # type: ignore
 except (
     Exception
@@ -50,6 +58,9 @@ GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 ACTIONS_URL_TEMPLATE = (
     "https://api.github.com/repos/{owner}/{repo}/actions/runs"
 )
+DEFAULT_SECRETS = Path("secrets.yaml")
+DEFAULT_TOKEN_KEY = "github_token"
+DEFAULT_AUTH_HEADER_KEY = "github_repo_metrics_auth_header"
 
 
 @dataclass
@@ -78,6 +89,50 @@ class PullRequest:
 class WorkflowRun:
     conclusion: str | None
     created_at: dt.datetime
+
+
+def load_secrets(path: Path) -> dict[str, object]:
+    """Load a secrets mapping from ``path``.
+
+    ``secrets.yaml`` files are optional for this script; the environment
+    variable fallback keeps backwards compatibility intact. Only when a secrets
+    file is present (or explicitly requested) do we require PyYAML to be
+    installed.
+    """
+
+    if not path.exists():
+        return {}
+
+    if yaml is None:  # pragma: no cover - exercised via integration tests
+        raise RuntimeError(
+            "PyYAML is required to read secrets files. Install pyyaml or set "
+            "GITHUB_TOKEN in the environment."
+        )
+
+    with path.open(encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+
+    if not isinstance(data, dict):
+        raise ValueError(f"Secrets file {path} must contain a mapping.")
+
+    return data
+
+
+def normalise_token(value: object) -> str | None:
+    if isinstance(value, str):
+        candidate = value.strip()
+        if candidate:
+            return candidate
+    return None
+
+
+def extract_from_header(value: object) -> str | None:
+    header = normalise_token(value)
+    if not header:
+        return None
+    if header.lower().startswith("bearer "):
+        return header.split(None, 1)[1].strip()
+    return header
 
 
 class GitHubMetricsClient:
@@ -167,18 +222,37 @@ class GitHubMetricsClient:
                 return
 
             for edge in history.get("edges", []):
-                node = edge.get("node", {})
-                committed_at = dt.datetime.fromisoformat(
-                    node["committedDate"].replace("Z", "+00:00")
-                )
+                node = edge.get("node") or {}
+
+                committed_raw = node.get("committedDate")
+                if not committed_raw:
+                    # Skip records that do not contain the minimum payload we expect.
+                    continue
+
+                try:
+                    committed_at = dt.datetime.fromisoformat(
+                        committed_raw.replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    # Ignore malformed timestamps returned by the API.
+                    continue
+
+                sha = node.get("oid")
+                if not sha:
+                    # Without a SHA there is little value in the commit entry.
+                    continue
+
+                author_info = node.get("author") or {}
+                user_info = author_info.get("user") or {}
                 author = (
-                    node.get("author", {}).get("user", {}).get("login")
-                    or node.get("author", {}).get("name")
-                    or node.get("author", {}).get("email")
+                    user_info.get("login")
+                    or author_info.get("name")
+                    or author_info.get("email")
                     or "unknown"
                 )
+
                 yield Commit(
-                    sha=node["oid"],
+                    sha=sha,
                     committed_at=committed_at,
                     author=author,
                     message=node.get("messageHeadline", ""),
@@ -608,11 +682,44 @@ def main() -> None:
         default=120,
         help="How many days of history to analyse",
     )
+    parser.add_argument(
+        "--secrets",
+        type=Path,
+        default=DEFAULT_SECRETS,
+        help="Path to secrets.yaml containing GitHub credentials",
+    )
+    parser.add_argument(
+        "--token-key",
+        default=DEFAULT_TOKEN_KEY,
+        help="Key in the secrets file that stores the PAT (defaults to github_token)",
+    )
+    parser.add_argument(
+        "--auth-header-key",
+        default=DEFAULT_AUTH_HEADER_KEY,
+        help=(
+            "Fallback key for a pre-built Authorization header (defaults to "
+            "github_repo_metrics_auth_header)"
+        ),
+    )
     args = parser.parse_args()
 
-    token = os.environ.get("GITHUB_TOKEN")
+    token = normalise_token(os.environ.get("GITHUB_TOKEN"))
     if not token:
-        raise SystemExit("GITHUB_TOKEN environment variable is required")
+        try:
+            secrets = load_secrets(args.secrets)
+        except (RuntimeError, ValueError) as exc:
+            raise SystemExit(str(exc)) from exc
+
+        token = normalise_token(secrets.get(args.token_key))
+        if not token:
+            token = extract_from_header(secrets.get(args.auth_header_key))
+
+    if not token:
+        raise SystemExit(
+            "Provide a GitHub token via the GITHUB_TOKEN environment variable "
+            f"or the secrets file {args.secrets} (keys '{args.token_key}' or "
+            f"'{args.auth_header_key}')."
+        )
 
     owner, repo_name = args.repo.split("/", 1)
     since = dt.datetime.utcnow().replace(tzinfo=dt.UTC) - dt.timedelta(
