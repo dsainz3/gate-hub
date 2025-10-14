@@ -1,8 +1,12 @@
 {
-  "status": "pending",
-  "message": "Run metrics workflow to populate",
-  "highlights": {},
-  "lines_added": 0,
-  "lines_deleted": 0,
-  "contributors_last_week": 0
+  "generated_at": "2025-10-14T09:51:10.971384+00:00Z",
+  "highlights": {
+    "Daily commits": "1 (-98.1%)",
+    "Weekly commits": "185 (+63.7%)",
+    "Monthly commits": "475 (\u221e)",
+    "Median PR merge time": "0.00 days"
+  },
+  "lines_added": 728122,
+  "lines_deleted": 451783,
+  "contributors_last_week": 2
 }
