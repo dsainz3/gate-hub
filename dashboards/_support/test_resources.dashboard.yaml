@@ -72,7 +72,7 @@ views:
                     grey
                   {% endif %}
                 content: >-
-                  Huskers {{ states('sensor.huskers_team_score') }}–{{ states('sensor.huskers_opponent_score_2') }}
+                  Huskers {{ states('sensor.huskers_team_score') }}–{{ states('sensor.huskers_opponent_score') }}
                 tap_action:
                   action: more-info
                   entity: sensor.huskers_game_detail
@@ -97,7 +97,7 @@ views:
             icon: mdi:scoreboard-outline
             icon_color: red
             primary: >-
-              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
+              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score') }} {{ states('sensor.huskers_opponent_name') }}
             secondary: >-
               {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
             layout: vertical
@@ -491,7 +491,7 @@ views:
             icon: mdi:scoreboard-outline
             icon_color: red
             primary: >-
-              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
+              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score') }} {{ states('sensor.huskers_opponent_name') }}
             secondary: >-
               {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
             layout: vertical
@@ -534,13 +534,20 @@ views:
             view_layout:
               column_span: 2
           - type: custom:mushroom-template-card
-            entity: sensor.f1_next_race_sprint
+            entity: sensor.f1_weekend_sprint_label
             icon: mdi:timer-outline
             icon_color: >-
-              {{ 'amber' if is_state('sensor.f1_next_race_sprint', 'Sprint') else 'blue-grey' }}
+              {{ 'amber' if is_state('sensor.f1_weekend_sprint_label', 'Sprint') else 'blue-grey' }}
             primary: Weekend highlights
-            secondary: >-
-              Sprint {{ states('sensor.f1_next_race_sprint') | default('—', true) }} · Session {{ states('sensor.f1_next_session_name') | default('TBA', true) }}
+            secondary: |-
+              {{ states('sensor.f1_weekend_sprint_label') }} weekend
+              Next session {{ states('sensor.f1_weekend_next_session_name') }}
+              {%- set start = state_attr('sensor.f1_weekend_next_session_name', 'next_session_start_local') -%}
+              {%- if start not in ['', None, 'unknown', 'unavailable'] -%}
+              {{ as_timestamp(start) | timestamp_custom('%b %-d %-I:%M %p', True) }} local
+              {%- else -%}
+              Schedule TBA
+              {%- endif -%}
             layout: vertical
             fill_container: true
             multiline_secondary: true
