@@ -473,13 +473,13 @@
                           Re-triggered {{ repeat.item.name }} automation
                           ({{ automation_entity }}) to catch up on missed run.
       - variables:
-          front_expected_state: null
+          front_expected_state:
           front_min_brightness: 0
           front_max_brightness: 0
-          garage_expected_state: null
+          garage_expected_state:
           garage_min_brightness: 0
           garage_max_brightness: 0
-          led_expected_state: null
+          led_expected_state:
           led_min_brightness: 0
           led_max_brightness: 0
           corrective_automation: ''
