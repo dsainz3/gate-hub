@@ -429,15 +429,33 @@
           'morning_off': last_morning_off_ts
         } %}
         {% set ordered = triggers | dictsort(by='value') %}
+        {% set latest_profile = 'unknown' %}
         {% if ordered %}
           {% set latest = ordered[-1] %}
           {% if latest[1] and (now_ts - latest[1]) < 90000 %}
-            {{ latest[0] }}
-          {% else %}
-            unknown
+            {% set latest_profile = latest[0] %}
           {% endif %}
+        {% endif %}
+        {% if latest_profile != 'unknown' %}
+          {{ latest_profile }}
         {% else %}
-          unknown
+          {% set expected = namespace(profile='unknown', ts=0) %}
+          {% set schedule = [
+            ('evening', sunset_expected_ts, sunset_expected_ts == 0),
+            ('night', midnight_expected_ts, false),
+            ('early_morning', early_morning_expected_ts, false),
+            ('morning_off', sunrise_expected_ts, (sunrise_expected_ts == 0) or husker_show_active)
+          ] %}
+          {% for item in schedule %}
+            {% set profile = item[0] %}
+            {% set ts = item[1] %}
+            {% set skip = item[2] %}
+            {% if not skip and ts and ts <= now_ts and ts >= expected.ts %}
+              {% set expected.profile = profile %}
+              {% set expected.ts = ts %}
+            {% endif %}
+          {% endfor %}
+          {{ expected.profile }}
         {% endif %}
     action:
       - repeat:
@@ -472,6 +490,43 @@
                         message: >-
                           Re-triggered {{ repeat.item.name }} automation
                           ({{ automation_entity }}) to catch up on missed run.
+      - variables:
+          active_profile: >-
+            {% set triggers = {
+              'evening': as_timestamp(state_attr('automation.exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true),
+              'night': as_timestamp(state_attr('automation.night_mode_at_midnight', 'last_triggered')) | default(0, true),
+              'early_morning': as_timestamp(state_attr('automation.early_morning_lights_0330', 'last_triggered')) | default(0, true),
+              'morning_off': as_timestamp(state_attr('automation.exterior_lights_sunrise_off', 'last_triggered')) | default(0, true)
+            } %}
+            {% set ordered = triggers | dictsort(by='value') %}
+            {% set latest_profile = 'unknown' %}
+            {% if ordered %}
+              {% set latest = ordered[-1] %}
+              {% if latest[1] and (now_ts - latest[1]) < 90000 %}
+                {% set latest_profile = latest[0] %}
+              {% endif %}
+            {% endif %}
+            {% if latest_profile != 'unknown' %}
+              {{ latest_profile }}
+            {% else %}
+              {% set expected = namespace(profile='unknown', ts=0) %}
+              {% set schedule = [
+                ('evening', sunset_expected_ts, sunset_expected_ts == 0),
+                ('night', midnight_expected_ts, false),
+                ('early_morning', early_morning_expected_ts, false),
+                ('morning_off', sunrise_expected_ts, (sunrise_expected_ts == 0) or husker_show_active)
+              ] %}
+              {% for item in schedule %}
+                {% set profile = item[0] %}
+                {% set ts = item[1] %}
+                {% set skip = item[2] %}
+                {% if not skip and ts and ts <= now_ts and ts >= expected.ts %}
+                  {% set expected.profile = profile %}
+                  {% set expected.ts = ts %}
+                {% endif %}
+              {% endfor %}
+              {{ expected.profile }}
+            {% endif %}
       - variables:
           front_expected_state:
           front_min_brightness: 0
