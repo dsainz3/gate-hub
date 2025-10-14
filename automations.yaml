@@ -67,7 +67,9 @@
     action:
       - service: scene.turn_on
         target:
-          entity_id: scene.lighting_night_mode
+          entity_id: scene.lighting_night_mode_interior_exterior
+        enabled: >-
+          {{ states.get('scene.lighting_night_mode_interior_exterior') is not none }}
         data:
           transition: 5
 
@@ -90,7 +92,9 @@
     action:
       - service: scene.turn_on
         target:
-          entity_id: scene.lighting_early_morning_gentle_wake
+          entity_id: scene.lighting_early_morning_gentle_wake_interior_exterior
+        enabled: >-
+          {{ states.get('scene.lighting_early_morning_gentle_wake_interior_exterior') is not none }}
         data:
           transition: 3
 
@@ -399,28 +403,28 @@
       husker_show_active: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
       automations_to_check:
         - name: Evening Sunset Exterior
-          entity_id: automation.exterior_front_garage_on_sunset
+          entity_id: automation.lighting_exterior_front_garage_on_sunset
           expected_ts: "{{ sunset_expected_ts }}"
           skip: "{{ sunset_expected_ts == 0 }}"
         - name: Night Mode
-          entity_id: automation.night_mode_at_midnight
+          entity_id: automation.lighting_night_mode_at_midnight
           expected_ts: "{{ midnight_expected_ts }}"
           skip: 'false'
         - name: Early Morning Gentle Wake
-          entity_id: automation.early_morning_lights_0330
+          entity_id: automation.early_morning_lights_03_30
           expected_ts: "{{ early_morning_expected_ts }}"
           skip: 'false'
         - name: Morning Exterior Off
-          entity_id: automation.exterior_lights_sunrise_off
+          entity_id: automation.lighting_morning_lights_off_sunrise
           expected_ts: "{{ sunrise_expected_ts }}"
           skip: "{{ sunrise_expected_ts == 0 or husker_show_active }}"
       front_entity: light.front_porch_lights
       garage_entity: light.garage_lights
       led_entity: light.permanent_outdoor_lights
-      last_evening_ts: "{{ as_timestamp(state_attr('automation.exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true) }}"
-      last_night_ts: "{{ as_timestamp(state_attr('automation.night_mode_at_midnight', 'last_triggered')) | default(0, true) }}"
-      last_early_ts: "{{ as_timestamp(state_attr('automation.early_morning_lights_0330', 'last_triggered')) | default(0, true) }}"
-      last_morning_off_ts: "{{ as_timestamp(state_attr('automation.exterior_lights_sunrise_off', 'last_triggered')) | default(0, true) }}"
+      last_evening_ts: "{{ as_timestamp(state_attr('automation.lighting_exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true) }}"
+      last_night_ts: "{{ as_timestamp(state_attr('automation.lighting_night_mode_at_midnight', 'last_triggered')) | default(0, true) }}"
+      last_early_ts: "{{ as_timestamp(state_attr('automation.early_morning_lights_03_30', 'last_triggered')) | default(0, true) }}"
+      last_morning_off_ts: "{{ as_timestamp(state_attr('automation.lighting_morning_lights_off_sunrise', 'last_triggered')) | default(0, true) }}"
       active_profile: >-
         {% set triggers = {
           'evening': last_evening_ts,
@@ -493,10 +497,10 @@
       - variables:
           active_profile: >-
             {% set triggers = {
-              'evening': as_timestamp(state_attr('automation.exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true),
-              'night': as_timestamp(state_attr('automation.night_mode_at_midnight', 'last_triggered')) | default(0, true),
-              'early_morning': as_timestamp(state_attr('automation.early_morning_lights_0330', 'last_triggered')) | default(0, true),
-              'morning_off': as_timestamp(state_attr('automation.exterior_lights_sunrise_off', 'last_triggered')) | default(0, true)
+              'evening': as_timestamp(state_attr('automation.lighting_exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true),
+              'night': as_timestamp(state_attr('automation.lighting_night_mode_at_midnight', 'last_triggered')) | default(0, true),
+              'early_morning': as_timestamp(state_attr('automation.early_morning_lights_03_30', 'last_triggered')) | default(0, true),
+              'morning_off': as_timestamp(state_attr('automation.lighting_morning_lights_off_sunrise', 'last_triggered')) | default(0, true)
             } %}
             {% set ordered = triggers | dictsort(by='value') %}
             {% set latest_profile = 'unknown' %}
@@ -553,7 +557,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 90
                   led_max_brightness: 200
-                  corrective_automation: automation.exterior_front_garage_on_sunset
+                  corrective_automation: automation.lighting_exterior_front_garage_on_sunset
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'early_morning' }}"
@@ -568,7 +572,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 90
                   led_max_brightness: 200
-                  corrective_automation: automation.early_morning_lights_0330
+                  corrective_automation: automation.early_morning_lights_03_30
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'night' }}"
@@ -579,7 +583,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 1
                   led_max_brightness: 110
-                  corrective_automation: automation.night_mode_at_midnight
+                  corrective_automation: automation.lighting_night_mode_at_midnight
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'morning_off' and not husker_show_active }}"
@@ -588,7 +592,7 @@
                   front_expected_state: 'off'
                   garage_expected_state: 'off'
                   led_expected_state: 'off'
-                  corrective_automation: automation.exterior_lights_sunrise_off
+                  corrective_automation: automation.lighting_morning_lights_off_sunrise
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'morning_off' and husker_show_active }}"
@@ -685,40 +689,40 @@
       current_month: '{{ now().month }}'
       monthly_configs:
         1:
-          scene: scene.lighting_led_effect_january
+          scene: scene.lighting_exterior_led_effect_january
           effect: LED-January
         2:
-          scene: scene.lighting_led_effect_february
+          scene: scene.lighting_exterior_led_effect_february
           effect: LED-February
         3:
-          scene: scene.lighting_led_effect_march
+          scene: scene.lighting_exterior_led_effect_march
           effect: LED-March
         4:
-          scene: scene.lighting_led_effect_april
+          scene: scene.lighting_exterior_led_effect_april
           effect: LED-April
         5:
-          scene: scene.lighting_led_effect_patriotic
+          scene: scene.lighting_exterior_led_effect_patriotic
           effect: BSMT-Patriotic
         6:
-          scene: scene.lighting_led_effect_patriotic
+          scene: scene.lighting_exterior_led_effect_patriotic
           effect: BSMT-Patriotic
         7:
-          scene: scene.lighting_led_effect_patriotic
+          scene: scene.lighting_exterior_led_effect_patriotic
           effect: BSMT-Patriotic
         8:
-          scene: scene.lighting_led_effect_august
+          scene: scene.lighting_exterior_led_effect_august
           effect: LED-August
         9:
-          scene: scene.lighting_led_effect_august
+          scene: scene.lighting_exterior_led_effect_august
           effect: LED-August
         10:
-          scene: scene.lighting_led_effect_halloween
+          scene: scene.lighting_exterior_led_effect_halloween
           effect: Halloween
         11:
-          scene: scene.lighting_led_effect_thanksgiving
+          scene: scene.lighting_exterior_led_effect_thanksgiving
           effect: LED-Thanksgiving
         12:
-          scene: scene.lighting_led_effect_christmas
+          scene: scene.lighting_exterior_led_effect_christmas
           effect: Christmas
       target_config: '{{ monthly_configs.get(current_month, {}) }}'
       target_scene: '{{ target_config.get("scene") }}'
@@ -766,6 +770,8 @@
                                 - service: scene.turn_on
                                   target:
                                     entity_id: '{{ target_scene }}'
+                                  enabled: >-
+                                    {{ target_scene is not none and target_scene != '' and states.get(target_scene) is not none }}
                                   continue_on_error: true
                         - service: light.turn_on
                           target:
