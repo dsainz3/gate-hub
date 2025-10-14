@@ -68,3 +68,4 @@ make_fake_secrets.py
 /external/
 tmp/
 custom_components/tplink_router/translations/tr.json
+scripts/secrets.yaml

@@ -14,7 +14,13 @@
 ## Repository Metrics Summary
 
 <!-- METRICS:START -->
-Automated summary pending. Run the **Repository metrics** workflow to populate.
+## Repository health snapshot
+_Updated 2025-10-14T09:51:10.971384+00:00Z_
+
+- Daily commits: **1** (-98.1%)
+- Weekly commits: **185** (+63.7%)
+- Monthly commits: **475** (∞)
+- Median PR merge time: **0.00 days**
 <!-- METRICS:END -->
 
 ## Repo Metrics & Devices Dashboard
