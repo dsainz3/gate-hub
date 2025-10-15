@@ -66,10 +66,9 @@
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
+        enabled: "{{ states.get('scene.lighting_night_mode_interior_exterior') is not none }}"
         target:
           entity_id: scene.lighting_night_mode_interior_exterior
-        enabled: >-
-          {{ states.get('scene.lighting_night_mode_interior_exterior') is not none }}
         data:
           transition: 5
 
@@ -91,10 +90,9 @@
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
       - service: scene.turn_on
+        enabled: "{{ states.get('scene.lighting_early_morning_gentle_wake_interior_exterior') is not none }}"
         target:
           entity_id: scene.lighting_early_morning_gentle_wake_interior_exterior
-        enabled: >-
-          {{ states.get('scene.lighting_early_morning_gentle_wake_interior_exterior') is not none }}
         data:
           transition: 3
 
@@ -401,30 +399,36 @@
       sunrise_expected_ts: "{{ (sunrise_last_ts + 300) if sunrise_last_ts else 0 }}"
       sunset_expected_ts: "{{ (sunset_last_ts + 300) if sunset_last_ts else 0 }}"
       husker_show_active: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
+    # These entity_ids use the alias-derived slugs:
+    #  - 'Lighting: Evening Sunset (Exterior)'   -> automation.lighting_evening_sunset_exterior
+    #  - 'Lighting: Night Mode'                  -> automation.lighting_night_mode
+    #  - 'Lighting: Early Morning Gentle Wake'   -> automation.lighting_early_morning_gentle_wake
+    #  - 'Lighting: Morning Exterior Off'        -> automation.lighting_morning_exterior_off
       automations_to_check:
         - name: Evening Sunset Exterior
-          entity_id: automation.lighting_exterior_front_garage_on_sunset
+          entity_id: automation.exterior_front_garage_on_sunset
           expected_ts: "{{ sunset_expected_ts }}"
           skip: "{{ sunset_expected_ts == 0 }}"
         - name: Night Mode
-          entity_id: automation.lighting_night_mode_at_midnight
+          entity_id: automation.night_mode_at_midnight
           expected_ts: "{{ midnight_expected_ts }}"
           skip: 'false'
         - name: Early Morning Gentle Wake
-          entity_id: automation.early_morning_lights_03_30
+          entity_id: automation.early_morning_lights_0330
           expected_ts: "{{ early_morning_expected_ts }}"
           skip: 'false'
         - name: Morning Exterior Off
-          entity_id: automation.lighting_morning_lights_off_sunrise
+          entity_id: automation.exterior_lights_sunrise_off
           expected_ts: "{{ sunrise_expected_ts }}"
           skip: "{{ sunrise_expected_ts == 0 or husker_show_active }}"
+
       front_entity: light.front_porch_lights
       garage_entity: light.garage_lights
       led_entity: light.permanent_outdoor_lights
-      last_evening_ts: "{{ as_timestamp(state_attr('automation.lighting_exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true) }}"
-      last_night_ts: "{{ as_timestamp(state_attr('automation.lighting_night_mode_at_midnight', 'last_triggered')) | default(0, true) }}"
-      last_early_ts: "{{ as_timestamp(state_attr('automation.early_morning_lights_03_30', 'last_triggered')) | default(0, true) }}"
-      last_morning_off_ts: "{{ as_timestamp(state_attr('automation.lighting_morning_lights_off_sunrise', 'last_triggered')) | default(0, true) }}"
+      last_evening_ts: "{{ as_timestamp(state_attr('automation.lighting_evening_sunset_exterior', 'last_triggered')) | default(0, true) }}"
+      last_night_ts: "{{ as_timestamp(state_attr('automation.lighting_night_mode', 'last_triggered')) | default(0, true) }}"
+      last_early_ts: "{{ as_timestamp(state_attr('automation.lighting_early_morning_gentle_wake', 'last_triggered')) | default(0, true) }}"
+      last_morning_off_ts: "{{ as_timestamp(state_attr('automation.lighting_morning_exterior_off', 'last_triggered')) | default(0, true) }}"
       active_profile: >-
         {% set triggers = {
           'evening': last_evening_ts,
@@ -497,10 +501,10 @@
       - variables:
           active_profile: >-
             {% set triggers = {
-              'evening': as_timestamp(state_attr('automation.lighting_exterior_front_garage_on_sunset', 'last_triggered')) | default(0, true),
-              'night': as_timestamp(state_attr('automation.lighting_night_mode_at_midnight', 'last_triggered')) | default(0, true),
-              'early_morning': as_timestamp(state_attr('automation.early_morning_lights_03_30', 'last_triggered')) | default(0, true),
-              'morning_off': as_timestamp(state_attr('automation.lighting_morning_lights_off_sunrise', 'last_triggered')) | default(0, true)
+              'evening': as_timestamp(state_attr('automation.lighting_evening_sunset_exterior', 'last_triggered')) | default(0, true),
+              'night': as_timestamp(state_attr('automation.lighting_night_mode', 'last_triggered')) | default(0, true),
+              'early_morning': as_timestamp(state_attr('automation.lighting_early_morning_gentle_wake', 'last_triggered')) | default(0, true),
+              'morning_off': as_timestamp(state_attr('automation.lighting_morning_exterior_off', 'last_triggered')) | default(0, true)
             } %}
             {% set ordered = triggers | dictsort(by='value') %}
             {% set latest_profile = 'unknown' %}
@@ -557,7 +561,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 90
                   led_max_brightness: 200
-                  corrective_automation: automation.lighting_exterior_front_garage_on_sunset
+                  corrective_automation: automation.lighting_evening_sunset_exterior
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'early_morning' }}"
@@ -572,7 +576,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 90
                   led_max_brightness: 200
-                  corrective_automation: automation.early_morning_lights_03_30
+                  corrective_automation: automation.lighting_early_morning_gentle_wake
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'night' }}"
@@ -583,7 +587,7 @@
                   led_expected_state: 'on'
                   led_min_brightness: 1
                   led_max_brightness: 110
-                  corrective_automation: automation.lighting_night_mode_at_midnight
+                  corrective_automation: automation.lighting_night_mode
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'morning_off' and not husker_show_active }}"
@@ -592,7 +596,7 @@
                   front_expected_state: 'off'
                   garage_expected_state: 'off'
                   led_expected_state: 'off'
-                  corrective_automation: automation.lighting_morning_lights_off_sunrise
+                  corrective_automation: automation.lighting_morning_exterior_off
           - conditions:
               - condition: template
                 value_template: "{{ active_profile == 'morning_off' and husker_show_active }}"
@@ -669,6 +673,7 @@
                   message: >-
                     Realigned exterior lights for profile {{ active_profile }}
                     by re-triggering {{ corrective_automation }}.
+
   - id: exterior_led_monthly_effect
     alias: 'LED: Monthly Effect Scheduler'
     description: >
@@ -688,42 +693,18 @@
     variables:
       current_month: '{{ now().month }}'
       monthly_configs:
-        1:
-          scene: scene.lighting_exterior_led_effect_january
-          effect: LED-January
-        2:
-          scene: scene.lighting_exterior_led_effect_february
-          effect: LED-February
-        3:
-          scene: scene.lighting_exterior_led_effect_march
-          effect: LED-March
-        4:
-          scene: scene.lighting_exterior_led_effect_april
-          effect: LED-April
-        5:
-          scene: scene.lighting_exterior_led_effect_patriotic
-          effect: BSMT-Patriotic
-        6:
-          scene: scene.lighting_exterior_led_effect_patriotic
-          effect: BSMT-Patriotic
-        7:
-          scene: scene.lighting_exterior_led_effect_patriotic
-          effect: BSMT-Patriotic
-        8:
-          scene: scene.lighting_exterior_led_effect_august
-          effect: LED-August
-        9:
-          scene: scene.lighting_exterior_led_effect_august
-          effect: LED-August
-        10:
-          scene: scene.lighting_exterior_led_effect_halloween
-          effect: Halloween
-        11:
-          scene: scene.lighting_exterior_led_effect_thanksgiving
-          effect: LED-Thanksgiving
-        12:
-          scene: scene.lighting_exterior_led_effect_christmas
-          effect: Christmas
+        1: {scene: scene.lighting_exterior_led_effect_january, effect: LED-January}
+        2: {scene: scene.lighting_exterior_led_effect_february, effect: LED-February}
+        3: {scene: scene.lighting_exterior_led_effect_march, effect: LED-March}
+        4: {scene: scene.lighting_exterior_led_effect_april, effect: LED-April}
+        5: {scene: scene.lighting_exterior_led_effect_patriotic, effect: BSMT-Patriotic}
+        6: {scene: scene.lighting_exterior_led_effect_patriotic, effect: BSMT-Patriotic}
+        7: {scene: scene.lighting_exterior_led_effect_patriotic, effect: BSMT-Patriotic}
+        8: {scene: scene.lighting_exterior_led_effect_august, effect: LED-August}
+        9: {scene: scene.lighting_exterior_led_effect_august, effect: LED-August}
+        10: {scene: scene.lighting_exterior_led_effect_halloween, effect: Halloween}
+        11: {scene: scene.lighting_exterior_led_effect_thanksgiving, effect: LED-Thanksgiving}
+        12: {scene: scene.lighting_exterior_led_effect_christmas, effect: Christmas}
       target_config: '{{ monthly_configs.get(current_month, {}) }}'
       target_scene: '{{ target_config.get("scene") }}'
       target_effect: '{{ target_config.get("effect") }}'
@@ -766,12 +747,12 @@
                             - conditions:
                                 - condition: template
                                   value_template: "{{ target_scene is not none and target_scene != '' }}"
+                                - condition: template
+                                  value_template: "{{ states.get(target_scene) is not none }}"
                               sequence:
                                 - service: scene.turn_on
                                   target:
                                     entity_id: '{{ target_scene }}'
-                                  enabled: >-
-                                    {{ target_scene is not none and target_scene != '' and states.get(target_scene) is not none }}
                                   continue_on_error: true
                         - service: light.turn_on
                           target:
@@ -779,15 +760,13 @@
                           data:
                             effect: '{{ target_effect }}'
                           continue_on_error: true
-                        - wait_template: >-
-                            {{ state_attr(permanent_light, 'effect') == target_effect }}
+                        - wait_template: "{{ state_attr(permanent_light, 'effect') == target_effect }}"
                           timeout: '00:00:20'
                           continue_on_timeout: true
                         - choose:
                             - conditions:
                                 - condition: template
-                                  value_template: >-
-                                    {{ state_attr(permanent_light, 'effect') == target_effect }}
+                                  value_template: "{{ state_attr(permanent_light, 'effect') == target_effect }}"
                               sequence:
                                 - service: logbook.log
                                   data:
@@ -806,32 +785,25 @@
                               target:
                                 entity_id: '{{ permanent_light }}'
                               continue_on_error: true
-                      else:
-                        - service: logbook.log
-                          data:
-                            name: LED Monthly Effect
-                            message: >-
-                              Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- light unavailable (attempt {{ repeat.index }})
-              default:
-                - service: logbook.log
-                  data:
-                    name: LED Monthly Effect
-                    message: >-
-                      Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing from list (attempt {{ repeat.index }})
-                - choose:
-                    - conditions:
-                        - condition: template
-                          value_template: "{{ has_value(permanent_light) }}"
-                      sequence:
-                        - service: homeassistant.update_entity
-                          target:
-                            entity_id: '{{ permanent_light }}'
-                          continue_on_error: true
+                  default:
+                    - service: logbook.log
+                      data:
+                        name: LED Monthly Effect
+                        message: >-
+                          Waiting for {{ target_effect or 'unknown effect' }} for month {{ current_month }} -- effect missing from list (attempt {{ repeat.index }})
+                    - choose:
+                        - conditions:
+                            - condition: template
+                              value_template: "{{ has_value(permanent_light) }}"
+                          sequence:
+                            - service: homeassistant.update_entity
+                              target:
+                                entity_id: '{{ permanent_light }}'
+                              continue_on_error: true
             - delay: '00:00:10'
       - if:
           - condition: template
-            value_template: >-
-              {{ state_attr(permanent_light, 'effect') != target_effect }}
+            value_template: "{{ state_attr(permanent_light, 'effect') != target_effect }}"
         then:
           - service: logbook.log
             data:
