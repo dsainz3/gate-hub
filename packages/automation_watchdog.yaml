@@ -39,6 +39,11 @@ template:
               {% set current_runs = state_attr(entity_id, 'current') %}
               {% set max_runs = state_attr(entity_id, 'max') %}
               {% set last_triggered = state_attr(entity_id, 'last_triggered') %}
+              {% set next_trigger_attr = state_attr(entity_id, 'next_triggered') %}
+              {% if next_trigger_attr in [None, '', 'unknown', 'unavailable'] %}
+                {% set next_trigger_attr = state_attr(entity_id, 'next_trigger') %}
+              {% endif %}
+              {% set next_trigger = next_trigger_attr if next_trigger_attr not in [None, '', 'unknown', 'unavailable'] else 'unknown' %}
               {% set snapshot = {
                 'entity_id': entity_id,
                 'name': automation.name,
@@ -48,7 +53,8 @@ template:
                 'mode': automation_mode,
                 'current_runs': current_runs,
                 'max_runs': max_runs,
-                'last_triggered': last_triggered
+                'last_triggered': last_triggered,
+                'next_trigger': next_trigger
               } %}
               {% set ns.snapshots = ns.snapshots + [snapshot] %}
               {% if entity_id in ignored %}
@@ -118,7 +124,16 @@ template:
             {% endif %}
           automations: >-
             {% set audit = automation_audit_snapshot | from_json %}
-            {{ audit.snapshots | to_json }}
+            {% set entries = [] %}
+            {% for snapshot in audit.snapshots %}
+              {% set entries = entries + [{
+                'entity_id': snapshot.entity_id,
+                'name': snapshot.name,
+                'last_triggered': snapshot.last_triggered if snapshot.last_triggered not in [None, '', 'unknown', 'unavailable'] else 'unknown',
+                'next_trigger': snapshot.next_trigger if snapshot.next_trigger not in [None, '', 'unknown', 'unavailable'] else 'unknown'
+              }] %}
+            {% endfor %}
+            {{ entries | to_json }}
   - trigger:
       - platform: homeassistant
         event: start

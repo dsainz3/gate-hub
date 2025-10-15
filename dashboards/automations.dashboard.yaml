@@ -824,3 +824,34 @@ views:
               service: scene.turn_on
               target:
                 entity_id: scene.safety_burner_plugs_off
+  - title: Schedule
+    path: autos-schedule
+    icon: mdi:calendar-clock
+    badges: []
+    cards:
+      - type: markdown
+        content: >-
+          # 📆 Automation Schedule
+
+          {% set sensors = [
+            {'title': 'All Automations', 'entity': 'sensor.automation_status_audit'},
+            {'title': 'Huskers Automations', 'entity': 'sensor.huskers_automation_status_audit'}
+          ] %}
+          {% for sensor in sensors %}
+          ### {{ sensor.title }}
+
+          {% set rows = (state_attr(sensor.entity, 'automations') | default('[]', true)) | from_json %}
+          {% if rows %}
+          | Automation | Last Triggered | Next Trigger |
+          | --- | --- | --- |
+          {% for row in rows %}
+          | {{ row.name or row.entity_id }} | {{ row.last_triggered if row.last_triggered not in [None, '', 'unknown', 'unavailable'] else 'Unknown' }} | {{ row.next_trigger if row.next_trigger not in [None, '', 'unknown', 'unavailable'] else 'Unknown' }} |
+          {% endfor %}
+          {% else %}
+          _No automation schedule data available._
+          {% endif %}
+
+          {% if not loop.last %}
+
+          {% endif %}
+          {% endfor %}

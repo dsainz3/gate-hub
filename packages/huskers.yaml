@@ -1529,17 +1529,35 @@ template:
                   'state': states(trig)
                 }] %}
               {% endfor %}
+              {% set friendly_name = state_attr(entry.entity_id, 'friendly_name') or entry.entity_id %}
+              {% set last_triggered = state_attr(entry.entity_id, 'last_triggered') %}
+              {% set next_trigger_attr = state_attr(entry.entity_id, 'next_triggered') %}
+              {% if next_trigger_attr in [None, '', 'unknown', 'unavailable'] %}
+                {% set next_trigger_attr = state_attr(entry.entity_id, 'next_trigger') %}
+              {% endif %}
+              {% set next_trigger = next_trigger_attr if next_trigger_attr not in [None, '', 'unknown', 'unavailable'] else 'unknown' %}
               {% set snapshots = snapshots + [{
                 'entity_id': entry.entity_id,
+                'name': friendly_name,
                 'state': states(entry.entity_id),
                 'expected_mode': entry.expected_mode,
                 'mode': state_attr(entry.entity_id, 'mode'),
-                'last_triggered': state_attr(entry.entity_id, 'last_triggered'),
+                'last_triggered': last_triggered,
+                'next_trigger': next_trigger,
                 'current_runs': state_attr(entry.entity_id, 'current'),
                 'triggers': trigger_states
               }] %}
             {% endfor %}
-            {{ snapshots | to_json }}
+            {% set entries = [] %}
+            {% for snapshot in snapshots %}
+              {% set entries = entries + [{
+                'entity_id': snapshot.entity_id,
+                'name': snapshot.name,
+                'last_triggered': snapshot.last_triggered if snapshot.last_triggered not in [None, '', 'unknown', 'unavailable'] else 'unknown',
+                'next_trigger': snapshot.next_trigger if snapshot.next_trigger not in [None, '', 'unknown', 'unavailable'] else 'unknown'
+              }] %}
+            {% endfor %}
+            {{ entries | to_json }}
   - binary_sensor:
       - name: huskers_is_pregame_espn
         unique_id: huskers_is_pregame_espn
