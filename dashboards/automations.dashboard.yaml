@@ -548,7 +548,102 @@ views:
           - automation.holiday_mode_11_30_pm_reset
           - automation.safety_turn_off_burner_plugs_at_11_00_pm
           - automation.humidor_plug_temperature_control
-          - automation.weather_severe_alert_notification
+      - automation.weather_severe_alert_notification
+
+  - title: Schedule
+    path: autos-schedule
+    icon: mdi:calendar-clock
+    badges: []
+    cards:
+      - type: markdown
+        content: >-
+          ## 📆 Automation Schedule
+
+          {% set system = state_attr('sensor.automation_status_audit', 'automations') or [] %}
+          {% set huskers = state_attr('sensor.huskers_automation_status_audit', 'automations') or [] %}
+          {% set combined = [] %}
+          {% set seen = [] %}
+          {% for entry in system + huskers %}
+            {% if entry.entity_id not in seen %}
+              {% set combined = combined + [entry] %}
+              {% set seen = seen + [entry.entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {% set sorted = combined | sort(attribute='name') %}
+          {% if not sorted %}
+          _No automation metadata available. Confirm the audit sensors are loaded._
+          {% else %}
+          | Automation | Last Run | Next Run | Description |
+          | --- | --- | --- | --- |
+          {% for entry in sorted %}
+          {% set status_icon = '✅' if entry.result_status == 'match' else '⚠️' %}
+          {% set is_ignored = entry.ignored if entry.ignored is defined else false %}
+          {% if is_ignored %}
+            {% set status_icon = '🙈' %}
+          {% endif %}
+          {% set last_display = '—' %}
+          {% if entry.last_triggered %}
+            {% set last_dt = as_datetime(entry.last_triggered) %}
+            {% if last_dt %}
+              {% set last_display = as_local(last_dt).strftime('%Y-%m-%d %H:%M') ~ ' (' ~ relative_time(last_dt) ~ ')' %}
+            {% endif %}
+          {% endif %}
+          {% set next_display = '—' %}
+          {% if entry.next_trigger %}
+            {% set next_dt = as_datetime(entry.next_trigger) %}
+            {% if next_dt %}
+              {% set next_display = as_local(next_dt).strftime('%Y-%m-%d %H:%M') ~ ' (' ~ relative_time(next_dt) ~ ')' %}
+            {% endif %}
+          {% elif entry.next_run_minutes is defined and entry.next_run_minutes is not none %}
+            {% set minutes = entry.next_run_minutes %}
+            {% if minutes > 0 %}
+              {% set next_display = minutes | round(1) ~ ' min away' %}
+            {% else %}
+              {% set next_display = minutes | round(1) ~ ' min overdue' %}
+            {% endif %}
+          {% endif %}
+          {% set description = entry.description or '—' %}
+          {% set description = description | replace('|', '\\|') %}
+          | {{ status_icon }} **{{ entry.name or entry.entity_id }}**<br/><code>{{ entry.entity_id }}</code> | {{ last_display }} | {{ next_display }} | {{ description }} |
+          {% endfor %}
+          {% endif %}
+
+      - type: markdown
+        content: >-
+          ## 🛠️ Audit Comparisons
+
+          {% set system = state_attr('sensor.automation_status_audit', 'automations') or [] %}
+          {% set huskers = state_attr('sensor.huskers_automation_status_audit', 'automations') or [] %}
+          {% set combined = [] %}
+          {% set seen = [] %}
+          {% for entry in system + huskers %}
+            {% if entry.entity_id not in seen %}
+              {% set combined = combined + [entry] %}
+              {% set seen = seen + [entry.entity_id] %}
+            {% endif %}
+          {% endfor %}
+          {% set sorted = combined | sort(attribute='name') %}
+          {% if not sorted %}
+          _No audit data available._
+          {% else %}
+          | Automation | Expected → Actual | Notes | Quick Links |
+          | --- | --- | --- | --- |
+          {% for entry in sorted %}
+          {% set status_icon = '✅' if entry.result_status == 'match' else '⚠️' %}
+          {% set is_ignored = entry.ignored if entry.ignored is defined else false %}
+          {% if is_ignored %}
+            {% set status_icon = '🙈' %}
+          {% endif %}
+          {% set expected = entry.expected_state | default('n/a') %}
+          {% set actual = entry.state | default('unknown') %}
+          {% set note = entry.status_detail or '' %}
+          {% set description = entry.description or '—' %}
+          {% set description = description | replace('|', '\\|') %}
+          {% set trace_url = 'https://my.home-assistant.io/redirect/trace?domain=automation&entity_id=' ~ entry.entity_id %}
+          {% set logbook_url = 'https://my.home-assistant.io/redirect/logbook/?entity_id=' ~ entry.entity_id %}
+          | {{ status_icon }} **{{ entry.name or entry.entity_id }}**<br/><code>{{ entry.entity_id }}</code><br/>{{ description }} | {{ expected }} → {{ actual }} | {{ note }} | [Trace]({{ trace_url }}) · [Logbook]({{ logbook_url }}) |
+          {% endfor %}
+          {% endif %}
 
   - title: Scenes
     path: autos-scenes

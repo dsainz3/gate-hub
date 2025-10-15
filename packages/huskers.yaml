@@ -1394,6 +1394,7 @@ template:
         unique_id: huskers_automation_status_audit
         icon: mdi:playlist-check
         variables:
+          automation_metadata: !include ../shared/automation_descriptions.yaml
           automation_matrix: >-
             {{ [
               {
@@ -1520,6 +1521,8 @@ template:
             {{ parts | join(' — ') if parts else 'All automations enabled with expected modes' }}
           automations: >-
             {% set matrix = automation_matrix | from_json %}
+            {% set metadata = automation_metadata or {} %}
+            {% set descriptions = metadata.automation_descriptions or {} %}
             {% set snapshots = [] %}
             {% for entry in matrix %}
               {% set trigger_states = [] %}
@@ -1529,12 +1532,41 @@ template:
                   'state': states(trig)
                 }] %}
               {% endfor %}
+              {% set last_triggered = state_attr(entry.entity_id, 'last_triggered') %}
+              {% set next_trigger = state_attr(entry.entity_id, 'next_triggered') or state_attr(entry.entity_id, 'next_trigger') %}
+              {% set next_trigger = None if next_trigger in [None, '', 'unknown', 'unavailable'] else next_trigger %}
+              {% set next_trigger_ts = as_timestamp(next_trigger) if next_trigger is not none else None %}
+              {% set last_triggered_ts = as_timestamp(last_triggered) if last_triggered not in [None, '', 'unknown', 'unavailable'] else None %}
+              {% set last_run_minutes = ((now().timestamp() - last_triggered_ts) / 60) if last_triggered_ts is not none else None %}
+              {% set next_run_minutes = ((next_trigger_ts - now().timestamp()) / 60) if next_trigger_ts is not none else None %}
+              {% set expected_state = 'on' %}
+              {% set actual_state = states(entry.entity_id) %}
+              {% set description = descriptions.get(entry.entity_id) %}
+              {% if not description %}
+                {% set description = state_attr(entry.entity_id, 'description') %}
+              {% endif %}
+              {% set description = description or '' %}
+              {% if actual_state == expected_state %}
+                {% set result_status = 'match' %}
+                {% set status_detail = '✅ Matches expected state' %}
+              {% else %}
+                {% set result_status = 'mismatch' %}
+                {% set status_detail = '⚠️ Expected ' ~ expected_state ~ ' but is ' ~ actual_state %}
+              {% endif %}
               {% set snapshots = snapshots + [{
                 'entity_id': entry.entity_id,
-                'state': states(entry.entity_id),
+                'name': state_attr(entry.entity_id, 'friendly_name') or entry.entity_id,
+                'state': actual_state,
+                'expected_state': expected_state,
                 'expected_mode': entry.expected_mode,
                 'mode': state_attr(entry.entity_id, 'mode'),
-                'last_triggered': state_attr(entry.entity_id, 'last_triggered'),
+                'last_triggered': last_triggered,
+                'last_run_minutes': last_run_minutes,
+                'next_trigger': next_trigger,
+                'next_run_minutes': next_run_minutes,
+                'description': description,
+                'result_status': result_status,
+                'status_detail': status_detail,
                 'current_runs': state_attr(entry.entity_id, 'current'),
                 'triggers': trigger_states
               }] %}

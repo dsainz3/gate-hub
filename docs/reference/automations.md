@@ -14,6 +14,10 @@ tags:
 
 Use this catalog as the single source of truth for automation behaviour. Each entry references its source file so code owners can jump straight to definitions. When adding or modifying automations, update this page in the same pull request.
 
+## Automation Summaries (synced with dashboard metadata)
+
+--8<-- "docs/includes/automation-descriptions-table.md"
+
 ## Operations Console (`dashboards/automations.dashboard.yaml`)
 
 Administrators can manage every automation and scene from the Automations dashboard in the sidebar (title **Automations**, `require_admin: true`). The landing view provides:
