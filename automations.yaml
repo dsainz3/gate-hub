@@ -23,6 +23,11 @@
           entity_id: scene.lighting_evening_sunset_interior
         data:
           transition: 2
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Evening interior sunset scene applied
+          entity_id: automation.evening_lights_at_sunset
 
   - id: exterior_front_garage_on_sunset
     alias: 'Lighting: Evening Sunset (Exterior)'
@@ -47,6 +52,11 @@
           entity_id: scene.lighting_evening_sunset_exterior
         data:
           transition: 2
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Evening exterior sunset scene applied
+          entity_id: automation.exterior_front_garage_on_sunset
 
   - id: night_mode_at_midnight
     alias: 'Lighting: Night Mode'
@@ -67,11 +77,16 @@
     action:
       - service: scene.turn_on
         target:
-          entity_id: scene.lighting_night_mode_interior_exterior
+          entity_id: scene.lighting_night_mode
         enabled: >-
-          {{ states.get('scene.lighting_night_mode_interior_exterior') is not none }}
+          {{ states.get('scene.lighting_night_mode') is not none }}
         data:
           transition: 5
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Night mode scene applied
+          entity_id: automation.lighting_night_mode_at_midnight
 
   - id: early_morning_lights_0330
     alias: 'Lighting: Early Morning Gentle Wake'
@@ -92,11 +107,16 @@
     action:
       - service: scene.turn_on
         target:
-          entity_id: scene.lighting_early_morning_gentle_wake_interior_exterior
+          entity_id: scene.lighting_early_morning_gentle_wake
         enabled: >-
-          {{ states.get('scene.lighting_early_morning_gentle_wake_interior_exterior') is not none }}
+          {{ states.get('scene.lighting_early_morning_gentle_wake') is not none }}
         data:
           transition: 3
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Early morning gentle wake scene applied
+          entity_id: automation.early_morning_lights_03_30
 
   - id: interior_lights_sunrise_off
     alias: 'Lighting: Morning Interior Off'
@@ -124,6 +144,11 @@
           entity_id: scene.lighting_morning_interior_off
         data:
           transition: 10
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Morning interior lights turned off after sunrise
+          entity_id: automation.interior_lights_sunrise_off
 
   - id: exterior_lights_sunrise_off
     alias: 'Lighting: Morning Exterior Off'
@@ -151,6 +176,11 @@
           entity_id: scene.lighting_morning_exterior_off
         data:
           transition: 10
+      - service: logbook.log
+        data:
+          name: Lighting Automation
+          message: Morning exterior lights turned off after sunrise
+          entity_id: automation.exterior_lights_sunrise_off
 
   - id: exterior_lights_cloudy_daytime
     alias: 'Lighting: Daytime Cloudy Exterior'
@@ -689,40 +719,40 @@
       current_month: '{{ now().month }}'
       monthly_configs:
         1:
-          scene: scene.lighting_exterior_led_effect_january
+          scene: scene.lighting_led_effect_january
           effect: LED-January
         2:
-          scene: scene.lighting_exterior_led_effect_february
+          scene: scene.lighting_led_effect_february
           effect: LED-February
         3:
-          scene: scene.lighting_exterior_led_effect_march
+          scene: scene.lighting_led_effect_march
           effect: LED-March
         4:
-          scene: scene.lighting_exterior_led_effect_april
+          scene: scene.lighting_led_effect_april
           effect: LED-April
         5:
-          scene: scene.lighting_exterior_led_effect_patriotic
+          scene: scene.lighting_led_effect_patriotic
           effect: BSMT-Patriotic
         6:
-          scene: scene.lighting_exterior_led_effect_patriotic
+          scene: scene.lighting_led_effect_patriotic
           effect: BSMT-Patriotic
         7:
-          scene: scene.lighting_exterior_led_effect_patriotic
+          scene: scene.lighting_led_effect_patriotic
           effect: BSMT-Patriotic
         8:
-          scene: scene.lighting_exterior_led_effect_august
+          scene: scene.lighting_led_effect_august
           effect: LED-August
         9:
-          scene: scene.lighting_exterior_led_effect_august
+          scene: scene.lighting_led_effect_august
           effect: LED-August
         10:
-          scene: scene.lighting_exterior_led_effect_halloween
+          scene: scene.lighting_led_effect_halloween
           effect: Halloween
         11:
-          scene: scene.lighting_exterior_led_effect_thanksgiving
+          scene: scene.lighting_led_effect_thanksgiving
           effect: LED-Thanksgiving
         12:
-          scene: scene.lighting_exterior_led_effect_christmas
+          scene: scene.lighting_led_effect_christmas
           effect: Christmas
       target_config: '{{ monthly_configs.get(current_month, {}) }}'
       target_scene: '{{ target_config.get("scene") }}'

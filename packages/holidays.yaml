@@ -433,6 +433,11 @@ automation:
       - service: script.turn_on
         target:
           entity_id: script.holiday_exterior_lights
+      - service: logbook.log
+        data:
+          name: Holiday Automation
+          message: Halloween exterior lights start sequence triggered
+          entity_id: automation.activate_halloween_exterior_lights
     mode: single
 
   - id: deactivate_halloween_exterior_lights
@@ -448,6 +453,11 @@ automation:
       - service: script.turn_on
         target:
           entity_id: script.holiday_exterior_lights_resume
+      - service: logbook.log
+        data:
+          name: Holiday Automation
+          message: Halloween exterior lights resume sequence triggered
+          entity_id: automation.deactivate_halloween_exterior_lights
     mode: single
 
   - id: holiday_mode_manual_reset
@@ -474,6 +484,11 @@ automation:
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.holiday_mode_manual
+      - service: logbook.log
+        data:
+          name: Holiday Automation
+          message: Manual holiday override cleared (calendar off)
+          entity_id: automation.holiday_mode_manual_reset
     mode: restart
 
   - id: holiday_mode_manual_reset_2330
@@ -490,4 +505,9 @@ automation:
       - service: input_boolean.turn_off
         target:
           entity_id: input_boolean.holiday_mode_manual
+      - service: logbook.log
+        data:
+          name: Holiday Automation
+          message: Manual holiday override cleared at 23:30
+          entity_id: automation.holiday_mode_manual_reset_2330
     mode: single
