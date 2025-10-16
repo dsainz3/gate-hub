@@ -9,23 +9,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      run-ruff: ${{ steps.filter.outputs.lint }}
+      run-precommit: ${{ steps.filter.outputs.precommit }}
+      run-tests: ${{ steps.filter.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            lint:
+              - '**/*.py'
+              - '.pre-commit-config.yaml'
+              - '.ruff.toml'
+              - 'ruff.toml'
+              - 'pyproject.toml'
+              - 'poetry.lock'
+            precommit:
+              - '@lint'
+              - '**/*.yaml'
+              - '**/*.yml'
+              - '**/*.json'
+              - '.prettierrc*'
+            tests:
+              - '@lint'
+              - 'tests/**'
+              - 'custom_components/**'
+
   ruff:
     name: Ruff (lint + format check)
+    needs: changes
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-ruff == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ruff check
+      - name: Ruff checks
         uses: astral-sh/ruff-action@v2
         with:
           version: '0.6.9'
-          args: check . --output-format=github --force-exclude
-
-      - name: Ruff format --check
-        run: ruff format --check .
+          args: |
+            check . --output-format=github --force-exclude
+            format --check .
 
   precommit:
     name: pre-commit (YAML & HA tools)
+    needs: changes
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-precommit == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,24 +76,27 @@ jobs:
             pyproject.toml
             .pre-commit-config.yaml
 
-      - name: Cache pre-commit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: |
-            pre-commit-${{ runner.os }}-
+      - name: Determine pre-commit scope
+        id: precommit-args
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "args=--from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=--all-files" >> "$GITHUB_OUTPUT"
+          fi
 
-      - run: pip install pre-commit
-
-      # Skip Python linters here; Ruff is its own job
-      - name: pre-commit run (non-Python hooks)
+      - name: Run pre-commit (non-Python hooks)
+        uses: pre-commit/action@v3.0.1
         env:
           SKIP: ruff,ruff-format
-        run: pre-commit run --all-files
+        with:
+          python-version: '3.12'
+          extra_args: ${{ steps.precommit-args.outputs.args }}
 
   tests:
     name: Unit & smoke tests
+    needs: changes
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-tests == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +108,11 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install Poetry
-        run: pip install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.8.3
+          virtualenvs-in-project: true
+          installer-parallel: true
 
       - name: Cache Poetry downloads
         uses: actions/cache@v4
@@ -87,8 +132,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
-          poetry install --with dev --no-interaction --sync
+          poetry install --with dev --no-interaction --sync --no-root
 
       - name: Run pytest
         run: poetry run pytest
