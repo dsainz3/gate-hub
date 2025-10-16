@@ -52,13 +52,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ruff checks
+      - name: Ruff check
         uses: astral-sh/ruff-action@v2
         with:
           version: '0.6.9'
-          args: |
-            check . --output-format=github --force-exclude
-            format --check .
+          args: check . --output-format=github --force-exclude
+
+      - name: Ruff format --check
+        run: ruff format --check .
 
   precommit:
     name: pre-commit (YAML & HA tools)
