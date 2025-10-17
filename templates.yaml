@@ -230,6 +230,87 @@
     ########################################################################
     # HUSKERS — TeamTracker helpers (kept separate from ESPN package)
     ########################################################################
+      - name: husker_team_buffered
+        unique_id: husker_team_buffered
+        icon: mdi:football-helmet
+        availability: "{{ has_value('sensor.husker_team') }}"
+        state: "{{ states('sensor.husker_team') }}"
+        attributes:
+          sport: "{{ state_attr('sensor.husker_team','sport') }}"
+          sport_path: "{{ state_attr('sensor.husker_team','sport_path') }}"
+          league: "{{ state_attr('sensor.husker_team','league') }}"
+          league_path: "{{ state_attr('sensor.husker_team','league_path') }}"
+          league_logo: "{{ state_attr('sensor.husker_team','league_logo') }}"
+          season: "{{ state_attr('sensor.husker_team','season') }}"
+          team_abbr: "{{ state_attr('sensor.husker_team','team_abbr') }}"
+          opponent_abbr: "{{ state_attr('sensor.husker_team','opponent_abbr') }}"
+          event_name: "{{ state_attr('sensor.husker_team','event_name') }}"
+          event_url: "{{ state_attr('sensor.husker_team','event_url') }}"
+          date: "{{ state_attr('sensor.husker_team','date') }}"
+          kickoff_in: "{{ state_attr('sensor.husker_team','kickoff_in') }}"
+          series_summary: "{{ state_attr('sensor.husker_team','series_summary') }}"
+          venue: "{{ state_attr('sensor.husker_team','venue') }}"
+          location: "{{ state_attr('sensor.husker_team','location') }}"
+          tv_network: "{{ state_attr('sensor.husker_team','tv_network') }}"
+          odds: "{{ state_attr('sensor.husker_team','odds') }}"
+          overunder: "{{ state_attr('sensor.husker_team','overunder') }}"
+          team_name: "{{ state_attr('sensor.husker_team','team_name') }}"
+          team_long_name: "{{ state_attr('sensor.husker_team','team_long_name') }}"
+          team_id: "{{ state_attr('sensor.husker_team','team_id') }}"
+          team_record: "{{ state_attr('sensor.husker_team','team_record') }}"
+          team_rank: "{{ state_attr('sensor.husker_team','team_rank') }}"
+          team_conference_id: "{{ state_attr('sensor.husker_team','team_conference_id') }}"
+          team_homeaway: "{{ state_attr('sensor.husker_team','team_homeaway') }}"
+          team_logo: "{{ state_attr('sensor.husker_team','team_logo') }}"
+          team_url: "{{ state_attr('sensor.husker_team','team_url') }}"
+          team_colors: "{{ state_attr('sensor.husker_team','team_colors') }}"
+          team_score: "{{ states('sensor.huskers_our_score_effective') | int(0) }}"
+          team_win_probability: "{{ state_attr('sensor.husker_team','team_win_probability') }}"
+          team_winner: "{{ state_attr('sensor.husker_team','team_winner') }}"
+          team_timeouts: "{{ state_attr('sensor.husker_team','team_timeouts') }}"
+          opponent_name: "{{ state_attr('sensor.husker_team','opponent_name') }}"
+          opponent_long_name: "{{ state_attr('sensor.husker_team','opponent_long_name') }}"
+          opponent_id: "{{ state_attr('sensor.husker_team','opponent_id') }}"
+          opponent_record: "{{ state_attr('sensor.husker_team','opponent_record') }}"
+          opponent_rank: "{{ state_attr('sensor.husker_team','opponent_rank') }}"
+          opponent_conference_id: "{{ state_attr('sensor.husker_team','opponent_conference_id') }}"
+          opponent_homeaway: "{{ state_attr('sensor.husker_team','opponent_homeaway') }}"
+          opponent_logo: "{{ state_attr('sensor.husker_team','opponent_logo') }}"
+          opponent_url: "{{ state_attr('sensor.husker_team','opponent_url') }}"
+          opponent_colors: "{{ state_attr('sensor.husker_team','opponent_colors') }}"
+          opponent_score: "{{ states('sensor.huskers_opponent_score_effective') | int(0) }}"
+          opponent_win_probability: "{{ state_attr('sensor.husker_team','opponent_win_probability') }}"
+          opponent_winner: "{{ state_attr('sensor.husker_team','opponent_winner') }}"
+          opponent_timeouts: "{{ state_attr('sensor.husker_team','opponent_timeouts') }}"
+          quarter: "{{ states('sensor.huskers_quarter_effective') }}"
+          clock: "{{ states('sensor.huskers_game_clock_effective') }}"
+          possession: "{{ state_attr('sensor.husker_team','possession') }}"
+          last_play: "{{ state_attr('sensor.husker_team','last_play') }}"
+          down_distance_text: "{{ state_attr('sensor.husker_team','down_distance_text') }}"
+          outs: "{{ state_attr('sensor.husker_team','outs') }}"
+          balls: "{{ state_attr('sensor.husker_team','balls') }}"
+          strikes: "{{ state_attr('sensor.husker_team','strikes') }}"
+          on_first: "{{ state_attr('sensor.husker_team','on_first') }}"
+          on_second: "{{ state_attr('sensor.husker_team','on_second') }}"
+          on_third: "{{ state_attr('sensor.husker_team','on_third') }}"
+          team_shots_on_target: "{{ state_attr('sensor.husker_team','team_shots_on_target') }}"
+          team_total_shots: "{{ state_attr('sensor.husker_team','team_total_shots') }}"
+          opponent_shots_on_target: "{{ state_attr('sensor.husker_team','opponent_shots_on_target') }}"
+          opponent_total_shots: "{{ state_attr('sensor.husker_team','opponent_total_shots') }}"
+          team_sets_won: "{{ state_attr('sensor.husker_team','team_sets_won') }}"
+          opponent_sets_won: "{{ state_attr('sensor.husker_team','opponent_sets_won') }}"
+          last_update: "{{ state_attr('sensor.husker_team','last_update') }}"
+          api_message: "{{ state_attr('sensor.husker_team','api_message') }}"
+          api_url: "{{ state_attr('sensor.husker_team','api_url') }}"
+
+      - name: huskers_our_score
+        unique_id: huskers_our_score_effective_alias
+        state: "{{ states('sensor.huskers_our_score_effective') | int(0) }}"
+
+      - name: huskers_opponent_score
+        unique_id: huskers_opponent_score_effective_alias
+        state: "{{ states('sensor.huskers_opponent_score_effective') | int(0) }}"
+
       - name: huskers_team_name
         unique_id: huskers_team_name_tt
         state: "{{ state_attr('sensor.husker_team','team_long_name') or 'Nebraska Cornhuskers' }}"
@@ -240,21 +321,25 @@
 
       - name: huskers_team_score
         unique_id: huskers_team_score_tt
-        state: "{{ (state_attr('sensor.husker_team','team_score') | int(0)) }}"
+        state: "{{ states('sensor.huskers_our_score_effective') | int(0) }}"
 
       - name: huskers_opponent_score
         unique_id: huskers_opponent_score_tt
-        state: "{{ (state_attr('sensor.husker_team','opponent_score') | int(0)) }}"
+        state: "{{ states('sensor.huskers_opponent_score_effective') | int(0) }}"
 
       - name: Huskers Quarter
         unique_id: huskers_quarter
         availability: "{{ has_value('sensor.husker_team') }}"
-        state: "{{ state_attr('sensor.husker_team', 'quarter') | default('1') }}"
+        state: "{{ states('sensor.huskers_quarter_effective') or '1' }}"
         icon: mdi:numeric
 
       - name: huskers_game_clock_ct
         unique_id: huskers_game_clock_ct_tt
-        state: "{{ state_attr('sensor.husker_team','clock') or '' }}"
+        state: "{{ states('sensor.huskers_game_clock_effective') }}"
+
+      - name: huskers_game_clock
+        unique_id: huskers_game_clock_effective_alias
+        state: "{{ states('sensor.huskers_game_clock_effective') }}"
 
       - name: huskers_kickoff_time_ct
         unique_id: huskers_kickoff_time_ct_tt

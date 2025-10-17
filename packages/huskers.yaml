@@ -130,6 +130,11 @@ input_boolean:
     icon: mdi:timer-cog
     initial: false
 
+  huskers_use_score_delay:
+    name: Huskers Use Score Delay
+    icon: mdi:clock-alert
+    initial: false
+
   huskers_color_show:
     name: Huskers Color Show Active
     icon: mdi:lightbulb-group
@@ -211,6 +216,16 @@ input_text:
   huskers_last_score:
     name: Huskers Last Score Text
     icon: mdi:text
+
+  huskers_game_clock_manual:
+    name: Huskers Game Clock (Manual)
+    icon: mdi:timer-outline
+    initial: '--:--'
+
+  huskers_quarter_manual:
+    name: Huskers Quarter (Manual)
+    icon: mdi:numeric
+    initial: '1'
 
 ################################################################################
 # GROUPS
@@ -1247,14 +1262,46 @@ template:
           {% endfor %}
           {{ (score | int(0)) if score is not none else 0 }}
 
+      # Opponent score (auto) from scoreboard
+      - name: huskers_opponent_score_auto
+        unique_id: huskers_opponent_score_auto
+        state: >-
+          {% set events = state_attr('sensor.espn_cfb_scoreboard', 'events') or [] %}
+          {% set score = none %}
+          {% for e in events %}
+            {% set comp = (e.competitions | default([])) | first %}
+            {% if comp and comp.competitors is defined %}
+              {% for c in comp.competitors %}
+                {% if c.team is defined and c.team.id != '158' %}
+                  {% set score = c.score if c.score is defined else 0 %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+          {{ (score | int(0)) if score is not none else 0 }}
+
       # Effective score (manual override aware)
       - name: huskers_our_score_effective
         unique_id: huskers_our_score_effective
         state: >-
           {% if is_state('input_boolean.huskers_use_manual_score','on') %}
             {{ states('input_number.huskers_our_score_manual') | int(0) }}
+          {% elif is_state('input_boolean.huskers_use_score_delay','on') %}
+            {{ states('input_number.huskers_our_score_manual') | int(0) }}
           {% else %}
             {{ states('sensor.huskers_our_score_auto') | int(0) }}
+          {% endif %}
+
+      # Opponent score (manual override & delay aware)
+      - name: huskers_opponent_score_effective
+        unique_id: huskers_opponent_score_effective
+        state: >-
+          {% if is_state('input_boolean.huskers_use_manual_score','on') %}
+            {{ states('input_number.huskers_opponent_score_manual') | int(0) }}
+          {% elif is_state('input_boolean.huskers_use_score_delay','on') %}
+            {{ states('input_number.huskers_opponent_score_manual') | int(0) }}
+          {% else %}
+            {{ states('sensor.huskers_opponent_score_auto') | int(0) }}
           {% endif %}
 
       # Kickoff minutes (auto) routed from huskers_kickoff_in_2
@@ -1273,6 +1320,30 @@ template:
             {{ states('input_number.huskers_kickoff_in_manual') | int(0) }}
           {% else %}
             {{ states('sensor.huskers_kickoff_in_auto') | int(0) }}
+          {% endif %}
+
+      # Game quarter (delay aware)
+      - name: huskers_quarter_effective
+        unique_id: huskers_quarter_effective
+        state: >-
+          {% set live = state_attr('sensor.husker_team','quarter') %}
+          {% set sanitized = live if live not in [None, '', 'unknown', 'unavailable'] else '' %}
+          {% if is_state('input_boolean.huskers_use_score_delay','on') %}
+            {{ states('input_text.huskers_quarter_manual') if states('input_text.huskers_quarter_manual') not in ['unknown','unavailable', None] else sanitized }}
+          {% else %}
+            {{ sanitized }}
+          {% endif %}
+
+      # Game clock (delay aware)
+      - name: huskers_game_clock_effective
+        unique_id: huskers_game_clock_effective
+        state: >-
+          {% set live = state_attr('sensor.husker_team','clock') %}
+          {% set sanitized = live if live not in [None, '', 'unknown', 'unavailable'] else '--:--' %}
+          {% if is_state('input_boolean.huskers_use_score_delay','on') %}
+            {{ states('input_text.huskers_game_clock_manual') if states('input_text.huskers_game_clock_manual') not in ['unknown','unavailable', None, ''] else sanitized }}
+          {% else %}
+            {{ sanitized }}
           {% endif %}
 
       # AP ranking
@@ -1616,6 +1687,109 @@ template:
 # AUTOMATIONS
 ################################################################################
 automation:
+  - id: huskers_score_delay_buffer
+    alias: 'Huskers: Scoreboard Delay Buffer'
+    description: 'Copies TeamTracker scoreboard values into manual helpers after a 30-second buffer when enabled.'
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.husker_team
+        attribute: team_score
+      - platform: state
+        entity_id: sensor.husker_team
+        attribute: opponent_score
+      - platform: state
+        entity_id: sensor.husker_team
+        attribute: clock
+      - platform: state
+        entity_id: sensor.husker_team
+        attribute: quarter
+    condition:
+      - condition: state
+        entity_id: input_boolean.huskers_use_score_delay
+        state: 'on'
+      - condition: template
+        value_template: >-
+          {{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}
+    action:
+      - variables:
+          team_score: "{{ state_attr('sensor.husker_team','team_score') | int(0) }}"
+          opponent_score: "{{ state_attr('sensor.husker_team','opponent_score') | int(0) }}"
+          quarter: >-
+            {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '' }}
+          clock: >-
+            {% set raw = state_attr('sensor.husker_team','clock') %}
+            {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '--:--' }}
+      - delay: '00:00:30'
+      - condition: state
+        entity_id: input_boolean.huskers_use_score_delay
+        state: 'on'
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.huskers_our_score_manual
+        data:
+          value: "{{ team_score }}"
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.huskers_opponent_score_manual
+        data:
+          value: "{{ opponent_score }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.huskers_quarter_manual
+        data:
+          value: "{{ quarter }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.huskers_game_clock_manual
+        data:
+          value: "{{ clock }}"
+
+  - id: huskers_score_delay_sync
+    alias: 'Huskers: Score Delay Helper Sync'
+    description: 'Keeps manual score helpers aligned with live TeamTracker data on startup or when toggling the delay.'
+    mode: queued
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: input_boolean.huskers_use_score_delay
+    condition:
+      - condition: template
+        value_template: >-
+          {{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}
+    action:
+      - variables:
+          team_score: "{{ state_attr('sensor.husker_team','team_score') | int(0) }}"
+          opponent_score: "{{ state_attr('sensor.husker_team','opponent_score') | int(0) }}"
+          quarter: >-
+            {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '' }}
+          clock: >-
+            {% set raw = state_attr('sensor.husker_team','clock') %}
+            {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '--:--' }}
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.huskers_our_score_manual
+        data:
+          value: "{{ team_score }}"
+      - service: input_number.set_value
+        target:
+          entity_id: input_number.huskers_opponent_score_manual
+        data:
+          value: "{{ opponent_score }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.huskers_quarter_manual
+        data:
+          value: "{{ quarter }}"
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.huskers_game_clock_manual
+        data:
+          value: "{{ clock }}"
+
   - id: huskers_game_mode_enable_window
     alias: 'Huskers: Enable Game Mode Window'
     description: 'Automatically turns game mode on 20 minutes before kickoff and while a game is active.'
