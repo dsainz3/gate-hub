@@ -68,6 +68,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch for diff
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git fetch --no-tags --prune --depth=1 origin "${{ github.event.pull_request.base.ref }}"
 
       - uses: actions/setup-python@v5
         with:
@@ -81,7 +88,12 @@ jobs:
         id: precommit-args
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "args=--from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            if git rev-parse --verify "${{ github.event.pull_request.base.sha }}" >/dev/null 2>&1; then
+              echo "args=--from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "Base revision missing; falling back to full run"
+              echo "args=--all-files" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "args=--all-files" >> "$GITHUB_OUTPUT"
           fi
@@ -91,7 +103,6 @@ jobs:
         env:
           SKIP: ruff,ruff-format
         with:
-          python-version: '3.12'
           extra_args: ${{ steps.precommit-args.outputs.args }}
 
   tests:
