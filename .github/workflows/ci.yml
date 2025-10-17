@@ -39,6 +39,7 @@ jobs:
               - '**/*.yml'
               - '**/*.json'
               - '.prettierrc*'
+              - '!www/metrics/**'
             tests:
               - '@lint'
               - 'tests/**'
