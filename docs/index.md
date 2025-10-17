@@ -31,6 +31,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 - [Mosquitto MQTT Add-on](how-to/addons/mqtt.md)
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
 - [Football Team Dashboard Guide](how-to/football-team/dashboard.md) *(TeamTracker card, tailgate window, conference standings, lighting macros)*
+- [Codex Prompt – Huskers Dashboard 30-Second Delay](how-to/football-team/codex-delay-buffer-prompt.md)
 - [Football Team LED MQTT Controls](how-to/lighting/husker-led-mqtt.md)
 - [Govee Lighting Stack](how-to/lighting/govee-lighting-stack.md)
 - [F1 Package & Dashboard](how-to/f1/index.md)

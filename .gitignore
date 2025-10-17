@@ -49,6 +49,7 @@ zigbee2mqtt/coordinator_backup*.json
 
 # HACS managed frontend bundles
 www/community/
+www/reolink_warmup/
 
 # Vendor-specific artifacts
 custom_components/ble_monitor/
@@ -59,7 +60,6 @@ custom_components/zigbee2mqtt/coordinator_backup.local.json
 custom_components/bhyve/pybhyve/devices.json
 custom_components/bhyve/pybhyve/devices.local.json
 
-
 # Project-specific helpers
 govee_learning.yaml
 make_fake_secrets.py
@@ -67,9 +67,5 @@ make_fake_secrets.py
 # Local workspace scratch
 /external/
 tmp/
-custom_components/tplink_router/translations/tr.json
 scripts/secrets.yaml
-custom_components/tplink_router/__init__.py
-custom_components/tplink_router/coordinator.py
-custom_components/tplink_router/manifest.json
-custom_components/tplink_router/sensor.py
+custom_components/tplink_router/

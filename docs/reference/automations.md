@@ -101,6 +101,20 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 
 These automations pair with the [Football Team Dashboard Guide](../how-to/football-team/dashboard.md) and Football Team LED scripts. ESPN data is sourced via the TeamTracker integration and the REST sensors defined in `packages/huskers_everything.yaml` (including the Core API standings endpoint). When rebranding, update the helper/entity names but keep the automation logic aligned with these patterns.
 
+### Football Team: Scoreboard Delay Buffer (`packages/huskers_everything.yaml:1690`)
+- **ID** `huskers_score_delay_buffer`
+- **Entity** `automation.huskers_scoreboard_delay_buffer`
+- **Triggers**: Attribute changes on `sensor.husker_team` for team score, opponent score, game clock, or quarter.
+- **Guards**: Spoiler delay toggle `input_boolean.huskers_use_score_delay` must be `on` and the TeamTracker sensor available.
+- **Actions**: Wait 30 seconds, then copy the buffered values into the manual score/clock helpers so dashboards lag live updates.
+
+### Football Team: Score Delay Helper Sync (`packages/huskers_everything.yaml:1738`)
+- **ID** `huskers_score_delay_sync`
+- **Entity** `automation.huskers_score_delay_helper_sync`
+- **Triggers**: Home Assistant start or any state change on `input_boolean.huskers_use_score_delay`.
+- **Guards**: TeamTracker sensor returns data (`sensor.husker_team` not `unknown`/`unavailable`).
+- **Actions**: Immediately align the manual score/clock helpers with the latest TeamTracker payload so toggling the buffer produces consistent values.
+
 ### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
 - **ID** `huskers_game_mode_enable_window`
 - **Entity** `automation.huskers_enable_game_mode_window`
