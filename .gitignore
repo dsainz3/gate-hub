@@ -69,3 +69,7 @@ make_fake_secrets.py
 tmp/
 custom_components/tplink_router/translations/tr.json
 scripts/secrets.yaml
+custom_components/tplink_router/__init__.py
+custom_components/tplink_router/coordinator.py
+custom_components/tplink_router/manifest.json
+custom_components/tplink_router/sensor.py
