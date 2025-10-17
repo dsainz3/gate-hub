@@ -36,7 +36,14 @@ This guide explains how to deploy the Football Team LED scripts that coordinate 
 - `script.husker_led_start` — pushes the scarlet & cream theme via MQTT.
 - `script.husker_led_stop` — stops the show and re-applies the monthly effect using `automation.led_monthly_effect_scheduler`.
 
-Use these scripts from the [Football Team dashboards](../football-team/dashboard.md)—the **Lighting & Scenes** view surfaces the key scripts and automations—or via direct service calls. During game-day shows the chase routines hold the permanent LEDs at 100 % brightness while the chase group runs at 80 %, so the strip always punches through exterior ambient light even if indoor fixtures are dimmed.
+Use these scripts from the [Football Team dashboards](../football-team/dashboard.md)—the **Lighting & Scenes** view surfaces the key scripts and automations—or via direct service calls. During game-day shows the chase routines hold the permanent LEDs at 100 % brightness while the chase group runs at 80 %, so the strip always punches through exterior ambient light even if indoor fixtures are dimmed. The automation refresh now launches the 45 second chase exactly once at T‑20, then lets normal lighting take back over unless a celebration burst fires.
+
+## Game-day Automation Flow (2024 Refresh)
+
+- **Manual game mode control**: The legacy enable/disable window is gone—operators flip `input_boolean.huskers_game_mode` themselves from the dashboards or the Settings UI.
+- **Single-shot chase**: `automation.huskers_showtime_at_t_20` now spins up `script.huskers_chase30_start`, waits 50 seconds, and calls `script.huskers_chase30_stop` so the dual-cream chase runs a single 45 second lap.
+- **Tighter lighting hold**: `binary_sensor.huskers_lighting_hold` only asserts while a show script is active, a manual color show toggle is set, or within three minutes of the last chase or hail burst trigger. Daily lighting automations can resume immediately after the show clears.
+- **Postgame restoration**: `automation.huskers_postgame_cleanup` waits for a 20-minute postgame cool-down (or a 20-minute manual game-mode hold) before restoring the pre-chase snapshots and permanent LED effect.
 
 ## Manual Invocation
 Trigger from Developer Tools → Services:
@@ -58,7 +65,7 @@ data:
 ## Troubleshooting
 - **No response from LEDs** → confirm the MQTT broker is reachable and the light entity supports effects/brightness. Check the add-on logs.
 - **Effect unavailable** → verify the monthly effect exists in `light.permanent_outdoor_lights`’ `effect_list`.
-- **Automation conflict** → ensure the Husker lighting hold sensors allow the automation (see [Automation Catalog](../../reference/automations.md)).
+- **Automation conflict** → ensure the Husker lighting hold sensor is clear (see [Automation Catalog](../../reference/automations.md))—it now clears three minutes after the last chase/burst unless a show is still running.
 
 ## Hardening Against Reboots
 
