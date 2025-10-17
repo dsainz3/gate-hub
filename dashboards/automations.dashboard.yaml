@@ -58,14 +58,12 @@ views:
       - type: markdown
         content: "## 🏈 Huskers Game Flow"
       - type: entities
-        title: Huskers — Enable/Disable
+        title: Huskers — Core Automations
         show_header_toggle: false
         entities:
           - automation.huskers_pregame_showtime_t_20_minutes
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
-          - automation.huskers_enable_game_mode_window
-          - automation.huskers_disable_game_mode_window
       - type: entities
         title: Huskers — Last Triggered
         show_header_toggle: false
@@ -81,15 +79,7 @@ views:
           - type: attribute
             entity: automation.huskers_postgame_cleanup
             attribute: last_triggered
-            name: Postgame Cleanup — last_triggered
-          - type: attribute
-            entity: automation.huskers_enable_game_mode_window
-            attribute: last_triggered
-            name: Enable Window — last_triggered
-          - type: attribute
-            entity: automation.huskers_disable_game_mode_window
-            attribute: last_triggered
-            name: Disable Window — last_triggered
+            name: Postgame Restoration — last_triggered
       - type: grid
         square: false
         columns: 3
@@ -111,29 +101,13 @@ views:
               target:
                 entity_id: automation.huskers_td_burst_on_score
           - type: button
-            name: Trigger Postgame Cleanup
+            name: Trigger Postgame Restoration
             icon: mdi:broom
             tap_action:
               action: call-service
               service: automation.trigger
               target:
                 entity_id: automation.huskers_postgame_cleanup
-          - type: button
-            name: Trigger Enable Window
-            icon: mdi:calendar-plus
-            tap_action:
-              action: call-service
-              service: automation.trigger
-              target:
-                entity_id: automation.huskers_enable_game_mode_window
-          - type: button
-            name: Trigger Disable Window
-            icon: mdi:calendar-remove
-            tap_action:
-              action: call-service
-              service: automation.trigger
-              target:
-                entity_id: automation.huskers_disable_game_mode_window
       - type: markdown
         content: "## 💡 Lighting Schedules"
       - type: entities
@@ -524,8 +498,6 @@ views:
           - automation.huskers_pregame_showtime_t_20_minutes
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
-          - automation.huskers_enable_game_mode_window
-          - automation.huskers_disable_game_mode_window
           - automation.evening_lights_at_sunset
           - automation.lighting_exterior_front_garage_on_sunset
           - automation.lighting_night_mode_at_midnight

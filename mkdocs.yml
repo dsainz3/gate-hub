@@ -30,6 +30,7 @@ nav:
       - Football Team Dashboard History: explanation/football-team-dashboard-history.md
       - Pre-commit Quality Strategy: explanation/pre-commit-strategy.md
   - Archive:
+      - Huskers Automation History: archive/huskers-automation-history.md
       - AI Automation Builder (Archived): archive/ai-automation-builder.md
   - ADRs:
       - Template: adr/_template.md

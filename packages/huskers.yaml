@@ -1468,30 +1468,6 @@ template:
           automation_matrix: >-
             {{ [
               {
-                "entity_id": "automation.huskers_game_mode_enable_window",
-                "expected_mode": "single",
-                "triggers": [
-                  "sensor.huskers_kickoff_in_effective",
-                  "sensor.huskers_kickoff_in_2",
-                  "binary_sensor.huskers_is_pregame_espn",
-                  "binary_sensor.huskers_is_live_espn",
-                  "input_boolean.huskers_automations_enabled",
-                  "input_boolean.huskers_game_mode",
-                  "input_boolean.huskers_use_manual_kickoff"
-                ]
-              },
-              {
-                "entity_id": "automation.huskers_game_mode_disable_window",
-                "expected_mode": "single",
-                "triggers": [
-                  "sensor.huskers_kickoff_in_effective",
-                  "binary_sensor.huskers_is_pregame_espn",
-                  "binary_sensor.huskers_is_live_espn",
-                  "binary_sensor.huskers_is_postgame_espn",
-                  "input_boolean.huskers_game_mode"
-                ]
-              },
-              {
                 "entity_id": "automation.huskers_showtime_at_t_20",
                 "expected_mode": "single",
                 "triggers": [
@@ -1521,7 +1497,8 @@ template:
                   "input_boolean.huskers_game_mode",
                   "binary_sensor.huskers_light_show_active",
                   "script.huskers_chase30_loop",
-                  "script.huskers_chase_speed_loop"
+                  "script.huskers_chase_speed_loop",
+                  "input_boolean.huskers_automations_enabled"
                 ]
               }
             ] | to_json }}
@@ -1663,24 +1640,18 @@ template:
         state: >-
           {% set auto_enabled = is_state('input_boolean.huskers_automations_enabled','on') %}
           {% set game_mode = is_state('input_boolean.huskers_game_mode','on') %}
-          {% set manual_kick = is_state('input_boolean.huskers_use_manual_kickoff','on') %}
-          {% set has_next = state_attr('sensor.huskers_kickoff_in_2','has_next_game') | default(false) %}
-          {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(999) %}
-          {% set pre_window = (manual_kick or has_next) and minutes >= 0 and minutes <= 20 %}
-          {% set live = is_state('binary_sensor.huskers_is_live_espn','on') %}
           {% set show_active = is_state('binary_sensor.huskers_light_show_active','on') %}
-          {% set postgame_recent = (
-            is_state('binary_sensor.huskers_is_postgame_espn','on')
-            and (
-              now().timestamp()
-              - as_timestamp(states.binary_sensor.huskers_is_postgame_espn.last_changed, 0)
-            ) <= 1200
-          ) %}
+          {% set manual_show = is_state('input_boolean.huskers_color_show','on') %}
+          {% set now_ts = as_timestamp(now()) %}
+          {% set chase_ts = as_timestamp(state_attr('script.huskers_chase30_start', 'last_triggered'), 0) %}
+          {% set burst_ts = as_timestamp(state_attr('script.huskers_hail_burst_8s', 'last_triggered'), 0) %}
+          {% set chase_recent = chase_ts and chase_ts > 0 and (now_ts - chase_ts) <= 180 %}
+          {% set burst_recent = burst_ts and burst_ts > 0 and (now_ts - burst_ts) <= 120 %}
           {{ auto_enabled and game_mode and (
             show_active
-            or live
-            or pre_window
-            or postgame_recent
+            or manual_show
+            or chase_recent
+            or burst_recent
           ) }}
 
 ################################################################################
@@ -1790,105 +1761,6 @@ automation:
         data:
           value: "{{ clock }}"
 
-  - id: huskers_game_mode_enable_window
-    alias: 'Huskers: Enable Game Mode Window'
-    description: 'Automatically turns game mode on 20 minutes before kickoff and while a game is active.'
-    mode: single
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.huskers_kickoff_in_effective
-        below: 21
-      - id: safety_poll
-        platform: time_pattern
-        minutes: '/1'
-      - platform: state
-        entity_id: binary_sensor.huskers_is_pregame_espn
-        to: 'on'
-      - platform: state
-        entity_id: binary_sensor.huskers_is_live_espn
-        to: 'on'
-    condition:
-      - condition: state
-        entity_id: input_boolean.huskers_automations_enabled
-        state: 'on'
-      - condition: state
-        entity_id: input_boolean.huskers_game_mode
-        state: 'off'
-      - condition: or
-        conditions:
-          - condition: template
-            value_template: >-
-              {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(999) %}
-              {% set has_next = state_attr('sensor.huskers_kickoff_in_2', 'has_next_game') | default(false) %}
-              {% set manual = is_state('input_boolean.huskers_use_manual_kickoff', 'on') %}
-              {{ minutes >= 0 and minutes <= 20 and (has_next or manual) }}
-          - condition: state
-            entity_id: binary_sensor.huskers_is_live_espn
-            state: 'on'
-    action:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.huskers_game_mode
-      - service: logbook.log
-        data:
-          name: Huskers Game Mode
-          message: >-
-            Game mode enabled (kickoff in {{ states('sensor.huskers_kickoff_in_effective') }} min).
-
-  - id: huskers_game_mode_disable_window
-    alias: 'Huskers: Disable Game Mode Window'
-    description: 'Turns game mode off 20 minutes after postgame or when the next kickoff is more than 20 minutes away.'
-    mode: single
-    trigger:
-      - id: postgame_elapsed
-        platform: time_pattern
-        minutes: '/5'
-      - id: kickoff_far
-        platform: numeric_state
-        entity_id: sensor.huskers_kickoff_in_effective
-        above: 20
-        for:
-          minutes: 5
-    condition:
-      - condition: state
-        entity_id: input_boolean.huskers_game_mode
-        state: 'on'
-      - condition: template
-        value_template: >-
-          {{ not is_state('binary_sensor.huskers_is_pregame_espn', 'on') }}
-      - condition: template
-        value_template: >-
-          {{ not is_state('binary_sensor.huskers_is_live_espn', 'on') }}
-      - condition: template
-        value_template: >-
-          {% set postgame = states.binary_sensor.huskers_is_postgame_espn %}
-          {% set grace = 1200 %}
-          {% if trigger is not defined or trigger.id == 'kickoff_far' %}
-            {{ postgame is none
-               or postgame.state != 'on'
-               or (now().timestamp() - as_timestamp(postgame.last_changed, 0)) >= grace }}
-          {% else %}
-            {{ postgame is not none
-               and postgame.state == 'on'
-               and (now().timestamp() - as_timestamp(postgame.last_changed, 0)) >= grace }}
-          {% endif %}
-    action:
-      - variables:
-          disable_reason: >-
-            {% if trigger is not defined or trigger.id == 'kickoff_far' %}
-              kickoff outside the 20-minute window
-            {% else %}
-              postgame grace period elapsed
-            {% endif %}
-      - service: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.huskers_game_mode
-      - service: logbook.log
-        data:
-          name: Huskers Game Mode
-          message: >-
-            Game mode disabled ({{ disable_reason }}).
-
   - id: huskers_showtime_at_t_20
     alias: 'Huskers: Pregame Showtime (T-20 Minutes)'
     description: 'Starts the 30s cream chase ~20 minutes before kickoff.'
@@ -1902,9 +1774,6 @@ automation:
         below: 21
         for:
           seconds: 5
-      - id: safety_poll
-        platform: time_pattern
-        minutes: '/1'
     condition:
       - condition: state
         entity_id: input_boolean.huskers_automations_enabled
@@ -1926,22 +1795,25 @@ automation:
       - condition: state
         entity_id: script.huskers_chase_speed_loop
         state: 'off'
-      - condition: template
-        value_template: >-
-          {% if trigger is defined and trigger.id == 'safety_poll' %}
-            {% set minutes = states('sensor.huskers_kickoff_in_effective') | float(99) %}
-            {{ 0 <= minutes <= 25 }}
-          {% else %}
-            true
-          {% endif %}
     action:
+      - variables:
+          kickoff_in: "{{ states('sensor.huskers_kickoff_in_effective') }}"
+      - service: script.turn_off
+        target:
+          entity_id: script.huskers_chase_speed_loop
+        continue_on_error: true
       - service: script.turn_on
         target:
           entity_id: script.huskers_chase30_start
+      - delay:
+          seconds: 50
+      - service: script.turn_on
+        target:
+          entity_id: script.huskers_chase30_stop
       - service: logbook.log
         data:
           name: Huskers Automation
-          message: "Pregame show started (T-{{ states('sensor.huskers_kickoff_in_effective') }} min)"
+          message: "Pregame show ran 45s chase (T-{{ kickoff_in }} min)"
 
   - id: huskers_td_burst_on_score
     alias: 'Huskers: Touchdown Celebration'
@@ -1974,58 +1846,27 @@ automation:
           entity_id: automation.huskers_td_burst_on_score
 
   - id: huskers_postgame_cleanup
-    alias: 'Huskers: Postgame Cleanup'
-    description: 'Stops chase loops and restores lights when postgame window closes.'
+    alias: 'Huskers: Postgame Restoration'
+    description: 'Restores Husker lighting snapshots 20 minutes into postgame or after extended manual shutdowns.'
     initial_state: true
     mode: single
     trigger:
-      - id: postgame_closed
+      - id: postgame_20m
         platform: state
         entity_id: binary_sensor.huskers_is_postgame_espn
-        from: 'on'
-        to: 'off'
-      - id: postgame_unavailable
-        platform: state
-        entity_id: binary_sensor.huskers_is_postgame_espn
-        from: 'on'
-        to: 'unavailable'
-      - id: postgame_unknown
-        platform: state
-        entity_id: binary_sensor.huskers_is_postgame_espn
-        from: 'on'
-        to: 'unknown'
-      - id: game_mode_disabled
+        to: 'on'
+        for:
+          minutes: 20
+      - id: manual_hold
         platform: state
         entity_id: input_boolean.huskers_game_mode
-        from: 'on'
         to: 'off'
-      - id: chase_timeout
-        platform: time_pattern
-        minutes: '/5'
+        for:
+          minutes: 20
     condition:
-      - condition: template
-        value_template: >-
-          {% if trigger is not defined %}
-            true
-          {% elif trigger.id in ['postgame_closed', 'postgame_unavailable', 'postgame_unknown'] %}
-            {{ is_state('input_boolean.huskers_game_mode', 'on') }}
-          {% elif trigger.id == 'game_mode_disabled' %}
-            true
-          {% elif trigger.id == 'chase_timeout' %}
-            {% set now_ts = as_timestamp(now()) %}
-            {% set threshold = 900 %}
-            {% set chase30_last = as_timestamp(state_attr('script.huskers_chase30_loop', 'last_triggered')) %}
-            {% set chase_speed_last = as_timestamp(state_attr('script.huskers_chase_speed_loop', 'last_triggered')) %}
-            {% set chase30_expired = is_state('script.huskers_chase30_loop', 'on')
-              and chase30_last is not none
-              and (now_ts - chase30_last) > threshold %}
-            {% set chase_speed_expired = is_state('script.huskers_chase_speed_loop', 'on')
-              and chase_speed_last is not none
-              and (now_ts - chase_speed_last) > threshold %}
-            {{ chase30_expired or chase_speed_expired }}
-          {% else %}
-            true
-          {% endif %}
+      - condition: state
+        entity_id: input_boolean.huskers_automations_enabled
+        state: 'on'
     action:
       - variables:
           cleanup_required: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
@@ -2052,10 +1893,10 @@ automation:
         data:
           name: Huskers Automation
           message: >-
-            {% if cleanup_required %}
-              Postgame cleanup completed (loops stopped, state restored)
+            {% if trigger is defined and trigger.id == 'postgame_20m' %}
+              Postgame restoration applied after 20-minute cool-down (snapshots reapplied)
             {% else %}
-              Postgame cleanup restored snapshots (no active Husker light show)
+              Manual shutdown held 20 minutes — snapshots restored automatically
             {% endif %}
           entity_id: automation.huskers_postgame_cleanup
 
