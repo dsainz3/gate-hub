@@ -28,6 +28,10 @@ This guide provisions the dev container defined in `.devcontainer/` and connects
 2. Open the folder in VS Code.
 3. When prompted, choose **Reopen in Container** or run **Dev Containers: Reopen in Container** from the command palette.
 
+The initialize step now creates both the SSH directory **and** the workspace root on the Docker host. This avoids bind-mount
+errors such as `bind source path does not exist: /root/config` when you remote into Home Assistant OS (HAOS) and keep the
+repository under `/config` or another path that may not exist yet for the `root` account.
+
 The image builds from `mcr.microsoft.com/devcontainers/python:3.11`, installs Poetry, and wires helper scripts defined in `.devcontainer/`.
 
 ## Post-create Tasks
@@ -41,7 +45,7 @@ These commands are also available via VS Code tasks (see below).
 
 ## SSH Access to HAOS from the Container
 
-The container mounts your host `~/.ssh` directory read-only at `/home/vscode/.ssh`. A pre-build initialize command guarantees the directory exists on the Docker host with secure permissions (`mkdir -p ~/.ssh && chmod 700 ~/.ssh`) so the bind mount does not fail even on fresh Home Assistant OS installs. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
+The container mounts your host `~/.ssh` directory read-only at `/home/vscode/.ssh`. A pre-build initialize command guarantees the directory exists on the Docker host with secure permissions (`mkdir -p ~/.ssh && chmod 700 ~/.ssh`) and prepares the workspace root so Docker can mount it. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
 
 ### Importing your VS Code SSH config
 
