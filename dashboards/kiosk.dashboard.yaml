@@ -21,7 +21,57 @@ views:
         name: Next Huskers Game
 
     cards:
+      - type: markdown
+        view_layout:
+          grid-column: 1 / -1
+        content: |-
+          {% set now_time = now().strftime('%-I:%M %p') %}
+          {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
+          {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+          {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
+          {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
+          {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+          {% set low_battery_threshold = 30 %}
+          {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
+          {% set low_battery_ns = namespace(items=[]) %}
+          {% for ent in battery_entities %}
+            {% set state = ent.state | string %}
+            {% if ent.domain == 'binary_sensor' %}
+              {% if state == 'on' %}
+                {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
+              {% endif %}
+            {% else %}
+              {% set pct = state.replace('%', '') | float(100) %}
+              {% if pct < low_battery_threshold %}
+                {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ state ~ '%)'] %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% set low_battery_lines = low_battery_ns.items | unique | list %}
+          ### Status Briefing · {{ now_time }}
+          Hello! Here's the latest from around the house:
+
+          {% if on_lights %}
+          • Lights are on in {{ on_lights | join(', ') }}.
+          {% else %}
+          • All tracked lights are currently off.
+          {% endif %}
+
+          {% if humidity_valid %}
+          • Humidor humidity is at {{ humidor_humidity }}%, {{ 'right on target' if humidor_ok else 'outside the preferred range' }}.
+          {% else %}
+          • I'm not seeing a current humidor humidity reading.
+          {% endif %}
+
+          {% if low_battery_lines %}
+          • Keep an eye on {{ low_battery_lines | join(', ') }} — their batteries are running low.
+          {% else %}
+          • No low batteries to report right now.
+          {% endif %}
+
       - type: vertical-stack
+        view_layout:
+          grid-column: 1 / -1
         cards:
           - type: markdown
             content: |
