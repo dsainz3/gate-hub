@@ -166,6 +166,7 @@ Use these documents as the study material for sharpening system design, tooling,
 
 ## Automation & Tooling Workflow
 
+- **Dev container:** Open the repo in VS Code and choose **Dev Containers: Reopen in Container** to build the image defined in `.devcontainer/`. The container mounts your SSH keys read-only and exposes helper scripts (`haos-ssh`, `haos`) pre-configured for `root@homeassistant.local:2222`. See [VS Code Dev Container Setup](docs/how-to/dev-container.md) for details.
 - **Local setup:** `poetry env use 3.11`, `poetry install`, and `pre-commit install` provision the tooling stack. Pip-based installs remain an option if Poetry is unavailable.
 - **Validation loop:** Run `pre-commit run --all-files`, `ha core check`, `python scripts/ha_check_portable.py`, and `pytest` before pushing to guarantee clean builds.
 - **Secrets hygiene:** `.ci/fakesecrets.yaml` supplies CI with stub credentials; real values stay in `secrets.yaml` on the Home Assistant host.
