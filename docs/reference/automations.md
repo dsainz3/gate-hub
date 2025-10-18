@@ -103,18 +103,18 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 
 ### Football Team: Scoreboard Delay Buffer (`packages/huskers_everything.yaml:1690`)
 - **ID** `huskers_score_delay_buffer`
-- **Entity** `automation.huskers_scoreboard_delay_buffer`
-- **Triggers**: Attribute changes on `sensor.husker_team` for team score, opponent score, game clock, or quarter.
-- **Guards**: Spoiler delay toggle `input_boolean.huskers_use_score_delay` must be `on` and the TeamTracker sensor available.
+- **Entity** `automation.huskers_score_delay_buffer`
+- **Triggers**: Attribute changes on `sensor.husker_team` for team score, opponent score, game clock, or quarter; if that sensor is unavailable the automation still wakes when the ESPN auto scoreboard helpers update.
+- **Guards**: Spoiler delay toggle `input_boolean.huskers_use_score_delay` must be `on` and at least one scoreboard source (TeamTracker or the ESPN auto helpers) available.
 - **Mode**: Parallel (`max: 120`) so every scoreboard poll can finish its 30-second hold without newer updates cancelling it.
-- **Actions**: Wait 30 seconds, then copy the buffered values into the manual score/clock helpers so dashboards lag live updates.
+- **Actions**: Wait 30 seconds, then copy the buffered values into the manual score/clock helpers so dashboards lag live updates, pulling from ESPN auto sensors whenever TeamTracker payloads are missing.
 
 ### Football Team: Score Delay Helper Sync (`packages/huskers_everything.yaml:1738`)
 - **ID** `huskers_score_delay_sync`
-- **Entity** `automation.huskers_score_delay_helper_sync`
+- **Entity** `automation.huskers_score_delay_sync`
 - **Triggers**: Home Assistant start or any state change on `input_boolean.huskers_use_score_delay`.
-- **Guards**: TeamTracker sensor returns data (`sensor.husker_team` not `unknown`/`unavailable`).
-- **Actions**: Immediately align the manual score/clock helpers with the latest TeamTracker payload so toggling the buffer produces consistent values.
+- **Guards**: Spoiler delay toggle must be `on` or the system must be starting, and at least one scoreboard source reporting data.
+- **Actions**: Immediately align the manual score/clock helpers with the latest TeamTracker payload; if that feed is down, the automation pulls from the ESPN auto scoreboard helpers so toggling the buffer produces consistent values.
 
 ### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
 - **ID** `huskers_game_mode_enable_window`
