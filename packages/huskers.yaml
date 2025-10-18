@@ -1618,7 +1618,8 @@ automation:
   - id: huskers_score_delay_buffer
     alias: 'Huskers: Scoreboard Delay Buffer'
     description: 'Copies TeamTracker scoreboard values into manual helpers after a 30-second buffer when enabled.'
-    mode: restart
+    mode: parallel
+    max: 120
     trigger:
       - platform: state
         entity_id: sensor.husker_team

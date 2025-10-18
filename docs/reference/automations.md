@@ -106,6 +106,7 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Entity** `automation.huskers_scoreboard_delay_buffer`
 - **Triggers**: Attribute changes on `sensor.husker_team` for team score, opponent score, game clock, or quarter.
 - **Guards**: Spoiler delay toggle `input_boolean.huskers_use_score_delay` must be `on` and the TeamTracker sensor available.
+- **Mode**: Parallel (`max: 120`) so every scoreboard poll can finish its 30-second hold without newer updates cancelling it.
 - **Actions**: Wait 30 seconds, then copy the buffered values into the manual score/clock helpers so dashboards lag live updates.
 
 ### Football Team: Score Delay Helper Sync (`packages/huskers_everything.yaml:1738`)
