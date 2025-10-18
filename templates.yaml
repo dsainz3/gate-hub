@@ -959,7 +959,7 @@
             {% endfor %}
             {% set low_battery_lines = low_battery_ns.items | unique | list %}
             {% if on_lights %}
-              {% set bullet_lights = '- Lights are on in ' ~ (on_lights | join(', ')) ~ '.' %}
+              {% set bullet_lights = '- Lights currently on:\n  - ' ~ (on_lights | join('\n  - ')) %}
             {% else %}
               {% set bullet_lights = '- All tracked lights are currently off.' %}
             {% endif %}
