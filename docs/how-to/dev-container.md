@@ -41,7 +41,12 @@ These commands are also available via VS Code tasks (see below).
 
 ## SSH Access to HAOS from the Container
 
-The container mounts your host `~/.ssh` directory (including `config`, `known_hosts`, and keys) read-only at `/home/vscode/.ssh` so existing keys and host-specific SSH aliases work without copying secrets. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
+The container mounts your host `~/.ssh` directory read-only at `/home/vscode/.ssh`. A pre-build initialize command guarantees the directory exists on the Docker host with secure permissions (`mkdir -p ~/.ssh && chmod 700 ~/.ssh`) so the bind mount does not fail even on fresh Home Assistant OS installs. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
+
+### Importing your VS Code SSH config
+
+- **Remote-SSH to HAOS:** Copy any existing `config`, key files, or `known_hosts` entries from your development workstation into `/root/.ssh/` on the Home Assistant OS host (the machine running Docker). The mount surfaces whatever lives in that directory, so the container inherits the same SSH profiles.
+- **Local VS Code usage:** If you develop directly on the same machine that runs Docker, keep your SSH material in `~/.ssh/` and the container will mount it automatically. No additional action is required.
 
 Use either of the following from the integrated terminal:
 
