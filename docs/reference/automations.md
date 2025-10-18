@@ -115,12 +115,26 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Guards**: TeamTracker sensor returns data (`sensor.husker_team` not `unknown`/`unavailable`).
 - **Actions**: Immediately align the manual score/clock helpers with the latest TeamTracker payload so toggling the buffer produces consistent values.
 
+### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
+- **ID** `huskers_game_mode_enable_window`
+- **Entity** `automation.huskers_enable_game_mode_window`
+- **Triggers**: `sensor.huskers_kickoff_in_effective` < 121 for ≥1 minute, or ESPN pregame/live binary sensors turning `on`.
+- **Guards**: Game mode currently `off` and evidence of an upcoming or active game.
+- **Actions**: Enables `input_boolean.huskers_game_mode` and logs kickoff timing.
+
+### Football Team: Disable Game Mode Window (`packages/huskers_everything.yaml:1038`)
+- **ID** `huskers_game_mode_disable_window`
+- **Entity** `automation.huskers_disable_game_mode_window`
+- **Triggers**: Postgame ESPN sensor `on` for 2 hours, or kickoff timer > 120 for ≥5 minutes.
+- **Guards**: Game mode `on`, ESPN pregame and live sensors both `off`.
+- **Actions**: Disables `input_boolean.huskers_game_mode` and logs the change.
+
 ### Football Team: Pregame Showtime (T-20 Minutes) (`packages/huskers_everything.yaml:1072`)
 - **ID** `huskers_showtime_at_t_20`
 - **Entity** `automation.huskers_pregame_showtime_t_20_minutes`
 - **Trigger**: Kickoff timer between 19–21 minutes for >5 seconds.
 - **Guards**: Huskers automations enabled, game mode `on`, ESPN pregame `on` (or test mode), and chase scripts idle.
-- **Actions**: Stops any speed loop failsafe, launches `script.huskers_chase30_start`, waits 50 seconds, then fires `script.huskers_chase30_stop` so the 45 s chase runs exactly once before logging the start event.
+- **Actions**: Launches `script.huskers_chase30_start` (dual-cream, 45 s loop; interior group at 80 % brightness, permanent LEDs pinned at 100 %) and logs the start event.
 
 ### Football Team: Touchdown Celebration (`packages/huskers_everything.yaml:1114`)
 - **ID** `huskers_td_burst_on_score`
@@ -128,11 +142,12 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Guards**: Huskers automations + game mode `on`; score must increase.
 - **Actions**: Runs `script.huskers_hail_burst_8s` (scarlet reset plus cream accents at 80 %, permanent LEDs held at 100 %) and logs the score delta.
 
-### Football Team: Postgame Restoration (`packages/huskers_everything.yaml:1144`)
+### Football Team: Postgame Cleanup (`packages/huskers_everything.yaml:1144`)
 - **ID** `huskers_postgame_cleanup`
-- **Trigger**: `binary_sensor.huskers_is_postgame_espn` remains `on` for 20 minutes, or `input_boolean.huskers_game_mode` stays `off` for 20 minutes.
-- **Guards**: Huskers automations enabled.
-- **Actions**: Stops any active chase loops (when needed), reapplies the pre-chase snapshots, and logs whether it followed the postgame cool-down or a manual shutdown hold.
+- **Trigger**: `binary_sensor.huskers_is_postgame_espn` transitions `on` → `off`.
+- **Guards**: Huskers automations + game mode `on`.
+- **Actions**: Stops chase scripts in parallel and records cleanup completion.
+- **Notes**: The supporting status sensor stores a `status_source` attribute (`scoreboard` or `schedule`). If ESPN’s live feed disappears immediately after the game, the fallback schedule entry keeps the sensor in `Final` so this automation still fires once the postgame window expires.
 
 ### Football Team: Automation Watchdog Alert (`packages/huskers_everything.yaml:1194`)
 - **ID** `huskers_automation_watchdog_alert`
