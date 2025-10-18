@@ -3,7 +3,7 @@ title: Codex Prompt – Huskers Dashboard 30-Second Delay
 summary: Credits-optimized instructions for generating a 30-second spoiler buffer on the football dashboards and refreshing the supporting documentation.
 status: active
 category: how-to
-updated: 2025-10-14
+updated: 2025-10-17
 owner: playbook-team
 tags:
   - codex
@@ -29,7 +29,7 @@ Implementation requirements:
 1. Automations & helpers
    - Reuse the existing manual override helpers: `input_boolean.huskers_use_manual_score`, `input_number.huskers_our_score_manual`, `input_number.huskers_opponent_score_manual`, and any clock-related helpers already defined.
    - Add the delay automations inside `packages/huskers.yaml` alongside the existing Huskers helpers; trigger whenever `sensor.husker_team` updates score, clock, or period attributes.
-   - The automation must wait 30 seconds (`delay: "00:00:30"`) before copying live values into the manual helpers.
+   - The automation must wait 30 seconds (`delay: "00:00:30"`) before copying live values into the manual helpers and run in `mode: parallel` with a high `max` so rapid clock ticks queue instead of cancelling the spoiler window.
    - Ensure manual helpers revert to live values instantly when the delay boolean is off.
    - Introduce a new `input_boolean.huskers_use_score_delay` so operators can toggle the buffer. Default to `off`.
 2. Dashboards
