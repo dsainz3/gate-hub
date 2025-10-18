@@ -935,6 +935,28 @@
             {% set time_readout = now_obj.strftime('%-I:%M %p') %}
             {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
             {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+            {% if on_lights %}
+              {% set bullet_lights = '- Lights currently on:\n  - ' ~ (on_lights | join('\n  - ')) %}
+            {% else %}
+              {% set bullet_lights = '- All tracked lights are currently off.' %}
+            {% endif %}
+            {% set lines = [
+              greeting ~ ", here's your support lab briefing as of " ~ time_readout ~ ".",
+              '',
+              bullet_lights
+            ] %}
+            {{ lines | join('\n') }}
+          environment_content: >-
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
             {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
             {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
             {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
@@ -958,11 +980,6 @@
               {% endif %}
             {% endfor %}
             {% set low_battery_lines = low_battery_ns.items | unique | list %}
-            {% if on_lights %}
-              {% set bullet_lights = '- Lights currently on:\n  - ' ~ (on_lights | join('\n  - ')) %}
-            {% else %}
-              {% set bullet_lights = '- All tracked lights are currently off.' %}
-            {% endif %}
             {% if humidity_valid %}
               {% if humidor_ok %}
                 {% set bullet_humidor = '- Humidor humidity is at ' ~ (humidor_humidity | float(0) | round(1)) ~ '%, holding steady.' %}
@@ -978,9 +995,8 @@
               {% set bullet_batteries = '- No low batteries to report right now.' %}
             {% endif %}
             {% set lines = [
-              greeting ~ ", here's your support lab briefing as of " ~ time_readout ~ ".",
+              greeting ~ ", keeping tabs on support lab essentials as of " ~ time_readout ~ ".",
               '',
-              bullet_lights,
               bullet_humidor,
               bullet_batteries
             ] %}

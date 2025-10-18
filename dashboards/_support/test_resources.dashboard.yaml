@@ -21,10 +21,16 @@ views:
         cards:
           - type: markdown
             view_layout:
-              column_span: 3
+              column_span: 2
             content: >-
               {{ state_attr('sensor.support_test_resources_briefing', 'content')
                  or "Support lab briefing details are currently unavailable." }}
+          - type: markdown
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'environment_content')
+                 or "Support lab environment details are currently unavailable." }}
           - type: custom:mushroom-title-card
             title: Support Lab · Modern Showcase
             subtitle: Curated command centre built from the sample entities.
