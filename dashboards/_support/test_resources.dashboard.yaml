@@ -135,46 +135,250 @@ views:
             square: false
             cards:
               - type: markdown
-                title: Support lab briefing
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: linear-gradient(145deg, rgba(253, 248, 236, 0.95), rgba(240, 228, 196, 0.92));
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.28);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card .eyebrow {
+                      color: var(--secondary-text-color);
+                      font-size: 0.75rem;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      display: block;
+                      margin-bottom: 6px;
+                    }
+                    ha-card h2 {
+                      font-size: 1.25rem;
+                      margin: 0 0 12px 0;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
                 content: >-
+                  <span class="eyebrow">Mission Control</span>
+
+                  <h2>Support Lab · Modem Showcase</h2>
+
                   {{ state_attr('sensor.support_test_resources_briefing', 'content')
                      or "Support lab briefing details are currently unavailable." }}
               - type: markdown
-                title: Keeping tabs on essentials
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: linear-gradient(145deg, rgba(253, 248, 236, 0.95), rgba(235, 222, 188, 0.92));
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card .eyebrow {
+                      color: var(--secondary-text-color);
+                      font-size: 0.75rem;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      display: block;
+                      margin-bottom: 6px;
+                    }
+                    ha-card h2 {
+                      font-size: 1.25rem;
+                      margin: 0 0 12px 0;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
                 content: >-
+                  <span class="eyebrow">Environment Snapshot</span>
+
+                  <h2>Keeping Tabs on Essentials</h2>
+
                   {{ state_attr('sensor.support_test_resources_briefing', 'environment_content')
                      or "Support lab environment details are currently unavailable." }}
               - type: markdown
-                title: Headline events
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: linear-gradient(145deg, rgba(253, 248, 236, 0.95), rgba(236, 226, 197, 0.92));
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card .eyebrow {
+                      color: var(--secondary-text-color);
+                      font-size: 0.75rem;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      display: block;
+                      margin-bottom: 6px;
+                    }
+                    ha-card h2 {
+                      font-size: 1.25rem;
+                      margin: 0 0 12px 0;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
                 content: >-
+                  <span class="eyebrow">Live Highlights</span>
+
+                  <h2>Headline Events</h2>
+
                   {{ state_attr('sensor.support_test_resources_briefing', 'events_content')
                      or "Support lab event highlights are currently unavailable." }}
               - type: markdown
-                title: Systems oversight
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: linear-gradient(145deg, rgba(253, 248, 236, 0.95), rgba(232, 218, 184, 0.92));
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card .eyebrow {
+                      color: var(--secondary-text-color);
+                      font-size: 0.75rem;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      display: block;
+                      margin-bottom: 6px;
+                    }
+                    ha-card h2 {
+                      font-size: 1.25rem;
+                      margin: 0 0 12px 0;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
                 content: >-
+                  <span class="eyebrow">Systems Pulse</span>
+
+                  <h2>Operational Oversight</h2>
+
                   {{ state_attr('sensor.support_test_resources_briefing', 'systems_content')
                      or "Support lab systems details are currently unavailable." }}
-          - type: markdown
-            title: System health snapshot
+          - type: grid
             view_layout:
               column_span: 4
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'system_health_cluster')
-                 or "System health metrics are currently unavailable." }}
-          - type: markdown
-            title: Environment readings
-            view_layout:
-              column_span: 4
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'environment_cluster')
-                 or "Environment metrics are currently unavailable." }}
-          - type: markdown
-            title: Lighting & energy
-            view_layout:
-              column_span: 4
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'lighting_energy_cluster')
-                 or "Lighting and energy metrics are currently unavailable." }}
+            columns: 3
+            square: false
+            cards:
+              - type: markdown
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: var(--card-background-color);
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card h3 {
+                      margin-top: 0;
+                      margin-bottom: 12px;
+                      font-size: 1.05rem;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
+                content: >-
+                  <h3>System Health</h3>
+
+                  {{ state_attr('sensor.support_test_resources_briefing', 'system_health_cluster')
+                     or "System health metrics are currently unavailable." }}
+              - type: markdown
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: var(--card-background-color);
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card h3 {
+                      margin-top: 0;
+                      margin-bottom: 12px;
+                      font-size: 1.05rem;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
+                content: >-
+                  <h3>Environment</h3>
+
+                  {{ state_attr('sensor.support_test_resources_briefing', 'environment_cluster')
+                     or "Environment metrics are currently unavailable." }}
+              - type: markdown
+                card_mod:
+                  style: |
+                    ha-card {
+                      background: var(--card-background-color);
+                      border-radius: var(--ha-card-border-radius, 18px);
+                      border: 1px solid rgba(50, 38, 15, 0.24);
+                      box-shadow: var(--ha-card-box-shadow, 0px 18px 36px rgba(0, 0, 0, 0.18));
+                      color: var(--primary-text-color);
+                      padding: 20px 22px;
+                    }
+                    ha-card h3 {
+                      margin-top: 0;
+                      margin-bottom: 12px;
+                      font-size: 1.05rem;
+                      font-weight: 700;
+                    }
+                    ha-card ul {
+                      margin: 0;
+                      padding-left: 1.15rem;
+                    }
+                    ha-card li {
+                      margin-bottom: 6px;
+                    }
+                content: >-
+                  <h3>Lighting &amp; Energy</h3>
+
+                  {{ state_attr('sensor.support_test_resources_briefing', 'lighting_energy_cluster')
+                     or "Lighting and energy metrics are currently unavailable." }}
       - type: grid
         title: Live Highlights
         columns: 3
