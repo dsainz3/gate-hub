@@ -15,8 +15,8 @@ RUN apt-get update && \
 RUN pipx install poetry && pipx ensurepath
 
 # Set up shell profile directory for customizations
-COPY profile.d/ /etc/profile.d/
+COPY .devcontainer/profile.d/ /etc/profile.d/
 
 # Provide a helper script for HAOS SSH access
-COPY haos-ssh /usr/local/bin/haos-ssh
+COPY .devcontainer/haos-ssh /usr/local/bin/haos-ssh
 RUN chmod +x /usr/local/bin/haos-ssh

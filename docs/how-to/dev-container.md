@@ -41,7 +41,7 @@ These commands are also available via VS Code tasks (see below).
 
 ## SSH Access to HAOS from the Container
 
-The container mounts your host `~/.ssh` directory read-only at `/home/vscode/.ssh` so existing keys work without copying secrets. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
+The container mounts your host `~/.ssh` directory (including `config`, `known_hosts`, and keys) read-only at `/home/vscode/.ssh` so existing keys and host-specific SSH aliases work without copying secrets. Networking runs in host mode so `homeassistant.local` resolves as it does on the host.
 
 Use either of the following from the integrated terminal:
 
