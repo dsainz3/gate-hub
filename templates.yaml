@@ -1115,6 +1115,153 @@
               bullet_holiday
             ] %}
             {{ lines | join('\n') }}
+          system_health_cluster: >-
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set cpu_state = states('sensor.processor_use') %}
+            {% if cpu_state not in invalid %}
+              {% set cpu_value = cpu_state | float(0) | round(1) %}
+              {% set cpu_line = '- **CPU %** · ' ~ cpu_value ~ '%' %}
+            {% else %}
+              {% set cpu_line = '- **CPU %** · —' %}
+            {% endif %}
+            {% set memory_state = states('sensor.memory_use_percent') %}
+            {% if memory_state not in invalid %}
+              {% set memory_value = memory_state | float(0) | round(1) %}
+              {% set memory_line = '- **Memory %** · ' ~ memory_value ~ '%' %}
+            {% else %}
+              {% set memory_line = '- **Memory %** · —' %}
+            {% endif %}
+            {% set disk_state = states('sensor.disk_use_percent') %}
+            {% if disk_state not in invalid %}
+              {% set disk_value = disk_state | float(0) | round(1) %}
+              {% set disk_line = '- **Disk %** · ' ~ disk_value ~ '%' %}
+            {% else %}
+              {% set disk_line = '- **Disk %** · —' %}
+            {% endif %}
+            {% set ping_state = states('sensor.speedtest_ping') %}
+            {% if ping_state not in invalid %}
+              {% set ping_value = ping_state | float(0) | round(1) %}
+              {% set ping_line = '- **Ping (ms)** · ' ~ ping_value ~ ' ms' %}
+            {% else %}
+              {% set ping_line = '- **Ping (ms)** · —' %}
+            {% endif %}
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set lines = [
+              greeting ~ ", here is the latest system health at " ~ time_readout ~ ":",
+              '',
+              cpu_line,
+              memory_line,
+              disk_line,
+              ping_line
+            ] %}
+            {{ lines | join('\n') }}
+          environment_cluster: >-
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set temp_state = states('sensor.outdoor_temperature_wx') %}
+            {% if temp_state not in invalid %}
+              {% set temp_value = temp_state | float(0) | round(1) %}
+              {% set temp_line = '- **Temp (°F)** · ' ~ temp_value ~ '°F' %}
+            {% else %}
+              {% set temp_line = '- **Temp (°F)** · —' %}
+            {% endif %}
+            {% set humidity_state = states('sensor.outdoor_humidity_wx') %}
+            {% if humidity_state not in invalid %}
+              {% set humidity_value = humidity_state | float(0) | round(1) %}
+              {% set humidity_line = '- **Humidity (%)** · ' ~ humidity_value ~ '%' %}
+            {% else %}
+              {% set humidity_line = '- **Humidity (%)** · —' %}
+            {% endif %}
+            {% set pressure_state = states('sensor.kneplatt72_pressure') %}
+            {% set pressure_unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('hPa') %}
+            {% if pressure_state not in invalid %}
+              {% set pressure_value = pressure_state | float(0) | round(2) %}
+              {% set pressure_line = '- **Pressure** · ' ~ pressure_value ~ ' ' ~ pressure_unit %}
+            {% else %}
+              {% set pressure_line = '- **Pressure** · —' %}
+            {% endif %}
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set lines = [
+              greeting ~ ", environment checkpoints updated at " ~ time_readout ~ ":",
+              '',
+              temp_line,
+              humidity_line,
+              pressure_line
+            ] %}
+            {{ lines | join('\n') }}
+          lighting_energy_cluster: >-
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set lights_state = states('sensor.kiosk_snapshot_lights_on') %}
+            {% if lights_state not in invalid %}
+              {% set lights_line = '- **Lights On (count)** · ' ~ (lights_state | int(0)) %}
+            {% else %}
+              {% set lights_line = '- **Lights On (count)** · —' %}
+            {% endif %}
+            {% set power_sources = [
+              'sensor.energy_usage_power',
+              'sensor.home_total_power',
+              'sensor.total_home_power',
+              'sensor.plug_humidor_power'
+            ] %}
+            {% set power_ns = namespace(line='- **Power (W)** · —') %}
+            {% for entity in power_sources %}
+              {% set value = states(entity) %}
+              {% if value not in invalid %}
+                {% set unit = state_attr(entity, 'unit_of_measurement') | default('W') %}
+                {% set power_ns.line = '- **Power (W)** · ' ~ (value | float(0) | round(1)) ~ ' ' ~ unit %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% set energy_sources = [
+              'sensor.energy_usage_today',
+              'sensor.energy_today',
+              'sensor.daily_energy',
+              'sensor.plug_humidor_energy_today'
+            ] %}
+            {% set energy_ns = namespace(line='- **Energy Today (kWh)** · —') %}
+            {% for entity in energy_sources %}
+              {% set value = states(entity) %}
+              {% if value not in invalid %}
+                {% set unit = state_attr(entity, 'unit_of_measurement') | default('kWh') %}
+                {% set energy_ns.line = '- **Energy Today (kWh)** · ' ~ (value | float(0) | round(2)) ~ ' ' ~ unit %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set lines = [
+              greeting ~ ", lighting and energy stats pulled at " ~ time_readout ~ ":",
+              '',
+              lights_line,
+              power_ns.line,
+              energy_ns.line
+            ] %}
+            {{ lines | join('\n') }}
 
   - binary_sensor:
       - name: huskers_tailgate_window

@@ -19,43 +19,6 @@ views:
         title: Mission Control
         columns: 4
         cards:
-          - type: markdown
-            title: Support lab briefing
-            view_layout:
-              column_span: 1
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'content')
-                 or "Support lab briefing details are currently unavailable." }}
-          - type: markdown
-            title: Keeping tabs on essentials
-            view_layout:
-              column_span: 1
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'environment_content')
-                 or "Support lab environment details are currently unavailable." }}
-          - type: markdown
-            title: Headline events
-            view_layout:
-              column_span: 1
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'events_content')
-                 or "Support lab event highlights are currently unavailable." }}
-          - type: markdown
-            title: Systems oversight
-            view_layout:
-              column_span: 1
-            content: >-
-              {{ state_attr('sensor.support_test_resources_briefing', 'systems_content')
-                 or "Support lab systems details are currently unavailable." }}
-          - type: custom:mushroom-title-card
-            title: Support Lab · Modern Showcase
-            subtitle: Curated command centre built from the sample entities.
-            alignment: start
-            tap_action:
-              action: more-info
-              entity: sensor.agenda_planner_summary
-            view_layout:
-              column_span: 4
           - type: custom:mushroom-chips-card
             alignment: start
             chips:
@@ -114,8 +77,106 @@ views:
                 tap_action:
                   action: more-info
                   entity: sensor.f1_next_race_name
+              - type: template
+                entity: sensor.kiosk_snapshot_lights_on
+                icon: mdi:lightbulb-on
+                icon_color: >-
+                  {% set lights = states('sensor.kiosk_snapshot_lights_on') %}
+                  {% if lights in ['', 'unknown', 'unavailable', none] %}
+                    grey
+                  {% elif lights | int(0) > 0 %}
+                    amber
+                  {% else %}
+                    grey
+                  {% endif %}
+                content: >-
+                  {% set lights = states('sensor.kiosk_snapshot_lights_on') %}
+                  {% if lights in ['', 'unknown', 'unavailable', none] %}
+                    Lights · –
+                  {% else %}
+                    Lights · {{ lights }}
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: sensor.kiosk_snapshot_lights_on
+              - type: template
+                entity: sensor.hygrometer_humidor_humidity
+                icon: mdi:water-percent
+                icon_color: >-
+                  {% set humidity = states('sensor.hygrometer_humidor_humidity') %}
+                  {% if humidity in ['', 'unknown', 'unavailable', none] %}
+                    grey
+                  {% else %}
+                    {% set humidity_value = humidity | float(0) %}
+                    {% if humidity_value >= 70 %}
+                      green
+                    {% elif humidity_value >= 60 %}
+                      amber
+                    {% else %}
+                      red
+                    {% endif %}
+                  {% endif %}
+                content: >-
+                  {% set humidity = states('sensor.hygrometer_humidor_humidity') %}
+                  {% if humidity in ['', 'unknown', 'unavailable', none] %}
+                    Humidor · –
+                  {% else %}
+                    Humidor · {{ humidity | float(0) | round(1) }}%
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: sensor.hygrometer_humidor_humidity
             view_layout:
               column_span: 4
+          - type: markdown
+            title: Support lab briefing
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'content')
+                 or "Support lab briefing details are currently unavailable." }}
+          - type: markdown
+            title: Keeping tabs on essentials
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'environment_content')
+                 or "Support lab environment details are currently unavailable." }}
+          - type: markdown
+            title: Headline events
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'events_content')
+                 or "Support lab event highlights are currently unavailable." }}
+          - type: markdown
+            title: Systems oversight
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'systems_content')
+                 or "Support lab systems details are currently unavailable." }}
+          - type: markdown
+            title: System health snapshot
+            view_layout:
+              column_span: 4
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'system_health_cluster')
+                 or "System health metrics are currently unavailable." }}
+          - type: markdown
+            title: Environment readings
+            view_layout:
+              column_span: 4
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'environment_cluster')
+                 or "Environment metrics are currently unavailable." }}
+          - type: markdown
+            title: Lighting & energy
+            view_layout:
+              column_span: 4
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'lighting_energy_cluster')
+                 or "Lighting and energy metrics are currently unavailable." }}
       - type: grid
         title: Live Highlights
         columns: 3
