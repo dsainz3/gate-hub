@@ -1712,14 +1712,14 @@
 <li><strong>ID</strong> <code>night_mode_at_midnight</code></li>
 <li><strong>Trigger</strong>: Time equals <code>00:00:00</code>.</li>
 <li><strong>Guards</strong>: Pauses while <code>binary_sensor.holiday_mode_active</code> is <code>on</code> to honour holiday scenes.</li>
-<li><strong>Actions</strong>: Powers down interior/exterior fixtures and leaves permanent LEDs glowing at 20%.</li>
+<li><strong>Actions</strong>: Activates the Night Mode scene with a 5 s fade so the scene definition governs every light level before logging the handoff.</li>
 </ul>
 <h3 id="lighting-early-morning-gentle-wake-330-am-automationsyaml105">Lighting: Early Morning Gentle Wake (3:30 AM) (<code>automations.yaml:105</code>)<a class="headerlink" href="#lighting-early-morning-gentle-wake-330-am-automationsyaml105" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>ID</strong> <code>early_morning_lights_0330</code></li>
 <li><strong>Trigger</strong>: Time equals <code>03:30:00</code>.</li>
 <li><strong>Guards</strong>: Suppressed if <code>binary_sensor.holiday_mode_active</code> is <code>on</code>.</li>
-<li><strong>Actions</strong>: Softly lights interior spaces (10%, warm) and exterior fixtures (10%, cool); boosts permanent LEDs to 50%.</li>
+<li><strong>Actions</strong>: Runs the Early Morning Gentle Wake scene with a 3 s fade so the scene manages interior ambience and exterior glow prior to logging.</li>
 </ul>
 <h3 id="lighting-morning-lights-off-sunrise-15-min-automationsyaml148">Lighting: Morning Lights Off (Sunrise + 15 min) (<code>automations.yaml:148</code>)<a class="headerlink" href="#lighting-morning-lights-off-sunrise-15-min-automationsyaml148" title="Permanent link">&para;</a></h3>
 <ul>
