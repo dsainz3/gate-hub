@@ -35,7 +35,7 @@ Reload themes after deployment via **Developer Tools → YAML → Reload themes*
 Purpose: Fan-facing board with real-time game context.
 
 Highlights
-- **TeamTracker hero card** summarising clock, score, probability, and win/loss context; when `input_boolean.huskers_use_score_delay` is on it reads from the `*_effective` helpers that the 30-second parallel delay buffer (`automation.huskers_scoreboard_delay_buffer`) maintains so ESPN clock ticks cannot cancel queued updates.
+- **TeamTracker hero card** summarising clock, score, probability, and win/loss context; when `input_boolean.huskers_use_score_delay` is on it reads from the `*_effective` helpers that the 30-second parallel delay buffer (`automation.huskers_score_delay_buffer`) maintains so ESPN clock ticks cannot cancel queued updates—even if TeamTracker momentarily drops, the buffer now falls back to the ESPN scoreboard sensors so delayed helpers continue to advance.
 - **Quick actions** to refresh ESPN endpoints (`sensor.husker_team`, `sensor.espn_cfb_scoreboard`, `sensor.espn_nebraska_schedule`).
 - **Game mode controls** to manually start or stop `input_boolean.huskers_game_mode` without hunting through Settings. The stop button now restores the pre-show lighting snapshot that is captured at kickoff.
 - **Lighting macros**: launch the dual-cream 45 s chase, trigger the Hail Varsity burst, or fall back to the all-scarlet scene.
@@ -53,7 +53,7 @@ Usage Notes
 ### Anti-Spoiler Delay
 
 - **Enable the buffer**: Flip `input_boolean.huskers_use_score_delay` on from the Ops Console → Game Mode & Automations card. The hero card, markdown blocks, and gauges immediately pivot to the `*_effective` helpers, keeping the UI ~30 seconds behind real time.
-- **Automation pair**: `automation.huskers_scoreboard_delay_buffer` runs in parallel mode (`max: 120`) and waits 30 seconds after TeamTracker posts a new score/quarter/clock before copying the values into the manual helpers. `automation.huskers_score_delay_helper_sync` re-aligns the helpers at startup or when toggling the buffer.
+- **Automation pair**: `automation.huskers_score_delay_buffer` runs in parallel mode (`max: 120`) and waits 30 seconds after TeamTracker posts a new score/quarter/clock before copying the values into the manual helpers. If TeamTracker data is unavailable during a run, it now falls back to the ESPN auto scoreboard sensors so the helpers still refresh. `automation.huskers_score_delay_sync` re-aligns the helpers at startup or when toggling the buffer with the same fallback logic.
 - **Manual edits still win**: If you need full control, use `input_boolean.huskers_use_manual_score`—it overrides both the delay and the live feed until you turn it back off.
 - **Disable to catch up**: Turning the buffer off immediately syncs the manual helpers with the latest TeamTracker data so dashboards snap back to live numbers without lingering stale values.
 

@@ -1633,22 +1633,49 @@ automation:
       - platform: state
         entity_id: sensor.husker_team
         attribute: quarter
+      - platform: state
+        entity_id:
+          - sensor.huskers_our_score_auto
+          - sensor.huskers_opponent_score_auto
     condition:
       - condition: state
         entity_id: input_boolean.huskers_use_score_delay
         state: 'on'
       - condition: template
         value_template: >-
-          {{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}
+          {{
+            states('sensor.husker_team') not in ['unknown', 'unavailable']
+            or states('sensor.huskers_our_score_auto') not in ['unknown', 'unavailable']
+            or states('sensor.huskers_opponent_score_auto') not in ['unknown', 'unavailable']
+          }}
     action:
       - variables:
-          team_score: "{{ state_attr('sensor.husker_team','team_score') | int(0) }}"
-          opponent_score: "{{ state_attr('sensor.husker_team','opponent_score') | int(0) }}"
+          tt_available: "{{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}"
+          team_score: >-
+            {% if tt_available %}
+              {{ state_attr('sensor.husker_team','team_score') | int(0) }}
+            {% else %}
+              {{ states('sensor.huskers_our_score_auto') | int(0) }}
+            {% endif %}
+          opponent_score: >-
+            {% if tt_available %}
+              {{ state_attr('sensor.husker_team','opponent_score') | int(0) }}
+            {% else %}
+              {{ states('sensor.huskers_opponent_score_auto') | int(0) }}
+            {% endif %}
           quarter: >-
-            {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {% if tt_available %}
+              {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {% else %}
+              {% set raw = states('sensor.huskers_quarter_effective') %}
+            {% endif %}
             {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '' }}
           clock: >-
-            {% set raw = state_attr('sensor.husker_team','clock') %}
+            {% if tt_available %}
+              {% set raw = state_attr('sensor.husker_team','clock') %}
+            {% else %}
+              {% set raw = states('sensor.huskers_game_clock_effective') %}
+            {% endif %}
             {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '--:--' }}
       - delay: '00:00:30'
       - condition: state
@@ -1687,16 +1714,39 @@ automation:
     condition:
       - condition: template
         value_template: >-
-          {{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}
+          {{
+            states('sensor.husker_team') not in ['unknown', 'unavailable']
+            or states('sensor.huskers_our_score_auto') not in ['unknown', 'unavailable']
+            or states('sensor.huskers_opponent_score_auto') not in ['unknown', 'unavailable']
+          }}
     action:
       - variables:
-          team_score: "{{ state_attr('sensor.husker_team','team_score') | int(0) }}"
-          opponent_score: "{{ state_attr('sensor.husker_team','opponent_score') | int(0) }}"
+          tt_available: "{{ states('sensor.husker_team') not in ['unknown', 'unavailable'] }}"
+          team_score: >-
+            {% if tt_available %}
+              {{ state_attr('sensor.husker_team','team_score') | int(0) }}
+            {% else %}
+              {{ states('sensor.huskers_our_score_auto') | int(0) }}
+            {% endif %}
+          opponent_score: >-
+            {% if tt_available %}
+              {{ state_attr('sensor.husker_team','opponent_score') | int(0) }}
+            {% else %}
+              {{ states('sensor.huskers_opponent_score_auto') | int(0) }}
+            {% endif %}
           quarter: >-
-            {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {% if tt_available %}
+              {% set raw = state_attr('sensor.husker_team','quarter') %}
+            {% else %}
+              {% set raw = states('sensor.huskers_quarter_effective') %}
+            {% endif %}
             {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '' }}
           clock: >-
-            {% set raw = state_attr('sensor.husker_team','clock') %}
+            {% if tt_available %}
+              {% set raw = state_attr('sensor.husker_team','clock') %}
+            {% else %}
+              {% set raw = states('sensor.huskers_game_clock_effective') %}
+            {% endif %}
             {{ raw if raw not in [None, '', 'unknown', 'unavailable'] else '--:--' }}
       - service: input_number.set_value
         target:
