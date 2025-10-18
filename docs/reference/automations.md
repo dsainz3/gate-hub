@@ -116,20 +116,6 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Guards**: Spoiler delay toggle must be `on` or the system must be starting, and at least one scoreboard source reporting data.
 - **Actions**: Immediately align the manual score/clock helpers with the latest TeamTracker payload; if that feed is down, the automation pulls from the ESPN auto scoreboard helpers so toggling the buffer produces consistent values.
 
-### Football Team: Enable Game Mode Window (`packages/huskers_everything.yaml:997`)
-- **ID** `huskers_game_mode_enable_window`
-- **Entity** `automation.huskers_enable_game_mode_window`
-- **Triggers**: `sensor.huskers_kickoff_in_effective` < 121 for ≥1 minute, or ESPN pregame/live binary sensors turning `on`.
-- **Guards**: Game mode currently `off` and evidence of an upcoming or active game.
-- **Actions**: Enables `input_boolean.huskers_game_mode` and logs kickoff timing.
-
-### Football Team: Disable Game Mode Window (`packages/huskers_everything.yaml:1038`)
-- **ID** `huskers_game_mode_disable_window`
-- **Entity** `automation.huskers_disable_game_mode_window`
-- **Triggers**: Postgame ESPN sensor `on` for 2 hours, or kickoff timer > 120 for ≥5 minutes.
-- **Guards**: Game mode `on`, ESPN pregame and live sensors both `off`.
-- **Actions**: Disables `input_boolean.huskers_game_mode` and logs the change.
-
 ### Football Team: Pregame Showtime (T-20 Minutes) (`packages/huskers_everything.yaml:1072`)
 - **ID** `huskers_showtime_at_t_20`
 - **Entity** `automation.huskers_pregame_showtime_t_20_minutes`

@@ -1404,30 +1404,6 @@ template:
           automation_matrix: >-
             {{ [
               {
-                "entity_id": "automation.huskers_game_mode_enable_window",
-                "expected_mode": "single",
-                "triggers": [
-                  "sensor.huskers_kickoff_in_effective",
-                  "sensor.huskers_kickoff_in_2",
-                  "binary_sensor.huskers_is_pregame_espn",
-                  "binary_sensor.huskers_is_live_espn",
-                  "input_boolean.huskers_automations_enabled",
-                  "input_boolean.huskers_game_mode",
-                  "input_boolean.huskers_use_manual_kickoff"
-                ]
-              },
-              {
-                "entity_id": "automation.huskers_game_mode_disable_window",
-                "expected_mode": "single",
-                "triggers": [
-                  "sensor.huskers_kickoff_in_effective",
-                  "binary_sensor.huskers_is_pregame_espn",
-                  "binary_sensor.huskers_is_live_espn",
-                  "binary_sensor.huskers_is_postgame_espn",
-                  "input_boolean.huskers_game_mode"
-                ]
-              },
-              {
                 "entity_id": "automation.huskers_showtime_at_t_20",
                 "expected_mode": "single",
                 "triggers": [
