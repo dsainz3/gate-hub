@@ -17,7 +17,12 @@ This page documents the baseline platform for gate-hub. Pair it with the [CI run
 
 ## VS Code Workspace
 
-Connect from the desktop VS Code client via the **Remote - SSH** extension to the Home Assistant SSH add-on (`root@homeassistant.local:22`). The workspace opens directly under `/config`. A minimal `.code-workspace` snippet:
+You have two supported workflows:
+
+1. **Dev Container (recommended):** Use the `.devcontainer/` definition with the VS Code Dev Containers extension. The container mounts host SSH keys read-only, runs with host networking, and exposes helper commands (`haos-ssh`, `haos`) targeting `root@homeassistant.local:2222`. See the [VS Code Dev Container Setup](../how-to/dev-container.md) guide for build steps and troubleshooting.
+2. **Remote - SSH:** Connect from the desktop VS Code client via the **Remote - SSH** extension to the Home Assistant SSH add-on (`root@homeassistant.local:2222`).
+
+Both workflows open the repository under `/config`. A minimal `.code-workspace` snippet for the Remote - SSH option:
 
 ```json
 {
