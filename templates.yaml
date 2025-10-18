@@ -833,48 +833,36 @@
         icon: mdi:account-tie
         availability: "{{ true }}"
         state: >-
-          {% set now_obj = now() %}
-          {% set hour = now_obj.hour %}
-          {% if hour < 12 %}
-            {% set greeting = 'Good morning' %}
-          {% elif hour < 17 %}
-            {% set greeting = 'Good afternoon' %}
-          {% else %}
-            {% set greeting = 'Good evening' %}
-          {% endif %}
-          {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
-          {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list %}
-          {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
-          {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
-          {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
-          {% set low_battery_threshold = 30 %}
+          {% set invalid = ['', 'unknown', 'unavailable', none] %}
+          {% set humidor_alert = is_state('binary_sensor.kiosk_humidor_out_of_band', 'on') %}
           {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
           {% set low_battery_ns = namespace(items=[]) %}
           {% for ent in battery_entities %}
             {% set state = ent.state | string %}
             {% if ent.domain == 'binary_sensor' %}
               {% if state == 'on' %}
-                {% set low_battery_ns.items = low_battery_ns.items + [ent.entity_id] %}
+                {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
               {% endif %}
             {% else %}
-              {% if state not in ['', 'unknown', 'unavailable', none] %}
+              {% if state not in invalid %}
                 {% set pct = state.replace('%', '') | float(100) %}
-                {% if pct < low_battery_threshold %}
-                  {% set low_battery_ns.items = low_battery_ns.items + [ent.entity_id] %}
+                {% if pct < 30 %}
+                  {% set display = state if '%' in state else state ~ '%' %}
+                  {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ display ~ ')'] %}
                 {% endif %}
               {% endif %}
             {% endif %}
           {% endfor %}
-          {% set low_battery_lines = low_battery_ns.items | unique | list %}
-          {% if not humidor_ok or low_battery_lines %}
+          {% set network_state = states('sensor.network_status_summary') %}
+          {% set network_alert = network_state not in invalid and network_state | lower != 'online' %}
+          {% if humidor_alert or (low_battery_ns.items | length > 0) or network_alert %}
             attention
           {% else %}
             ok
           {% endif %}
         attributes:
           greeting: >-
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
+            {% set hour = now().hour %}
             {% if hour < 12 %}
               Good morning
             {% elif hour < 17 %}
@@ -886,23 +874,8 @@
           lights_on: >-
             {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
             {{ lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list }}
-          humidor_humidity: >-
-            {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
-            {% if humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
-              {{ humidor_humidity | float(0) }}
-            {% else %}
-              {{ none }}
-            {% endif %}
-          humidor_within_range: >-
-            {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'on') %}
-              false
-            {% elif is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
-              true
-            {% else %}
-              {{ none }}
-            {% endif %}
           low_batteries: >-
-            {% set low_battery_threshold = 30 %}
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
             {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
             {% set low_battery_ns = namespace(items=[]) %}
             {% for ent in battery_entities %}
@@ -912,150 +885,50 @@
                   {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
                 {% endif %}
               {% else %}
-                {% if state not in ['', 'unknown', 'unavailable', none] %}
+                {% if state not in invalid %}
                   {% set pct = state.replace('%', '') | float(100) %}
-                  {% if pct < low_battery_threshold %}
-                    {% set display = state if '%' in state else state ~ '%' %}
+                  {% if pct < 30 %}
+                    {% set display = state if '%' in state else (pct | round(0)) ~ '%' %}
                     {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ display ~ ')'] %}
                   {% endif %}
                 {% endif %}
               {% endif %}
             {% endfor %}
             {{ low_battery_ns.items | unique | list }}
-          content: >-
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
-            {% if hour < 12 %}
-              {% set greeting = 'Good morning' %}
-            {% elif hour < 17 %}
-              {% set greeting = 'Good afternoon' %}
-            {% else %}
-              {% set greeting = 'Good evening' %}
-            {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
-            {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
-            {% if on_lights %}
-              {% set bullet_lights = '- Lights currently on:\n  - ' ~ (on_lights | join('\n  - ')) %}
-            {% else %}
-              {% set bullet_lights = '- All tracked lights are currently off.' %}
-            {% endif %}
-            {% set lines = [
-              greeting ~ ", here's your support lab briefing as of " ~ time_readout ~ ".",
-              '',
-              bullet_lights
-            ] %}
-            {{ lines | join('\n') }}
-          environment_content: >-
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
-            {% if hour < 12 %}
-              {% set greeting = 'Good morning' %}
-            {% elif hour < 17 %}
-              {% set greeting = 'Good afternoon' %}
-            {% else %}
-              {% set greeting = 'Good evening' %}
-            {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
-            {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
-            {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
-            {% set low_battery_threshold = 30 %}
-            {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
-            {% set low_battery_ns = namespace(items=[]) %}
-            {% for ent in battery_entities %}
-              {% set state = ent.state | string %}
-              {% if ent.domain == 'binary_sensor' %}
-                {% if state == 'on' %}
-                  {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
-                {% endif %}
-              {% else %}
-                {% if state not in ['', 'unknown', 'unavailable', none] %}
-                  {% set pct = state.replace('%', '') | float(100) %}
-                  {% if pct < low_battery_threshold %}
-                    {% set display = state if '%' in state else state ~ '%' %}
-                    {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ display ~ ')'] %}
-                  {% endif %}
+          active_scenes: >-
+            {% set active = [] %}
+            {% for ent in states.scene %}
+              {% if ent.state == 'scening' %}
+                {% set age = (now() - ent.last_changed).total_seconds() %}
+                {% if age < 21600 %}
+                  {% set active = active + [ent.name] %}
                 {% endif %}
               {% endif %}
             {% endfor %}
-            {% set low_battery_lines = low_battery_ns.items | unique | list %}
-            {% if humidity_valid %}
-              {% if humidor_ok %}
-                {% set bullet_humidor = '- Humidor humidity is at ' ~ (humidor_humidity | float(0) | round(1)) ~ '%, holding steady.' %}
-              {% else %}
-                {% set bullet_humidor = '- Humidor humidity is at ' ~ (humidor_humidity | float(0) | round(1)) ~ '%, outside the preferred range.' %}
-              {% endif %}
-            {% else %}
-              {% set bullet_humidor = "- I'm not seeing a current humidor humidity reading." %}
-            {% endif %}
-            {% if low_battery_lines %}
-              {% set bullet_batteries = '- Low batteries detected for ' ~ (low_battery_lines | join(', ')) ~ '.' %}
-            {% else %}
-              {% set bullet_batteries = '- No low batteries to report right now.' %}
-            {% endif %}
-            {% set lines = [
-              greeting ~ ", keeping tabs on support lab essentials as of " ~ time_readout ~ ".",
-              '',
-              bullet_humidor,
-              bullet_batteries
-            ] %}
-            {{ lines | join('\n') }}
-          events_content: >-
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
-            {% if hour < 12 %}
-              {% set greeting = 'Good morning' %}
-            {% elif hour < 17 %}
-              {% set greeting = 'Good afternoon' %}
-            {% else %}
-              {% set greeting = 'Good evening' %}
-            {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set huskers_team = states('sensor.huskers_team_name') %}
-            {% set huskers_phase = states('sensor.huskers_game_phase_label') %}
-            {% set huskers_opp = states('sensor.huskers_opponent_name') %}
-            {% set huskers_team_score = states('sensor.huskers_team_score') %}
-            {% set huskers_opp_score = states('sensor.huskers_opponent_score') %}
+            {{ active }}
+          sprinkler_runtime_today: >-
             {% set invalid = ['', 'unknown', 'unavailable', none] %}
-            {% set has_huskers = huskers_team not in invalid and huskers_phase not in invalid and huskers_opp not in invalid and huskers_team_score not in invalid and huskers_opp_score not in invalid %}
-            {% if has_huskers %}
-              {% set bullet_huskers = '- Huskers ' ~ huskers_team ~ ' ' ~ huskers_team_score ~ ' – ' ~ huskers_opp_score ~ ' ' ~ huskers_opp ~ ' · ' ~ huskers_phase ~ '.' %}
-            {% else %}
-              {% set bullet_huskers = "- Huskers update isn't available right now." %}
-            {% endif %}
-            {% set f1_name = states('sensor.f1_next_race_name') %}
-            {% set f1_location = states('sensor.f1_next_race_location') %}
-            {% set lights_out = states('sensor.f1_lights_out_local') %}
-            {% set f1_round = states('sensor.f1_next_race_round') %}
-            {% set has_f1 = f1_name not in invalid and f1_location not in invalid %}
-            {% if lights_out not in invalid %}
-              {% set lights_out_ts = as_timestamp(lights_out, default=None) %}
-            {% else %}
-              {% set lights_out_ts = none %}
-            {% endif %}
-            {% if has_f1 %}
-              {% if lights_out_ts is not none %}
-                {% set lights_out_readable = lights_out_ts | timestamp_custom('%b %-d %-I:%M %p', True) %}
-                {% set round_readout = f1_round if f1_round not in invalid else 'TBA' %}
-                {% set bullet_f1 = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out ' ~ lights_out_readable ~ '.' %}
-              {% else %}
-                {% set round_readout = f1_round if f1_round not in invalid else 'TBA' %}
-                {% set bullet_f1 = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out time TBA.' %}
-              {% endif %}
-            {% else %}
-              {% set bullet_f1 = "- Formula 1 schedule isn't available right now." %}
-            {% endif %}
-            {% set lines = [
-              greeting ~ ", scanning headline events as of " ~ time_readout ~ ".",
-              '',
-              bullet_huskers,
-              bullet_f1
+            {% set sensors = [
+              'sensor.kiosk_sprinklers_south_side_runtime_today',
+              'sensor.kiosk_sprinklers_back_south_runtime_today',
+              'sensor.kiosk_sprinklers_back_north_runtime_today',
+              'sensor.kiosk_sprinklers_front_runtime_today',
+              'sensor.kiosk_sprinklers_zone5_runtime_today'
             ] %}
-            {{ lines | join('\n') }}
-          systems_content: >-
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
+            {% set total = namespace(value=0) %}
+            {% for entity_id in sensors %}
+              {% set value = states(entity_id) %}
+              {% if value not in invalid %}
+                {% set total.value = total.value + (value | float(0)) %}
+              {% endif %}
+            {% endfor %}
+            {% if total.value > 0 %}
+              {{ (total.value | round(1)) }}
+            {% else %}
+              {{ none }}
+            {% endif %}
+          lights_briefing: >-
+            {% set hour = now().hour %}
             {% if hour < 12 %}
               {% set greeting = 'Good morning' %}
             {% elif hour < 17 %}
@@ -1063,90 +936,152 @@
             {% else %}
               {% set greeting = 'Good evening' %}
             {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set time_readout = now().strftime('%-I:%M %p') %}
+            {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
+            {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+            {% if on_lights %}
+              {% set line_one = '- Lights currently on:\n  - ' ~ (on_lights | join('\n  - ')) %}
+            {% else %}
+              {% set line_one = '- All tracked lights are currently off.' %}
+            {% endif %}
+            {% set automations = states('binary_sensor.kiosk_automations_have_issues') %}
+            {% set problem_count = states('sensor.kiosk_automations_problem_count') %}
+            {% if automations == 'on' %}
+              {% set line_two = '- Automation watchdog has flagged ' ~ (problem_count if problem_count not in ['', 'unknown', 'unavailable', none] else 'an issue') ~ '.' %}
+            {% elif automations == 'off' %}
+              {% set line_two = '- Automation watchdog reports a clean bill of health.' %}
+            {% else %}
+              {% set line_two = "- Automation watchdog status isn't available right now." %}
+            {% endif %}
+            {{ greeting ~ ", here's the lighting status as of " ~ time_readout ~ ":\n\n" ~ line_one ~ "\n" ~ line_two }}
+          weather_briefing: >-
+            {% set hour = now().hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now().strftime('%-I:%M %p') %}
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set condition = states('weather.forecast_home') %}
+            {% set temp = states('sensor.outdoor_temperature_wx') %}
+            {% set humidity = states('sensor.outdoor_humidity_wx') %}
+            {% set wind = states('sensor.outdoor_wind_speed_wx') %}
+            {% set bearing = state_attr('weather.forecast_home', 'wind_bearing') %}
+            {% if bearing not in invalid %}
+              {% set dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] %}
+              {% set index = ((bearing | float(0) + 22.5) / 45) | int %}
+              {% set wind_dir = dirs[index % 8] %}
+            {% else %}
+              {% set wind_dir = none %}
+            {% endif %}
+            {% set zones = [
+              'switch.sprinkler_south_side_zone',
+              'switch.sprinkler_back_south_zone',
+              'switch.sprinkler_back_north_zone',
+              'switch.sprinkler_front_zone',
+              'switch.sprinkler_zone_5_zone'
+            ] %}
+            {% set running = [] %}
+            {% for zone in zones %}
+              {% if is_state(zone, 'on') %}
+                {% set running = running + [state_attr(zone, 'friendly_name') | default(zone.split('.')[-1] | replace('_', ' ') | title)] %}
+              {% endif %}
+            {% endfor %}
+            {% set schedule_on = is_state('switch.sprinkler_scheduled_program', 'on') %}
+            {% set runtime_sensors = [
+              'sensor.kiosk_sprinklers_south_side_runtime_today',
+              'sensor.kiosk_sprinklers_back_south_runtime_today',
+              'sensor.kiosk_sprinklers_back_north_runtime_today',
+              'sensor.kiosk_sprinklers_front_runtime_today',
+              'sensor.kiosk_sprinklers_zone5_runtime_today'
+            ] %}
+            {% set runtime_ns = namespace(total=0) %}
+            {% for entity_id in runtime_sensors %}
+              {% set value = states(entity_id) %}
+              {% if value not in invalid %}
+                {% set runtime_ns.total = runtime_ns.total + (value | float(0)) %}
+              {% endif %}
+            {% endfor %}
+            {% if runtime_ns.total > 0 %}
+              {% set runtime = runtime_ns.total | round(1) %}
+            {% else %}
+              {% set runtime = none %}
+            {% endif %}
+            {% if condition not in invalid or temp not in invalid %}
+              {% set cond_line = '- Outside is ' ~ (condition | title if condition not in invalid else 'conditions unavailable') %}
+              {% if temp not in invalid %}
+                {% set cond_line = cond_line ~ ' at ' ~ temp ~ '°F' %}
+              {% endif %}
+              {% if humidity not in invalid %}
+                {% set cond_line = cond_line ~ ' with ' ~ humidity ~ '% humidity' %}
+              {% endif %}
+              {% set cond_line = cond_line ~ '.' %}
+            {% else %}
+              {% set cond_line = "- I'm not seeing current outdoor readings." %}
+            {% endif %}
+            {% if wind not in invalid %}
+              {% if wind_dir %}
+                {% set wind_line = '- Wind running ' ~ wind ~ ' mph from the ' ~ wind_dir ~ '.' %}
+              {% else %}
+                {% set wind_line = '- Wind running ' ~ wind ~ ' mph.' %}
+              {% endif %}
+            {% else %}
+              {% set wind_line = '' %}
+            {% endif %}
+            {% if running %}
+              {% set sprinkler_line = '- Irrigation active on ' ~ (running | join(', ')) ~ '.' %}
+            {% elif schedule_on %}
+              {% set sprinkler_line = '- Irrigation schedule is armed and ready.' %}
+            {% else %}
+              {% set sprinkler_line = '- Irrigation schedule is idle.' %}
+            {% endif %}
+            {% if runtime not in [None, ''] %}
+              {% set runtime_line = '- Runtime today totals ' ~ (runtime | float(0) | round(1)) ~ ' minutes.' %}
+            {% else %}
+              {% set runtime_line = '' %}
+            {% endif %}
+            {{ greeting ~ ", weather and sprinklers check-in at " ~ time_readout ~ ":\n\n" ~ cond_line ~ ("\n" ~ wind_line if wind_line else '') ~ "\n" ~ sprinkler_line ~ ("\n" ~ runtime_line if runtime_line else '') }}
+          network_briefing: >-
+            {% set hour = now().hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now().strftime('%-I:%M %p') %}
             {% set invalid = ['', 'unknown', 'unavailable', none] %}
             {% set network_status = states('sensor.network_status_summary') %}
-            {% set network_performance = states('sensor.network_performance_summary') %}
+            {% set performance = states('sensor.network_performance_summary') %}
             {% set download = states('sensor.speedtest_download') %}
             {% set upload = states('sensor.speedtest_upload') %}
             {% set ping = states('sensor.speedtest_ping') %}
             {% if network_status not in invalid %}
               {% if network_status | lower == 'online' %}
-                {% set bullet_network = '- Network status is online and steady.' %}
+                {% set status_line = '- Core network is online and stable.' %}
               {% else %}
-                {% set bullet_network = '- Network status reports ' ~ (network_status | lower) ~ '.' %}
+                {% set status_line = '- Core network reports ' ~ network_status | lower ~ '.' %}
               {% endif %}
             {% else %}
-              {% set bullet_network = "- Network status isn't available right now." %}
+              {% set status_line = "- Network status isn't available right now." %}
             {% endif %}
-            {% if network_performance not in invalid and download not in invalid and upload not in invalid and ping not in invalid %}
-              {% set bullet_performance = '- Throughput check · ↓ ' ~ download ~ ' Mbps · ↑ ' ~ upload ~ ' Mbps · Ping ' ~ ping ~ ' ms.' %}
+            {% if download not in invalid and upload not in invalid and ping not in invalid %}
+              {% set speed_line = '- Latest throughput: ↓ ' ~ download ~ ' Mbps · ↑ ' ~ upload ~ ' Mbps · Ping ' ~ ping ~ ' ms.' %}
             {% else %}
-              {% set bullet_performance = "- Throughput details aren't available right now." %}
+              {% set speed_line = "- Throughput metrics are unavailable." %}
             {% endif %}
-            {% set automation_issues = states('binary_sensor.kiosk_automations_have_issues') %}
-            {% set problem_count = states('sensor.kiosk_automations_problem_count') %}
-            {% if automation_issues == 'on' %}
-              {% set bullet_automations = '- Automation check: Issues detected (' ~ (problem_count if problem_count not in invalid else 'count unavailable') ~ ').' %}
-            {% elif automation_issues == 'off' %}
-              {% set bullet_automations = '- Automation check: All routines are healthy.' %}
+            {% if performance not in invalid %}
+              {% set perf_line = '- Performance watch: ' ~ performance | title ~ '.' %}
             {% else %}
-              {% set bullet_automations = "- Automation status isn't available right now." %}
+              {% set perf_line = '' %}
             {% endif %}
-            {% set holiday_mode = states('input_boolean.holiday_mode_manual') %}
-            {% set next_holiday = states('sensor.next_us_holiday') %}
-            {% if holiday_mode == 'on' %}
-              {% set bullet_holiday = '- Holiday mode override is currently engaged.' %}
-            {% elif holiday_mode == 'off' %}
-              {% if next_holiday not in invalid %}
-                {% set bullet_holiday = '- Holiday mode is off · Next holiday ' ~ next_holiday ~ '.' %}
-              {% else %}
-                {% set bullet_holiday = '- Holiday mode is off.' %}
-              {% endif %}
-            {% else %}
-              {% set bullet_holiday = "- Holiday mode status isn't available right now." %}
-            {% endif %}
-            {% set lines = [
-              greeting ~ ", overseeing systems health as of " ~ time_readout ~ ".",
-              '',
-              bullet_network,
-              bullet_performance,
-              bullet_automations,
-              bullet_holiday
-            ] %}
-            {{ lines | join('\n') }}
-          system_health_cluster: >-
-            {% set invalid = ['', 'unknown', 'unavailable', none] %}
-            {% set cpu_state = states('sensor.processor_use') %}
-            {% if cpu_state not in invalid %}
-              {% set cpu_value = cpu_state | float(0) | round(1) %}
-              {% set cpu_line = '- **CPU %** · ' ~ cpu_value ~ '%' %}
-            {% else %}
-              {% set cpu_line = '- **CPU %** · —' %}
-            {% endif %}
-            {% set memory_state = states('sensor.memory_use_percent') %}
-            {% if memory_state not in invalid %}
-              {% set memory_value = memory_state | float(0) | round(1) %}
-              {% set memory_line = '- **Memory %** · ' ~ memory_value ~ '%' %}
-            {% else %}
-              {% set memory_line = '- **Memory %** · —' %}
-            {% endif %}
-            {% set disk_state = states('sensor.disk_use_percent') %}
-            {% if disk_state not in invalid %}
-              {% set disk_value = disk_state | float(0) | round(1) %}
-              {% set disk_line = '- **Disk %** · ' ~ disk_value ~ '%' %}
-            {% else %}
-              {% set disk_line = '- **Disk %** · —' %}
-            {% endif %}
-            {% set ping_state = states('sensor.speedtest_ping') %}
-            {% if ping_state not in invalid %}
-              {% set ping_value = ping_state | float(0) | round(1) %}
-              {% set ping_line = '- **Ping (ms)** · ' ~ ping_value ~ ' ms' %}
-            {% else %}
-              {% set ping_line = '- **Ping (ms)** · —' %}
-            {% endif %}
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
+            {{ greeting ~ ", networking status as of " ~ time_readout ~ ":\n\n" ~ status_line ~ "\n" ~ speed_line ~ ("\n" ~ perf_line if perf_line else '') }}
+          sports_briefing: >-
+            {% set hour = now().hour %}
             {% if hour < 12 %}
               {% set greeting = 'Good morning' %}
             {% elif hour < 17 %}
@@ -1154,42 +1089,41 @@
             {% else %}
               {% set greeting = 'Good evening' %}
             {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set lines = [
-              greeting ~ ", here is the latest system health at " ~ time_readout ~ ":",
-              '',
-              cpu_line,
-              memory_line,
-              disk_line,
-              ping_line
-            ] %}
-            {{ lines | join('\n') }}
-          environment_cluster: >-
+            {% set time_readout = now().strftime('%-I:%M %p') %}
             {% set invalid = ['', 'unknown', 'unavailable', none] %}
-            {% set temp_state = states('sensor.outdoor_temperature_wx') %}
-            {% if temp_state not in invalid %}
-              {% set temp_value = temp_state | float(0) | round(1) %}
-              {% set temp_line = '- **Temp (°F)** · ' ~ temp_value ~ '°F' %}
+            {% set huskers_team = states('sensor.huskers_team_name') %}
+            {% set huskers_phase = states('sensor.huskers_game_phase_label') %}
+            {% set huskers_opp = states('sensor.huskers_opponent_name_2') or states('sensor.huskers_opponent_name') %}
+            {% set huskers_team_score = states('sensor.huskers_team_score') %}
+            {% set huskers_opp_score = states('sensor.huskers_opponent_score_2') or states('sensor.huskers_opponent_score') %}
+            {% if huskers_team not in invalid and huskers_phase not in invalid and huskers_opp not in invalid and huskers_team_score not in invalid and huskers_opp_score not in invalid %}
+              {% set huskers_line = '- Huskers ' ~ huskers_team ~ ' ' ~ huskers_team_score ~ ' – ' ~ huskers_opp_score ~ ' ' ~ huskers_opp ~ ' · ' ~ huskers_phase ~ '.' %}
             {% else %}
-              {% set temp_line = '- **Temp (°F)** · —' %}
+              {% set huskers_line = "- Huskers update isn't available right now." %}
             {% endif %}
-            {% set humidity_state = states('sensor.outdoor_humidity_wx') %}
-            {% if humidity_state not in invalid %}
-              {% set humidity_value = humidity_state | float(0) | round(1) %}
-              {% set humidity_line = '- **Humidity (%)** · ' ~ humidity_value ~ '%' %}
+            {% set f1_name = states('sensor.f1_next_race_name') %}
+            {% set f1_location = states('sensor.f1_next_race_location') %}
+            {% set lights_out = states('sensor.f1_lights_out_local') %}
+            {% set f1_round = states('sensor.f1_next_race_round') %}
+            {% if lights_out not in invalid %}
+              {% set lights_out_ts = as_timestamp(lights_out, default=None) %}
             {% else %}
-              {% set humidity_line = '- **Humidity (%)** · —' %}
+              {% set lights_out_ts = none %}
             {% endif %}
-            {% set pressure_state = states('sensor.kneplatt72_pressure') %}
-            {% set pressure_unit = state_attr('sensor.kneplatt72_pressure', 'unit_of_measurement') | default('hPa') %}
-            {% if pressure_state not in invalid %}
-              {% set pressure_value = pressure_state | float(0) | round(2) %}
-              {% set pressure_line = '- **Pressure** · ' ~ pressure_value ~ ' ' ~ pressure_unit %}
+            {% if f1_name not in invalid and f1_location not in invalid %}
+              {% set round_readout = f1_round if f1_round not in invalid else 'TBA' %}
+              {% if lights_out_ts is not none %}
+                {% set lights_out_readable = lights_out_ts | timestamp_custom('%b %-d %-I:%M %p', True) %}
+                {% set f1_line = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out ' ~ lights_out_readable ~ '.' %}
+              {% else %}
+                {% set f1_line = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out time TBA.' %}
+              {% endif %}
             {% else %}
-              {% set pressure_line = '- **Pressure** · —' %}
+              {% set f1_line = "- Formula 1 schedule isn't available right now." %}
             {% endif %}
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
+            {{ greeting ~ ", sports desk briefing at " ~ time_readout ~ ":\n\n" ~ huskers_line ~ "\n" ~ f1_line }}
+          scene_briefing: >-
+            {% set hour = now().hour %}
             {% if hour < 12 %}
               {% set greeting = 'Good morning' %}
             {% elif hour < 17 %}
@@ -1197,72 +1131,22 @@
             {% else %}
               {% set greeting = 'Good evening' %}
             {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set lines = [
-              greeting ~ ", environment checkpoints updated at " ~ time_readout ~ ":",
-              '',
-              temp_line,
-              humidity_line,
-              pressure_line
-            ] %}
-            {{ lines | join('\n') }}
-          lighting_energy_cluster: >-
-            {% set invalid = ['', 'unknown', 'unavailable', none] %}
-            {% set lights_state = states('sensor.kiosk_snapshot_lights_on') %}
-            {% if lights_state not in invalid %}
-              {% set lights_line = '- **Lights On (count)** · ' ~ (lights_state | int(0)) %}
-            {% else %}
-              {% set lights_line = '- **Lights On (count)** · —' %}
-            {% endif %}
-            {% set power_sources = [
-              'sensor.energy_usage_power',
-              'sensor.home_total_power',
-              'sensor.total_home_power',
-              'sensor.plug_humidor_power'
-            ] %}
-            {% set power_ns = namespace(line='- **Power (W)** · —') %}
-            {% for entity in power_sources %}
-              {% set value = states(entity) %}
-              {% if value not in invalid %}
-                {% set unit = state_attr(entity, 'unit_of_measurement') | default('W') %}
-                {% set power_ns.line = '- **Power (W)** · ' ~ (value | float(0) | round(1)) ~ ' ' ~ unit %}
-                {% break %}
+            {% set time_readout = now().strftime('%-I:%M %p') %}
+            {% set active = [] %}
+            {% for ent in states.scene %}
+              {% if ent.state == 'scening' %}
+                {% set age = (now() - ent.last_changed).total_seconds() %}
+                {% if age < 21600 %}
+                  {% set active = active + [ent.name] %}
+                {% endif %}
               {% endif %}
             {% endfor %}
-            {% set energy_sources = [
-              'sensor.energy_usage_today',
-              'sensor.energy_today',
-              'sensor.daily_energy',
-              'sensor.plug_humidor_energy_today'
-            ] %}
-            {% set energy_ns = namespace(line='- **Energy Today (kWh)** · —') %}
-            {% for entity in energy_sources %}
-              {% set value = states(entity) %}
-              {% if value not in invalid %}
-                {% set unit = state_attr(entity, 'unit_of_measurement') | default('kWh') %}
-                {% set energy_ns.line = '- **Energy Today (kWh)** · ' ~ (value | float(0) | round(2)) ~ ' ' ~ unit %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% set now_obj = now() %}
-            {% set hour = now_obj.hour %}
-            {% if hour < 12 %}
-              {% set greeting = 'Good morning' %}
-            {% elif hour < 17 %}
-              {% set greeting = 'Good afternoon' %}
+            {% if active %}
+              {% set line = '- Active scenes:\n  - ' ~ (active | join('\n  - ')) %}
             {% else %}
-              {% set greeting = 'Good evening' %}
+              {% set line = '- No tracked scenes are currently active.' %}
             {% endif %}
-            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
-            {% set lines = [
-              greeting ~ ", lighting and energy stats pulled at " ~ time_readout ~ ":",
-              '',
-              lights_line,
-              power_ns.line,
-              energy_ns.line
-            ] %}
-            {{ lines | join('\n') }}
-
+            {{ greeting ~ ", scene status checked at " ~ time_readout ~ ":\n\n" ~ line }}
   - binary_sensor:
       - name: huskers_tailgate_window
         unique_id: huskers_tailgate_window_tt
