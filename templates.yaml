@@ -828,6 +828,164 @@
             mdi:emoticon-question
           {% endif %}
 
+      - name: Support Test Resources Briefing
+        unique_id: support_test_resources_briefing
+        icon: mdi:account-tie
+        availability: "{{ true }}"
+        state: >-
+          {% set now_obj = now() %}
+          {% set hour = now_obj.hour %}
+          {% if hour < 12 %}
+            {% set greeting = 'Good morning' %}
+          {% elif hour < 17 %}
+            {% set greeting = 'Good afternoon' %}
+          {% else %}
+            {% set greeting = 'Good evening' %}
+          {% endif %}
+          {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
+          {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list %}
+          {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+          {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
+          {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
+          {% set low_battery_threshold = 30 %}
+          {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
+          {% set low_battery_ns = namespace(items=[]) %}
+          {% for ent in battery_entities %}
+            {% set state = ent.state | string %}
+            {% if ent.domain == 'binary_sensor' %}
+              {% if state == 'on' %}
+                {% set low_battery_ns.items = low_battery_ns.items + [ent.entity_id] %}
+              {% endif %}
+            {% else %}
+              {% if state not in ['', 'unknown', 'unavailable', none] %}
+                {% set pct = state.replace('%', '') | float(100) %}
+                {% if pct < low_battery_threshold %}
+                  {% set low_battery_ns.items = low_battery_ns.items + [ent.entity_id] %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% set low_battery_lines = low_battery_ns.items | unique | list %}
+          {% if not humidor_ok or low_battery_lines %}
+            attention
+          {% else %}
+            ok
+          {% endif %}
+        attributes:
+          greeting: >-
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              Good morning
+            {% elif hour < 17 %}
+              Good afternoon
+            {% else %}
+              Good evening
+            {% endif %}
+          report_time: "{{ now().strftime('%-I:%M %p') }}"
+          lights_on: >-
+            {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
+            {{ lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list }}
+          humidor_humidity: >-
+            {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
+            {% if humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
+              {{ humidor_humidity | float(0) }}
+            {% else %}
+              {{ none }}
+            {% endif %}
+          humidor_within_range: >-
+            {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'on') %}
+              false
+            {% elif is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+              true
+            {% else %}
+              {{ none }}
+            {% endif %}
+          low_batteries: >-
+            {% set low_battery_threshold = 30 %}
+            {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
+            {% set low_battery_ns = namespace(items=[]) %}
+            {% for ent in battery_entities %}
+              {% set state = ent.state | string %}
+              {% if ent.domain == 'binary_sensor' %}
+                {% if state == 'on' %}
+                  {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
+                {% endif %}
+              {% else %}
+                {% if state not in ['', 'unknown', 'unavailable', none] %}
+                  {% set pct = state.replace('%', '') | float(100) %}
+                  {% if pct < low_battery_threshold %}
+                    {% set display = state if '%' in state else state ~ '%' %}
+                    {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ display ~ ')'] %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {{ low_battery_ns.items | unique | list }}
+          content: >-
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set lights_group = expand('group.kiosk_all_lights_core') | default([]) %}
+            {% set on_lights = lights_group | selectattr('state', 'eq', 'on') | map(attribute='name') | list %}
+            {% set humidor_humidity = states('sensor.hygrometer_humidor_humidity') %}
+            {% set humidity_valid = humidor_humidity not in ['', 'unknown', 'unavailable', none] %}
+            {% set humidor_ok = is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+            {% set low_battery_threshold = 30 %}
+            {% set battery_entities = states | selectattr('attributes.device_class', 'eq', 'battery') | list %}
+            {% set low_battery_ns = namespace(items=[]) %}
+            {% for ent in battery_entities %}
+              {% set state = ent.state | string %}
+              {% if ent.domain == 'binary_sensor' %}
+                {% if state == 'on' %}
+                  {% set low_battery_ns.items = low_battery_ns.items + [ent.name] %}
+                {% endif %}
+              {% else %}
+                {% if state not in ['', 'unknown', 'unavailable', none] %}
+                  {% set pct = state.replace('%', '') | float(100) %}
+                  {% if pct < low_battery_threshold %}
+                    {% set display = state if '%' in state else state ~ '%' %}
+                    {% set low_battery_ns.items = low_battery_ns.items + [ent.name ~ ' (' ~ display ~ ')'] %}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+            {% set low_battery_lines = low_battery_ns.items | unique | list %}
+            {% if on_lights %}
+              {% set bullet_lights = '- Lights are on in ' ~ (on_lights | join(', ')) ~ '.' %}
+            {% else %}
+              {% set bullet_lights = '- All tracked lights are currently off.' %}
+            {% endif %}
+            {% if humidity_valid %}
+              {% if humidor_ok %}
+                {% set bullet_humidor = '- Humidor humidity is at ' ~ (humidor_humidity | float(0) | round(1)) ~ '%, holding steady.' %}
+              {% else %}
+                {% set bullet_humidor = '- Humidor humidity is at ' ~ (humidor_humidity | float(0) | round(1)) ~ '%, outside the preferred range.' %}
+              {% endif %}
+            {% else %}
+              {% set bullet_humidor = "- I'm not seeing a current humidor humidity reading." %}
+            {% endif %}
+            {% if low_battery_lines %}
+              {% set bullet_batteries = '- Low batteries detected for ' ~ (low_battery_lines | join(', ')) ~ '.' %}
+            {% else %}
+              {% set bullet_batteries = '- No low batteries to report right now.' %}
+            {% endif %}
+            {% set lines = [
+              greeting ~ ", here's your support lab briefing as of " ~ time_readout ~ ".",
+              '',
+              bullet_lights,
+              bullet_humidor,
+              bullet_batteries
+            ] %}
+            {{ lines | join('\n') }}
+
   - binary_sensor:
       - name: huskers_tailgate_window
         unique_id: huskers_tailgate_window_tt
