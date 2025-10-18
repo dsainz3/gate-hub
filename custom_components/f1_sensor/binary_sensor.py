@@ -5,17 +5,16 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .entity import F1BaseEntity
 from .helpers import normalize_track_status
+from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
@@ -64,7 +63,7 @@ class F1RaceWeekSensor(F1BaseEntity, BinarySensorEntity):
             return None, None
 
         races = data.get("MRData", {}).get("RaceTable", {}).get("Races", [])
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.timezone.utc)
 
         for race in races:
             date = race.get("date")
@@ -83,14 +82,12 @@ class F1RaceWeekSensor(F1BaseEntity, BinarySensorEntity):
         next_race_dt, _ = self._get_next_race()
         if not next_race_dt:
             return False
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.timezone.utc)
         start_of_week = now - datetime.timedelta(days=now.weekday())
         end_of_week = start_of_week + datetime.timedelta(
             days=6, hours=23, minutes=59, seconds=59
         )
-        return (
-            start_of_week.date() <= next_race_dt.date() <= end_of_week.date()
-        )
+        return start_of_week.date() <= next_race_dt.date() <= end_of_week.date()
 
     @property
     def state(self):
@@ -99,7 +96,7 @@ class F1RaceWeekSensor(F1BaseEntity, BinarySensorEntity):
     @property
     def extra_state_attributes(self):
         next_race_dt, race = self._get_next_race()
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.timezone.utc)
         days = None
         race_name = None
         if next_race_dt:
@@ -119,9 +116,7 @@ class F1SafetyCarBinarySensor(F1BaseEntity, RestoreEntity, BinarySensorEntity):
         super().__init__(coordinator, name, unique_id, entry_id, device_name)
         self._attr_icon = "mdi:car"
         try:
-            from homeassistant.components.binary_sensor import (
-                BinarySensorDeviceClass,
-            )
+            from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
             self._attr_device_class = BinarySensorDeviceClass.SAFETY
         except Exception:
@@ -134,7 +129,7 @@ class F1SafetyCarBinarySensor(F1BaseEntity, RestoreEntity, BinarySensorEntity):
         await super().async_added_to_hass()
         self.coordinator.async_add_listener(self._handle_coordinator_update)
         # Prefer coordinator's latest if present
-        payload, _ = self._extract_payload()
+        payload, ts = self._extract_payload()
         if payload is not None:
             self._update_from_track_status()
         else:
@@ -169,24 +164,17 @@ class F1SafetyCarBinarySensor(F1BaseEntity, RestoreEntity, BinarySensorEntity):
         ts = None
         if ts_raw:
             try:
-                ts = datetime.datetime.fromisoformat(
-                    str(ts_raw).replace("Z", "+00:00")
-                )
+                ts = datetime.datetime.fromisoformat(str(ts_raw).replace("Z", "+00:00"))
                 if ts.tzinfo is None:
-                    ts = ts.replace(tzinfo=datetime.UTC)
-            except Exception:
+                    ts = ts.replace(tzinfo=datetime.timezone.utc)
+            except Exception:  # noqa: BLE001
                 ts = None
         return payload, ts
 
     def _update_from_track_status(self) -> None:
         payload, ts = self._extract_payload()
         if ts and self._last_ts and ts <= self._last_ts:
-            _LOGGER.debug(
-                "SafetyCar: Ignored old TrackStatus (ts=%s <= last=%s): %s",
-                ts,
-                self._last_ts,
-                payload,
-            )
+            _LOGGER.debug("SafetyCar: Ignored old TrackStatus (ts=%s <= last=%s): %s", ts, self._last_ts, payload)
             return
         state = normalize_track_status(payload)
         is_on = state in {"VSC", "SC"}
@@ -198,10 +186,7 @@ class F1SafetyCarBinarySensor(F1BaseEntity, RestoreEntity, BinarySensorEntity):
             payload,
         )
         self._attr_is_on = is_on
-        self._attr_extra_state_attributes = {
-            "track_status": state,
-            "raw": payload,
-        }
+        self._attr_extra_state_attributes = {"track_status": state}
         if ts:
             self._last_ts = ts
 

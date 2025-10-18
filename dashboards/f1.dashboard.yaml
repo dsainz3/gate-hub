@@ -44,7 +44,7 @@ views:
               entity_id: script.f1_stop_all_shows
 
       - type: markdown
-        title: Race Countdown
+        title: Race Overview
         content: |
           {% set invalid = ['unknown', 'unavailable', '', None] %}
           {% set minutes = states('sensor.f1_lights_out_minutes_effective') | int(9999) %}
@@ -52,7 +52,17 @@ views:
           {% set race = states('sensor.f1_next_race_name') %}
           {% set location = states('sensor.f1_next_race_location') %}
           {% set local_ts = states('sensor.f1_lights_out_local') %}
+          {% set session = states('sensor.f1_current_session') %}
+          {% set status = states('sensor.f1_session_status') %}
           {% set track_status = states('sensor.f1_track_status_label') %}
+          {% set status_map = {
+            'pre': 'Pre-Session',
+            'live': 'Live',
+            'suspended': 'Red Flag',
+            'finished': 'Finished',
+            'finalised': 'Finalised',
+            'ended': 'Closed'
+          } %}
           {% if local_ts not in invalid %}
             {% set ts = as_timestamp(local_ts, default=None) %}
             {% if ts is not none %}
@@ -63,20 +73,44 @@ views:
           {% else %}
             {% set formatted = 'TBD' %}
           {% endif %}
+          {% if status in invalid %}
+            {% set status_label = 'Awaiting Weekend' %}
+          {% else %}
+            {% set status_label = status_map.get(status, status | replace('_', ' ') | title) %}
+          {% endif %}
+          {% if session in invalid %}
+            {% set session_label = 'No active session' %}
+          {% else %}
+            {% set session_label = session | replace('_', ' ') | title %}
+          {% endif %}
           <div style="padding:16px;border-radius:18px;background:var(--card-background-color);box-shadow:var(--ha-card-box-shadow);">
             <h2 style="margin:0 0 8px 0;font-size:1.6rem;">{{ race }} ({{ location }})</h2>
             <p style="margin:4px 0;color:var(--secondary-text-color);">Lights out: {{ formatted }}</p>
-            <p style="margin:16px 0 0 0;font-size:3rem;font-weight:700;">T-{{ minutes }} min</p>
-            <p style="margin:4px 0 0 0;font-weight:600;color:var(--primary-text-color);">Phase: {{ phase }}</p>
+            <p style="margin:12px 0 0 0;font-size:1.2rem;font-weight:600;">{{ session_label }}</p>
+            <p style="margin:4px 0 12px 0;color:var(--secondary-text-color);">Status: {{ status_label }}</p>
+            <p style="margin:0;font-size:2.6rem;font-weight:700;">T-{{ minutes }} min</p>
+            <p style="margin:6px 0 0 0;font-weight:600;color:var(--primary-text-color);">Phase: {{ phase }}</p>
             <p style="margin:4px 0 0 0;color:var(--secondary-text-color);">Track status: {{ track_status }}</p>
           </div>
 
-      - type: horizontal-stack
+      - type: grid
+        columns: 3
+        square: false
         cards:
+          - type: tile
+            entity: sensor.f1_current_session
+            name: Current Session
+            state_content: state
+          - type: tile
+            entity: sensor.f1_session_status
+            name: Session Status
           - type: tile
             entity: sensor.f1_lights_out_minutes_effective
             name: Lights Out (min)
             state_content: state
+          - type: tile
+            entity: sensor.f1_race_phase_label
+            name: Race Phase
           - type: tile
             entity: sensor.f1_track_status_label
             name: Track Status
@@ -88,7 +122,7 @@ views:
             name: Pre-Race Window
           - type: tile
             entity: binary_sensor.f1_is_race_live
-            name: Live
+            name: Live Window
           - type: tile
             entity: binary_sensor.f1_is_race_wrap
             name: Post Race
@@ -99,34 +133,57 @@ views:
           {% set race = states('sensor.f1_next_race_name') %}
           {% set location = states('sensor.f1_next_race_location') %}
           {% set local_ts = states('sensor.f1_lights_out_local') %}
+          {% set next_session = states('sensor.f1_weekend_next_session_name') %}
+          {% set next_session_start = state_attr('sensor.f1_weekend_next_session_name', 'next_session_start_local') %}
+          {% set countdown_mode = 'Automatic' if is_state('input_boolean.f1_use_manual_lights_out', 'off') else 'Manual (' ~ (states('input_number.f1_lights_out_manual_minutes') | int(0)) ~ ' min)' %}
           {% set has_schedule = local_ts not in ['unknown', 'unavailable', '', None] %}
+          {% if next_session_start not in ['unknown', 'unavailable', '', None] %}
+            {% set next_session_ts = as_timestamp(next_session_start, default=None) %}
+          {% else %}
+            {% set next_session_ts = None %}
+          {% endif %}
           <ul>
             <li><strong>Race:</strong> {{ race }} ({{ location }})</li>
             {% if has_schedule %}
-              <li><strong>Lights out:</strong>
-          {% set ts = as_timestamp(local_ts, default=None) %}
-          {% if ts is not none %}
-            {{ ts | timestamp_custom('%a %b %-d · %-I:%M %p %Z', True) }}
-          {% else %}
-            TBD
-          {% endif %}
-              </li>
+              {% set ts = as_timestamp(local_ts, default=None) %}
+              <li><strong>Lights out:</strong> {{ ts | timestamp_custom('%a %b %-d · %-I:%M %p %Z', True) if ts is not none else 'TBD' }}</li>
             {% else %}
               <li><strong>Lights out:</strong> TBD – enable the F1 sensor integration for timetable data.</li>
             {% endif %}
-            <li><strong>Countdown mode:</strong>
-              {% if is_state('input_boolean.f1_use_manual_lights_out','on') %}
-                Manual ({{ states('input_number.f1_lights_out_manual_minutes') | int(0) }} min)
-              {% else %}
-                Automatic
-              {% endif %}
-            </li>
+            <li><strong>Countdown mode:</strong> {{ countdown_mode }}</li>
+            <li><strong>Next session:</strong> {{ next_session }}{% if next_session_ts is not none %} ({{ next_session_ts | timestamp_custom('%a %b %-d · %-I:%M %p %Z', True) }}){% endif %}</li>
           </ul>
 
       - type: markdown
-        title: Standings Snapshot
+        title: Driver Roster
         content: |
-          F1 standings sensors are not currently enabled. Open <em>Settings → Devices & Services → F1 Sensor</em> and enable the driver & constructor standings to populate this section.
+          {% set roster = state_attr('sensor.f1_driver_list', 'drivers') %}
+          {% if roster %}
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="text-align:left;border-bottom:1px solid var(--divider-color);">
+                  <th style="padding:4px 0;">#</th>
+                  <th style="padding:4px 0;">Driver</th>
+                  <th style="padding:4px 0;">Team</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for driver in roster %}
+                  {% set color = driver.team_color | default('#999999') %}
+                  <tr style="border-bottom:1px solid var(--divider-color);">
+                    <td style="padding:6px 0;font-weight:600;">{{ driver.racing_number }}</td>
+                    <td style="padding:6px 0;display:flex;align-items:center;gap:8px;">
+                      <span style="width:12px;height:12px;border-radius:50%;background-color:{{ color }};display:inline-block;"></span>
+                      <span>{{ driver.name }} ({{ driver.tla }})</span>
+                    </td>
+                    <td style="padding:6px 0;">{{ driver.team }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p>Enable the Driver List sensor in the F1 integration to populate this roster.</p>
+          {% endif %}
 
       - type: entities
         title: Race Telemetry
@@ -135,10 +192,16 @@ views:
             name: Lights Out (Local)
           - entity: sensor.f1_lights_out_minutes_auto
             name: Auto Countdown (min)
+          - entity: sensor.f1_current_session
+            name: Current Session
+          - entity: sensor.f1_session_status
+            name: Session Status
           - entity: sensor.f1_race_phase_label
             name: Race Phase
           - entity: sensor.f1_track_status_label
             name: Track Status
+          - entity: sensor.f1_driver_list
+            name: Driver List
           - entity: input_text.f1_last_flag_message
             name: Last Flag Message
 
