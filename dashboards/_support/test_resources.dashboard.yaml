@@ -17,12 +17,11 @@ views:
     sections:
       - type: grid
         columns: 4
+        square: false
         cards:
           - type: heading
             heading: Mission Overview
             heading_style: title
-            grid_options:
-              columns: 4
             view_layout:
               column_span: 4
           - type: custom:mushroom-chips-card
@@ -150,124 +149,108 @@ views:
                 tap_action:
                   action: navigate
                   navigation_path: /lovelace/support-test-scenes
-            grid_options:
-              columns: 4
             view_layout:
               column_span: 4
-          - type: grid
-            columns: 4
-            grid_options:
-              columns: 4
-            cards:
-              - type: markdown
-                title: Lights briefing
-                content: >-
-                  {% set summary = state_attr('sensor.support_test_resources_briefing', 'lights_briefing') %}
-                  {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Light summary is currently unavailable.' }}
-                card_mod:
-                  style: |
-                    ha-card {
-                      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.25));
-                      border-radius: 16px;
-                      box-shadow: none;
-                      padding: 1.2rem;
-                    }
-              - type: markdown
-                title: Weather & water
-                content: >-
-                  {% set summary = state_attr('sensor.support_test_resources_briefing', 'weather_briefing') %}
-                  {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Weather summary is currently unavailable.' }}
-                card_mod:
-                  style: |
-                    ha-card {
-                      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.25));
-                      border-radius: 16px;
-                      box-shadow: none;
-                      padding: 1.2rem;
-                    }
-              - type: markdown
-                title: Network watch
-                content: >-
-                  {% set summary = state_attr('sensor.support_test_resources_briefing', 'network_briefing') %}
-                  {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Network summary is currently unavailable.' }}
-                card_mod:
-                  style: |
-                    ha-card {
-                      background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.25));
-                      border-radius: 16px;
-                      box-shadow: none;
-                      padding: 1.2rem;
-                    }
-              - type: markdown
-                title: Sports desk
-                content: >-
-                  {% set summary = state_attr('sensor.support_test_resources_briefing', 'sports_briefing') %}
-                  {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Sports summary is currently unavailable.' }}
-                card_mod:
-                  style: |
-                    ha-card {
-                      background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(124,58,237,0.25));
-                      border-radius: 16px;
-                      box-shadow: none;
-                      padding: 1.2rem;
-                    }
-            view_layout:
-              column_span: 4
-          - type: grid
-            columns: 4
-            grid_options:
-              columns: 4
-            cards:
-              - type: custom:mushroom-template-card
-                entity: sensor.kiosk_snapshot_aux_readout
-                icon: mdi:lightbulb-on-outline
-                icon_color: amber
-                primary: Interior snapshot
-                secondary: '{{ states(''sensor.kiosk_snapshot_aux_readout'') }}'
-                fill_container: true
-                layout: vertical
-                multiline_secondary: true
-              - type: custom:mushroom-template-card
-                entity: sensor.network_status_summary
-                icon: mdi:lan-check
-                icon_color: >-
-                  {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
-                primary: Network status
-                secondary: '{{ states(''sensor.network_status_summary'') }}'
-                fill_container: true
-                layout: vertical
-              - type: custom:mushroom-template-card
-                entity: sensor.hygrometer_humidor_humidity
-                icon: mdi:cigar
-                icon_color: >-
-                  {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
-                    teal
-                  {% else %}
-                    red
-                  {% endif %}
-                primary: Humidor humidity
-                secondary: >-
-                  {{ states('sensor.hygrometer_humidor_humidity') | default('—', true) }}%
-                layout: vertical
-                fill_container: true
-              - type: custom:mushroom-template-card
-                entity: sensor.support_test_resources_briefing
-                icon: mdi:battery-alert
-                icon_color: >-
-                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
-                  {{ 'amber' if low is iterable and low | count > 0 else 'green' }}
-                primary: Battery alerts
-                secondary: >-
-                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
-                  {% if low is iterable and low | count > 0 %}
-                    {{ low | join(', ') }}
-                  {% else %}
-                    No low batteries detected
-                  {% endif %}
-                layout: vertical
-                fill_container: true
-        view_layout:
-          column_span: 4
+          - type: markdown
+            title: Lights briefing
+            content: >-
+              {% set summary = state_attr('sensor.support_test_resources_briefing', 'lights_briefing') %}
+              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Light summary is currently unavailable.' }}
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.25));
+                  border-radius: 16px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: markdown
+            title: Weather & water
+            content: >-
+              {% set summary = state_attr('sensor.support_test_resources_briefing', 'weather_briefing') %}
+              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Weather summary is currently unavailable.' }}
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.25));
+                  border-radius: 16px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: markdown
+            title: Network watch
+            content: >-
+              {% set summary = state_attr('sensor.support_test_resources_briefing', 'network_briefing') %}
+              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Network summary is currently unavailable.' }}
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.25));
+                  border-radius: 16px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: markdown
+            title: Sports desk
+            content: >-
+              {% set summary = state_attr('sensor.support_test_resources_briefing', 'sports_briefing') %}
+              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Sports summary is currently unavailable.' }}
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(124,58,237,0.25));
+                  border-radius: 16px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_snapshot_aux_readout
+            icon: mdi:lightbulb-on-outline
+            icon_color: amber
+            primary: Interior snapshot
+            secondary: '{{ states(''sensor.kiosk_snapshot_aux_readout'') }}'
+            fill_container: true
+            layout: vertical
+            multiline_secondary: true
+          - type: custom:mushroom-template-card
+            entity: sensor.network_status_summary
+            icon: mdi:lan-check
+            icon_color: >-
+              {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
+            primary: Network status
+            secondary: '{{ states(''sensor.network_status_summary'') }}'
+            fill_container: true
+            layout: vertical
+          - type: custom:mushroom-template-card
+            entity: sensor.hygrometer_humidor_humidity
+            icon: mdi:cigar
+            icon_color: >-
+              {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'off') %}
+                teal
+              {% else %}
+                red
+              {% endif %}
+            primary: Humidor humidity
+            secondary: >-
+              {{ states('sensor.hygrometer_humidor_humidity') | default('—', true) }}%
+            layout: vertical
+            fill_container: true
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:battery-alert
+            icon_color: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {{ 'amber' if low is iterable and low | count > 0 else 'green' }}
+            primary: Battery alerts
+            secondary: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {% if low is iterable and low | count > 0 %}
+                {{ low | join(', ') }}
+              {% else %}
+                No low batteries detected
+              {% endif %}
+            layout: vertical
+            fill_container: true
     badges:
       - entity: sensor.kiosk_snapshot_lights_on
         name: Lights On
