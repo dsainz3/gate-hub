@@ -72,14 +72,6 @@ views:
               service: script.turn_on
               target:
                 entity_id: script.huskers_hail_burst_8s
-          - type: button
-            name: All Scarlet
-            icon: mdi:palette
-            tap_action:
-              action: call-service
-              service: scene.turn_on
-              target:
-                entity_id: scene.huskers_seven_all_scarlet
       - type: vertical-stack
         cards:
           - type: markdown
@@ -495,6 +487,8 @@ views:
           - input_boolean.huskers_use_score_delay
           - type: section
             label: Huskers Automations
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
           - automation.huskers_showtime_at_t_20
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
@@ -541,6 +535,8 @@ views:
       - type: logbook
         title: Huskers Activity Log
         entities:
+          - automation.huskers_enable_game_mode_window
+          - automation.huskers_disable_game_mode_window
           - automation.huskers_showtime_at_t_20
           - automation.huskers_td_burst_on_score
           - automation.huskers_postgame_cleanup
