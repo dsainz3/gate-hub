@@ -1001,6 +1001,120 @@
               bullet_batteries
             ] %}
             {{ lines | join('\n') }}
+          events_content: >-
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set huskers_team = states('sensor.huskers_team_name') %}
+            {% set huskers_phase = states('sensor.huskers_game_phase_label') %}
+            {% set huskers_opp = states('sensor.huskers_opponent_name') %}
+            {% set huskers_team_score = states('sensor.huskers_team_score') %}
+            {% set huskers_opp_score = states('sensor.huskers_opponent_score') %}
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set has_huskers = huskers_team not in invalid and huskers_phase not in invalid and huskers_opp not in invalid and huskers_team_score not in invalid and huskers_opp_score not in invalid %}
+            {% if has_huskers %}
+              {% set bullet_huskers = '- Huskers ' ~ huskers_team ~ ' ' ~ huskers_team_score ~ ' – ' ~ huskers_opp_score ~ ' ' ~ huskers_opp ~ ' · ' ~ huskers_phase ~ '.' %}
+            {% else %}
+              {% set bullet_huskers = "- Huskers update isn't available right now." %}
+            {% endif %}
+            {% set f1_name = states('sensor.f1_next_race_name') %}
+            {% set f1_location = states('sensor.f1_next_race_location') %}
+            {% set lights_out = states('sensor.f1_lights_out_local') %}
+            {% set f1_round = states('sensor.f1_next_race_round') %}
+            {% set has_f1 = f1_name not in invalid and f1_location not in invalid %}
+            {% if lights_out not in invalid %}
+              {% set lights_out_ts = as_timestamp(lights_out, default=None) %}
+            {% else %}
+              {% set lights_out_ts = none %}
+            {% endif %}
+            {% if has_f1 %}
+              {% if lights_out_ts is not none %}
+                {% set lights_out_readable = lights_out_ts | timestamp_custom('%b %-d %-I:%M %p', True) %}
+                {% set round_readout = f1_round if f1_round not in invalid else 'TBA' %}
+                {% set bullet_f1 = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out ' ~ lights_out_readable ~ '.' %}
+              {% else %}
+                {% set round_readout = f1_round if f1_round not in invalid else 'TBA' %}
+                {% set bullet_f1 = '- Next F1 · ' ~ f1_name ~ ' (Round ' ~ round_readout ~ ') in ' ~ f1_location ~ ' · Lights out time TBA.' %}
+              {% endif %}
+            {% else %}
+              {% set bullet_f1 = "- Formula 1 schedule isn't available right now." %}
+            {% endif %}
+            {% set lines = [
+              greeting ~ ", scanning headline events as of " ~ time_readout ~ ".",
+              '',
+              bullet_huskers,
+              bullet_f1
+            ] %}
+            {{ lines | join('\n') }}
+          systems_content: >-
+            {% set now_obj = now() %}
+            {% set hour = now_obj.hour %}
+            {% if hour < 12 %}
+              {% set greeting = 'Good morning' %}
+            {% elif hour < 17 %}
+              {% set greeting = 'Good afternoon' %}
+            {% else %}
+              {% set greeting = 'Good evening' %}
+            {% endif %}
+            {% set time_readout = now_obj.strftime('%-I:%M %p') %}
+            {% set invalid = ['', 'unknown', 'unavailable', none] %}
+            {% set network_status = states('sensor.network_status_summary') %}
+            {% set network_performance = states('sensor.network_performance_summary') %}
+            {% set download = states('sensor.speedtest_download') %}
+            {% set upload = states('sensor.speedtest_upload') %}
+            {% set ping = states('sensor.speedtest_ping') %}
+            {% if network_status not in invalid %}
+              {% if network_status | lower == 'online' %}
+                {% set bullet_network = '- Network status is online and steady.' %}
+              {% else %}
+                {% set bullet_network = '- Network status reports ' ~ (network_status | lower) ~ '.' %}
+              {% endif %}
+            {% else %}
+              {% set bullet_network = "- Network status isn't available right now." %}
+            {% endif %}
+            {% if network_performance not in invalid and download not in invalid and upload not in invalid and ping not in invalid %}
+              {% set bullet_performance = '- Throughput check · ↓ ' ~ download ~ ' Mbps · ↑ ' ~ upload ~ ' Mbps · Ping ' ~ ping ~ ' ms.' %}
+            {% else %}
+              {% set bullet_performance = "- Throughput details aren't available right now." %}
+            {% endif %}
+            {% set automation_issues = states('binary_sensor.kiosk_automations_have_issues') %}
+            {% set problem_count = states('sensor.kiosk_automations_problem_count') %}
+            {% if automation_issues == 'on' %}
+              {% set bullet_automations = '- Automation check: Issues detected (' ~ (problem_count if problem_count not in invalid else 'count unavailable') ~ ').' %}
+            {% elif automation_issues == 'off' %}
+              {% set bullet_automations = '- Automation check: All routines are healthy.' %}
+            {% else %}
+              {% set bullet_automations = "- Automation status isn't available right now." %}
+            {% endif %}
+            {% set holiday_mode = states('input_boolean.holiday_mode_manual') %}
+            {% set next_holiday = states('sensor.next_us_holiday') %}
+            {% if holiday_mode == 'on' %}
+              {% set bullet_holiday = '- Holiday mode override is currently engaged.' %}
+            {% elif holiday_mode == 'off' %}
+              {% if next_holiday not in invalid %}
+                {% set bullet_holiday = '- Holiday mode is off · Next holiday ' ~ next_holiday ~ '.' %}
+              {% else %}
+                {% set bullet_holiday = '- Holiday mode is off.' %}
+              {% endif %}
+            {% else %}
+              {% set bullet_holiday = "- Holiday mode status isn't available right now." %}
+            {% endif %}
+            {% set lines = [
+              greeting ~ ", overseeing systems health as of " ~ time_readout ~ ".",
+              '',
+              bullet_network,
+              bullet_performance,
+              bullet_automations,
+              bullet_holiday
+            ] %}
+            {{ lines | join('\n') }}
 
   - binary_sensor:
       - name: huskers_tailgate_window

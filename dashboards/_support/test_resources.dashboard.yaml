@@ -17,20 +17,36 @@ views:
     sections:
       - type: grid
         title: Mission Control
-        columns: 3
+        columns: 4
         cards:
           - type: markdown
+            title: Support lab briefing
             view_layout:
-              column_span: 2
+              column_span: 1
             content: >-
               {{ state_attr('sensor.support_test_resources_briefing', 'content')
                  or "Support lab briefing details are currently unavailable." }}
           - type: markdown
+            title: Keeping tabs on essentials
             view_layout:
               column_span: 1
             content: >-
               {{ state_attr('sensor.support_test_resources_briefing', 'environment_content')
                  or "Support lab environment details are currently unavailable." }}
+          - type: markdown
+            title: Headline events
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'events_content')
+                 or "Support lab event highlights are currently unavailable." }}
+          - type: markdown
+            title: Systems oversight
+            view_layout:
+              column_span: 1
+            content: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'systems_content')
+                 or "Support lab systems details are currently unavailable." }}
           - type: custom:mushroom-title-card
             title: Support Lab · Modern Showcase
             subtitle: Curated command centre built from the sample entities.
@@ -39,7 +55,7 @@ views:
               action: more-info
               entity: sensor.agenda_planner_summary
             view_layout:
-              column_span: 3
+              column_span: 4
           - type: custom:mushroom-chips-card
             alignment: start
             chips:
@@ -99,7 +115,7 @@ views:
                   action: more-info
                   entity: sensor.f1_next_race_name
             view_layout:
-              column_span: 3
+              column_span: 4
       - type: grid
         title: Live Highlights
         columns: 3
