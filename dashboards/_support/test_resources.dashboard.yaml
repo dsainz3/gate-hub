@@ -21,6 +21,8 @@ views:
           - type: heading
             heading: Mission Overview
             heading_style: title
+            grid_options:
+              columns: 4
             view_layout:
               column_span: 4
           - type: custom:mushroom-chips-card
@@ -148,10 +150,14 @@ views:
                 tap_action:
                   action: navigate
                   navigation_path: /lovelace/support-test-scenes
+            grid_options:
+              columns: 4
             view_layout:
               column_span: 4
           - type: grid
             columns: 4
+            grid_options:
+              columns: 4
             cards:
               - type: markdown
                 title: Lights briefing
@@ -209,6 +215,8 @@ views:
               column_span: 4
           - type: grid
             columns: 4
+            grid_options:
+              columns: 4
             cards:
               - type: custom:mushroom-template-card
                 entity: sensor.kiosk_snapshot_aux_readout
