@@ -82,21 +82,10 @@
           {{ states.get('scene.lighting_night_mode') is not none }}
         data:
           transition: 5
-      - service: light.turn_on
-        target:
-          entity_id: light.permanent_outdoor_lights
-        data:
-          transition: 5
-          brightness_pct: 20
-      - service: light.turn_off
-        target:
-          entity_id:
-            - light.front_porch_lights
-            - light.light_garage_left
-            - light.light_garage_center
-            - light.light_garage_right
-        data:
-          transition: 5
+      - wait_template: >-
+          {{ is_state('light.front_porch_lights', 'off') and is_state('light.permanent_outdoor_lights', 'on') }}
+        timeout: '00:00:10'
+        continue_on_timeout: true
       - service: logbook.log
         data:
           name: Lighting Automation
@@ -127,22 +116,10 @@
           {{ states.get('scene.lighting_early_morning_gentle_wake') is not none }}
         data:
           transition: 3
-      - service: light.turn_on
-        target:
-          entity_id: light.permanent_outdoor_lights
-        data:
-          transition: 3
-          brightness_pct: 50
-      - service: light.turn_on
-        target:
-          entity_id:
-            - light.front_porch_lights
-            - light.light_garage_left
-            - light.light_garage_center
-            - light.light_garage_right
-        data:
-          transition: 3
-          brightness_pct: 10
+      - wait_template: >-
+          {{ is_state('light.front_porch_lights', 'on') and is_state('light.permanent_outdoor_lights', 'on') }}
+        timeout: '00:00:10'
+        continue_on_timeout: true
       - service: logbook.log
         data:
           name: Lighting Automation
