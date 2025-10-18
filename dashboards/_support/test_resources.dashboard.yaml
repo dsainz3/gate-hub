@@ -27,80 +27,94 @@ views:
             alignment: start
             chips:
               - type: template
-                entity: weather.forecast_home
-                icon: mdi:weather-partly-cloudy
-                icon_color: >-
-                  {% set condition = states('weather.forecast_home') %}
-                  {% if condition in ['sunny', 'clear-night'] %}
-                    amber
-                  {% elif condition in ['cloudy', 'partlycloudy', 'mostlycloudy'] %}
-                    blue-grey
-                  {% elif condition in ['rainy', 'pouring'] %}
-                    blue
-                  {% else %}
-                    teal
-                  {% endif %}
-                content: >-
-                  {{ states('weather.forecast_home') | title }} · {{ states('sensor.temperature') }}°F
-                tap_action:
-                  action: more-info
-                  entity: weather.forecast_home
-              - type: template
-                entity: sensor.network_status_summary
-                icon: mdi:lan-check
-                icon_color: >-
-                  {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
-                content: Network · {{ states('sensor.network_status_summary') }}
-                tap_action:
-                  action: more-info
-                  entity: sensor.network_status_summary
-              - type: template
-                entity: sensor.huskers_game_phase_label
-                icon: mdi:football-helmet
-                icon_color: >-
-                  {% if states('sensor.huskers_game_phase_label') == 'Final' %}
-                    red
-                  {% elif is_state('sensor.huskers_game_phase_label', 'Live') %}
-                    green
-                  {% else %}
-                    grey
-                  {% endif %}
-                content: >-
-                  Huskers {{ states('sensor.huskers_team_score') }}–{{ states('sensor.huskers_opponent_score_2') }}
-                tap_action:
-                  action: more-info
-                  entity: sensor.huskers_game_detail
-              - type: template
-                entity: binary_sensor.f1_is_race_week
-                icon: mdi:flag-checkered
-                icon_color: >-
-                  {{ 'purple' if is_state('binary_sensor.f1_is_race_week', 'on') else 'grey' }}
-                content: F1 · {{ states('sensor.f1_next_race_name') }}
-                tap_action:
-                  action: more-info
-                  entity: sensor.f1_next_race_name
-              - type: template
-                entity: sensor.hygrometer_humidor_humidity
-                icon: mdi:water-percent
-                icon_color: >-
-                  {% if is_state('binary_sensor.kiosk_humidor_out_of_band', 'on') %}
-                    red
-                  {% else %}
-                    indigo
-                  {% endif %}
-                content: Humidor · {{ states('sensor.hygrometer_humidor_humidity') }}%
-                tap_action:
-                  action: more-info
-                  entity: sensor.hygrometer_humidor_humidity
-              - type: template
                 entity: sensor.support_test_resources_briefing
-                icon: mdi:account-tie
+                icon: mdi:lightbulb-group-outline
                 icon_color: >-
-                  {{ 'green' if is_state('sensor.support_test_resources_briefing', 'ok') else 'amber' }}
-                content: Briefing · {{ states('sensor.support_test_resources_briefing') | title }}
+                  {% set lights = state_attr('sensor.support_test_resources_briefing', 'lights_on') %}
+                  {% set count = lights | count if lights is iterable else states('sensor.kiosk_snapshot_lights_on') | int(0) %}
+                  {{ 'amber' if count > 0 else 'blue-grey' }}
+                content: >-
+                  {% set lights = state_attr('sensor.support_test_resources_briefing', 'lights_on') %}
+                  {% if lights is iterable %}
+                    Lights · {{ lights | count }} on
+                  {% else %}
+                    {% set fallback = states('sensor.kiosk_snapshot_lights_on') %}
+                    {% if fallback in ['', 'unknown', 'unavailable', none] %}
+                      Lights · —
+                    {% else %}
+                      Lights · {{ fallback }} on
+                    {% endif %}
+                  {% endif %}
                 tap_action:
                   action: more-info
                   entity: sensor.support_test_resources_briefing
+              - type: template
+                entity: sensor.outdoor_temperature_wx
+                icon: mdi:thermometer
+                icon_color: >-
+                  {% set temp = states('sensor.outdoor_temperature_wx') | float(0) %}
+                  {% if temp <= 32 %}
+                    blue
+                  {% elif temp >= 85 %}
+                    red
+                  {% else %}
+                    amber
+                  {% endif %}
+                content: >-
+                  {% set temp = states('sensor.outdoor_temperature_wx') %}
+                  {% if temp in ['', 'unknown', 'unavailable', none] %}
+                    Temp · —
+                  {% else %}
+                    Temp · {{ temp }}°F
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: sensor.outdoor_temperature_wx
+              - type: template
+                entity: sensor.outdoor_humidity_wx
+                icon: mdi:water-percent
+                icon_color: indigo
+                content: >-
+                  {% set humidity = states('sensor.outdoor_humidity_wx') %}
+                  {% if humidity in ['', 'unknown', 'unavailable', none] %}
+                    Humidity · —
+                  {% else %}
+                    Humidity · {{ humidity }}%
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: sensor.outdoor_humidity_wx
+              - type: template
+                entity: sensor.outdoor_wind_speed_wx
+                icon: mdi:weather-windy
+                icon_color: teal
+                content: >-
+                  {% set speed = states('sensor.outdoor_wind_speed_wx') %}
+                  {% if speed in ['', 'unknown', 'unavailable', none] %}
+                    Wind · —
+                  {% else %}
+                    Wind · {{ speed }} mph
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: sensor.outdoor_wind_speed_wx
+              - type: template
+                entity: weather.forecast_home
+                icon: mdi:compass-rose
+                icon_color: blue-grey
+                content: >-
+                  {% set bearing = state_attr('weather.forecast_home', 'wind_bearing') %}
+                  {% if bearing in [None, '', 'unknown', 'unavailable'] %}
+                    Direction · —
+                  {% else %}
+                    {% set dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] %}
+                    {% set index = ((bearing | float(0) + 22.5) / 45) | int %}
+                    {% set cardinal = dirs[index % 8] %}
+                    Direction · {{ cardinal }} ({{ bearing | round(0) }}°)
+                  {% endif %}
+                tap_action:
+                  action: more-info
+                  entity: weather.forecast_home
             view_layout:
               column_span: 4
           - type: markdown
