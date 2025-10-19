@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-HOST="${HA_HOST:-homeassistant.local}"
-PORT="${HA_PORT:-2222}"
-
-exec ssh "root@${HOST}" -p "${PORT}" "$@"

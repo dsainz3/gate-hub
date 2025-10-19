@@ -28,7 +28,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 ## How-to Guides
 - [CI Pipeline Runbook](how-to/ci.md)
 - [Pre-commit Hooks](how-to/pre-commit.md)
-- [VS Code Dev Container Setup](how-to/dev-container.md)
+- Dev Containers are not supported with HAOS; use the Remote - SSH workflow described in the [Infrastructure Overview](reference/infrastructure.md).
 - [Mosquitto MQTT Add-on](how-to/addons/mqtt.md)
 - [Govee2MQTT Add-on](how-to/addons/govee2mqtt.md)
 - [Football Team Dashboard Guide](how-to/football-team/dashboard.md) *(TeamTracker card, tailgate window, conference standings, lighting macros)*
