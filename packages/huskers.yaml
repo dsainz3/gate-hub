@@ -763,6 +763,7 @@ script:
     mode: single
     variables:
       test_ct: 370
+      test_ct_kelvin: "{{ (1000000 / test_ct) | round(0) | int }}"
       test_brightness: 60
     sequence:
       - choose:
@@ -775,7 +776,7 @@ script:
                   entity_id: light.theater_lights
                 data:
                   brightness_pct: "{{ test_brightness }}"
-                  color_temp: "{{ test_ct }}"
+                  color_temp_kelvin: "{{ test_ct_kelvin }}"
                   transition: 1
               - delay: '00:00:02'
               - service: light.turn_on
@@ -783,7 +784,7 @@ script:
                   entity_id: light.theater_lights
                 data:
                   brightness_pct: 30
-                  color_temp: 454
+                  color_temp_kelvin: 2203
                   transition: 1
               - service: logbook.log
                 data:

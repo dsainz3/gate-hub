@@ -79,7 +79,7 @@
         target:
           entity_id: scene.lighting_night_mode
         enabled: >-
-          {{ states.get('scene.lighting_night_mode') is not none }}
+          {{ states('scene.lighting_night_mode') not in ['unknown', 'unavailable'] }}
         data:
           transition: 5
       - service: logbook.log
@@ -109,7 +109,7 @@
         target:
           entity_id: scene.lighting_early_morning_gentle_wake
         enabled: >-
-          {{ states.get('scene.lighting_early_morning_gentle_wake') is not none }}
+          {{ states('scene.lighting_early_morning_gentle_wake') not in ['unknown', 'unavailable'] }}
         data:
           transition: 3
       - service: logbook.log
@@ -801,7 +801,7 @@
                                   target:
                                     entity_id: '{{ target_scene }}'
                                   enabled: >-
-                                    {{ target_scene is not none and target_scene != '' and states.get(target_scene) is not none }}
+                                    {{ target_scene is not none and target_scene != '' and has_value(target_scene) }}
                                   continue_on_error: true
                         - service: light.turn_on
                           target:
