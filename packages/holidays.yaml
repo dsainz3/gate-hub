@@ -384,7 +384,7 @@ script:
                     - light.light_garage_center
                     - light.light_garage_right
                 data:
-                  color_temp: 500
+                  color_temp_kelvin: 2000
                   brightness_pct: 10
                   transition: 3
               - if:
