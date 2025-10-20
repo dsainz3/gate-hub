@@ -23,4 +23,3 @@ _Generated 2025-10-20T06:19:40.694788+00:00Z_
 * Median time to merge: `0.00` days
 * Average files changed per PR: `0.0`
 * Lines added vs deleted: `+741,129` / `-459,309`
-* 
