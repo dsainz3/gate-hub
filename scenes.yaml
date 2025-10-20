@@ -22,15 +22,15 @@
       light.sunroom_light:
         state: 'on'
         brightness_pct: 60
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.diningroom_light:
         state: 'on'
         brightness_pct: 60
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.livingroom_light:
         state: 'on'
         brightness_pct: 60
-        color_temp: 500
+        color_temp_kelvin: 2000
 
   - id: lighting_evening_sunset_exterior
     name: Lighting – Evening Sunset (Exterior)
@@ -38,19 +38,19 @@
       light.front_porch_lights:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_left:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_center:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_right:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.permanent_outdoor_lights:
         state: 'on'
         brightness_pct: 50
@@ -105,31 +105,31 @@
       light.sunroom_light:
         state: 'on'
         brightness_pct: 10
-        color_temp: 454
+        color_temp_kelvin: 2203
       light.diningroom_light:
         state: 'on'
         brightness_pct: 10
-        color_temp: 454
+        color_temp_kelvin: 2203
       light.livingroom_light:
         state: 'on'
         brightness_pct: 10
-        color_temp: 454
+        color_temp_kelvin: 2203
       light.front_porch_lights:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_left:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_center:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.light_garage_right:
         state: 'on'
         brightness_pct: 10
-        color_temp: 500
+        color_temp_kelvin: 2000
       light.permanent_outdoor_lights:
         state: 'on'
         brightness_pct: 50
