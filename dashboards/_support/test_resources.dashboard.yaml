@@ -1,6 +1,6 @@
 title: Support · Test Resources
 views:
-  - title: Quick Glance
+  - title: Executive Brief
     path: support-test-quick
     icon: mdi:view-dashboard-outline
     type: sections
@@ -29,16 +29,16 @@ views:
     badges:
       - entity: sensor.kiosk_snapshot_lights_on
         name: Lights
+      - entity: sensor.support_test_resources_briefing
+        name: Attention
       - entity: sensor.outdoor_temperature_wx
         name: Outdoor Temp
       - entity: sensor.outdoor_humidity_wx
         name: Humidity
-      - entity: sensor.outdoor_wind_speed_wx
-        name: Wind
-      - entity: switch.sprinkler_scheduled_program
-        name: Sprinklers
       - entity: sensor.network_status_summary
         name: Network
+      - entity: switch.sprinkler_scheduled_program
+        name: Sprinklers
     sections:
       - type: grid
         grid_options:
@@ -46,6 +46,8 @@ views:
         cards:
           - type: custom:mushroom-chips-card
             alignment: start
+            view_layout:
+              column_span: 12
             chips:
               - type: template
                 entity: sensor.kiosk_snapshot_lights_on
@@ -73,6 +75,18 @@ views:
                   entity: sensor.kiosk_snapshot_plugs_on
               - type: template
                 entity: sensor.support_test_resources_briefing
+                icon: mdi:battery-heart-variant
+                icon_color: >-
+                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+                  {{ 'red' if low is iterable and low | count > 0 else 'green' }}
+                content: >-
+                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+                  Batteries · {{ low | count if low is iterable else 0 }} low
+                tap_action:
+                  action: more-info
+                  entity: sensor.support_test_resources_briefing
+              - type: template
+                entity: sensor.support_test_resources_briefing
                 icon: mdi:palette-swatch
                 icon_color: >-
                   {% set active = state_attr('sensor.support_test_resources_briefing', 'active_scenes') %}
@@ -84,63 +98,16 @@ views:
                   action: navigate
                   navigation_path: /lovelace/support-test-operations
               - type: template
-                entity: sensor.support_test_resources_briefing
-                icon: mdi:battery-heart
+                entity: switch.sprinkler_scheduled_program
+                icon: mdi:sprinkler-variant
                 icon_color: >-
-                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
-                  {{ 'amber' if low is iterable and low | count > 0 else 'green' }}
+                  {{ 'green' if is_state('switch.sprinkler_scheduled_program', 'on') else 'blue-grey' }}
                 content: >-
-                  {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
-                  Batteries · {{ low | count if low is iterable else 0 }} low
+                  {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+                  Sprinklers · {{ (runtime | round(1)) ~ ' min' if runtime not in ['', 'unknown', 'unavailable', none] else 'Idle' }}
                 tap_action:
-                  action: more-info
-                  entity: sensor.support_test_resources_briefing
-              - type: template
-                entity: weather.forecast_home
-                icon: mdi:weather-partly-cloudy
-                icon_color: >-
-                  {% set condition = states('weather.forecast_home') %}
-                  {% if condition in ['sunny', 'clear-night'] %}
-                    amber
-                  {% elif condition in ['cloudy', 'partlycloudy', 'mostlycloudy'] %}
-                    blue-grey
-                  {% elif condition in ['rainy', 'pouring'] %}
-                    blue
-                  {% else %}
-                    teal
-                  {% endif %}
-                content: >-
-                  {% set temp = states('sensor.outdoor_temperature_wx') %}
-                  Weather · {{ states('weather.forecast_home') | title }}{% if temp not in ['', 'unknown', 'unavailable', none] %} · {{ temp }}°F{% endif %}
-                tap_action:
-                  action: more-info
-                  entity: weather.forecast_home
-              - type: template
-                entity: sensor.outdoor_humidity_wx
-                icon: mdi:water-percent
-                icon_color: indigo
-                content: >-
-                  {% set humidity = states('sensor.outdoor_humidity_wx') %}
-                  Humidity · {{ humidity if humidity not in ['', 'unknown', 'unavailable', none] else '—' }}
-              - type: template
-                entity: sensor.outdoor_wind_speed_wx
-                icon: mdi:weather-windy
-                icon_color: teal
-                content: >-
-                  {% set speed = states('sensor.outdoor_wind_speed_wx') %}
-                  {% set bearing = state_attr('weather.forecast_home', 'wind_bearing') %}
-                  {% if speed in ['', 'unknown', 'unavailable', none] %}
-                    Wind · —
-                  {% else %}
-                    {% if bearing in ['', 'unknown', 'unavailable', none] %}
-                      Wind · {{ speed }} mph
-                    {% else %}
-                      {% set dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] %}
-                      {% set index = ((bearing | float(0) + 22.5) / 45) | int %}
-                      {% set cardinal = dirs[index % 8] %}
-                      Wind · {{ speed }} mph {{ cardinal }}
-                    {% endif %}
-                  {% endif %}
+                  action: navigate
+                  navigation_path: /lovelace/support-test-environment
               - type: template
                 entity: sensor.network_status_summary
                 icon: mdi:lan-check
@@ -151,22 +118,6 @@ views:
                   action: navigate
                   navigation_path: /lovelace/support-test-network
               - type: template
-                entity: sensor.huskers_game_phase_label
-                icon: mdi:football-helmet
-                icon_color: >-
-                  {% if is_state('sensor.huskers_game_phase_label', 'Live') %}
-                    red
-                  {% elif is_state('sensor.huskers_game_phase_label', 'Final') %}
-                    blue-grey
-                  {% else %}
-                    grey
-                  {% endif %}
-                content: >-
-                  Huskers {{ states('sensor.huskers_team_score') }}–{{ states('sensor.huskers_opponent_score_2') }}
-                tap_action:
-                  action: more-info
-                  entity: sensor.huskers_game_detail
-              - type: template
                 entity: binary_sensor.f1_is_race_week
                 icon: mdi:flag-checkered
                 icon_color: >-
@@ -175,15 +126,224 @@ views:
                 tap_action:
                   action: more-info
                   entity: sensor.f1_next_race_name
-              - type: template
-                entity: switch.sprinkler_scheduled_program
-                icon: mdi:sprinkler-variant
-                icon_color: >-
-                  {{ 'green' if is_state('switch.sprinkler_scheduled_program', 'on') else 'blue-grey' }}
-                content: Sprinklers · {{ states('switch.sprinkler_scheduled_program') | title }}
-                tap_action:
-                  action: navigate
-                  navigation_path: /lovelace/support-test-weather
+          - type: heading
+            heading: Executive Summary
+            heading_style: title
+            view_layout:
+              column_span: 12
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:clipboard-text-outline
+            icon_color: >-
+              {% if is_state('sensor.support_test_resources_briefing', 'attention') %}
+                amber
+              {% else %}
+                teal
+              {% endif %}
+            badge_icon: >-
+              {% if is_state('sensor.support_test_resources_briefing', 'attention') %}
+                mdi:alert
+              {% else %}
+                mdi:check
+              {% endif %}
+            badge_color: >-
+              {% if is_state('sensor.support_test_resources_briefing', 'attention') %}
+                amber
+              {% else %}
+                green
+              {% endif %}
+            primary: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'greeting') }}, here's the latest test bench report.
+            secondary: >-
+              {% set lights = state_attr('sensor.support_test_resources_briefing', 'lights_on') %}
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+              {% set network = states('sensor.network_status_summary') %}
+              • Reported {{ state_attr('sensor.support_test_resources_briefing', 'report_time') }}
+              • Lights on: {{ lights | count if lights is iterable else 0 }}
+              • Low batteries: {{ low | count if low is iterable else 0 }}
+              • Sprinklers ran: {{ (runtime | round(1)) ~ ' min' if runtime not in ['', 'unknown', 'unavailable', none] else 'not yet today' }}
+              • Network: {{ network if network not in ['', 'unknown', 'unavailable', none] else 'status unavailable' }}
+            tap_action:
+              action: more-info
+            view_layout:
+              column_span: 6
+            card_mod:
+              style: |
+                ha-card {
+                  background: linear-gradient(135deg, rgba(20,184,166,0.25), rgba(59,130,246,0.2));
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.4rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_automations_problem_count
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:robot-check
+            icon_color: >-
+              {% set issues = states('sensor.kiosk_automations_problem_count') | int(0) %}
+              {{ 'red' if issues > 0 else 'green' }}
+            primary: Automation posture
+            secondary: >-
+              {% set issues = states('sensor.kiosk_automations_problem_count') | int(0) %}
+              {% set watchdog = states('binary_sensor.kiosk_automations_have_issues') %}
+              Issues flagged: {{ issues }}
+              Watchdog: {{ 'clear' if watchdog == 'off' else ('attention' if watchdog == 'on' else 'unknown') }}
+              Audit: {{ states('sensor.automation_status_audit') | default('pending', true) }}
+            tap_action:
+              action: more-info
+              entity: sensor.automation_status_audit
+            view_layout:
+              column_span: 3
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                  background: var(--card-background-color);
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:lightbulb-group-outline
+            icon_color: >-
+              {% set lights = state_attr('sensor.support_test_resources_briefing', 'lights_on') %}
+              {{ 'amber' if lights is iterable and lights | count > 0 else 'blue-grey' }}
+            primary: Lighting pulse
+            secondary: >-
+              {% set lights = state_attr('sensor.support_test_resources_briefing', 'lights_on') %}
+              {% if lights is iterable and lights | count > 0 %}
+                {{ lights | join(', ') }}
+              {% else %}
+                All tracked lights are off.
+              {% endif %}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-operations
+            view_layout:
+              column_span: 3
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:battery-alert
+            icon_color: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {{ 'red' if low is iterable and low | count > 0 else 'green' }}
+            primary: Battery watch
+            secondary: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {% if low is iterable and low | count > 0 %}
+                {% set preview = low[:3] %}
+                {{ preview | join(', ') }}{% if low | count > preview | count %} +{{ (low | count) - (preview | count) }} more{% endif %}
+              {% else %}
+                All monitored batteries above threshold.
+              {% endif %}
+            tap_action:
+              action: more-info
+              entity: sensor.support_test_resources_briefing
+            view_layout:
+              column_span: 3
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:palette-swatch
+            icon_color: >-
+              {% set active = state_attr('sensor.support_test_resources_briefing', 'active_scenes') %}
+              {{ 'purple' if active is iterable and active | count > 0 else 'blue-grey' }}
+            primary: Scenes engaged
+            secondary: >-
+              {% set active = state_attr('sensor.support_test_resources_briefing', 'active_scenes') %}
+              {% if active is iterable and active | count > 0 %}
+                {{ active | join(', ') }}
+              {% else %}
+                No scenes are currently running.
+              {% endif %}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-operations
+            view_layout:
+              column_span: 3
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:sprinkler-variant
+            icon_color: teal
+            primary: Sprinkler usage today
+            secondary: >-
+              {% set invalid = ['', 'unknown', 'unavailable', none] %}
+              {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+              {% set zones = [
+                ('South side', 'sensor.sprinklers_south_side_runtime_today_min'),
+                ('Back south', 'sensor.sprinklers_back_south_runtime_today_min'),
+                ('Back north', 'sensor.sprinklers_back_north_runtime_today_min'),
+                ('Front', 'sensor.sprinklers_front_runtime_today_min'),
+                ('Zone 5', 'sensor.sprinklers_zone_5_runtime_today_min')
+              ] %}
+              {% set details = [] %}
+              {% for label, entity_id in zones %}
+                {% set value = states(entity_id) %}
+                {% if value not in invalid %}
+                  {% set details = details + [label ~ ' · ' ~ (value | float(0) | round(1)) ~ ' min'] %}
+                {% endif %}
+              {% endfor %}
+              {% if runtime not in invalid %}
+                {% set header = 'Total run · ' ~ (runtime | round(1)) ~ ' min' %}
+              {% elif is_state('switch.sprinkler_scheduled_program', 'on') %}
+                {% set header = 'Program armed · awaiting next run' %}
+              {% else %}
+                {% set header = 'Sprinkler schedule is currently paused' %}
+              {% endif %}
+              {{ header }}
+              {% if details %}
+                {{ '\\n' }}{{ details | join('\\n') }}
+              {% endif %}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-sprinklers
+            view_layout:
+              column_span: 3
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
       - type: grid
         columns: 12
         grid_options:
@@ -194,60 +354,91 @@ views:
             heading_style: title
             view_layout:
               column_span: 12
-          - type: markdown
-            title: Lights briefing
-            content: >-
-              {% set summary = state_attr('sensor.support_test_resources_briefing', 'lights_briefing') %}
-              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Light summary is currently unavailable.' }}
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:lightbulb-on-80
+            icon_color: amber
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            primary: Lights briefing
+            secondary: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'lights_briefing') }}
+            tap_action:
+              action: more-info
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.25));
+                  background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(249,115,22,0.28));
                   border-radius: 16px;
                   box-shadow: none;
                   padding: 1.2rem;
                 }
             view_layout:
               column_span: 3
-          - type: markdown
-            title: Weather & water
-            content: >-
-              {% set summary = state_attr('sensor.support_test_resources_briefing', 'weather_briefing') %}
-              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Weather summary is currently unavailable.' }}
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:weather-partly-rainy
+            icon_color: indigo
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            primary: Weather & water
+            secondary: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'weather_briefing') }}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-environment
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.25));
+                  background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(37,99,235,0.3));
                   border-radius: 16px;
                   box-shadow: none;
                   padding: 1.2rem;
                 }
             view_layout:
               column_span: 3
-          - type: markdown
-            title: Network watch
-            content: >-
-              {% set summary = state_attr('sensor.support_test_resources_briefing', 'network_briefing') %}
-              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Network summary is currently unavailable.' }}
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:lan-connect
+            icon_color: teal
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            primary: Network watch
+            secondary: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'network_briefing') }}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-network
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.25));
+                  background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(16,185,129,0.3));
                   border-radius: 16px;
                   box-shadow: none;
                   padding: 1.2rem;
                 }
             view_layout:
               column_span: 3
-          - type: markdown
-            title: Sports desk
-            content: >-
-              {% set summary = state_attr('sensor.support_test_resources_briefing', 'sports_briefing') %}
-              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'Sports summary is currently unavailable.' }}
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:stadium-variant
+            icon_color: purple
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            primary: Sports desk
+            secondary: >-
+              {{ state_attr('sensor.support_test_resources_briefing', 'sports_briefing') }}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-sports
             card_mod:
               style: |
                 ha-card {
-                  background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(99,102,241,0.25));
+                  background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(99,102,241,0.3));
                   border-radius: 16px;
                   box-shadow: none;
                   padding: 1.2rem;
@@ -263,42 +454,12 @@ views:
             heading: Signals
             heading_style: title
             view_layout:
-              column_span: 8
-          - type: custom:mushroom-template-card
-            entity: sensor.huskers_game_phase_label
-            icon: mdi:scoreboard-outline
-            icon_color: red
-            primary: >-
-              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
-            secondary: >-
-              {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            tap_action:
-              action: more-info
-              entity: sensor.huskers_series_summary
-            view_layout:
-              column_span: 3
-          - type: custom:mushroom-template-card
-            entity: sensor.f1_next_race_name
-            icon: mdi:calendar-clock
-            icon_color: purple
-            primary: >-
-              Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
-            secondary: >
-              {{ states('sensor.f1_next_race_location') }}
-
-              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
-
-              Lights out {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable', none, ''] else 'TBA' }}
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
-            view_layout:
-              column_span: 3
+              column_span: 12
           - type: custom:mushroom-template-card
             entity: sensor.network_performance_summary
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
             icon: mdi:chart-areaspline
             icon_color: >-
               {% set state = states('sensor.network_performance_summary') %}
@@ -309,26 +470,65 @@ views:
               {% else %}
                 red
               {% endif %}
-            primary: Network Pulse
+            primary: Network pulse
             secondary: |
               ↓ {{ states('sensor.speedtest_download') }} Mbps
               ↑ {{ states('sensor.speedtest_upload') }} Mbps
               Ping {{ states('sensor.speedtest_ping') }} ms
-            layout: vertical
-            fill_container: true
-            multiline_secondary: true
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-network
             view_layout:
               column_span: 3
           - type: custom:mushroom-template-card
             entity: sensor.kiosk_snapshot_aux_readout
-            icon: mdi:home-analytics
-            icon_color: teal
-            primary: Interior Snapshot
-            secondary: >-
-              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            icon: mdi:home-analytics
+            icon_color: teal
+            primary: Interior snapshot
+            secondary: >-
+              {{ states('sensor.kiosk_snapshot_aux_readout') }} · Lights {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+            tap_action:
+              action: more-info
+              entity: sensor.kiosk_snapshot_aux_readout
+            view_layout:
+              column_span: 3
+          - type: custom:mushroom-template-card
+            entity: sensor.huskers_game_phase_label
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:scoreboard-outline
+            icon_color: red
+            primary: >-
+              {{ states('sensor.huskers_team_name') }} {{ states('sensor.huskers_team_score') }} – {{ states('sensor.huskers_opponent_score_2') }} {{ states('sensor.huskers_opponent_name_2') }}
+            secondary: >-
+              {{ states('sensor.huskers_game_phase_label') }} · {{ states('sensor.huskers_game_detail') }}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-sports
+            view_layout:
+              column_span: 3
+          - type: custom:mushroom-template-card
+            entity: sensor.f1_next_race_name
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            icon: mdi:calendar-clock
+            icon_color: purple
+            primary: >-
+              Next F1 · {{ states('sensor.f1_next_race_name') }} (Round {{ states('sensor.f1_next_race_round') }})
+            secondary: >
+              {{ states('sensor.f1_next_race_location') }}
+
+              {%- set lights_out = states('sensor.f1_lights_out_local') -%}
+
+              Lights out {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable', none, ''] else 'TBA' }}
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/support-test-sports
             view_layout:
               column_span: 3
   - title: Environment & Comfort
@@ -361,9 +561,178 @@ views:
       - type: grid
         columns: 4
         cards:
+          - type: custom:mushroom-chips-card
+            alignment: start
+            view_layout:
+              column_span: 4
+            chips:
+              - type: template
+                entity: sensor.outdoor_temperature_wx
+                icon: mdi:thermometer
+                icon_color: >-
+                  {% set temp = states('sensor.outdoor_temperature_wx') | float(70) %}
+                  {% if temp < 40 %}
+                    blue
+                  {% elif temp > 85 %}
+                    deep-orange
+                  {% else %}
+                    teal
+                  {% endif %}
+                content: >-
+                  {% set temp = states('sensor.outdoor_temperature_wx') %}
+                  Temp · {{ temp ~ '°F' if temp not in ['', 'unknown', 'unavailable', none] else '—' }}
+              - type: template
+                entity: sensor.outdoor_humidity_wx
+                icon: mdi:water-percent
+                icon_color: indigo
+                content: >-
+                  {% set humidity = states('sensor.outdoor_humidity_wx') %}
+                  Humidity · {{ humidity if humidity not in ['', 'unknown', 'unavailable', none] else '—' }}%
+              - type: template
+                entity: sensor.outdoor_wind_speed_wx
+                icon: mdi:weather-windy
+                icon_color: teal
+                content: >-
+                  {% set speed = states('sensor.outdoor_wind_speed_wx') %}
+                  {% set bearing = state_attr('weather.forecast_home', 'wind_bearing') %}
+                  {% if speed in ['', 'unknown', 'unavailable', none] %}
+                    Wind · —
+                  {% else %}
+                    {% if bearing in ['', 'unknown', 'unavailable', none] %}
+                      Wind · {{ speed }} mph
+                    {% else %}
+                      {% set dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] %}
+                      {% set index = ((bearing | float(0) + 22.5) / 45) | int %}
+                      {% set cardinal = dirs[index % 8] %}
+                      Wind · {{ speed }} mph {{ cardinal }}
+                    {% endif %}
+                  {% endif %}
+              - type: template
+                entity: switch.sprinkler_scheduled_program
+                icon: mdi:sprinkler-variant
+                icon_color: >-
+                  {{ 'green' if is_state('switch.sprinkler_scheduled_program', 'on') else 'blue-grey' }}
+                content: >-
+                  {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+                  Sprinklers · {{ (runtime | round(1)) ~ ' min' if runtime not in ['', 'unknown', 'unavailable', none] else states('switch.sprinkler_scheduled_program') | title }}
+                tap_action:
+                  action: more-info
+                  entity: switch.sprinkler_scheduled_program
+          - type: heading
+            heading: Comfort Snapshot
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: weather.forecast_home
+            icon: mdi:weather-partly-cloudy
+            icon_color: >-
+              {% set condition = states('weather.forecast_home') %}
+              {% if condition in ['sunny', 'clear-night'] %}
+                amber
+              {% elif condition in ['rainy', 'pouring'] %}
+                blue
+              {% elif condition in ['snowy', 'hail'] %}
+                indigo
+              {% else %}
+                teal
+              {% endif %}
+            primary: Outdoor conditions
+            secondary: >-
+              {% set temp = states('sensor.outdoor_temperature_wx') %}
+              {% set humidity = states('sensor.outdoor_humidity_wx') %}
+              {% set wind = states('sensor.outdoor_wind_speed_wx') %}
+              Condition · {{ states('weather.forecast_home') | title }}
+              Temperature · {{ temp ~ '°F' if temp not in ['', 'unknown', 'unavailable', none] else '—' }}
+              Humidity · {{ humidity if humidity not in ['', 'unknown', 'unavailable', none] else '—' }}%
+              Wind · {{ wind ~ ' mph' if wind not in ['', 'unknown', 'unavailable', none] else '—' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:weather-windy-variant
+            icon_color: teal
+            primary: Wind & visibility
+            secondary: >-
+              {% set speed = states('sensor.outdoor_wind_speed_wx') %}
+              {% set bearing = state_attr('weather.forecast_home', 'wind_bearing') %}
+              {% set visibility = state_attr('weather.forecast_home', 'visibility') %}
+              {% if speed in ['', 'unknown', 'unavailable', none] %}
+                Wind · —
+              {% else %}
+                {% if bearing in ['', 'unknown', 'unavailable', none] %}
+                  Wind · {{ speed }} mph
+                {% else %}
+                  {% set dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] %}
+                  {% set index = ((bearing | float(0) + 22.5) / 45) | int %}
+                  {% set cardinal = dirs[index % 8] %}
+                  Wind · {{ speed }} mph {{ cardinal }}
+                {% endif %}
+              {% endif %}
+              Visibility · {{ visibility ~ ' mi' if visibility not in ['', 'unknown', 'unavailable', none] else '—' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 1
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:mushroom-template-card
+            entity: switch.sprinkler_scheduled_program
+            icon: mdi:sprinkler
+            icon_color: >-
+              {{ 'green' if is_state('switch.sprinkler_scheduled_program', 'on') else 'blue-grey' }}
+            primary: Watering program
+            secondary: >-
+              {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+              {% if runtime not in ['', 'unknown', 'unavailable', none] %}
+                Today's runtime {{ runtime | round(1) }} minutes.
+              {% else %}
+                No runtime logged yet today.
+              {% endif %}
+              Schedule · {{ states('switch.sprinkler_scheduled_program') | title }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 1
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: weather-forecast
+            entity: weather.forecast_home
+            show_hourly_forecast: true
+            name: Home forecast
+            view_layout:
+              column_span: 4
+      - type: grid
+        columns: 4
+        cards:
           - type: heading
             heading: Atmosphere Trends
+            view_layout:
+              column_span: 4
           - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
             header:
               show: true
               title: Outdoor comfort trend
@@ -422,6 +791,8 @@ views:
         cards:
           - type: heading
             heading: Precision Zones
+            view_layout:
+              column_span: 4
           - type: custom:mushroom-entity-card
             entity: sensor.hygrometer_humidor_temperature
             name: Humidor temperature
@@ -431,12 +802,14 @@ views:
             primary_info: state
             secondary_info: name
             badge_icon: mdi:chart-line
-            badge_color: |-
+            badge_color: |
               {% if states('sensor.humidor_system_status') == 'OK' %}
                 green
               {% else %}
                 amber
               {% endif %}
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
             entity: sensor.hygrometer_humidor_humidity
             name: Humidor humidity
@@ -452,6 +825,8 @@ views:
               {% else %}
                 red
               {% endif %}
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: sensor.kiosk_snapshot_aux_readout
             icon: mdi:home-analytics
@@ -461,6 +836,395 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 4
+      - type: grid
+        columns: 4
+        cards:
+          - type: heading
+            heading: Humidor insight
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: sensor.hygrometer_humidor_humidity
+            icon: mdi:water-percent
+            icon_color: >-
+              {% set invalid = ['', 'unknown', 'unavailable', none] %}
+              {% set humidity = states('sensor.hygrometer_humidor_humidity') %}
+              {% if humidity in invalid %}
+                grey
+              {% else %}
+                {% set h = humidity | float(0) %}
+                {% if 68 <= h <= 73 %}
+                  green
+                {% elif 65 <= h < 68 or 73 < h <= 76 %}
+                  amber
+                {% else %}
+                  red
+                {% endif %}
+              {% endif %}
+            primary: Humidor humidity status
+            secondary: >-
+              {% set invalid = ['', 'unknown', 'unavailable', none] %}
+              {% set humidity = states('sensor.hygrometer_humidor_humidity') %}
+              {% set temperature = states('sensor.hygrometer_humidor_temperature') %}
+              {% if humidity in invalid %}
+                Humidity reading unavailable. Target 68–73%.
+              {% else %}
+                {% set h = humidity | float(0) %}
+                Current · {{ h | round(1) }}%
+                Target · 68–73%
+                Status · {% if 68 <= h <= 73 %}In range{% elif h < 68 %}Below range{% else %}Above range{% endif %}
+              {% endif %}
+              {% if temperature not in invalid %}
+                Temperature · {{ temperature | float(0) | round(1) }}°F
+              {% endif %}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+          - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
+            header:
+              show: true
+              title: Humidor humidity (72h)
+              show_states: true
+            graph_span: 3d
+            now:
+              show: true
+            apex_config:
+              chart:
+                height: 260
+              stroke:
+                curve: smooth
+              annotations:
+                yaxis:
+                  - y: 68
+                    y2: 73
+                    fillColor: 'rgba(16,185,129,0.12)'
+                    borderColor: 'rgba(16,185,129,0.45)'
+                    label:
+                      text: 'Target 68–73%'
+                      style:
+                        color: '#047857'
+                        background: 'rgba(16,185,129,0.12)'
+              yaxis:
+                - min: 50
+                  max: 80
+                  labels:
+                    formatter: |
+                      function(value) {
+                        return value.toFixed(0) + '%';
+                      }
+            series:
+              - entity: sensor.hygrometer_humidor_humidity
+                name: Humidity
+                type: line
+                stroke_width: 3
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: avg
+  - title: Sprinklers
+    path: support-test-sprinklers
+    icon: mdi:sprinkler-variant
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+          --dashboard-max-width: none;
+          --view-max-width: none;
+          --view-margin-left: 24px;
+          --view-margin-right: 24px;
+        }
+        #view {
+          justify-content: center;
+        }
+    max_columns: 8
+    layout_options:
+      'grid-template-columns': repeat(auto-fit, minmax(320px, 1fr))
+      'grid-auto-flow': row dense
+      'gap': 16px
+      'justify-content': center
+    sections:
+      - type: grid
+        columns: 4
+        cards:
+          - type: custom:mushroom-chips-card
+            alignment: start
+            view_layout:
+              column_span: 4
+            chips:
+              - type: template
+                entity: switch.sprinkler_scheduled_program
+                icon: mdi:sprinkler-variant
+                icon_color: >-
+                  {{ 'green' if is_state('switch.sprinkler_scheduled_program', 'on') else 'blue-grey' }}
+                content: Program · {{ states('switch.sprinkler_scheduled_program') | title }}
+              - type: template
+                entity: sensor.support_test_resources_briefing
+                icon: mdi:timer-outline
+                icon_color: teal
+                content: >-
+                  {% set runtime = state_attr('sensor.support_test_resources_briefing', 'sprinkler_runtime_today') %}
+                  Runtime · {{ runtime | round(1) if runtime not in ['', 'unknown', 'unavailable', none] else '0' }} min
+              - type: template
+                entity: switch.sprinkler_south_side_zone
+                icon: mdi:run
+                icon_color: >-
+                  {% set zones = [
+                    'switch.sprinkler_south_side_zone',
+                    'switch.sprinkler_back_south_zone',
+                    'switch.sprinkler_back_north_zone',
+                    'switch.sprinkler_front_zone',
+                    'switch.sprinkler_zone_5_zone'
+                  ] %}
+                  {% set active = namespace(count=0) %}
+                  {% for zone in zones %}
+                    {% if is_state(zone, 'on') %}
+                      {% set active.count = active.count + 1 %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ 'green' if active.count > 0 else 'blue-grey' }}
+                content: >-
+                  {% set zones = [
+                    'switch.sprinkler_south_side_zone',
+                    'switch.sprinkler_back_south_zone',
+                    'switch.sprinkler_back_north_zone',
+                    'switch.sprinkler_front_zone',
+                    'switch.sprinkler_zone_5_zone'
+                  ] %}
+                  {% set active = [] %}
+                  {% for zone in zones %}
+                    {% if is_state(zone, 'on') %}
+                      {% set active = active + [state_attr(zone, 'friendly_name') | default(zone.split('.')[-1] | replace('_', ' ') | title)] %}
+                    {% endif %}
+                  {% endfor %}
+                  {% if active %}
+                    Running · {{ active | join(', ') }}
+                  {% else %}
+                    Running · None
+                  {% endif %}
+          - type: heading
+            heading: Today's coverage
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:format-list-checks
+            icon_color: teal
+            primary: Runtime by zone (minutes)
+            secondary: >-
+              {% set invalid = ['', 'unknown', 'unavailable', none] %}
+              {% set zones = [
+                ('South side', 'sensor.sprinklers_south_side_runtime_today_min'),
+                ('Back south', 'sensor.sprinklers_back_south_runtime_today_min'),
+                ('Back north', 'sensor.sprinklers_back_north_runtime_today_min'),
+                ('Front', 'sensor.sprinklers_front_runtime_today_min'),
+                ('Zone 5', 'sensor.sprinklers_zone_5_runtime_today_min')
+              ] %}
+              {% for label, entity_id in zones %}
+                {% set value = states(entity_id) %}
+                {{ label }} · {{ value | float(0) | round(1) if value not in invalid else '0' }} min
+              {% endfor %}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 4
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
+      - type: grid
+        columns: 4
+        cards:
+          - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
+            header:
+              show: true
+              title: Daily runtime (last 7 days)
+              show_states: false
+            graph_span: 7d
+            now:
+              show: false
+            apex_config:
+              chart:
+                stacked: true
+                type: area
+              dataLabels:
+                enabled: false
+              legend:
+                position: top
+              yaxis:
+                - min: 0
+                  labels:
+                    formatter: |
+                      function(value) {
+                        return value.toFixed(0) + ' min';
+                      }
+            series:
+              - entity: sensor.sprinklers_south_side_runtime_today_min
+                name: South side
+                type: column
+                group_by:
+                  duration: 1d
+                  func: max
+                transform: "return x === null ? null : Number(x);"
+              - entity: sensor.sprinklers_back_south_runtime_today_min
+                name: Back south
+                type: column
+                group_by:
+                  duration: 1d
+                  func: max
+                transform: "return x === null ? null : Number(x);"
+              - entity: sensor.sprinklers_back_north_runtime_today_min
+                name: Back north
+                type: column
+                group_by:
+                  duration: 1d
+                  func: max
+                transform: "return x === null ? null : Number(x);"
+              - entity: sensor.sprinklers_front_runtime_today_min
+                name: Front
+                type: column
+                group_by:
+                  duration: 1d
+                  func: max
+                transform: "return x === null ? null : Number(x);"
+              - entity: sensor.sprinklers_zone_5_runtime_today_min
+                name: Zone 5
+                type: column
+                group_by:
+                  duration: 1d
+                  func: max
+                transform: "return x === null ? null : Number(x);"
+          - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
+            header:
+              show: true
+              title: Runtime progression (past 24h)
+              show_states: true
+            graph_span: 1d
+            now:
+              show: true
+            apex_config:
+              chart:
+                type: line
+              stroke:
+                curve: smooth
+              legend:
+                position: top
+              yaxis:
+                - min: 0
+                  labels:
+                    formatter: |
+                      function(value) {
+                        return value.toFixed(0) + ' min';
+                      }
+            series:
+              - entity: sensor.sprinklers_south_side_runtime_today_min
+                name: South side
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: max
+              - entity: sensor.sprinklers_back_south_runtime_today_min
+                name: Back south
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: max
+              - entity: sensor.sprinklers_back_north_runtime_today_min
+                name: Back north
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: max
+              - entity: sensor.sprinklers_front_runtime_today_min
+                name: Front
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: max
+              - entity: sensor.sprinklers_zone_5_runtime_today_min
+                name: Zone 5
+                extend_to: now
+                transform: "return x === null ? null : Number(x);"
+                group_by:
+                  duration: 30min
+                  func: max
+      - type: grid
+        columns: 4
+        cards:
+          - type: heading
+            heading: Zone controls
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-entity-card
+            entity: switch.sprinkler_south_side_zone
+            name: South side zone
+            icon: mdi:pine-tree
+            layout: vertical
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: switch.sprinkler_back_south_zone
+            name: Back south zone
+            icon: mdi:pine-tree
+            layout: vertical
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: switch.sprinkler_back_north_zone
+            name: Back north zone
+            icon: mdi:pine-tree
+            layout: vertical
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: switch.sprinkler_front_zone
+            name: Front zone
+            icon: mdi:pine-tree
+            layout: vertical
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: switch.sprinkler_zone_5_zone
+            name: Zone 5
+            icon: mdi:pine-tree
+            layout: vertical
+            fill_container: true
+            view_layout:
+              column_span: 2
   - title: Network Pulse
     path: support-test-network
     icon: mdi:access-point-network
@@ -491,13 +1255,77 @@ views:
       - type: grid
         columns: 4
         cards:
+          - type: custom:mushroom-chips-card
+            alignment: start
+            view_layout:
+              column_span: 4
+            chips:
+              - type: template
+                entity: sensor.network_status_summary
+                icon: mdi:lan-check
+                icon_color: >-
+                  {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
+                content: Network · {{ states('sensor.network_status_summary') }}
+              - type: template
+                entity: sensor.deco_total_down_mbps
+                icon: mdi:access-point-network
+                icon_color: blue
+                content: >-
+                  ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps · ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps
+              - type: template
+                entity: sensor.deco_client_count
+                icon: mdi:account-multiple
+                icon_color: >-
+                  {% set total = states('sensor.deco_client_count') | int(0) %}
+                  {{ 'purple' if total > 40 else 'teal' }}
+                content: Clients · {{ states('sensor.deco_client_count') }}
+              - type: template
+                entity: sensor.speedtest_ping
+                icon: mdi:speedometer
+                icon_color: >-
+                  {% set ping = states('sensor.speedtest_ping') | float(0) %}
+                  {% if ping <= 25 %}
+                    green
+                  {% elif ping <= 40 %}
+                    amber
+                  {% else %}
+                    red
+                  {% endif %}
+                content: Ping · {{ states('sensor.speedtest_ping') }} ms
           - type: heading
-            heading: Connectivity Overview
+            heading: Network Overview
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: sensor.network_status_summary
+            icon: mdi:radio-tower
+            icon_color: >-
+              {{ 'green' if is_state('sensor.network_status_summary', 'Online') else 'red' }}
+            primary: Uplink health
+            secondary: >-
+              Status · {{ states('sensor.network_status_summary') }}
+              Latency · {{ states('sensor.internet_latency_2') | default('—', true) }} ms
+              Packet loss · {{ states('sensor.network_performance_summary') | title }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+            tap_action:
+              action: more-info
+              entity: sensor.network_status_summary
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
           - type: custom:mushroom-template-card
             entity: sensor.deco_total_down_mbps
-            icon: mdi:access-point-network
+            icon: mdi:chart-areaspline
             icon_color: blue
-            primary: Deco mesh throughput
+            primary: Throughput snapshot
             secondary: |
               ↓ {{ states('sensor.deco_total_down_mbps') }} Mbps
               ↑ {{ states('sensor.deco_total_up_mbps') }} Mbps
@@ -505,31 +1333,51 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 1
+            tap_action:
+              action: more-info
+              entity: sensor.deco_total_down_mbps
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
           - type: custom:mushroom-template-card
-            entity: sensor.network_performance_summary
-            icon: mdi:chart-bell-curve
-            icon_color: >-
-              {% if states('sensor.network_performance_summary') == 'excellent' %}
-                green
-              {% elif states('sensor.network_performance_summary') == 'degraded' %}
-                amber
-              {% else %}
-                teal
-              {% endif %}
+            entity: sensor.deco_client_count
+            icon: mdi:account-group
+            icon_color: teal
             primary: Client mix
             secondary: >-
               Wi-Fi {{ states('sensor.deco_client_count') }} · Guest {{ states('sensor.tp_link_router_total_guest_wifi_clients') | default('—', true) }}
-
               Wired {{ states('sensor.tp_link_router_total_wired_clients') | default('—', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 1
+            tap_action:
+              action: more-info
+              entity: sensor.deco_client_count
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
       - type: grid
         columns: 4
         cards:
           - type: heading
             heading: Performance History
+            view_layout:
+              column_span: 4
           - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
             header:
               show: true
               title: Speedtest history
@@ -565,6 +1413,8 @@ views:
                   duration: 6h
                   func: max
           - type: custom:apexcharts-card
+            view_layout:
+              column_span: 4
             header:
               show: true
               title: Latency watch
@@ -624,10 +1474,10 @@ views:
       - type: grid
         columns: 4
         cards:
-          - type: heading
-            heading: Game Day Radar
           - type: custom:mushroom-chips-card
             alignment: start
+            view_layout:
+              column_span: 4
             chips:
               - type: template
                 entity: sensor.huskers_game_phase_label
@@ -651,20 +1501,16 @@ views:
                 icon: mdi:flag-checkered
                 icon_color: >-
                   {{ 'purple' if is_state('binary_sensor.f1_is_race_week', 'on') else 'grey' }}
-                content: >-
-                  Race Week · {{ states('binary_sensor.f1_is_race_week') | title }}
+                content: Race Week · {{ states('binary_sensor.f1_is_race_week') | title }}
               - type: template
                 entity: sensor.f1_next_race_round
                 icon: mdi:counter
                 icon_color: purple
                 content: Round {{ states('sensor.f1_next_race_round') }}
+          - type: heading
+            heading: Game Day Radar
             view_layout:
               column_span: 4
-      - type: grid
-        columns: 4
-        cards:
-          - type: heading
-            heading: Scoreboard & Storylines
           - type: custom:mushroom-template-card
             entity: sensor.huskers_game_phase_label
             icon: mdi:scoreboard-outline
@@ -676,11 +1522,11 @@ views:
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 2
             tap_action:
               action: more-info
               entity: sensor.huskers_series_summary
-            view_layout:
-              column_span: 3
           - type: custom:mushroom-template-card
             entity: sensor.huskers_series_summary
             icon: mdi:clipboard-text-clock
@@ -691,12 +1537,7 @@ views:
             fill_container: true
             multiline_secondary: true
             view_layout:
-              column_span: 3
-      - type: grid
-        columns: 4
-        cards:
-          - type: heading
-            heading: Race Weekend Outlook
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: sensor.f1_next_race_name
             icon: mdi:calendar-clock
@@ -707,12 +1548,15 @@ views:
 
               {%- set lights_out = states('sensor.f1_lights_out_local') -%}
 
-              Lights out {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable'] else 'TBA' }}
+              Lights out {{ as_timestamp(lights_out) | timestamp_custom('%b %-d %-I:%M %p', True) if lights_out not in ['unknown', 'unavailable', none, ''] else 'TBA' }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
             view_layout:
-              column_span: 3
+              column_span: 2
+            tap_action:
+              action: more-info
+              entity: sensor.f1_next_race_name
           - type: custom:mushroom-template-card
             entity: sensor.f1_next_race_sprint
             icon: mdi:timer-outline
@@ -720,12 +1564,29 @@ views:
               {{ 'amber' if is_state('sensor.f1_next_race_sprint', 'Sprint') else 'blue-grey' }}
             primary: Weekend highlights
             secondary: >-
-              Sprint {{ states('sensor.f1_next_race_sprint') | default('—', true) }} · Session {{ states('sensor.f1_next_session_name') | default('TBA', true) }}
+              Sprint · {{ states('sensor.f1_next_race_sprint') | default('—', true) }}
+              Next session · {{ states('sensor.f1_next_session_name') | default('TBA', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
             view_layout:
-              column_span: 3
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:play-speed
+            icon_color: amber
+            primary: Upcoming alerts
+            secondary: >-
+              {% set summary = state_attr('sensor.support_test_resources_briefing', 'sports_briefing') %}
+              {{ summary if summary not in [None, '', 'unknown', 'unavailable'] else 'No active alerts right now.' }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 4
+            tap_action:
+              action: more-info
+              entity: sensor.support_test_resources_briefing
   - title: Operations Center
     path: support-test-operations
     icon: mdi:lightning-bolt
@@ -757,9 +1618,13 @@ views:
         columns: 4
         cards:
           - type: heading
-            heading: Lighting & Scenes
+            heading: Operations Summary
+            view_layout:
+              column_span: 4
           - type: custom:mushroom-chips-card
             alignment: start
+            view_layout:
+              column_span: 4
             chips:
               - type: action
                 icon: mdi:weather-sunset
@@ -797,92 +1662,37 @@ views:
                   data:
                     entity_id: scene.lighting_exterior_led_effect_halloween
                 content: Seasonal
-          - type: custom:mushroom-entity-card
-            entity: light.all_lights
-            name: All lights
-            icon: mdi:lightbulb-group
-            layout: vertical
-            fill_container: true
-            secondary_info: last-changed
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-entity-card
-            entity: light.permanent_outdoor_lights
-            name: Exterior LEDs
-            icon: mdi:string-lights
-            layout: vertical
-            fill_container: true
-            show_brightness_control: true
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-entity-card
-            entity: light.theater_lights
-            name: Theater lights
-            icon: mdi:movie-open
-            layout: vertical
-            fill_container: true
-            show_brightness_control: true
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-entity-card
-            entity: light.sunroom_light
-            name: Sunroom light
-            icon: mdi:white-balance-iridescent
-            layout: vertical
-            fill_container: true
-            show_brightness_control: true
-            tap_action:
-              action: more-info
-          - type: custom:mushroom-entity-card
-            entity: switch.permanent_outdoor_lights_power_switch
-            name: Exterior power
-            icon: mdi:power-plug
-            layout: vertical
-            fill_container: true
-      - type: grid
-        columns: 4
-        cards:
-          - type: heading
-            heading: Automations & Checks
-          - type: custom:mushroom-chips-card
-            alignment: start
-            chips:
               - type: template
-                entity: automation.evening_lights_at_sunset
-                icon: mdi:weather-sunset-down
+                entity: light.all_lights
+                icon: mdi:lightbulb-group
                 icon_color: >-
-                  {{ 'amber' if is_state('automation.evening_lights_at_sunset', 'on') else 'grey' }}
-                content: Evening Sunset
+                  {{ 'amber' if is_state('light.all_lights', 'on') else 'blue-grey' }}
+                content: All Lights · {{ states('light.all_lights') | title }}
               - type: template
-                entity: automation.huskers_td_burst_on_score
-                icon: mdi:stadium
-                icon_color: >-
-                  {{ 'red' if is_state('automation.huskers_td_burst_on_score', 'on') else 'grey' }}
-                content: Huskers TD
-              - type: template
-                entity: automation.weather_severe_alert_notification
-                icon: mdi:weather-hurricane
-                icon_color: >-
-                  {{ 'blue' if is_state('automation.weather_severe_alert_notification', 'on') else 'grey' }}
-                content: Weather Alerts
-          - type: custom:mushroom-entity-card
-            entity: input_boolean.huskers_automations_enabled
-            name: Huskers automations
-            icon: mdi:football
+                entity: sensor.kiosk_snapshot_lights_on
+                icon: mdi:counter
+                icon_color: teal
+                content: Lit · {{ states('sensor.kiosk_snapshot_lights_on') }}
+          - type: custom:mushroom-template-card
+            entity: sensor.kiosk_snapshot_aux_readout
+            icon: mdi:home-lightbulb
+            icon_color: amber
+            primary: Lighting status
+            secondary: >-
+              Lights {{ states('sensor.kiosk_snapshot_lights_on') }} · Plugs {{ states('sensor.kiosk_snapshot_plugs_on') }}
+              {{ states('sensor.kiosk_snapshot_aux_readout') }}
             layout: vertical
             fill_container: true
-          - type: custom:mushroom-entity-card
-            entity: input_boolean.f1_automations_enabled
-            name: F1 automations
-            icon: mdi:flag-variant
-            layout: vertical
-            fill_container: true
-          - type: custom:mushroom-entity-card
-            entity: input_boolean.weather_notifications_enabled
-            name: Weather notifications
-            icon: mdi:weather-partly-lightning
-            layout: vertical
-            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 18px;
+                  box-shadow: none;
+                  padding: 1.2rem;
+                }
           - type: custom:mushroom-template-card
             entity: sensor.automation_status_audit
             icon: mdi:robot-check
@@ -893,15 +1703,49 @@ views:
                 amber
               {% endif %}
             primary: Automation audit
-            secondary: >
-              System {{ states('sensor.automation_status_audit') | default('unknown', true) }}
-
-              Specialized {{ states('sensor.specialized_mode_audit') | default('unknown', true) }}
-
-              Huskers {{ states('sensor.huskers_automation_status_audit') | default('unknown', true) }}
+            secondary: >-
+              Status · {{ states('sensor.automation_status_audit') | default('unknown', true) }}
+              Issues · {{ states('sensor.kiosk_automations_problem_count') }}
+              Specialized · {{ states('sensor.specialized_mode_audit') | default('unknown', true) }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
+            view_layout:
+              column_span: 2
+            tap_action:
+              action: more-info
+              entity: sensor.automation_status_audit
+      - type: grid
+        columns: 4
+        cards:
+          - type: heading
+            heading: Automation Controls
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.huskers_automations_enabled
+            name: Huskers automations
+            icon: mdi:football
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.f1_automations_enabled
+            name: F1 automations
+            icon: mdi:flag-variant
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: input_boolean.weather_notifications_enabled
+            name: Weather notifications
+            icon: mdi:weather-partly-lightning
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-template-card
             entity: sensor.kiosk_automations_problem_count
             icon: mdi:alert-decagram-outline
@@ -909,267 +1753,423 @@ views:
               {{ 'green' if states('sensor.kiosk_automations_problem_count') | int(0) == 0 else 'red' }}
             primary: Kiosk diagnostics
             secondary: >-
-              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor alarm {{ states('sensor.humidor_system_status') }}
+              Issues {{ states('sensor.kiosk_automations_problem_count') }} · Humidor {{ states('sensor.humidor_system_status') }}
             layout: vertical
             fill_container: true
             multiline_secondary: true
-      - type: grid
-        columns: 3
-        cards:
-          - type: heading
-            heading: System Updates
-          - type: custom:mushroom-entity-card
-            entity: update.home_assistant_core_update
-            name: Core update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.home_assistant_operating_system_update
-            name: OS update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.home_assistant_supervisor_update
-            name: Supervisor update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.mosquitto_broker_update
-            name: Mosquitto update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.zigbee2mqtt_update
-            name: Zigbee2MQTT update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.git_pull_update
-            name: Git pull update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.samba_share_update
-            name: Samba update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.studio_code_server_update
-            name: Code Server update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.radarr_update
-            name: Radarr update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
-          - type: custom:mushroom-entity-card
-            entity: update.govee_to_mqtt_bridge_update
-            name: Govee→MQTT update
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: state
-            icon: mdi:update
+            view_layout:
+              column_span: 2
       - type: grid
         columns: 4
         cards:
           - type: heading
             heading: Light Groups
+            view_layout:
+              column_span: 4
           - type: custom:mushroom-light-card
             entity: light.all_lights
             name: All lights
             icon: mdi:lightbulb-group
             fill_container: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-light-card
             entity: light.all_exterior_lights
-            name: All exterior
+            name: Exterior
             icon: mdi:coach-lamp
             fill_container: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-light-card
             entity: light.mainfloor_lights
             name: Mainfloor
             icon: mdi:sofa
             fill_container: true
-          - type: custom:mushroom-light-card
-            entity: light.garage_lights
-            name: Garage
-            icon: mdi:garage
-            fill_container: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-light-card
             entity: light.theater_lights
             name: Theater
-            icon: mdi:theater
+            icon: mdi:movie-open
             fill_container: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-light-card
             entity: light.office_lights
             name: Office
             icon: mdi:desk-lamp
             fill_container: true
-          - type: custom:mushroom-light-card
-            entity: light.front_porch_lights
-            name: Front porch
-            icon: mdi:coach-lamp
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: switch.permanent_outdoor_lights_power_switch
+            name: Exterior power
+            icon: mdi:power-plug
+            layout: vertical
             fill_container: true
-          - type: custom:mushroom-light-card
-            entity: light.permanent_outdoor_lights_3
-            name: Permanent outdoor
-            icon: mdi:string-lights
-            fill_container: true
+            view_layout:
+              column_span: 2
       - type: grid
-        columns: 3
+        columns: 4
         cards:
           - type: heading
-            heading: Scenes – Quick Run
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_evening_sunset_interior
-            name: 'Evening: Interior'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_evening_sunset_exterior
-            name: 'Evening: Exterior'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_morning_interior_off
-            name: 'Morning: Interior Off'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_morning_exterior_off
-            name: 'Morning: Exterior Off'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_daytime_cloudy_interior
-            name: 'Daytime Cloudy: Interior'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_daytime_cloudy_exterior
-            name: 'Daytime Cloudy: Exterior'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_exterior_led_effect_halloween
-            name: 'LED: Halloween'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_exterior_led_effect_thanksgiving
-            name: 'LED: Thanksgiving'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
-          - type: custom:mushroom-entity-card
-            entity: scene.lighting_exterior_led_effect_christmas
-            name: 'LED: Christmas'
-            icon: mdi:palette-swatch
-            layout: horizontal
-            fill_container: true
-            primary_info: name
-            secondary_info: none
+            heading: Scene Launchpad
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-chips-card
+            alignment: start
+            view_layout:
+              column_span: 4
+            chips:
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: amber
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_evening_sunset_interior
+                content: Evening · Interior
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: amber
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_evening_sunset_exterior
+                content: Evening · Exterior
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: blue
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_morning_interior_off
+                content: Morning · Interior Off
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: blue
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_morning_exterior_off
+                content: Morning · Exterior Off
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: teal
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_daytime_cloudy_interior
+                content: Daytime Cloudy · Interior
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: teal
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_daytime_cloudy_exterior
+                content: Daytime Cloudy · Exterior
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: purple
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_exterior_led_effect_halloween
+                content: LED · Halloween
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: orange
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_exterior_led_effect_thanksgiving
+                content: LED · Thanksgiving
+              - type: action
+                icon: mdi:palette-swatch
+                icon_color: red
+                tap_action:
+                  action: call-service
+                  service: scene.turn_on
+                  data:
+                    entity_id: scene.lighting_exterior_led_effect_christmas
+                content: LED · Christmas
       - type: grid
-        columns: 3
+        columns: 4
         cards:
           - type: heading
-            heading: Automation & Scripts
+            heading: Automation Scripts
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-chips-card
+            alignment: start
+            view_layout:
+              column_span: 4
+            chips:
+              - type: action
+                icon: mdi:lightbulb-on-outline
+                icon_color: amber
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.sunroom_segments_chase
+                content: Sunroom Chase
+              - type: action
+                icon: mdi:flag-checkered
+                icon_color: purple
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.f1_lights_out_sequence
+                content: F1 · Lights Out
+              - type: action
+                icon: mdi:flag-checkered
+                icon_color: purple
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.f1_chequered_flag_show
+                content: F1 · Chequered Flag
+              - type: action
+                icon: mdi:stop-circle
+                icon_color: red
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.f1_stop_all_shows
+                content: F1 · Stop All
+              - type: action
+                icon: mdi:calendar-plus
+                icon_color: teal
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.agenda_planner_add_event
+                content: Agenda · Add Event
+              - type: action
+                icon: mdi:playlist-plus
+                icon_color: teal
+                tap_action:
+                  action: call-service
+                  service: script.turn_on
+                  data:
+                    entity_id: script.agenda_planner_add_task
+                content: Agenda · Add Task
+
+  - title: Maintenance & Updates
+    path: support-test-maintenance
+    icon: mdi:toolbox-outline
+    type: sections
+    theme: Support Test Gold
+    card_mod:
+      style: |
+        :host {
+          --app-header-background-color: var(--support-test-header-test-bench-bg, var(--app-header-background-color));
+          --app-header-text-color: var(--support-test-header-test-bench-fg, var(--app-header-text-color));
+          --app-header-button-text-color: var(--support-test-header-test-bench-fg, var(--app-header-button-text-color));
+          --app-header-icon-color: var(--support-test-header-test-bench-fg, var(--app-header-icon-color));
+          --dashboard-max-width: none;
+          --view-max-width: none;
+          --view-margin-left: 24px;
+          --view-margin-right: 24px;
+        }
+        #view {
+          justify-content: center;
+        }
+    max_columns: 8
+    layout_options:
+      'grid-template-columns': repeat(auto-fit, minmax(320px, 1fr))
+      'grid-auto-flow': row dense
+      'gap': 16px
+      'justify-content': center
+    sections:
+      - type: grid
+        columns: 4
+        cards:
+          - type: heading
+            heading: System Health
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:shield-check
+            icon_color: >-
+              {% if is_state('sensor.support_test_resources_briefing', 'attention') %}
+                amber
+              {% else %}
+                green
+              {% endif %}
+            primary: Overall attention
+            secondary: >-
+              State · {{ states('sensor.support_test_resources_briefing') | title }}
+              Low batteries · {{ (state_attr('sensor.support_test_resources_briefing', 'low_batteries') | count) if state_attr('sensor.support_test_resources_briefing', 'low_batteries') is iterable else 0 }}
+              Active scenes · {{ (state_attr('sensor.support_test_resources_briefing', 'active_scenes') | count) if state_attr('sensor.support_test_resources_briefing', 'active_scenes') is iterable else 0 }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.support_test_resources_briefing
+            icon: mdi:battery-alert
+            icon_color: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {{ 'red' if low is iterable and low | count > 0 else 'green' }}
+            primary: Battery list
+            secondary: >-
+              {% set low = state_attr('sensor.support_test_resources_briefing', 'low_batteries') %}
+              {% if low is iterable and low | count > 0 %}
+                {% set preview = low[:5] %}
+                {{ preview | join(', ') }}{% if low | count > preview | count %} +{{ (low | count) - (preview | count) }} more{% endif %}
+              {% else %}
+                All tracked devices above threshold.
+              {% endif %}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-template-card
+            entity: sensor.automation_status_audit
+            icon: mdi:robot
+            icon_color: >-
+              {% if states('sensor.automation_status_audit') in ['ok', 'ready'] %}
+                green
+              {% else %}
+                amber
+              {% endif %}
+            primary: Automation services
+            secondary: >-
+              Status · {{ states('sensor.automation_status_audit') | default('unknown', true) }}
+              Specialized · {{ states('sensor.specialized_mode_audit') | default('unknown', true) }}
+              Issues · {{ states('sensor.kiosk_automations_problem_count') }}
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
+      - type: grid
+        columns: 4
+        cards:
+          - type: heading
+            heading: Update Queue
+            view_layout:
+              column_span: 4
+          - type: custom:mushroom-template-card
+            entity: update.home_assistant_core_update
+            icon: mdi:update
+            icon_color: indigo
+            primary: Update backlog
+            secondary: >-
+              {% set updates = [
+                'update.home_assistant_core_update',
+                'update.home_assistant_operating_system_update',
+                'update.home_assistant_supervisor_update',
+                'update.mosquitto_broker_update',
+                'update.zigbee2mqtt_update',
+                'update.git_pull_update',
+                'update.samba_share_update',
+                'update.studio_code_server_update',
+                'update.radarr_update',
+                'update.govee_to_mqtt_bridge_update'
+              ] %}
+              {% set pending = updates | select('is_state', 'on') | list %}
+              Pending · {{ pending | count }} of {{ updates | count }} tracked
+            layout: vertical
+            fill_container: true
+            multiline_secondary: true
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.sunroom_segments_chase
-            name: Sunroom Chase
-            icon: mdi:lightbulb-on-outline
+            entity: update.home_assistant_core_update
+            name: Core update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.f1_lights_out_sequence
-            name: 'F1: Lights Out'
-            icon: mdi:flag-checkered
+            entity: update.home_assistant_operating_system_update
+            name: OS update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.f1_chequered_flag_show
-            name: 'F1: Chequered Flag'
-            icon: mdi:flag-checkered
+            entity: update.home_assistant_supervisor_update
+            name: Supervisor update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.f1_stop_all_shows
-            name: 'F1: Stop All'
-            icon: mdi:stop-circle
+            entity: update.mosquitto_broker_update
+            name: Mosquitto update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.agenda_planner_add_event
-            name: 'Agenda: Add Event'
-            icon: mdi:calendar-plus
+            entity: update.zigbee2mqtt_update
+            name: Zigbee2MQTT update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
           - type: custom:mushroom-entity-card
-            entity: script.agenda_planner_add_task
-            name: 'Agenda: Add Task'
-            icon: mdi:playlist-plus
+            entity: update.git_pull_update
+            name: Git pull update
+            icon: mdi:update
             layout: horizontal
             fill_container: true
-            primary_info: name
-            secondary_info: state
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: update.samba_share_update
+            name: Samba update
+            icon: mdi:update
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: update.studio_code_server_update
+            name: Code Server update
+            icon: mdi:update
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: update.radarr_update
+            name: Radarr update
+            icon: mdi:update
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2
+          - type: custom:mushroom-entity-card
+            entity: update.govee_to_mqtt_bridge_update
+            name: Govee→MQTT update
+            icon: mdi:update
+            layout: horizontal
+            fill_container: true
+            view_layout:
+              column_span: 2

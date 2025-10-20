@@ -828,6 +828,116 @@
             mdi:emoticon-question
           {% endif %}
 
+      - name: Sprinklers South Side Runtime Today (min)
+        unique_id: sprinklers_south_side_runtime_today_minutes
+        unit_of_measurement: min
+        device_class: duration
+        state_class: measurement
+        availability: >-
+          {{ states('sensor.kiosk_sprinklers_south_side_runtime_today') not in ['', 'unknown', 'unavailable', none] }}
+        state: >-
+          {% set raw = states('sensor.kiosk_sprinklers_south_side_runtime_today') %}
+          {% set unit = state_attr('sensor.kiosk_sprinklers_south_side_runtime_today', 'unit_of_measurement') | default('', true) | lower %}
+          {% if raw in ['', 'unknown', 'unavailable', none] %}
+            {{ none }}
+          {% else %}
+            {% set value = raw | float(0) %}
+            {% if unit in ['h', 'hr', 'hrs', 'hour', 'hours'] %}
+              {{ (value * 60) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
+      - name: Sprinklers Back South Runtime Today (min)
+        unique_id: sprinklers_back_south_runtime_today_minutes
+        unit_of_measurement: min
+        device_class: duration
+        state_class: measurement
+        availability: >-
+          {{ states('sensor.kiosk_sprinklers_back_south_runtime_today') not in ['', 'unknown', 'unavailable', none] }}
+        state: >-
+          {% set raw = states('sensor.kiosk_sprinklers_back_south_runtime_today') %}
+          {% set unit = state_attr('sensor.kiosk_sprinklers_back_south_runtime_today', 'unit_of_measurement') | default('', true) | lower %}
+          {% if raw in ['', 'unknown', 'unavailable', none] %}
+            {{ none }}
+          {% else %}
+            {% set value = raw | float(0) %}
+            {% if unit in ['h', 'hr', 'hrs', 'hour', 'hours'] %}
+              {{ (value * 60) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
+      - name: Sprinklers Back North Runtime Today (min)
+        unique_id: sprinklers_back_north_runtime_today_minutes
+        unit_of_measurement: min
+        device_class: duration
+        state_class: measurement
+        availability: >-
+          {{ states('sensor.kiosk_sprinklers_back_north_runtime_today') not in ['', 'unknown', 'unavailable', none] }}
+        state: >-
+          {% set raw = states('sensor.kiosk_sprinklers_back_north_runtime_today') %}
+          {% set unit = state_attr('sensor.kiosk_sprinklers_back_north_runtime_today', 'unit_of_measurement') | default('', true) | lower %}
+          {% if raw in ['', 'unknown', 'unavailable', none] %}
+            {{ none }}
+          {% else %}
+            {% set value = raw | float(0) %}
+            {% if unit in ['h', 'hr', 'hrs', 'hour', 'hours'] %}
+              {{ (value * 60) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
+      - name: Sprinklers Front Runtime Today (min)
+        unique_id: sprinklers_front_runtime_today_minutes
+        unit_of_measurement: min
+        device_class: duration
+        state_class: measurement
+        availability: >-
+          {{ states('sensor.kiosk_sprinklers_front_runtime_today') not in ['', 'unknown', 'unavailable', none] }}
+        state: >-
+          {% set raw = states('sensor.kiosk_sprinklers_front_runtime_today') %}
+          {% set unit = state_attr('sensor.kiosk_sprinklers_front_runtime_today', 'unit_of_measurement') | default('', true) | lower %}
+          {% if raw in ['', 'unknown', 'unavailable', none] %}
+            {{ none }}
+          {% else %}
+            {% set value = raw | float(0) %}
+            {% if unit in ['h', 'hr', 'hrs', 'hour', 'hours'] %}
+              {{ (value * 60) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
+      - name: Sprinklers Zone 5 Runtime Today (min)
+        unique_id: sprinklers_zone5_runtime_today_minutes
+        unit_of_measurement: min
+        device_class: duration
+        state_class: measurement
+        availability: >-
+          {{ states('sensor.kiosk_sprinklers_zone5_runtime_today') not in ['', 'unknown', 'unavailable', none] }}
+        state: >-
+          {% set raw = states('sensor.kiosk_sprinklers_zone5_runtime_today') %}
+          {% set unit = state_attr('sensor.kiosk_sprinklers_zone5_runtime_today', 'unit_of_measurement') | default('', true) | lower %}
+          {% if raw in ['', 'unknown', 'unavailable', none] %}
+            {{ none }}
+          {% else %}
+            {% set value = raw | float(0) %}
+            {% if unit in ['h', 'hr', 'hrs', 'hour', 'hours'] %}
+              {{ (value * 60) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
       - name: Support Test Resources Briefing
         unique_id: support_test_resources_briefing
         icon: mdi:account-tie
@@ -909,11 +1019,11 @@
           sprinkler_runtime_today: >-
             {% set invalid = ['', 'unknown', 'unavailable', none] %}
             {% set sensors = [
-              'sensor.kiosk_sprinklers_south_side_runtime_today',
-              'sensor.kiosk_sprinklers_back_south_runtime_today',
-              'sensor.kiosk_sprinklers_back_north_runtime_today',
-              'sensor.kiosk_sprinklers_front_runtime_today',
-              'sensor.kiosk_sprinklers_zone5_runtime_today'
+              'sensor.sprinklers_south_side_runtime_today_min',
+              'sensor.sprinklers_back_south_runtime_today_min',
+              'sensor.sprinklers_back_north_runtime_today_min',
+              'sensor.sprinklers_front_runtime_today_min',
+              'sensor.sprinklers_zone_5_runtime_today_min'
             ] %}
             {% set total = namespace(value=0) %}
             {% for entity_id in sensors %}
@@ -927,6 +1037,7 @@
             {% else %}
               {{ none }}
             {% endif %}
+          sprinkler_runtime_unit: min
           lights_briefing: >-
             {% set hour = now().hour %}
             {% if hour < 12 %}
@@ -992,11 +1103,11 @@
             {% endfor %}
             {% set schedule_on = is_state('switch.sprinkler_scheduled_program', 'on') %}
             {% set runtime_sensors = [
-              'sensor.kiosk_sprinklers_south_side_runtime_today',
-              'sensor.kiosk_sprinklers_back_south_runtime_today',
-              'sensor.kiosk_sprinklers_back_north_runtime_today',
-              'sensor.kiosk_sprinklers_front_runtime_today',
-              'sensor.kiosk_sprinklers_zone5_runtime_today'
+              'sensor.sprinklers_south_side_runtime_today_min',
+              'sensor.sprinklers_back_south_runtime_today_min',
+              'sensor.sprinklers_back_north_runtime_today_min',
+              'sensor.sprinklers_front_runtime_today_min',
+              'sensor.sprinklers_zone_5_runtime_today_min'
             ] %}
             {% set runtime_ns = namespace(total=0) %}
             {% for entity_id in runtime_sensors %}
