@@ -1287,3 +1287,110 @@
             {% endif %}
           {% endif %}
           {{ show }}
+# SPRINKLERS — WATER USE ESTIMATES
+
+  - sensor:
+      # Minutes TODAY (per zone)
+      - name: irrigation_zone1_minutes_today
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone1_hours_today') | float(0)) * 60) | round(1) }}"
+        icon: mdi:timer
+      - name: irrigation_zone2_minutes_today
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone2_hours_today') | float(0)) * 60) | round(1) }}"
+        icon: mdi:timer
+      - name: irrigation_zone3_minutes_today
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone3_hours_today') | float(0)) * 60) | round(1) }}"
+        icon: mdi:timer
+      - name: irrigation_zone4_minutes_today
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone4_hours_today') | float(0)) * 60) | round(1) }}"
+        icon: mdi:timer
+      - name: irrigation_zone5_minutes_today
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone5_hours_today') | float(0)) * 60) | round(1) }}"
+        icon: mdi:timer
+
+      # Minutes THIS MONTH (per zone)
+      - name: irrigation_zone1_minutes_month
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone1_hours_month') | float(0)) * 60) | round(0) }}"
+      - name: irrigation_zone2_minutes_month
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone2_hours_month') | float(0)) * 60) | round(0) }}"
+      - name: irrigation_zone3_minutes_month
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone3_hours_month') | float(0)) * 60) | round(0) }}"
+      - name: irrigation_zone4_minutes_month
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone4_hours_month') | float(0)) * 60) | round(0) }}"
+      - name: irrigation_zone5_minutes_month
+        unit_of_measurement: min
+        state: "{{ ((states('sensor.irrigation_zone5_hours_month') | float(0)) * 60) | round(0) }}"
+
+      # Gallons TODAY (per zone) — uses input_number.*_gpm
+      - name: irrigation_zone1_gallons_today
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone1_gpm') | float(0)) * (states('sensor.irrigation_zone1_minutes_today') | float(0))) | round(1) }}"
+        icon: mdi:water
+      - name: irrigation_zone2_gallons_today
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone2_gpm') | float(0)) * (states('sensor.irrigation_zone2_minutes_today') | float(0))) | round(1) }}"
+        icon: mdi:water
+      - name: irrigation_zone3_gallons_today
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone3_gpm') | float(0)) * (states('sensor.irrigation_zone3_minutes_today') | float(0))) | round(1) }}"
+        icon: mdi:water
+      - name: irrigation_zone4_gallons_today
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone4_gpm') | float(0)) * (states('sensor.irrigation_zone4_minutes_today') | float(0))) | round(1) }}"
+        icon: mdi:water
+      - name: irrigation_zone5_gallons_today
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone5_gpm') | float(0)) * (states('sensor.irrigation_zone5_minutes_today') | float(0))) | round(1) }}"
+
+      # Gallons THIS MONTH (per zone)
+      - name: irrigation_zone1_gallons_month
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone1_gpm') | float(0)) * (states('sensor.irrigation_zone1_minutes_month') | float(0))) | round(0) }}"
+      - name: irrigation_zone2_gallons_month
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone2_gpm') | float(0)) * (states('sensor.irrigation_zone2_minutes_month') | float(0))) | round(0) }}"
+      - name: irrigation_zone3_gallons_month
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone3_gpm') | float(0)) * (states('sensor.irrigation_zone3_minutes_month') | float(0))) | round(0) }}"
+      - name: irrigation_zone4_gallons_month
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone4_gpm') | float(0)) * (states('sensor.irrigation_zone4_minutes_month') | float(0))) | round(0) }}"
+      - name: irrigation_zone5_gallons_month
+        unit_of_measurement: gal
+        state: "{{ ((states('input_number.irrigation_zone5_gpm') | float(0)) * (states('sensor.irrigation_zone5_minutes_month') | float(0))) | round(0) }}"
+
+      # Totals (Today + Month)
+      - name: irrigation_total_gallons_today
+        unit_of_measurement: gal
+        icon: mdi:water
+        state: >
+          {{
+            (
+              (states('sensor.irrigation_zone1_gallons_today') | float(0)) +
+              (states('sensor.irrigation_zone2_gallons_today') | float(0)) +
+              (states('sensor.irrigation_zone3_gallons_today') | float(0)) +
+              (states('sensor.irrigation_zone4_gallons_today') | float(0)) +
+              (states('sensor.irrigation_zone5_gallons_today') | float(0))
+            ) | round(1)
+          }}
+      - name: irrigation_total_gallons_month
+        unit_of_measurement: gal
+        icon: mdi:water
+        state: >
+          {{
+            (
+              (states('sensor.irrigation_zone1_gallons_month') | float(0)) +
+              (states('sensor.irrigation_zone2_gallons_month') | float(0)) +
+              (states('sensor.irrigation_zone3_gallons_month') | float(0)) +
+              (states('sensor.irrigation_zone4_gallons_month') | float(0)) +
+              (states('sensor.irrigation_zone5_gallons_month') | float(0))
+            ) | round(0)
+          }}
