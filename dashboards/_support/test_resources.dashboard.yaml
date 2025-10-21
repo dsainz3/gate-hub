@@ -1625,6 +1625,41 @@ views:
                   box-shadow: none;
                   padding: 1.2rem;
                 }
+      # === Sprinklers — Usage Tracking ===
+      - type: grid
+        columns: 2
+        cards:
+          # Card A — Estimated Water · Totals
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Estimated Water — Totals"
+              - type: entities
+                state_color: true
+                entities:
+                  - entity: sensor.irrigation_total_gallons_today
+                    name: Today (gal)
+                  - entity: sensor.irrigation_total_gallons_month
+                    name: Month to date (gal)
+
+          # Card B — Water by Zone (Today)
+          - type: vertical-stack
+            cards:
+              - type: markdown
+                content: "### Water by Zone — Today"
+              - type: entities
+                state_color: true
+                entities:
+                  - entity: sensor.irrigation_zone1_gallons_today
+                    name: Zone 1 (gal)
+                  - entity: sensor.irrigation_zone2_gallons_today
+                    name: Zone 2 (gal)
+                  - entity: sensor.irrigation_zone3_gallons_today
+                    name: Zone 3 (gal)
+                  - entity: sensor.irrigation_zone4_gallons_today
+                    name: Zone 4 (gal)
+                  - entity: sensor.irrigation_zone5_gallons_today
+                    name: Zone 5 (gal)
       - type: grid
         columns: 4
         cards:

@@ -1,2 +1,35 @@
-null
-...
+irrigation_zone1_gpm:
+  name: Irrigation Z1 GPM
+  min: 0
+  max: 50
+  mode: box
+  unit_of_measurement: gpm
+  initial: 11.10
+irrigation_zone2_gpm:
+  name: Irrigation Z2 GPM
+  min: 0
+  max: 50
+  mode: box
+  unit_of_measurement: gpm
+  initial: 8.13
+irrigation_zone3_gpm:
+  name: Irrigation Z3 GPM
+  min: 0
+  max: 50
+  mode: box
+  unit_of_measurement: gpm
+  initial: 8.13
+irrigation_zone4_gpm:
+  name: Irrigation Z4 GPM
+  min: 0
+  max: 50
+  mode: box
+  unit_of_measurement: gpm
+  initial: 11.87
+irrigation_zone5_gpm:
+  name: Irrigation Z5 GPM
+  min: 0
+  max: 50
+  mode: box
+  unit_of_measurement: gpm
+  initial: 8.13

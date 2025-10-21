@@ -98,3 +98,84 @@
     precision: 2
 # Repository TODO tracker
   # Command line sensors moved to configuration.yaml under command_line:
+# SPRINKLERS — RUNTIME TRACKING
+
+  - platform: history_stats
+    name: irrigation_zone1_hours_today
+    entity_id: switch.sprinkler_south_side_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone1_hours_month
+    entity_id: switch.sprinkler_south_side_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone2_hours_today
+    entity_id: switch.sprinkler_back_south_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone2_hours_month
+    entity_id: switch.sprinkler_back_south_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone3_hours_today
+    entity_id: switch.sprinkler_back_north_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone3_hours_month
+    entity_id: switch.sprinkler_back_north_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone4_hours_today
+    entity_id: switch.sprinkler_front_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone4_hours_month
+    entity_id: switch.sprinkler_front_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone5_hours_today
+    entity_id: switch.sprinkler_zone_5_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: irrigation_zone5_hours_month
+    entity_id: switch.sprinkler_zone_5_zone
+    state: "on"
+    type: time
+    start: "{{ now().replace(day=1, hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
