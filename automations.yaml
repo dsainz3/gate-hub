@@ -105,6 +105,9 @@
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
+      - service: switch.turn_on
+        target:
+          entity_id: switch.permanent_outdoor_lights_power_switch
       - service: scene.turn_on
         target:
           entity_id: scene.lighting_early_morning_gentle_wake
