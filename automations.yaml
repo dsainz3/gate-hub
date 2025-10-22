@@ -75,13 +75,22 @@
       - condition: template
         value_template: "{{ states('binary_sensor.huskers_lighting_hold') != 'on' }}"
     action:
-      - service: scene.turn_on
-        target:
-          entity_id: scene.lighting_night_mode
-        enabled: >-
-          {{ states('scene.lighting_night_mode') not in ['unknown', 'unavailable'] }}
-        data:
-          transition: 5
+      - choose:
+          - conditions:
+              - condition: not
+                conditions:
+                  - condition: state
+                    entity_id: scene.lighting_night_mode
+                    state: unavailable
+                  - condition: state
+                    entity_id: scene.lighting_night_mode
+                    state: unknown
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: scene.lighting_night_mode
+                data:
+                  transition: 5
       - service: logbook.log
         data:
           name: Lighting Automation

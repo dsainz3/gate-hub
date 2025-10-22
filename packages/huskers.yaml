@@ -2039,7 +2039,7 @@ frontend:
           secondary-background-color: "#FFF8EC"
           card-background-color: "#FFFAF1"
           paper-card-background-color: "#FFFAF1"
-          app-header-background-color: var(--huskers-black)
+          app-header-background-color: var(--ha-theme-color-scarlet)
           app-header-text-color: var(--ha-theme-color-cream)
           app-header-icon-color: var(--ha-theme-color-cream)
           app-header-button-text-color: var(--ha-theme-color-cream)
@@ -2059,8 +2059,8 @@ frontend:
           state-unavailable-color: "#9B9B9B"
 
           # Emphasis and accent colours
-          primary-color: var(--huskers-black)
-          light-primary-color: "#2F2F2F"
+          primary-color: var(--ha-theme-color-scarlet)
+          light-primary-color: "#FF5C6F"
           accent-color: var(--huskers-black)
           state-icon-color: var(--huskers-black)
           state-icon-active-color: var(--ha-theme-color-scarlet)
@@ -2068,14 +2068,14 @@ frontend:
           paper-item-icon-active-color: var(--ha-theme-color-scarlet)
 
           # Buttons, controls, and MWC theme values
-          switch-checked-color: var(--huskers-black)
+          switch-checked-color: var(--ha-theme-color-scarlet)
           switch-unchecked-color: "rgba(17, 17, 17, 0.3)"
           switch-checked-button-color: var(--ha-theme-color-cream)
           switch-unchecked-button-color: var(--ha-theme-color-cream)
-          slider-color: var(--huskers-black)
-          slider-secondary-color: "rgba(228, 28, 56, 0.25)"
-          mdc-theme-primary: var(--huskers-black)
-          mdc-theme-secondary: var(--ha-theme-color-scarlet)
+          slider-color: var(--ha-theme-color-scarlet)
+          slider-secondary-color: "rgba(11, 11, 11, 0.25)"
+          mdc-theme-primary: var(--ha-theme-color-scarlet)
+          mdc-theme-secondary: var(--huskers-black)
           mdc-theme-on-primary: var(--ha-theme-color-cream)
           mdc-theme-on-secondary: var(--ha-theme-color-cream)
           mdc-theme-surface: var(--card-background-color)
@@ -2145,7 +2145,7 @@ frontend:
           secondary-background-color: "#161616"
           card-background-color: "#1F1A1A"
           paper-card-background-color: "#1F1A1A"
-          app-header-background-color: "#000000"
+          app-header-background-color: var(--ha-theme-color-scarlet)
           app-header-text-color: var(--ha-theme-color-cream)
           app-header-icon-color: var(--ha-theme-color-cream)
           app-header-button-text-color: var(--ha-theme-color-cream)

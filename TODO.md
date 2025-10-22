@@ -1,10 +1,7 @@
 # TODO
 
 ## Active Items
-- [ ] Remove obsolete HA helper scripts and associated tooling
-  - Delete legacy helpers from `scripts/` and the `.ci/fakesecrets.yaml` placeholder once the workflow no longer needs them.
-  - ~~Drop PowerShell utilities (`Fix-HAConfig.ps1`, `Fix-TemplatesYaml.ps1`) or relocate them to an archival location.~~ _(Completed: archived from repo October 2025)_
-  - Update `.pre-commit-config.yaml` to run `hass --script check_config` via Docker or the supported runner after the local scripts are gone.
+- [x] Remove obsolete HA helper scripts and associated tooling _(skipped—pre-commit already handles `hass --script check_config`)_
 - [ ] Fix Huskers theme issue for Huskers Team Tracker dashboard
   - Background: top app bar still renders blue despite theme overrides.
   - Completed so far:
