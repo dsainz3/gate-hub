@@ -2012,10 +2012,10 @@ automation:
       - variables:
           cleanup_required: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
           huskers_postgame_restore_pairs:
-            - dynamic: scene.huskers_before_chase_runtime
-              fallback: scene.huskers_before_chase_snapshot
-            - dynamic: scene.huskers_before_burst_runtime
-              fallback: scene.huskers_before_burst_snapshot
+            - dynamic_scene_id: huskers_before_chase_runtime
+              fallback_scene: scene.huskers_before_chase_snapshot
+            - dynamic_scene_id: huskers_before_burst_runtime
+              fallback_scene: scene.huskers_before_burst_snapshot
       - choose:
           - conditions:
               - condition: template
@@ -2032,22 +2032,24 @@ automation:
           - repeat:
               for_each: "{{ huskers_postgame_restore_pairs }}"
               sequence:
+                - variables:
+                    dynamic_scene: "{{ 'scene.' ~ repeat.item.dynamic_scene_id }}"
                 - choose:
                     - conditions:
                         - condition: template
-                          value_template: "{{ has_value(repeat.item.dynamic) }}"
+                          value_template: "{{ has_value(dynamic_scene) }}"
                       sequence:
                         - service: scene.turn_on
                           target:
-                            entity_id: "{{ repeat.item.dynamic }}"
+                            entity_id: "{{ dynamic_scene }}"
                           continue_on_error: true
                     - conditions:
                         - condition: template
-                          value_template: "{{ has_value(repeat.item.fallback) }}"
+                          value_template: "{{ has_value(repeat.item.fallback_scene) }}"
                       sequence:
                         - service: scene.turn_on
                           target:
-                            entity_id: "{{ repeat.item.fallback }}"
+                            entity_id: "{{ repeat.item.fallback_scene }}"
                           continue_on_error: true
       - service: logbook.log
         data:
