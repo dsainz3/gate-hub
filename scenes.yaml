@@ -10,6 +10,18 @@
       light.light_theater_left:
         state: 'off'
 
+  - id: huskers_before_chase_runtime
+    name: Huskers Before Chase Runtime
+    entities:
+      light.light_theater_left:
+        state: 'off'
+
+  - id: huskers_before_burst_runtime
+    name: Huskers Before Burst Runtime
+    entities:
+      light.light_theater_left:
+        state: 'off'
+
   - id: huskers_sunroom_chase
     name: Huskers Sunroom Chase
     entities:

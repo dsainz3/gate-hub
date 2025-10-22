@@ -268,13 +268,14 @@ script:
           cream_rgb: [253, 243, 231]
           chase_brightness_pct: 80
           permanent_brightness_pct: 100
+          huskers_chase_snapshot_id: huskers_before_chase_runtime
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase_speed_loop
         continue_on_error: true
       - service: scene.create
         data:
-          scene_id: huskers_before_chase
+          scene_id: "{{ huskers_chase_snapshot_id }}"
           snapshot_entities: >-
             {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
             {% if has_value(permanent_light) %}
@@ -405,14 +406,28 @@ script:
     alias: 'Huskers: Stop Cream Chase (restore)'
     mode: single
     sequence:
+      - variables:
+          huskers_chase_snapshot_id: huskers_before_chase_runtime
+          huskers_chase_snapshot_scene: "{{ 'scene.' ~ huskers_chase_snapshot_id }}"
+          huskers_chase_fallback_scene: scene.huskers_before_chase_snapshot
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase30_loop
       - delay: '00:00:00.5'
-      - service: scene.turn_on
-        target:
-          entity_id: scene.huskers_before_chase
-        continue_on_error: true
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(huskers_chase_snapshot_scene) }}"
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: "{{ huskers_chase_snapshot_scene }}"
+                continue_on_error: true
+        default:
+          - service: scene.turn_on
+            target:
+              entity_id: "{{ huskers_chase_fallback_scene }}"
+            continue_on_error: true
 
   huskers_chase_speed_start:
     alias: 'Huskers: Start Cream Chase (Variable-Speed)'
@@ -434,13 +449,15 @@ script:
           scarlet_rgb: [228, 28, 56]
           cream_rgb: [253, 243, 231]
           chase_brightness_pct: 80
+          permanent_brightness_pct: 100
+          huskers_chase_snapshot_id: huskers_before_chase_runtime
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase30_loop
         continue_on_error: true
       - service: scene.create
         data:
-          scene_id: huskers_before_chase
+          scene_id: "{{ huskers_chase_snapshot_id }}"
           snapshot_entities: >-
             {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
             {% if has_value(permanent_light) %}
@@ -535,14 +552,28 @@ script:
     alias: 'Huskers: Stop Cream Chase (Variable-Speed, restore)'
     mode: single
     sequence:
+      - variables:
+          huskers_chase_snapshot_id: huskers_before_chase_runtime
+          huskers_chase_snapshot_scene: "{{ 'scene.' ~ huskers_chase_snapshot_id }}"
+          huskers_chase_fallback_scene: scene.huskers_before_chase_snapshot
       - service: script.turn_off
         target:
           entity_id: script.huskers_chase_speed_loop
       - delay: '00:00:00.5'
-      - service: scene.turn_on
-        target:
-          entity_id: scene.huskers_before_chase
-        continue_on_error: true
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(huskers_chase_snapshot_scene) }}"
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: "{{ huskers_chase_snapshot_scene }}"
+                continue_on_error: true
+        default:
+          - service: scene.turn_on
+            target:
+              entity_id: "{{ huskers_chase_fallback_scene }}"
+            continue_on_error: true
 
   huskers_hail_burst_8s:
     alias: 'Huskers: Hail Varsity Burst (8s BPM)'
@@ -565,6 +596,9 @@ script:
           cream_rgb: [253, 243, 231]
           chase_brightness_pct: 80
           permanent_brightness_pct: 100
+          huskers_burst_snapshot_id: huskers_before_burst_runtime
+          huskers_burst_snapshot_scene: "{{ 'scene.' ~ huskers_burst_snapshot_id }}"
+          huskers_burst_fallback_scene: scene.huskers_before_burst_snapshot
       - variables:
           lights:
             - light.light_theater_left
@@ -596,7 +630,7 @@ script:
                 - light.light_front_right
       - service: scene.create
         data:
-          scene_id: huskers_before_burst
+          scene_id: "{{ huskers_burst_snapshot_id }}"
           snapshot_entities: >-
             {% set base = expand('group.huskers_eight_lights') | map(attribute='entity_id') | list %}
             {% if has_value(permanent_light) %}
@@ -656,10 +690,20 @@ script:
                 transition: 0.05
             - delay:
                 milliseconds: '{{ (beat_ms * 0.80) | int }}'
-      - service: scene.turn_on
-        target:
-          entity_id: scene.huskers_before_burst
-        continue_on_error: true
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ has_value(huskers_burst_snapshot_scene) }}"
+            sequence:
+              - service: scene.turn_on
+                target:
+                  entity_id: "{{ huskers_burst_snapshot_scene }}"
+                continue_on_error: true
+        default:
+          - service: scene.turn_on
+            target:
+              entity_id: "{{ huskers_burst_fallback_scene }}"
+            continue_on_error: true
 
   kiosk_stop_all_huskers_shows:
     alias: 'Kiosk: Stop All Huskers Shows'
@@ -1967,6 +2011,11 @@ automation:
     action:
       - variables:
           cleanup_required: "{{ is_state('binary_sensor.huskers_light_show_active', 'on') }}"
+          huskers_postgame_restore_pairs:
+            - dynamic_scene_id: huskers_before_chase_runtime
+              fallback_scene: scene.huskers_before_chase_snapshot
+            - dynamic_scene_id: huskers_before_burst_runtime
+              fallback_scene: scene.huskers_before_burst_snapshot
       - choose:
           - conditions:
               - condition: template
@@ -1980,12 +2029,28 @@ automation:
                     target:
                       entity_id: script.huskers_chase_speed_stop
         default:
-          - service: scene.turn_on
-            target:
-              entity_id:
-                - scene.huskers_before_chase
-                - scene.huskers_before_burst
-            continue_on_error: true
+          - repeat:
+              for_each: "{{ huskers_postgame_restore_pairs }}"
+              sequence:
+                - variables:
+                    dynamic_scene: "{{ 'scene.' ~ repeat.item.dynamic_scene_id }}"
+                - choose:
+                    - conditions:
+                        - condition: template
+                          value_template: "{{ has_value(dynamic_scene) }}"
+                      sequence:
+                        - service: scene.turn_on
+                          target:
+                            entity_id: "{{ dynamic_scene }}"
+                          continue_on_error: true
+                    - conditions:
+                        - condition: template
+                          value_template: "{{ has_value(repeat.item.fallback_scene) }}"
+                      sequence:
+                        - service: scene.turn_on
+                          target:
+                            entity_id: "{{ repeat.item.fallback_scene }}"
+                          continue_on_error: true
       - service: logbook.log
         data:
           name: Huskers Automation

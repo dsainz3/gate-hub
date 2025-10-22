@@ -68,7 +68,6 @@ group:
       - light.light_garage_left
       - light.light_garage_center
       - light.light_garage_right
-      - light.spare_light
 
 ################################################################################
 # SCENES
@@ -105,10 +104,6 @@ scene:
         state: "on"
         hs_color: [0, 95]
         brightness: 255
-      light.spare_light:
-        state: "on"
-        hs_color: [0, 95]
-        brightness: 255
 
   - id: f1_lights_out_green
     name: F1 – Lights Out Green
@@ -138,10 +133,6 @@ scene:
         hs_color: [120, 90]
         brightness: 255
       light.light_garage_right:
-        state: "on"
-        hs_color: [120, 90]
-        brightness: 255
-      light.spare_light:
         state: "on"
         hs_color: [120, 90]
         brightness: 255
@@ -177,10 +168,6 @@ scene:
         state: "on"
         color_temp_kelvin: 6000
         brightness: 255
-      light.spare_light:
-        state: "on"
-        color_temp_kelvin: 6000
-        brightness: 255
 
 ################################################################################
 # SCRIPTS
@@ -189,11 +176,15 @@ script:
   f1_lights_out_sequence:
     alias: "F1: Five Lights Out"
     mode: restart
+    variables:
+      f1_show_group: group.f1_show_lights
+      f1_snapshot_scene_id: f1_lights_snapshot
+      f1_snapshot_scene_entity: "{{ 'scene.' ~ f1_snapshot_scene_id }}"
     sequence:
       - service: scene.create
         data:
-          scene_id: f1_lights_snapshot
-          snapshot_entities: "{{ expand('group.f1_show_lights') | map(attribute='entity_id') | list }}"
+          scene_id: "{{ f1_snapshot_scene_id }}"
+          snapshot_entities: "{{ expand(f1_show_group) | map(attribute='entity_id') | list }}"
       - service: scene.turn_on
         target:
           entity_id: scene.f1_grid_all_red
@@ -221,11 +212,15 @@ script:
   f1_chequered_flag_show:
     alias: "F1: Chequered Flag Show"
     mode: restart
+    variables:
+      f1_show_group: group.f1_show_lights
+      f1_finish_scene_id: f1_finish_snapshot
+      f1_finish_scene_entity: "{{ 'scene.' ~ f1_finish_scene_id }}"
     sequence:
       - service: scene.create
         data:
-          scene_id: f1_finish_snapshot
-          snapshot_entities: "{{ expand('group.f1_show_lights') | map(attribute='entity_id') | list }}"
+          scene_id: "{{ f1_finish_scene_id }}"
+          snapshot_entities: "{{ expand(f1_show_group) | map(attribute='entity_id') | list }}"
       - service: scene.turn_on
         target:
           entity_id: scene.f1_chequered_flag
@@ -233,12 +228,15 @@ script:
           minutes: "{{ states('input_number.f1_chequered_hold_minutes') | int(10) }}"
       - service: scene.turn_on
         target:
-          entity_id: scene.f1_finish_snapshot
+          entity_id: "{{ f1_finish_scene_entity }}"
         continue_on_error: true
 
   f1_stop_all_shows:
     alias: "F1: Stop All Shows"
     mode: single
+    variables:
+      f1_snapshot_scene_id: f1_lights_snapshot
+      f1_snapshot_scene_entity: "{{ 'scene.' ~ f1_snapshot_scene_id }}"
     sequence:
       - service: script.turn_off
         target:
@@ -249,7 +247,7 @@ script:
           seconds: 1
       - service: scene.turn_on
         target:
-          entity_id: scene.f1_lights_snapshot
+          entity_id: "{{ f1_snapshot_scene_entity }}"
         continue_on_error: true
 
 ################################################################################
