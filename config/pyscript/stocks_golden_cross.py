@@ -10,11 +10,30 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any, Protocol
 from zoneinfo import ZoneInfo
 
-import requests
+import requests  # type: ignore[import-not-found]
+
+if TYPE_CHECKING:
+
+    class HomeAssistant:  # type: ignore[no-redef]
+        ...
+
+    class _LoggerProtocol(Protocol):
+        def msg(
+            self, message: str, *, level: str = ..., name: str = ...
+        ) -> None: ...
+
+    log: _LoggerProtocol
+    hass: HomeAssistant
+
+    def service(
+        func: Callable[..., Any] | None = None, **kwargs: Any
+    ) -> Callable[..., Any]: ...
+
 
 TIMEZONE = ZoneInfo("America/Chicago")
 HISTORY_DIR = "/config/www/stocks_gc_history"
