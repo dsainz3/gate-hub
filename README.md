@@ -49,6 +49,9 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 
 ## Journey Highlights
 
+- **Market signals → daily golden cross digest:** A Yahoo Finance-driven Pyscript ranks the
+  top sub-$20 equities with fresh SMA-50/200 crosses, publishes a digest sensor, and renders a
+  dedicated Lovelace dashboard with Mushroom chips, Markdown tables, and 30-day spread charts.
 - **Manual dashboards → reproducible platform:** Early Football Team and room dashboards lived only in the UI. They now render from YAML stored in Git (`dashboards/`), as chronicled in `docs/explanation/football-team-dashboard-history.md`.
 - **Scattered toggles → unified operations console:** `dashboards/automations.dashboard.yaml` exposes every automation, last-triggered timestamp, and scene button behind an admin-only Automations sidebar entry, keeping reloads and manual triggers in one place.
 - **Scripts on disk → portable tooling:** Inline fixes gave way to reusable helpers such as `scripts/ha_check_portable.py`, with the broader roadmap laid out in `docs/explanation/optimization-plan.md`.

@@ -1,0 +1,114 @@
+title: Stocks Golden Cross
+views:
+  - title: Golden Cross
+    path: golden_cross
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:mushroom-entity-card
+            entity: sensor.stocks_golden_cross
+            name: Daily Golden Cross Digest
+            icon: mdi:chart-line
+            layout: horizontal
+            primary_info: none
+            secondary_info: last-changed
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                primary: Updated
+                secondary: >
+                  {% set attr = state_attr('sensor.stocks_golden_cross', 'updated_date') %}
+                  {{ attr if attr else 'pending' }}
+                icon: mdi:calendar-check
+                tap_action:
+                  action: none
+              - type: custom:mushroom-template-card
+                primary: Universe
+                secondary: >
+                  {% set attr = state_attr('sensor.stocks_golden_cross', 'universe_size') %}
+                  {{ attr if attr is not none else '0' }}
+                icon: mdi:account-group
+                tap_action:
+                  action: none
+              - type: custom:mushroom-template-card
+                primary: Candidates
+                secondary: >
+                  {% set attr = state_attr('sensor.stocks_golden_cross', 'candidates') %}
+                  {{ attr if attr is not none else '0' }}
+                icon: mdi:star-three-points
+                tap_action:
+                  action: none
+          - type: entities
+            title: Controls
+            entities:
+              - entity: input_text.stocks_watchlist
+                name: Watchlist (comma separated)
+              - entity: script.stocks_golden_cross_run_now
+                name: Run scan now
+      - type: markdown
+        title: Top 3 Golden Cross Picks
+        content: >-
+          {% set top3 = state_attr('sensor.stocks_golden_cross', 'top3') or [] %}
+          {% if top3 %}
+          | Symbol | Price | SMA50 | SMA200 | Crossed? | Days Since | Slope | Score |
+          | :----- | ----: | ----: | -----: | :------- | ---------: | ----: | ----: |
+          {% for item in top3 %}
+          {% set price = "%.2f"|format(item.price) %}
+          {% set slope = "%.4f"|format(item.slope) %}
+          {% set score = "%.2f"|format(item.score) %}
+          {% set crossed = 'Yes' if item.crossed_today else 'No' %}
+          |{{ item.symbol }}|${{ price }}|{{ item.sma50 }}|{{ item.sma200 }}|{{ crossed }}|{{ item.days_since_cross }}|{{ slope }}|{{ score }}|
+          {% endfor %}
+          {% else %}
+          **No qualifying symbols under $20 today.**
+          {% endif %}
+      - type: markdown
+        title: Ranked Candidates (Top 15)
+        content: >-
+          {% set ranked = state_attr('sensor.stocks_golden_cross', 'ranked') or [] %}
+          {% if ranked %}
+          | # | Symbol | Price | SMA50 | SMA200 | Crossed? | Days Since | Slope | Score |
+          | :- | :----- | ----: | ----: | -----: | :------- | ---------: | ----: | ----: |
+          {% for item in ranked %}
+          {% set price = "%.2f"|format(item.price) %}
+          {% set slope = "%.4f"|format(item.slope) %}
+          {% set score = "%.2f"|format(item.score) %}
+          {% set crossed = 'Yes' if item.crossed_today else 'No' %}
+          |{{ loop.index }}|{{ item.symbol }}|${{ price }}|{{ item.sma50 }}|{{ item.sma200 }}|{{ crossed }}|{{ item.days_since_cross }}|{{ slope }}|{{ score }}|
+          {% endfor %}
+          {% else %}
+          **No ranked symbols available.**
+          {% endif %}
+      - type: custom:apexcharts-card
+        header:
+          title: Spread Trend (Top 3)
+          show: true
+        graph_span: 30d
+        all_series_config:
+          type: area
+          stroke_width: 2
+          opacity: 0.3
+        apex_config:
+          yaxis:
+            labels:
+              formatter: "return value.toFixed(3);"
+          tooltip:
+            x:
+              format: "yyyy-MM-dd"
+        series: |-
+          [[[
+            const entity = hass.states['sensor.stocks_golden_cross'];
+            const top3 = entity?.attributes?.top3 ?? [];
+            if (!Array.isArray(top3) || top3.length === 0) {
+              return [];
+            }
+            return top3.map((item) => ({
+              name: `${item.symbol} Spread`,
+              data_generator: () =>
+                fetch(`/local/stocks_gc_history/${item.symbol}.json`)
+                  .then((resp) => resp.json())
+                  .then((data) =>
+                    data.map((point) => [point.timestamp * 1000, point.spread])
+                  ),
+            }));
+          ]]]

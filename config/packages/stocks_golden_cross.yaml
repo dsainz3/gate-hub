@@ -1,0 +1,74 @@
+input_text:
+  stocks_watchlist:
+    name: Stocks Watchlist
+    min: 3
+    max: 255
+    initial: F, PLTR, NIO, SOFI, RUN, SPWR, CHPT, BB, SIRI, DNA, GPRO, NKLA, QS, BBD, GOLD, SBLK, AAL, SAVE, SWN, BTG
+
+template:
+  - sensor:
+      - name: Stocks Golden Cross Updated
+        unique_id: stocks_golden_cross_updated
+        state: >
+          {% set sensor = states('sensor.stocks_golden_cross') %}
+          {% if sensor not in ['unknown', 'unavailable'] %}
+            {{ state_attr('sensor.stocks_golden_cross', 'updated_date') }}
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: "{{ states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] }}"
+      - name: Stocks Golden Cross Candidates
+        unique_id: stocks_golden_cross_candidates
+        unit_of_measurement: tickers
+        state: >
+          {% if states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] %}
+            {{ state_attr('sensor.stocks_golden_cross', 'candidates') }}
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: "{{ states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] }}"
+      - name: Stocks Golden Cross Universe
+        unique_id: stocks_golden_cross_universe
+        unit_of_measurement: tickers
+        state: >
+          {% if states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] %}
+            {{ state_attr('sensor.stocks_golden_cross', 'universe_size') }}
+          {% else %}
+            unavailable
+          {% endif %}
+        availability: "{{ states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] }}"
+      - name: Stocks Golden Cross Top3
+        unique_id: stocks_golden_cross_top3
+        state: >
+          {% if states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] %}
+            {{ state_attr('sensor.stocks_golden_cross', 'top3') | tojson }}
+          {% else %}
+            unavailable
+          {% endif %}
+        attributes:
+          friendly_name: Top 3 Golden Cross Tickers
+        availability: "{{ states('sensor.stocks_golden_cross') not in ['unknown', 'unavailable'] }}"
+
+automation:
+  - id: stocks_golden_cross_daily_update
+    alias: Stocks Golden Cross Daily Update
+    mode: single
+    trigger:
+      - platform: time
+        at: "15:10:00"
+    condition:
+      - condition: time
+        weekday:
+          - mon
+          - tue
+          - wed
+          - thu
+          - fri
+    action:
+      - service: pyscript.stocks_golden_cross_update
+
+script:
+  stocks_golden_cross_run_now:
+    alias: Stocks Golden Cross Run Now
+    sequence:
+      - service: pyscript.stocks_golden_cross_update

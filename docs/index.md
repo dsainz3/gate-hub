@@ -11,6 +11,8 @@ owner: ops-team
 Welcome to the hypermodern documentation set for the gate-hub Home Assistant deployment. Content is grouped using the Divio model so readers can quickly find the right depth:
 
 Latest highlights:
+- Stocks Golden Cross package adds a weekday Yahoo Finance scan with Mushroom + ApexCharts
+  dashboard for under-$20 golden cross leaders.
 - Snapshot view now includes a dedicated agenda column showing the household calendar.
 - Agenda Planner package + kiosk view enable event/task entry from HA tablets.
 - Support · Test Resources dashboard adds a Plex · Theater lab with direct Fire TV controls and the HA Media Browser.
