@@ -488,7 +488,7 @@ automation:
         data:
           name: Holiday Automation
           message: Manual holiday override cleared (calendar off)
-          entity_id: automation.holiday_mode_manual_reset
+          entity_id: automation.holiday_mode_reset_manual_override
     mode: restart
 
   - id: holiday_mode_manual_reset_2330
@@ -509,5 +509,5 @@ automation:
         data:
           name: Holiday Automation
           message: Manual holiday override cleared at 23:30
-          entity_id: automation.holiday_mode_manual_reset_2330
+          entity_id: automation.holiday_mode_11_30_pm_reset
     mode: single

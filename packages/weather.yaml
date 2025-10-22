@@ -235,20 +235,39 @@ binary_sensor:
         device_class: problem
 
 automation:
-  # Swap 'sensor.nws_alerts' to your actual alert entity when available
   - id: weather_alert_notify
     alias: 'Weather: Severe Alert → Notification'
     mode: restart
+    trigger_variables:
+      weather_entity: !secret weather_primary_entity
     trigger:
-      - platform: state
-        entity_id:
-          - sensor.nws_alerts
+      - platform: template
+        value_template: >-
+          {{ state_attr(weather_entity, 'alerts') | default([], true) | count > 0 }}
     condition:
       - condition: state
         entity_id: input_boolean.weather_notifications_enabled
         state: 'on'
     action:
+      - variables:
+          alerts: "{{ state_attr(weather_entity, 'alerts') | default([], true) }}"
+          active_alert: "{{ alerts[0] if alerts else {} }}"
+          alert_title: >-
+            {% if active_alert %}
+              {{ active_alert.get('event') or active_alert.get('title') or 'Weather Alert' }}
+            {% else %}
+              Weather Alert
+            {% endif %}
+          alert_message: >-
+            {% if active_alert %}
+              {% set desc = active_alert.get('description') or active_alert.get('headline') %}
+              {% set severity = active_alert.get('severity') %}
+              {% set sender = active_alert.get('sender_name') %}
+              {{ severity | title if severity else '' }}{{ ' - ' if severity and desc else '' }}{{ desc or 'Check Home Assistant for details.' }}{{ '\nIssued by: ' ~ sender if sender else '' }}
+            {% else %}
+              No alert details were provided by the weather provider.
+            {% endif %}
       - service: persistent_notification.create
         data:
-          title: 'Weather Alert'
-          message: 'Update from {{ trigger.entity_id }}: {{ states(trigger.entity_id) }}'
+          title: "{{ alert_title }}"
+          message: "{{ alert_message }}"
