@@ -77,6 +77,8 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 - **Core platform:** Home Assistant OS with supervised add-ons, developed remotely via VS Code as documented in `docs/reference/infrastructure.md`.
 - **Integrations:** Zigbee2MQTT, MQTT, TP-Link Deco mesh monitoring, BLE sensors, Wunderground PWS, Govee lighting, TeamTracker sports data.
 - **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, media lab controls for Plex + Fire TV, plus the Automations & Scenes console for operators.
+- **Runtime extensions:** Pyscript powers the Stocks Golden Cross scanner—install the Pyscript
+  integration and reload it after deploys so `pyscript.stocks_golden_cross_update` is available.
 - **Themes:** Football Team palette variables live in `packages/huskers.yaml` so the Huskers package owns the entire experience. The Huskers Cream variant anchors dashboards with a cream base, black accents, and scarlet gradient shadows, and the docs call out where to adjust colours and typography for your team.
 
 ---

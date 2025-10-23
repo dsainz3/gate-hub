@@ -1,9 +1,24 @@
 # Stocks Golden Cross Dashboard
 
 ## Sources
-- Dashboard: `/config/dashboard/stocks_golden_cross.dashboard.yaml`
+- Dashboard: `/config/dashboards/stocks_golden_cross.dashboard.yaml`
 - Pyscript: `/config/pyscript/stocks_golden_cross.py`
 - Package: `/config/packages/stocks_golden_cross.yaml`
+
+## Prerequisites
+- Enable the **Pyscript** integration (HACS → Integrations → Pyscript, then add `pyscript:` to
+  `configuration.yaml` and restart). Once Home Assistant is back up, reload the Pyscript
+  integration so `pyscript.stocks_golden_cross_update` becomes available.
+- Ensure the dashboard include is registered under `lovelace:` → `dashboards:` in
+  `configuration.yaml`:
+  ```yaml
+  stocks-golden-cross-dashboard:
+    mode: yaml
+    title: Stocks Golden Cross
+    icon: mdi:finance
+    show_in_sidebar: true
+    filename: dashboards/stocks_golden_cross.dashboard.yaml
+  ```
 
 ## Overview
 Daily market digest that ranks under-$20 equities showing a fresh SMA-50/200 golden cross.
