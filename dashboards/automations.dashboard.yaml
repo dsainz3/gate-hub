@@ -221,6 +221,22 @@ views:
               target:
                 entity_id: automation.early_morning_lights_03_30
           - type: button
+            name: Halloween Loop (45s)
+            icon: mdi:halloween
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.lighting_halloween_cycle
+          - type: button
+            name: Stop Halloween Loop
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.lighting_halloween_stop
+          - type: button
             name: Trigger Interior Sunrise Off
             icon: mdi:white-balance-sunny
             tap_action:

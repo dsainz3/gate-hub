@@ -42,6 +42,7 @@ input_select: !include input_select.yaml
 
 input_text: !include input_text.yaml
 script: !include scripts.yaml
+input_button: !include input_button.yaml
 
 logbook:
 history:
