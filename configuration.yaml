@@ -43,9 +43,6 @@ input_select: !include input_select.yaml
 input_text: !include input_text.yaml
 script: !include scripts.yaml
 
-pyscript:
-  allow_all_imports: false
-
 logbook:
 history:
 
