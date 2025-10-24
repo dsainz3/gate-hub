@@ -56,7 +56,7 @@
         data:
           name: Lighting Automation
           message: Evening exterior sunset scene applied
-          entity_id: automation.lighting_exterior_front_garage_on_sunset
+          entity_id: automation.exterior_front_garage_on_sunset
 
   - id: night_mode_at_midnight
     alias: 'Lighting: Night Mode'
@@ -128,7 +128,7 @@
         data:
           name: Lighting Automation
           message: Early morning gentle wake scene applied
-          entity_id: automation.early_morning_lights_03_30
+          entity_id: automation.early_morning_lights_0330
 
   - id: interior_lights_sunrise_off
     alias: 'Lighting: Morning Interior Off'
@@ -160,7 +160,7 @@
         data:
           name: Lighting Automation
           message: Morning interior lights turned off after sunrise
-          entity_id: automation.interior_lights_off_15_minutes_after_sunrise
+          entity_id: automation.interior_lights_sunrise_off
 
   - id: exterior_lights_sunrise_off
     alias: 'Lighting: Morning Exterior Off'
@@ -192,7 +192,7 @@
         data:
           name: Lighting Automation
           message: Morning exterior lights turned off after sunrise
-          entity_id: automation.lighting_morning_lights_off_sunrise
+          entity_id: automation.exterior_lights_sunrise_off
 
   - id: exterior_lights_cloudy_daytime
     alias: 'Lighting: Daytime Cloudy Exterior'
