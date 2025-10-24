@@ -32,12 +32,14 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 - **Trigger**: Sun sets +5 minutes (`platform: sun`, `event: sunset`, `offset: 00:05:00`).
 - **Guards**: Skips while `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_lighting_hold` is `on` so holiday overrides and Husker light shows can take priority.
 - **Actions**: Brings sunroom, dining room, and living room lighting to 60% with a 2 s transition.
+- **Implementation**: Defined in YAML and mirrored in the Node-RED tab **Lighting Sun Automations** (see `noderd.js` export).
 
 ### Lighting: Exterior Front & Garage On (Sunset) (`automations.yaml:28`)
 - **ID** `exterior_front_garage_on_sunset`
 - **Trigger**: Sun sets +5 minutes.
 - **Guards**: Skips when either `binary_sensor.holiday_mode_active` is `on` or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Turns on porch and garage fixtures at low brightness and ramps `light.permanent_outdoor_lights` to 50% when available.
+- **Implementation**: Defined in YAML and mirrored in the Node-RED tab **Lighting Sun Automations** (see `noderd.js` export).
 
 ### Lighting: Night Mode at Midnight (`automations.yaml:65`)
 - **ID** `night_mode_at_midnight`
@@ -48,24 +50,33 @@ The second view, **Scenes**, exposes single-button access to every defined scene
 
 ### Lighting: Early Morning Gentle Wake (3:30 AM) (`automations.yaml:105`)
 - **ID** `early_morning_lights_0330`
-- **Entity** `automation.early_morning_lights_03_30`
+- **Entity** `automation.early_morning_lights_0330`
 - **Trigger**: Time equals `03:30:00`.
 - **Guards**: Suppressed if `binary_sensor.holiday_mode_active` or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Runs the Early Morning Gentle Wake scene (3 s fade) so the scene governs both interior ambience and exterior glow before writing a logbook entry.
 
 ### Lighting: Morning Lights Off (Sunrise + 15 min) (`automations.yaml:148`)
 - **ID** `interior_lights_sunrise_off`
-- **Entity** `automation.interior_lights_off_15_minutes_after_sunrise`
+- **Entity** `automation.interior_lights_sunrise_off`
 - **Trigger**: Sunrise +15 minutes.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active`, `binary_sensor.huskers_light_show_active`, or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Fades sunroom, living room, and dining room lights off.
+- **Implementation**: Defined in YAML and mirrored in the Node-RED tab **Lighting Sun Automations** (see `noderd.js` export).
 
 ### Lighting: Exterior Front & Garage Off (Sunrise) (`automations.yaml:171`)
 - **ID** `exterior_lights_sunrise_off`
-- **Entity** `automation.lighting_morning_lights_off_sunrise`
+- **Entity** `automation.exterior_lights_sunrise_off`
 - **Trigger**: Sunrise +5 minutes.
 - **Guards**: Skips while `binary_sensor.holiday_mode_active`, `binary_sensor.huskers_light_show_active`, or `binary_sensor.huskers_lighting_hold` is `on`.
 - **Actions**: Turns off porch, garage, and permanent outdoor lights.
+- **Implementation**: Defined in YAML and mirrored in the Node-RED tab **Lighting Sun Automations** (see `noderd.js` export).
+
+### Lighting: Daytime Cloudy Exterior (`automations.yaml:197`)
+- **ID** `exterior_lights_cloudy_daytime`
+- **Trigger**: Cloud coverage sensor crossing 80%, periodic 5-minute checks, Home Assistant start, and automation reload events.
+- **Guards**: Runs only between sunrise and sunset, requires a valid OpenWeather cloud-coverage reading, and pauses while `binary_sensor.huskers_lighting_hold` is `on`.
+- **Actions**: Drives porch and garage lights to 30 % brightness (with tolerance + validation), logs success/failure, and raises a persistent notification if brightness validation fails. Clears the notification once lights match the expected state or turn back off when skies clear.
+- **Implementation**: YAML automation with a feature-parity Node-RED flow (**Lighting Sun Automations → Cloudy Daytime Exterior**) exported via `noderd.js`. Disable one side to avoid duplicate actions.
 
 ### LED: Monthly Effect Scheduler (`automations.yaml:205`)
 - **ID** `exterior_led_monthly_effect`

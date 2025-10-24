@@ -175,6 +175,7 @@ Use these documents as the study material for sharpening system design, tooling,
 - **Local setup:** `poetry env use 3.11`, `poetry install`, and `pre-commit install` provision the tooling stack. Pip-based installs remain an option if Poetry is unavailable.
 - **Validation loop:** Run `pre-commit run --all-files`, `ha core check`, `python scripts/ha_check_portable.py`, and `pytest` before pushing to guarantee clean builds.
 - **Secrets hygiene:** `.ci/fakesecrets.yaml` supplies CI with stub credentials; real values stay in `secrets.yaml` on the Home Assistant host.
+- **Node-RED flows:** Import `noderd.js` into the Node-RED editor (tab **Lighting Sun Automations**) whenever the sun-based lighting routines change so the Supervisor add-on mirrors the YAML definitions.
 - **Entity exploration:** `poetry run python scripts/export_entities.py --token-file ~/.ha_token` exports an entity index to `docs/entities.md` without leaking runtime state.
 
 ---
