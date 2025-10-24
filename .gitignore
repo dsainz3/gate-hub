@@ -69,3 +69,4 @@ make_fake_secrets.py
 tmp/
 scripts/secrets.yaml
 custom_components/tplink_router/
+custom_components/pyscript/__init__.py

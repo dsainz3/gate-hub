@@ -15,11 +15,11 @@
 
 <!-- METRICS:START -->
 ## Repository health snapshot
-_Updated 2025-10-22T06:20:02.354621+00:00Z_
+_Updated 2025-10-24T06:18:41.612162+00:00Z_
 
-- Daily commits: **1** (-90.9%)
-- Weekly commits: **91** (-54.0%)
-- Monthly commits: **440** (+216.5%)
+- Daily commits: **1** (-87.5%)
+- Weekly commits: **93** (-46.6%)
+- Monthly commits: **454** (+226.6%)
 - Median PR merge time: **0.00 days**
 <!-- METRICS:END -->
 
@@ -49,6 +49,9 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 
 ## Journey Highlights
 
+- **Market signals → daily golden cross digest:** A Yahoo Finance-driven Pyscript ranks the
+  top sub-$20 equities with fresh SMA-50/200 crosses, publishes a digest sensor, and renders a
+  dedicated Lovelace dashboard with Mushroom chips, Markdown tables, and 30-day spread charts.
 - **Manual dashboards → reproducible platform:** Early Football Team and room dashboards lived only in the UI. They now render from YAML stored in Git (`dashboards/`), as chronicled in `docs/explanation/football-team-dashboard-history.md`.
 - **Scattered toggles → unified operations console:** `dashboards/automations.dashboard.yaml` exposes every automation, last-triggered timestamp, and scene button behind an admin-only Automations sidebar entry, keeping reloads and manual triggers in one place.
 - **Scripts on disk → portable tooling:** Inline fixes gave way to reusable helpers such as `scripts/ha_check_portable.py`, with the broader roadmap laid out in `docs/explanation/optimization-plan.md`.
@@ -74,6 +77,8 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 - **Core platform:** Home Assistant OS with supervised add-ons, developed remotely via VS Code as documented in `docs/reference/infrastructure.md`.
 - **Integrations:** Zigbee2MQTT, MQTT, TP-Link Deco mesh monitoring, BLE sensors, Wunderground PWS, Govee lighting, TeamTracker sports data.
 - **Experience layers:** Football Team Game Day dashboards, networking & system observability boards, kiosk interfaces, media lab controls for Plex + Fire TV, plus the Automations & Scenes console for operators.
+- **Runtime extensions:** Pyscript powers the Stocks Golden Cross scanner—install the Pyscript
+  integration and reload it after deploys so `pyscript.stocks_golden_cross_update` is available.
 - **Themes:** Football Team palette variables live in `packages/huskers.yaml` so the Huskers package owns the entire experience. The Huskers Cream variant anchors dashboards with a cream base, black accents, and scarlet gradient shadows, and the docs call out where to adjust colours and typography for your team.
 
 ---

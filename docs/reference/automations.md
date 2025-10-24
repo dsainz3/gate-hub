@@ -157,6 +157,19 @@ These automations pair with the [Football Team Dashboard Guide](../how-to/footba
 - **Actions**: Writes a Logbook entry with the audit summary so on-call staff can compare against the sensor’s trigger snapshot.
 - **Notes**: The audit sensor aggregates trigger states, helper booleans, and expected modes for all football automations so the alert message always references the latest snapshot.
 
+## Market Signals (`packages/stocks_golden_cross.yaml`)
+
+### Market: Golden Cross Daily Digest (`packages/stocks_golden_cross.yaml:54`)
+- **ID** `stocks_golden_cross_daily_update`
+- **Entity** `automation.stocks_golden_cross_daily_update`
+- **Trigger**: Weekday time trigger at 15:10:00 America/Chicago.
+- **Guards**: Weekday condition skips weekends to align with US market sessions.
+- **Actions**: Calls `pyscript.stocks_golden_cross_update` to pull Yahoo Finance history, score
+  golden cross candidates under $20, update `sensor.stocks_golden_cross`, and refresh the dashboard
+  history files.
+- **Notes**: Manual executions use `script.stocks_golden_cross_run_now`, surfaced alongside the
+  watchlist helper on the dashboard.
+
 ## Automation Watchdog Package (`packages/automation_watchdog.yaml`)
 
 ### System: Automation Watchdog Alert (`packages/automation_watchdog.yaml:293`)
