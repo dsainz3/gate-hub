@@ -1,0 +1,6 @@
+lighting_halloween_cycle:
+  name: Lighting Halloween Cycle
+  icon: mdi:halloween
+lighting_halloween_stop:
+  name: Lighting Halloween Stop
+  icon: mdi:stop-circle-outline
