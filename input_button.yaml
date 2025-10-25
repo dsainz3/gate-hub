@@ -1,6 +1,97 @@
+# === LIGHTING · HALLOWEEN ===
 lighting_halloween_cycle:
   name: Lighting Halloween Cycle
   icon: mdi:halloween
+
 lighting_halloween_stop:
   name: Lighting Halloween Stop
+  icon: mdi:stop-circle-outline
+
+# === TEST LIGHTING · START BUTTONS ===
+test_lighting_start_january:
+  name: Test Lighting · Start · January
+  icon: mdi:snowflake
+
+test_lighting_start_february:
+  name: Test Lighting · Start · February
+  icon: mdi:heart
+
+test_lighting_start_march:
+  name: Test Lighting · Start · March
+  icon: mdi:leaf
+
+test_lighting_start_april:
+  name: Test Lighting · Start · April
+  icon: mdi:flower-tulip
+
+test_lighting_start_may:
+  name: Test Lighting · Start · May
+  icon: mdi:flower
+
+test_lighting_start_june:
+  name: Test Lighting · Start · June
+  icon: mdi:weather-sunny
+
+test_lighting_start_july:
+  name: Test Lighting · Start · July
+  icon: mdi:flag-variant
+
+test_lighting_start_august:
+  name: Test Lighting · Start · August
+  icon: mdi:weather-sunny-alert
+
+test_lighting_start_september:
+  name: Test Lighting · Start · September
+  icon: mdi:fruit-grapes-outline
+
+test_lighting_start_october:
+  name: Test Lighting · Start · October
+  icon: mdi:halloween
+
+test_lighting_start_november:
+  name: Test Lighting · Start · November
+  icon: mdi:food-turkey
+
+test_lighting_start_december:
+  name: Test Lighting · Start · December
+  icon: mdi:string-lights
+
+# === TEST LIGHTING · STOP BUTTON ===
+test_lighting_stop:
+  name: Test Lighting · Stop
+  icon: mdi:stop-circle-outline
+
+# === TEST LIGHTING · SUN SIMULATION ===
+test_lighting_sun_plus_10m:
+  name: Test Lighting · Sun +10m
+  icon: mdi:weather-sunset
+
+test_lighting_sun_plus_4m:
+  name: Test Lighting · Sun +4m
+  icon: mdi:weather-sunset
+
+test_lighting_sun_now:
+  name: Test Lighting · Sun Now
+  icon: mdi:weather-sunset
+
+test_lighting_sun_minus_5m:
+  name: Test Lighting · Sun −5m
+  icon: mdi:weather-sunset-down
+
+test_lighting_sun_clear_override:
+  name: Test Lighting · Clear Override
+  icon: mdi:eraser
+
+test_lighting_sun_eval_now:
+  name: Test Lighting · Force Eval Now
+  icon: mdi:play-circle-outline
+
+
+# === HUSKER LIGHTING ===
+test_husker_game_mode:
+  name: Test Lighting · Husker Game Mode
+  icon: mdi:helmet
+
+test_stop_husker_mode:
+  name: Test Lighting · Stop Husker Mode
   icon: mdi:stop-circle-outline
