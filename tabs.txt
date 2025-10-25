@@ -1,0 +1,7 @@
+df0c3d394881af2d	Cloudy Daytime Exterior
+7be417f0d3f1e35e	Lighting Utility Automations	Fail-safe alignment for exterior lighting scenes plus LED monthly effect orchestration.
+b0ce83b4c7194f6d	Safety & Maintenance	Humidor cooling guard, nightly burner shutoff, and Reolink warmup sequencing.
+5bf285a455077f62	PLighting Seasonal Shows	Production: independent 2s transitions, 15–20s random waits, four-color palette. Uses stop_flag set by stop button event.
+234945acd17cd327	Lighting Sun Automations
+7e180ead4ba54b28	TLighting Seasonal Shows
+b6a2a23f1dc4SIM	Test · Sun Sim Controls

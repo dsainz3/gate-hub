@@ -1,0 +1,534 @@
+[
+  {
+    "id": "9314e019d9b4b746",
+    "type": "server-state-changed",
+    "z": "5bf285a455077f62",
+    "name": "Start button pressed",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "input_button.lighting_halloween_cycle"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "",
+    "ifStateType": "str",
+    "outputOnlyOnStateChange": false,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 200,
+    "y": 80,
+    "wires": [
+      [
+        "cd72f6d25de18601"
+      ]
+    ]
+  },
+  {
+    "id": "cd72f6d25de18601",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Init: palette, settings",
+    "func": "const colors = [[255,140,0],[0,100,0],[75,0,130],[139,0,0]];\nflow.set('halloweenPalette', colors);\nflow.set('transition_secs', 2);\nflow.set('brightness_pct', 35);\nflow.set('stop_flag', false);\nreturn msg;",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 730,
+    "y": 80,
+    "wires": [
+      [
+        "d3adbf3443b33bf1",
+        "a9e724e2d7142acc",
+        "d532c1a95c43f1e7",
+        "b21de141a245530c",
+        "dd46a01a1cede0e2"
+      ]
+    ]
+  },
+  {
+    "id": "d3adbf3443b33bf1",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Front Left: next random color",
+    "func": "const colors = flow.get('halloweenPalette'); const pick = colors[Math.floor(Math.random()*colors.length)]; const transition = flow.get('transition_secs') || 2; const brightness_pct = flow.get('brightness_pct') || 35; msg.payload = { rgb_color: pick, brightness_pct, transition }; return msg;",
+    "outputs": 1,
+    "x": 240,
+    "y": 160,
+    "wires": [
+      [
+        "3e70056b035153d1"
+      ]
+    ]
+  },
+  {
+    "id": "3e70056b035153d1",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Front Left \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_front_left"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 520,
+    "y": 160,
+    "wires": [
+      [
+        "64f895060458263f"
+      ]
+    ]
+  },
+  {
+    "id": "64f895060458263f",
+    "type": "delay",
+    "z": "5bf285a455077f62",
+    "name": "Front Left: random wait (15\u201320s)",
+    "pauseType": "delay",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "15",
+    "randomLast": "20",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 830,
+    "y": 160,
+    "wires": [
+      [
+        "c95d6453e66b72f1"
+      ]
+    ]
+  },
+  {
+    "id": "c95d6453e66b72f1",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "timeout": "",
+    "noerr": 0,
+    "x": 1090,
+    "y": 160,
+    "wires": [
+      [
+        "9b7927a6968f356a"
+      ],
+      [
+        "d3adbf3443b33bf1"
+      ]
+    ]
+  },
+  {
+    "id": "a9e724e2d7142acc",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Front Right: next random color",
+    "func": "const colors = flow.get('halloweenPalette'); const pick = colors[Math.floor(Math.random()*colors.length)]; const transition = flow.get('transition_secs') || 2; const brightness_pct = flow.get('brightness_pct') || 35; msg.payload = { rgb_color: pick, brightness_pct, transition }; return msg;",
+    "outputs": 1,
+    "x": 250,
+    "y": 220,
+    "wires": [
+      [
+        "7d857a17c7993990"
+      ]
+    ]
+  },
+  {
+    "id": "7d857a17c7993990",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Front Right \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_front_right"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 520,
+    "y": 220,
+    "wires": [
+      [
+        "6b0c33c6c3329140"
+      ]
+    ]
+  },
+  {
+    "id": "6b0c33c6c3329140",
+    "type": "delay",
+    "z": "5bf285a455077f62",
+    "name": "Front Right: random wait (15\u201320s)",
+    "pauseType": "delay",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "15",
+    "randomLast": "20",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 840,
+    "y": 220,
+    "wires": [
+      [
+        "0c25aaa6cea7688c"
+      ]
+    ]
+  },
+  {
+    "id": "0c25aaa6cea7688c",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "timeout": "",
+    "noerr": 0,
+    "x": 1090,
+    "y": 220,
+    "wires": [
+      [
+        "9b7927a6968f356a"
+      ],
+      [
+        "a9e724e2d7142acc"
+      ]
+    ]
+  },
+  {
+    "id": "d532c1a95c43f1e7",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Garage Left: next random color",
+    "func": "const colors = flow.get('halloweenPalette'); const pick = colors[Math.floor(Math.random()*colors.length)]; const transition = flow.get('transition_secs') || 2; const brightness_pct = flow.get('brightness_pct') || 35; msg.payload = { rgb_color: pick, brightness_pct, transition }; return msg;",
+    "outputs": 1,
+    "x": 250,
+    "y": 280,
+    "wires": [
+      [
+        "7280f9b2cd474cc5"
+      ]
+    ]
+  },
+  {
+    "id": "7280f9b2cd474cc5",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Garage Left \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_garage_left"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 520,
+    "y": 280,
+    "wires": [
+      [
+        "90c8a8300f095468"
+      ]
+    ]
+  },
+  {
+    "id": "90c8a8300f095468",
+    "type": "delay",
+    "z": "5bf285a455077f62",
+    "name": "Garage Left: random wait (15\u201320s)",
+    "pauseType": "delay",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "15",
+    "randomLast": "20",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 850,
+    "y": 280,
+    "wires": [
+      [
+        "0e99e01c087ff4a0"
+      ]
+    ]
+  },
+  {
+    "id": "0e99e01c087ff4a0",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "timeout": "",
+    "noerr": 0,
+    "x": 1090,
+    "y": 280,
+    "wires": [
+      [
+        "9b7927a6968f356a"
+      ],
+      [
+        "d532c1a95c43f1e7"
+      ]
+    ]
+  },
+  {
+    "id": "b21de141a245530c",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Garage Center: next random color",
+    "func": "const colors = flow.get('halloweenPalette'); const pick = colors[Math.floor(Math.random()*colors.length)]; const transition = flow.get('transition_secs') || 2; const brightness_pct = flow.get('brightness_pct') || 35; msg.payload = { rgb_color: pick, brightness_pct, transition }; return msg;",
+    "outputs": 1,
+    "x": 260,
+    "y": 340,
+    "wires": [
+      [
+        "3cb72ca676ac3c1a"
+      ]
+    ]
+  },
+  {
+    "id": "3cb72ca676ac3c1a",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Garage Center \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_garage_center"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 530,
+    "y": 340,
+    "wires": [
+      [
+        "74ce28ac60f3122a"
+      ]
+    ]
+  },
+  {
+    "id": "74ce28ac60f3122a",
+    "type": "delay",
+    "z": "5bf285a455077f62",
+    "name": "Garage Center: random wait (15\u201320s)",
+    "pauseType": "delay",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "15",
+    "randomLast": "20",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 860,
+    "y": 340,
+    "wires": [
+      [
+        "1fdad710eff3543e"
+      ]
+    ]
+  },
+  {
+    "id": "1fdad710eff3543e",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "timeout": "",
+    "noerr": 0,
+    "x": 1090,
+    "y": 340,
+    "wires": [
+      [
+        "9b7927a6968f356a"
+      ],
+      [
+        "b21de141a245530c"
+      ]
+    ]
+  },
+  {
+    "id": "dd46a01a1cede0e2",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Garage Right: next random color",
+    "func": "const colors = flow.get('halloweenPalette'); const pick = colors[Math.floor(Math.random()*colors.length)]; const transition = flow.get('transition_secs') || 2; const brightness_pct = flow.get('brightness_pct') || 35; msg.payload = { rgb_color: pick, brightness_pct, transition }; return msg;",
+    "outputs": 1,
+    "x": 250,
+    "y": 400,
+    "wires": [
+      [
+        "4b07ea298f046eb5"
+      ]
+    ]
+  },
+  {
+    "id": "4b07ea298f046eb5",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Garage Right \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_garage_right"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 520,
+    "y": 400,
+    "wires": [
+      [
+        "f9d8b8e363fe5361"
+      ]
+    ]
+  },
+  {
+    "id": "f9d8b8e363fe5361",
+    "type": "delay",
+    "z": "5bf285a455077f62",
+    "name": "Garage Right: random wait (15\u201320s)",
+    "pauseType": "delay",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "15",
+    "randomLast": "20",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 850,
+    "y": 400,
+    "wires": [
+      [
+        "60afb3d6e9a04072"
+      ]
+    ]
+  },
+  {
+    "id": "60afb3d6e9a04072",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "timeout": "",
+    "noerr": 0,
+    "x": 1090,
+    "y": 400,
+    "wires": [
+      [
+        "9b7927a6968f356a"
+      ],
+      [
+        "dd46a01a1cede0e2"
+      ]
+    ]
+  },
+  {
+    "id": "9b7927a6968f356a",
+    "type": "api-call-service",
+    "z": "5bf285a455077f62",
+    "name": "Log: show stopped",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "logbook.log",
+    "data": "{\"name\":\"Lighting Seasonal Show\",\"message\":\"Production independent 2s fades with 15\u201320s windows stopped\",\"entity_id\":\"input_button.lighting_halloween_cycle\"}",
+    "dataType": "json",
+    "x": 1400,
+    "y": 240,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "96effe2688ad101b",
+    "type": "server-state-changed",
+    "z": "5bf285a455077f62",
+    "name": "Stop button pressed (event)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.lighting_halloween_stop"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 260,
+    "y": 480,
+    "wires": [
+      [
+        "2c47e9d8dbc85805"
+      ]
+    ]
+  },
+  {
+    "id": "2c47e9d8dbc85805",
+    "type": "function",
+    "z": "5bf285a455077f62",
+    "name": "set flow.stop_flag = true",
+    "func": "flow.set('stop_flag', true);\nreturn null;",
+    "outputs": 0,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 580,
+    "y": 480,
+    "wires": []
+  }
+]

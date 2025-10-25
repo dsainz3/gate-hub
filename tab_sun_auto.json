@@ -1,0 +1,1179 @@
+[
+  {
+    "id": "e79a03b3ff4cac86",
+    "type": "inject",
+    "z": "234945acd17cd327",
+    "name": "Set plightingTargets (on deploy)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 2,
+    "topic": "",
+    "x": 200,
+    "y": 40,
+    "wires": [
+      [
+        "c48d276245448579"
+      ]
+    ]
+  },
+  {
+    "id": "c48d276245448579",
+    "type": "function",
+    "z": "234945acd17cd327",
+    "name": "flow.set('plightingTargets', [...])",
+    "func": "flow.set('plightingTargets', [\n  'light.light_front_left',\n  'light.light_front_right',\n  'light.light_garage_left',\n  'light.light_garage_center',\n  'light.light_garage_right'\n]);\nnode.status({fill:'green',shape:'dot',text:'plightingTargets set (5)'});\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 520,
+    "y": 40,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "85bc9b319939cd69",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Sunset below horizon",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 2,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sun.sun"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "below_horizon",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 170,
+    "y": 100,
+    "wires": [
+      [
+        "85491c6bbfa25320"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "85491c6bbfa25320",
+    "type": "delay",
+    "z": "234945acd17cd327",
+    "name": "Offset +5 min",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "minutes",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 380,
+    "y": 100,
+    "wires": [
+      [
+        "8993a742d70c367d"
+      ]
+    ]
+  },
+  {
+    "id": "8993a742d70c367d",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Holiday mode off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 2,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 610,
+    "y": 80,
+    "wires": [
+      [
+        "4a80c8498cf07a87"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "4a80c8498cf07a87",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Lighting hold not active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 870,
+    "y": 80,
+    "wires": [
+      [
+        "0168615a9227cf65"
+      ]
+    ]
+  },
+  {
+    "id": "0168615a9227cf65",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Apply interior sunset scene",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "scene.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "scene.lighting_evening_sunset_interior"
+    ],
+    "labelId": [],
+    "data": "{\"transition\":2}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "scene",
+    "service": "turn_on",
+    "x": 1160,
+    "y": 80,
+    "wires": [
+      [
+        "e2061390c5fbbcd3"
+      ]
+    ]
+  },
+  {
+    "id": "e2061390c5fbbcd3",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Logbook sunset interior",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"automation.evening_lights_at_sunset\",\"name\":\"Lighting Automation\",\"message\":\"Evening interior sunset scene applied\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1430,
+    "y": 80,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "604819ec5e24be4f",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Holiday mode off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 610,
+    "y": 180,
+    "wires": [
+      [
+        "b6a73bdaac62f719"
+      ]
+    ]
+  },
+  {
+    "id": "b6a73bdaac62f719",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Lighting hold not active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 870,
+    "y": 180,
+    "wires": [
+      [
+        "87623694850ea959"
+      ]
+    ]
+  },
+  {
+    "id": "87623694850ea959",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Apply exterior sunset scene",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "scene.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "scene.lighting_evening_sunset_exterior"
+    ],
+    "labelId": [],
+    "data": "{\"transition\":2}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "scene",
+    "service": "turn_on",
+    "x": 1160,
+    "y": 180,
+    "wires": [
+      [
+        "f81850a8d39d74ed",
+        "146206bacf3c5ab4"
+      ]
+    ]
+  },
+  {
+    "id": "f81850a8d39d74ed",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Logbook sunset exterior",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"automation.exterior_front_garage_on_sunset\",\"name\":\"Lighting Automation\",\"message\":\"Evening exterior sunset scene applied\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1430,
+    "y": 180,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "146206bacf3c5ab4",
+    "type": "delay",
+    "z": "234945acd17cd327",
+    "name": "Wait 1s \u2192 start show",
+    "pauseType": "delay",
+    "timeout": "1",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 1440,
+    "y": 220,
+    "wires": [
+      [
+        "441c190eadc0127a"
+      ]
+    ]
+  },
+  {
+    "id": "441c190eadc0127a",
+    "type": "function",
+    "z": "234945acd17cd327",
+    "name": "Attach targets (profile: evening)",
+    "func": "const targets = flow.get('plightingTargets');\nconst payload = {};\nif (Array.isArray(targets) && targets.length) {\n  payload.lights = targets;\n  payload.profile = 'evening';\n} else {\n  payload.target = 'exterior';\n  payload.profile = 'evening';\n}\nmsg.payload = payload;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1680,
+    "y": 220,
+    "wires": [
+      [
+        "f643ab77d502a7c8"
+      ]
+    ]
+  },
+  {
+    "id": "f643ab77d502a7c8",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Press PLighting START button (evening)",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "entityId": [
+      "input_button.lighting_halloween_cycle"
+    ],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "domain": "input_button",
+    "service": "press",
+    "x": 1950,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "da45931d33736790",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Sunrise above horizon",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sun.sun"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "above_horizon",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 170,
+    "y": 320,
+    "wires": [
+      [
+        "4b43a66929296bd5"
+      ]
+    ]
+  },
+  {
+    "id": "4b43a66929296bd5",
+    "type": "delay",
+    "z": "234945acd17cd327",
+    "name": "Offset +15 min",
+    "pauseType": "delay",
+    "timeout": "15",
+    "timeoutUnits": "minutes",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 390,
+    "y": 320,
+    "wires": [
+      [
+        "ec70bfd0cc577c77"
+      ]
+    ]
+  },
+  {
+    "id": "ec70bfd0cc577c77",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Holiday mode off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 620,
+    "y": 300,
+    "wires": [
+      [
+        "163571b033a280fa"
+      ]
+    ]
+  },
+  {
+    "id": "163571b033a280fa",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Light show off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "off",
+    "halt_if_type": "str",
+    "halt_if_compare": "is_not",
+    "entity_id": "binary_sensor.huskers_light_show_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 890,
+    "y": 300,
+    "wires": [
+      [
+        "a1bf6ddf0bc0ca36"
+      ]
+    ]
+  },
+  {
+    "id": "a1bf6ddf0bc0ca36",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Lighting hold not active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 1170,
+    "y": 300,
+    "wires": [
+      [
+        "62553e0b2d33cf34",
+        "481096ce91068a31"
+      ]
+    ]
+  },
+  {
+    "id": "62553e0b2d33cf34",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Apply morning interior off",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "scene.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "scene.lighting_morning_interior_off"
+    ],
+    "labelId": [],
+    "data": "{\"transition\":10}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "scene",
+    "service": "turn_on",
+    "x": 1470,
+    "y": 300,
+    "wires": [
+      [
+        "27cbc3a1f4c10ac4"
+      ]
+    ]
+  },
+  {
+    "id": "27cbc3a1f4c10ac4",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Logbook sunrise interior",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"automation.interior_lights_sunrise_off\",\"name\":\"Lighting Automation\",\"message\":\"Morning interior lights turned off after sunrise\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1740,
+    "y": 300,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "481096ce91068a31",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Press PLighting STOP button (sunrise branch)",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "entityId": [
+      "input_button.lighting_halloween_stop"
+    ],
+    "data": "{}",
+    "dataType": "json",
+    "domain": "input_button",
+    "service": "press",
+    "x": 1510,
+    "y": 340,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "828ad9bd86d58bda",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Lighting hold not active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 1160,
+    "y": 400,
+    "wires": [
+      [
+        "db9d2f5a7b1a54a6"
+      ]
+    ]
+  },
+  {
+    "id": "db9d2f5a7b1a54a6",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Apply morning exterior off",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "scene.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "scene.lighting_morning_exterior_off"
+    ],
+    "labelId": [],
+    "data": "{\"transition\":10}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "scene",
+    "service": "turn_on",
+    "x": 1450,
+    "y": 400,
+    "wires": [
+      [
+        "c8dc8695f9e43515",
+        "57e4a38f46c0b286"
+      ]
+    ]
+  },
+  {
+    "id": "c8dc8695f9e43515",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Logbook sunrise exterior",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"automation.exterior_lights_sunrise_off\",\"name\":\"Lighting Automation\",\"message\":\"Morning exterior lights turned off after sunrise\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1720,
+    "y": 400,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "57e4a38f46c0b286",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Press PLighting STOP button (after exterior off)",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "entityId": [
+      "input_button.lighting_halloween_stop"
+    ],
+    "data": "{}",
+    "dataType": "json",
+    "domain": "input_button",
+    "service": "press",
+    "x": 1770,
+    "y": 440,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "059bd92e9ba61f9f",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Any plighting light \u2192 ON",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "light.light_front_left",
+        "light.light_front_right",
+        "light.light_garage_left",
+        "light.light_garage_center",
+        "light.light_garage_right"
+      ]
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "on",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 210,
+    "y": 520,
+    "wires": [
+      [
+        "4857c81d0287f151",
+        "14cda1d7321f9c7d",
+        "173fd4ef2cf19adc"
+      ]
+    ]
+  },
+  {
+    "id": "4857c81d0287f151",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Holiday mode OFF?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "x": 520,
+    "y": 480,
+    "wires": [
+      [
+        "27f7dd1b454d6072"
+      ]
+    ]
+  },
+  {
+    "id": "14cda1d7321f9c7d",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Huskers show OFF?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "off",
+    "halt_if_type": "str",
+    "halt_if_compare": "is_not",
+    "entity_id": "binary_sensor.huskers_light_show_active",
+    "x": 530,
+    "y": 520,
+    "wires": [
+      [
+        "27f7dd1b454d6072"
+      ]
+    ]
+  },
+  {
+    "id": "173fd4ef2cf19adc",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Lighting hold NOT active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "x": 560,
+    "y": 560,
+    "wires": [
+      [
+        "27f7dd1b454d6072"
+      ]
+    ]
+  },
+  {
+    "id": "27f7dd1b454d6072",
+    "type": "function",
+    "z": "234945acd17cd327",
+    "name": "Attach targets (profile: auto)",
+    "func": "const targets = flow.get('plightingTargets');\nconst payload = {};\nif (Array.isArray(targets) && targets.length) {\n  payload.lights = targets;\n  payload.profile = 'auto';\n} else {\n  payload.target = 'exterior';\n  payload.profile = 'auto';\n}\nmsg.payload = payload;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 820,
+    "y": 520,
+    "wires": [
+      [
+        "04ac4f6fc4245a5a"
+      ]
+    ]
+  },
+  {
+    "id": "04ac4f6fc4245a5a",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Press PLighting START button (auto)",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "entityId": [
+      "input_button.lighting_halloween_cycle"
+    ],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "domain": "input_button",
+    "service": "press",
+    "x": 1080,
+    "y": 520,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "2ceee78862c9d4de",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Any plighting light \u2192 OFF",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "light.light_front_left",
+        "light.light_front_right",
+        "light.light_garage_left",
+        "light.light_garage_center",
+        "light.light_garage_right"
+      ]
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "off",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 210,
+    "y": 600,
+    "wires": [
+      [
+        "393312dc96a42262"
+      ]
+    ]
+  },
+  {
+    "id": "393312dc96a42262",
+    "type": "function",
+    "z": "234945acd17cd327",
+    "name": "Are ALL plighting lights OFF?",
+    "func": "const ha = global.get('homeassistant');\nif (!ha || !ha.homeAssistant || !ha.homeAssistant.states) {\n  return null;\n}\nconst states = ha.homeAssistant.states;\nconst ids = [\n  'light.light_front_left',\n  'light.light_front_right',\n  'light.light_garage_left',\n  'light.light_garage_center',\n  'light.light_garage_right'\n];\nconst allOff = ids.every(id => (states[id] && (states[id].state||'').toLowerCase() === 'off'));\nreturn allOff ? msg : null;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 520,
+    "y": 600,
+    "wires": [
+      [
+        "ca6b84781cc7cc92"
+      ]
+    ]
+  },
+  {
+    "id": "ca6b84781cc7cc92",
+    "type": "api-call-service",
+    "z": "234945acd17cd327",
+    "name": "Press PLighting STOP button (all off)",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "entityId": [
+      "input_button.lighting_halloween_stop"
+    ],
+    "data": "{}",
+    "dataType": "json",
+    "domain": "input_button",
+    "service": "press",
+    "x": 800,
+    "y": 600,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "0491b79b75878069",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Sunset below horizon",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sun.sun"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "below_horizon",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 170,
+    "y": 200,
+    "wires": [
+      [
+        "22cf39864f11a1ce"
+      ]
+    ]
+  },
+  {
+    "id": "22cf39864f11a1ce",
+    "type": "delay",
+    "z": "234945acd17cd327",
+    "name": "Offset +5 min",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "minutes",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 380,
+    "y": 200,
+    "wires": [
+      [
+        "604819ec5e24be4f"
+      ]
+    ]
+  },
+  {
+    "id": "6ac64c1a41e055db",
+    "type": "server-state-changed",
+    "z": "234945acd17cd327",
+    "name": "Sunrise above horizon",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sun.sun"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "above_horizon",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 170,
+    "y": 420,
+    "wires": [
+      [
+        "f3114b4c2d0131ca"
+      ]
+    ]
+  },
+  {
+    "id": "f3114b4c2d0131ca",
+    "type": "delay",
+    "z": "234945acd17cd327",
+    "name": "Offset +5 min",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "minutes",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 380,
+    "y": 420,
+    "wires": [
+      [
+        "9044225c25d1f792"
+      ]
+    ]
+  },
+  {
+    "id": "9044225c25d1f792",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Holiday mode off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 610,
+    "y": 400,
+    "wires": [
+      [
+        "5670b543b0f5b6b7"
+      ]
+    ]
+  },
+  {
+    "id": "5670b543b0f5b6b7",
+    "type": "api-current-state",
+    "z": "234945acd17cd327",
+    "name": "Light show off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "off",
+    "halt_if_type": "str",
+    "halt_if_compare": "is_not",
+    "entity_id": "binary_sensor.huskers_light_show_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "data",
+    "override_data": "msg",
+    "x": 880,
+    "y": 400,
+    "wires": [
+      [
+        "828ad9bd86d58bda"
+      ]
+    ]
+  }
+]

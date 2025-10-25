@@ -1,0 +1,871 @@
+[
+  {
+    "id": "d50bd03499a760da",
+    "type": "inject",
+    "z": "7be417f0d3f1e35e",
+    "name": "Fail-safe heartbeat",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "*/5 * * * *",
+    "once": true,
+    "onceDelay": 10,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 180,
+    "y": 120,
+    "wires": [
+      [
+        "af20c8dcf08b2083"
+      ]
+    ]
+  },
+  {
+    "id": "bada16134b057e32",
+    "type": "inject",
+    "z": "7be417f0d3f1e35e",
+    "name": "Fail-safe startup",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 2,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 190,
+    "y": 180,
+    "wires": [
+      [
+        "af20c8dcf08b2083"
+      ]
+    ]
+  },
+  {
+    "id": "5b1375ff07a16753",
+    "type": "server-events",
+    "z": "7be417f0d3f1e35e",
+    "name": "homeassistant_start",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "exposeAsEntityConfig": "",
+    "eventType": "homeassistant_start",
+    "waitForRunning": false,
+    "x": 190,
+    "y": 240,
+    "wires": [
+      [
+        "af20c8dcf08b2083"
+      ]
+    ]
+  },
+  {
+    "id": "d4c52365fc016656",
+    "type": "server-events",
+    "z": "7be417f0d3f1e35e",
+    "name": "automation_reloaded",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "exposeAsEntityConfig": "",
+    "eventType": "automation_reloaded",
+    "waitForRunning": false,
+    "x": 190,
+    "y": 300,
+    "wires": [
+      [
+        "af20c8dcf08b2083"
+      ]
+    ]
+  },
+  {
+    "id": "af20c8dcf08b2083",
+    "type": "api-current-state",
+    "z": "7be417f0d3f1e35e",
+    "name": "Holiday mode off?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "holiday_entity",
+    "override_data": "msg",
+    "x": 500,
+    "y": 180,
+    "wires": [
+      [
+        "57126be8eab7caa2"
+      ]
+    ]
+  },
+  {
+    "id": "57126be8eab7caa2",
+    "type": "api-current-state",
+    "z": "7be417f0d3f1e35e",
+    "name": "Lighting hold inactive?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "hold_entity",
+    "override_data": "msg",
+    "x": 780,
+    "y": 180,
+    "wires": [
+      [
+        "8dac14baf36d01ef"
+      ]
+    ]
+  },
+  {
+    "id": "8dac14baf36d01ef",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "Compute fail-safe actions",
+    "func": "\nconst ha = global.get('homeassistant');\nif (!ha || !ha.homeAssistant || !ha.homeAssistant.states) {\n    node.status({ fill: 'red', shape: 'ring', text: 'HA context unavailable' });\n    return null;\n}\nconst states = ha.homeAssistant.states;\nconst getState = (id) => (states[id]?.state || '').toLowerCase();\nconst getTs = (id) => {\n    const raw = states[id]?.attributes?.last_triggered;\n    return raw ? Date.parse(raw) / 1000 : 0;\n};\nconst now = Date.now() / 1000;\nconst sun = states['sun.sun'];\nconst nextRising = sun?.attributes?.next_rising ? Date.parse(sun.attributes.next_rising) / 1000 : 0;\nconst nextSetting = sun?.attributes?.next_setting ? Date.parse(sun.attributes.next_setting) / 1000 : 0;\nconst sunriseLast = nextRising ? nextRising - 86400 : 0;\nconst sunsetLast = nextSetting ? nextSetting - 86400 : 0;\nconst sunriseExpected = sunriseLast ? sunriseLast + 300 : 0;\nconst sunsetExpected = sunsetLast ? sunsetLast + 300 : 0;\nconst midnight = new Date();\nmidnight.setHours(0,0,0,0);\nconst midnightExpected = midnight.getTime() / 1000;\nconst early = new Date();\nearly.setHours(3,30,0,0);\nconst earlyExpected = early.getTime() / 1000;\nconst huskerShowActive = getState('binary_sensor.huskers_light_show_active') === 'on';\nconst automations = [\n    { name: 'Evening Sunset Exterior', entity_id: 'automation.lighting_exterior_front_garage_on_sunset', expected_ts: sunsetExpected, skip: sunsetExpected === 0 },\n    { name: 'Night Mode', entity_id: 'automation.lighting_night_mode_at_midnight', expected_ts: midnightExpected, skip: false },\n    { name: 'Early Morning Gentle Wake', entity_id: 'automation.early_morning_lights_03_30', expected_ts: earlyExpected, skip: false },\n    { name: 'Morning Exterior Off', entity_id: 'automation.lighting_morning_lights_off_sunrise', expected_ts: sunriseExpected, skip: sunriseExpected === 0 || huskerShowActive }\n];\nconst missed = [];\nautomations.forEach(auto => {\n    const expected = Number(auto.expected_ts) || 0;\n    if (auto.skip || expected === 0 || now < expected) {\n        return;\n    }\n    if (getState(auto.entity_id) !== 'on') {\n        return;\n    }\n    const last = getTs(auto.entity_id);\n    if (last < expected) {\n        missed.push({\n            entity_id: auto.entity_id,\n            name: auto.name,\n            log_message: `Re-triggered ${auto.name} automation (${auto.entity_id}) to catch up on missed run.`\n        });\n    }\n});\nconst lastMap = {\n    evening: getTs('automation.lighting_exterior_front_garage_on_sunset'),\n    night: getTs('automation.lighting_night_mode_at_midnight'),\n    early_morning: getTs('automation.early_morning_lights_03_30'),\n    morning_off: getTs('automation.lighting_morning_lights_off_sunrise')\n};\nlet activeProfile = 'unknown';\nconst sorted = Object.entries(lastMap).sort((a,b) => a[1]-b[1]);\nif (sorted.length) {\n    const [profile, ts] = sorted[sorted.length - 1];\n    if (ts && (now - ts) < 90000) {\n        activeProfile = profile;\n    }\n}\nif (activeProfile === 'unknown') {\n    const schedule = [\n        { profile: 'evening', ts: sunsetExpected, skip: sunsetExpected === 0 },\n        { profile: 'night', ts: midnightExpected, skip: false },\n        { profile: 'early_morning', ts: earlyExpected, skip: false },\n        { profile: 'morning_off', ts: sunriseExpected, skip: sunriseExpected === 0 || huskerShowActive }\n    ];\n    let candidate = { profile: 'unknown', ts: 0 };\n    schedule.forEach(item => {\n        if (!item.skip && item.ts && item.ts <= now && item.ts >= candidate.ts) {\n            candidate = { profile: item.profile, ts: item.ts };\n        }\n    });\n    activeProfile = candidate.profile;\n}\nconst front = {\n    entity: 'light.front_porch_lights',\n    expectedState: null,\n    min: 0,\n    max: 0\n};\nconst garage = {\n    entity: 'light.garage_lights',\n    expectedState: null,\n    min: 0,\n    max: 0\n};\nconst led = {\n    entity: 'light.permanent_outdoor_lights',\n    expectedState: null,\n    min: 0,\n    max: 0\n};\nlet correctiveAutomation = '';\nswitch (activeProfile) {\n    case 'evening':\n    case 'early_morning':\n        front.expectedState = 'on';\n        front.min = 1;\n        front.max = 90;\n        garage.expectedState = 'on';\n        garage.min = 1;\n        garage.max = 90;\n        led.expectedState = 'on';\n        led.min = 90;\n        led.max = 200;\n        correctiveAutomation = activeProfile === 'evening' ? 'automation.lighting_exterior_front_garage_on_sunset' : 'automation.early_morning_lights_03_30';\n        break;\n    case 'night':\n        front.expectedState = 'off';\n        garage.expectedState = 'off';\n        led.expectedState = 'on';\n        led.min = 1;\n        led.max = 110;\n        correctiveAutomation = 'automation.lighting_night_mode_at_midnight';\n        break;\n    case 'morning_off':\n        if (huskerShowActive) {\n            correctiveAutomation = '';\n        } else {\n            front.expectedState = 'off';\n            garage.expectedState = 'off';\n            led.expectedState = 'off';\n            correctiveAutomation = 'automation.lighting_morning_lights_off_sunrise';\n        }\n        break;\n    default:\n        correctiveAutomation = '';\n}\nconst getBrightness = (entityId) => Number(states[entityId]?.attributes?.brightness ?? 0);\nconst evaluateNeeds = (target) => {\n    if (!target.expectedState) {\n        return false;\n    }\n    const state = getState(target.entity);\n    if (target.expectedState === 'on') {\n        if (state !== 'on') {\n            return true;\n        }\n        const brightness = getBrightness(target.entity);\n        return brightness < target.min || brightness > target.max;\n    }\n    if (target.expectedState === 'off') {\n        return state !== 'off';\n    }\n    return false;\n};\nconst needsFront = evaluateNeeds(front);\nconst needsGarage = evaluateNeeds(garage);\nconst needsLed = evaluateNeeds(led);\nconst correctionNeeded = Boolean(correctiveAutomation) && (needsFront || needsGarage || needsLed);\nmsg.missed = missed;\nmsg.active_profile = activeProfile;\nmsg.correction_needed = correctionNeeded;\nmsg.correction_automation = correctiveAutomation;\nmsg.correction_message = correctionNeeded ? `Realigned exterior lights for profile ${activeProfile} by re-triggering ${correctiveAutomation}.` : '';\nif (missed.length) {\n    node.status({ fill: 'yellow', shape: 'dot', text: `${activeProfile} retrigger x${missed.length}` });\n} else if (correctionNeeded) {\n    node.status({ fill: 'blue', shape: 'dot', text: `${activeProfile} correction` });\n} else {\n    node.status({ fill: 'green', shape: 'dot', text: activeProfile || 'idle' });\n}\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1080,
+    "y": 180,
+    "wires": [
+      [
+        "5ba425bc38399874",
+        "40ad6f3ebef13967"
+      ]
+    ]
+  },
+  {
+    "id": "5ba425bc38399874",
+    "type": "split",
+    "z": "7be417f0d3f1e35e",
+    "name": "Each missed automation",
+    "splt": "\\n",
+    "spltType": "str",
+    "arraySplt": "1",
+    "arraySpltType": "len",
+    "stream": false,
+    "addname": "",
+    "property": "missed",
+    "x": 1340,
+    "y": 140,
+    "wires": [
+      [
+        "60abc7248edf3df1"
+      ]
+    ]
+  },
+  {
+    "id": "60abc7248edf3df1",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Trigger automation",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "automation.trigger",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{payload.entity_id}}"
+    ],
+    "labelId": [],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "automation",
+    "service": "trigger",
+    "x": 1570,
+    "y": 120,
+    "wires": [
+      [
+        "4ec9676bf7ded5e6"
+      ]
+    ]
+  },
+  {
+    "id": "4ec9676bf7ded5e6",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Log fail-safe retrigger",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "data": "{\"entity_id\":\"automation.exterior_lights_fail_safe_validator\",\"name\":\"Exterior Lighting Fail-safe\",\"message\":\"{{payload.log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1840,
+    "y": 120,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "40ad6f3ebef13967",
+    "type": "switch",
+    "z": "7be417f0d3f1e35e",
+    "name": "Needs correction?",
+    "property": "correction_needed",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 1340,
+    "y": 220,
+    "wires": [
+      [
+        "bb562dbc062af12c"
+      ]
+    ]
+  },
+  {
+    "id": "bb562dbc062af12c",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Trigger corrective automation",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "automation.trigger",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{correction_automation}}"
+    ],
+    "labelId": [],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "automation",
+    "service": "trigger",
+    "x": 1580,
+    "y": 220,
+    "wires": [
+      [
+        "cea2bda39821bb81"
+      ]
+    ]
+  },
+  {
+    "id": "cea2bda39821bb81",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Log correction",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "data": "{\"entity_id\":\"automation.exterior_lights_fail_safe_validator\",\"name\":\"Exterior Lighting Fail-safe\",\"message\":\"{{correction_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 1840,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "3c7410649b96e3f9",
+    "type": "server-events",
+    "z": "7be417f0d3f1e35e",
+    "name": "homeassistant_start",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "exposeAsEntityConfig": "",
+    "eventType": "homeassistant_start",
+    "waitForRunning": false,
+    "x": 180,
+    "y": 420,
+    "wires": [
+      [
+        "1f42054fc0556624"
+      ]
+    ]
+  },
+  {
+    "id": "de75e02cdb645c31",
+    "type": "inject",
+    "z": "7be417f0d3f1e35e",
+    "name": "Daily effect check",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "1 0 * * *",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 170,
+    "y": 360,
+    "wires": [
+      [
+        "1f42054fc0556624"
+      ]
+    ]
+  },
+  {
+    "id": "d9b60981b1026301",
+    "type": "server-state-changed",
+    "z": "7be417f0d3f1e35e",
+    "name": "LEDs became available?",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "light.permanent_outdoor_lights"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": false,
+    "ignoreCurrentStateUnavailable": false,
+    "outputProperties": [],
+    "x": 200,
+    "y": 480,
+    "wires": [
+      [
+        "f321c9f09264e4cd"
+      ]
+    ]
+  },
+  {
+    "id": "f321c9f09264e4cd",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "Gate on availability",
+    "func": "const data = msg.data || {};\nconst unavailable = ['unknown','unavailable',null,''];\nconst oldState = (data.old_state?.state || '').toLowerCase();\nconst newState = (data.new_state?.state || '').toLowerCase();\nif (!unavailable.includes(oldState) || unavailable.includes(newState)) {\n    return null;\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 460,
+    "y": 480,
+    "wires": [
+      [
+        "1f42054fc0556624"
+      ]
+    ]
+  },
+  {
+    "id": "1f42054fc0556624",
+    "type": "api-current-state",
+    "z": "7be417f0d3f1e35e",
+    "name": "Holiday mode off? (LED)",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "on",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.holiday_mode_active",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "holiday_entity",
+    "override_data": "msg",
+    "x": 760,
+    "y": 420,
+    "wires": [
+      [
+        "8b943b66e319644e"
+      ]
+    ]
+  },
+  {
+    "id": "8b943b66e319644e",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "Build LED job",
+    "func": "const now = new Date();\nconst month = now.getMonth() + 1;\nconst configs = {\n    1: { scene: 'scene.lighting_exterior_led_effect_january', effect: 'LED-January' },\n    2: { scene: 'scene.lighting_exterior_led_effect_february', effect: 'LED-February' },\n    3: { scene: 'scene.lighting_exterior_led_effect_march', effect: 'LED-March' },\n    4: { scene: 'scene.lighting_exterior_led_effect_april', effect: 'LED-April' },\n    5: { scene: 'scene.lighting_exterior_led_effect_patriotic', effect: 'BSMT-Patriotic' },\n    6: { scene: 'scene.lighting_exterior_led_effect_patriotic', effect: 'BSMT-Patriotic' },\n    7: { scene: 'scene.lighting_exterior_led_effect_patriotic', effect: 'BSMT-Patriotic' },\n    8: { scene: 'scene.lighting_exterior_led_effect_august', effect: 'LED-August' },\n    9: { scene: 'scene.lighting_exterior_led_effect_august', effect: 'LED-August' },\n    10:{ scene: 'scene.lighting_exterior_led_effect_halloween', effect: 'Halloween' },\n    11:{ scene: 'scene.lighting_exterior_led_effect_thanksgiving', effect: 'LED-Thanksgiving' },\n    12:{ scene: 'scene.lighting_exterior_led_effect_christmas', effect: 'Christmas' }\n};\nconst config = configs[month] || {};\nif (!config.effect) {\n    node.status({ fill: 'grey', shape: 'ring', text: 'no monthly effect' });\n    return null;\n}\nmsg.light_entity = 'light.permanent_outdoor_lights';\nmsg.target_scene = config.scene || '';\nmsg.target_effect = config.effect;\nmsg.current_month = month;\nmsg.max_attempts = 6;\nmsg.attempt = 0;\nmsg.retry_reason = '';\nnode.status({ fill: 'blue', shape: 'ring', text: `target ${config.effect}` });\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1050,
+    "y": 420,
+    "wires": [
+      [
+        "7e4d53bb454cd827"
+      ]
+    ]
+  },
+  {
+    "id": "7e4d53bb454cd827",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "LED readiness",
+    "func": "const ha = global.get('homeassistant');\nif (!ha || !ha.homeAssistant || !ha.homeAssistant.states) {\n    node.status({ fill: 'red', shape: 'ring', text: 'HA context unavailable' });\n    return null;\n}\nconst states = ha.homeAssistant.states;\nconst unavailable = ['unknown','unavailable','none',''];\nconst light = states[msg.light_entity];\nconst state = (light?.state || '').toLowerCase();\nconst effectList = Array.isArray(light?.attributes?.effect_list) ? light.attributes.effect_list : [];\nmsg.current_effect = light?.attributes?.effect || '';\nconst available = !!light && !unavailable.includes(state);\nconst hasEffect = available && effectList.includes(msg.target_effect);\nconst attempt = msg.attempt || 0;\nif (!available || !hasEffect) {\n    if (attempt >= (msg.max_attempts || 6)) {\n        msg.fail_message = `Skipped ${msg.target_effect} for month ${msg.current_month} -- ${available ? 'effect missing' : 'light unavailable'}.`;\n        node.status({ fill: 'red', shape: 'ring', text: 'LED unavailable' });\n        return [null, null, msg];\n    }\n    msg.attempt = attempt + 1;\n    msg.retry_reason = available ? 'effect missing' : 'light offline';\n    msg.needs_update = available;\n    node.status({ fill: 'yellow', shape: 'ring', text: msg.retry_reason });\n    return [null, msg, null];\n}\nmsg.needs_update = false;\nreturn [msg, null, null];",
+    "outputs": 3,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1310,
+    "y": 420,
+    "wires": [
+      [
+        "d13a96a112c636d1"
+      ],
+      [
+        "751c40f1462ec196"
+      ],
+      [
+        "1659c7f36930922d"
+      ]
+    ]
+  },
+  {
+    "id": "d13a96a112c636d1",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "Need to apply?",
+    "func": "const current = (msg.current_effect || '').toString();\nif (current === msg.target_effect) {\n    msg.apply_needed = false;\n    msg.log_message = `Applied ${msg.target_effect} for month ${msg.current_month} (scene ${msg.target_scene || 'not used'})`;\n    node.status({ fill: 'green', shape: 'dot', text: 'effect confirmed' });\n} else {\n    msg.apply_needed = true;\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1550,
+    "y": 360,
+    "wires": [
+      [
+        "a7be6f997e173741"
+      ]
+    ]
+  },
+  {
+    "id": "a7be6f997e173741",
+    "type": "switch",
+    "z": "7be417f0d3f1e35e",
+    "name": "Apply effect?",
+    "property": "apply_needed",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 1770,
+    "y": 360,
+    "wires": [
+      [
+        "90f6dfd4de62b1ae"
+      ],
+      [
+        "8a082661d7873ce4"
+      ]
+    ]
+  },
+  {
+    "id": "90f6dfd4de62b1ae",
+    "type": "switch",
+    "z": "7be417f0d3f1e35e",
+    "name": "Scene required?",
+    "property": "target_scene",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "neq",
+        "v": "",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 1990,
+    "y": 320,
+    "wires": [
+      [
+        "a9076575d7c495fd"
+      ]
+    ]
+  },
+  {
+    "id": "a9076575d7c495fd",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Apply LED scene",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "scene.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{target_scene}}"
+    ],
+    "labelId": [],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "scene",
+    "service": "turn_on",
+    "x": 2200,
+    "y": 320,
+    "wires": [
+      [
+        "3a777b14cc20af7b"
+      ]
+    ]
+  },
+  {
+    "id": "3a777b14cc20af7b",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Apply LED effect",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "light.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{light_entity}}"
+    ],
+    "labelId": [],
+    "data": "{\"effect\":\"{{target_effect}}\",\"transition\":2}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "light",
+    "service": "turn_on",
+    "x": 2440,
+    "y": 360,
+    "wires": [
+      [
+        "174c2239c6d01232"
+      ]
+    ]
+  },
+  {
+    "id": "174c2239c6d01232",
+    "type": "delay",
+    "z": "7be417f0d3f1e35e",
+    "name": "Verify after 5s",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "0",
+    "randomLast": "0",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 2690,
+    "y": 360,
+    "wires": [
+      [
+        "81ea520c097478fe"
+      ]
+    ]
+  },
+  {
+    "id": "81ea520c097478fe",
+    "type": "api-current-state",
+    "z": "7be417f0d3f1e35e",
+    "name": "Read LED effect",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "{{light_entity}}",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "light_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      },
+      {
+        "property": "light_effect",
+        "propertyType": "msg",
+        "value": "data.attributes.effect",
+        "valueType": "jsonata"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "led_entity_state",
+    "override_data": "msg",
+    "x": 2940,
+    "y": 360,
+    "wires": [
+      [
+        "31ccadd4f0ced727"
+      ]
+    ]
+  },
+  {
+    "id": "31ccadd4f0ced727",
+    "type": "function",
+    "z": "7be417f0d3f1e35e",
+    "name": "Validate LED result",
+    "func": "const effect = (msg.light_effect || '').toString();\nif (effect === msg.target_effect) {\n    msg.log_message = `Applied ${msg.target_effect} for month ${msg.current_month} (scene ${msg.target_scene || 'not used'})`;\n    node.status({ fill: 'green', shape: 'dot', text: 'effect confirmed' });\n    return [msg, null, null];\n}\nmsg.retry_reason = 'not confirmed';\nmsg.needs_update = true;\nmsg.fail_message = `Skipped ${msg.target_effect} for month ${msg.current_month} -- effect never confirmed after retries`;\nconst attempt = msg.attempt || 0;\nif (attempt >= (msg.max_attempts || 6)) {\n    node.status({ fill: 'red', shape: 'ring', text: 'effect failed' });\n    return [null, null, msg];\n}\nmsg.attempt = attempt + 1;\nnode.status({ fill: 'yellow', shape: 'ring', text: 'retrying' });\nreturn [null, msg, null];",
+    "outputs": 3,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3200,
+    "y": 360,
+    "wires": [
+      [
+        "8a082661d7873ce4"
+      ],
+      [
+        "751c40f1462ec196"
+      ],
+      [
+        "1659c7f36930922d"
+      ]
+    ]
+  },
+  {
+    "id": "751c40f1462ec196",
+    "type": "switch",
+    "z": "7be417f0d3f1e35e",
+    "name": "Need refresh?",
+    "property": "needs_update",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 1700,
+    "y": 520,
+    "wires": [
+      [
+        "51561a4a4ac867e7"
+      ],
+      [
+        "cab62d7979ddd75c"
+      ]
+    ]
+  },
+  {
+    "id": "51561a4a4ac867e7",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Refresh LED state",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "homeassistant.update_entity",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{light_entity}}"
+    ],
+    "labelId": [],
+    "data": "{}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "homeassistant",
+    "service": "update_entity",
+    "x": 1940,
+    "y": 500,
+    "wires": [
+      [
+        "cab62d7979ddd75c"
+      ]
+    ]
+  },
+  {
+    "id": "cab62d7979ddd75c",
+    "type": "delay",
+    "z": "7be417f0d3f1e35e",
+    "name": "Retry in 10s",
+    "pauseType": "delay",
+    "timeout": "10",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "0",
+    "randomLast": "0",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 2170,
+    "y": 540,
+    "wires": [
+      [
+        "7e4d53bb454cd827"
+      ]
+    ]
+  },
+  {
+    "id": "8a082661d7873ce4",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Log LED success",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "data": "{\"entity_id\":\"automation.exterior_led_monthly_effect\",\"name\":\"LED Monthly Effect\",\"message\":\"{{log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 2050,
+    "y": 260,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "1659c7f36930922d",
+    "type": "api-call-service",
+    "z": "7be417f0d3f1e35e",
+    "name": "Log LED failure",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "data": "{\"entity_id\":\"automation.exterior_led_monthly_effect\",\"name\":\"LED Monthly Effect\",\"message\":\"{{fail_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 3470,
+    "y": 460,
+    "wires": [
+      []
+    ]
+  }
+]

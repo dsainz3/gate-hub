@@ -21,6 +21,7 @@ nav:
   - Reference:
       - Documentation Style Guide: reference/documentation-style-guide.md
       - Automation Catalog: reference/automations.md
+      - Node-RED Lighting Reference: reference/node-red-lighting.md
       - Holiday Mode Reference: reference/holidays.md
       - Basement Theater Media Package: reference/theater-media.md
       - Agenda Planner Reference: reference/agenda-planner.md

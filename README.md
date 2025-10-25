@@ -56,6 +56,7 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 - **Scattered toggles → unified operations console:** `dashboards/automations.dashboard.yaml` exposes every automation, last-triggered timestamp, and scene button behind an admin-only Automations sidebar entry, keeping reloads and manual triggers in one place.
 - **Scripts on disk → portable tooling:** Inline fixes gave way to reusable helpers such as `scripts/ha_check_portable.py`, with the broader roadmap laid out in `docs/explanation/optimization-plan.md`.
 - **Live spoilers → buffered scoreboard:** The Football Team package now copies TeamTracker scores, quarter, and clock into manual helpers with a 30-second parallel delay queue so ESPN clock ticks stop cancelling the spoiler hold for streaming viewers. See the updated guide in `docs/how-to/football-team/dashboard.md`.
+- **YAML triggers → Node-RED lighting mesh:** Cloud, utility, safety, and seasonal lighting routines now run inside Node-RED. The `noderd.js` export is versioned alongside this repo, and the [Node-RED Lighting Reference](docs/reference/node-red-lighting.md) explains how each tab maps back to dashboards and helpers.
 - **Guesswork → disciplined workflows:** The pipeline in `.github/workflows/ci.yml`, paired with the pre-commit strategy in `docs/explanation/pre-commit-strategy.md`, keeps every change reviewable.
 - **Personal notes → Divio-style documentation:** `docs/index.md` curates how-to guides, references, explanations, and archives so future contributors can find the right depth quickly.
 - **Aspirations → measurable backlog:** `TODO.md` and the optimisation plan anchor next steps, from recorder tuning to system monitoring.
@@ -89,6 +90,7 @@ Gate Hub is my learning lab for becoming a hypermodern development engineer. Wha
 .
 ├─ configuration.yaml          # entry point wiring includes and packages
 ├─ automations.yaml            # base automations outside feature packages
+├─ noderd*.js / noderd*.json   # Node-RED exports for lighting, safety, and show flows
 ├─ templates.yaml              # template sensors & helpers (refactor in flight)
 ├─ packages/                   # feature bundles: football team, agenda, networking…
 ├─ dashboards/                 # YAML Lovelace dashboards and kiosk views
@@ -175,7 +177,7 @@ Use these documents as the study material for sharpening system design, tooling,
 - **Local setup:** `poetry env use 3.11`, `poetry install`, and `pre-commit install` provision the tooling stack. Pip-based installs remain an option if Poetry is unavailable.
 - **Validation loop:** Run `pre-commit run --all-files`, `ha core check`, `python scripts/ha_check_portable.py`, and `pytest` before pushing to guarantee clean builds.
 - **Secrets hygiene:** `.ci/fakesecrets.yaml` supplies CI with stub credentials; real values stay in `secrets.yaml` on the Home Assistant host.
-- **Node-RED flows:** Import `noderd.js` into the Node-RED editor (tab **Lighting Sun Automations**) whenever the sun-based lighting routines change so the Supervisor add-on mirrors the YAML definitions.
+- **Node-RED flows:** `noderd.js` is the canonical export for lighting, safety, and seasonal shows. Import it into Node-RED after edits and refresh [docs/reference/node-red-lighting.md](docs/reference/node-red-lighting.md) so reviewers can trace the flow logic without exporting from the UI.
 - **Entity exploration:** `poetry run python scripts/export_entities.py --token-file ~/.ha_token` exports an entity index to `docs/entities.md` without leaking runtime state.
 
 ---

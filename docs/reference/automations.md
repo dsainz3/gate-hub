@@ -14,6 +14,9 @@ tags:
 
 Use this catalog as the single source of truth for automation behaviour. Each entry references its source file so code owners can jump straight to definitions. When adding or modifying automations, update this page in the same pull request.
 
+!!! note "Node-RED migration"
+    Lighting, LED, safety, and seasonal routines now execute inside Node-RED. The export tracked as `noderd.js` (plus `noderd.sun.js`/`noderd.cloudy.js` variants) is reviewed alongside this catalog, and the [Node-RED Lighting Reference](node-red-lighting.md) documents every tab. YAML definitions remain in place for clarity, but treat the Node-RED flows as the authoritative runtime.
+
 ## Operations Console (`dashboards/automations.dashboard.yaml`)
 
 Administrators can manage every automation and scene from the Automations dashboard in the sidebar (title **Automations**, `require_admin: true`). The landing view provides:
@@ -25,7 +28,9 @@ Administrators can manage every automation and scene from the Automations dashbo
 
 The second view, **Scenes**, exposes single-button access to every defined scene (Football Team snapshots, F1 cues, daypart lighting, LED holiday effects, climate and safety presets). Each button calls `scene.turn_on`, so no extra helpers are required. Update this documentation and the dashboard together if you add or rename automations or scenes.
 
-## Lighting, LED, Safety & Climate (`automations.yaml`)
+## Lighting, LED, Safety & Climate (`automations.yaml` · `noderd.js`)
+
+The flows powering these automations now live in the Node-RED tabs **Cloudy Daytime Exterior**, **Lighting Utility Automations**, **Safety & Maintenance**, and **Lighting Sun Automations**. Update both the YAML fallback and `noderd.js` export when making changes, and keep the [Node-RED Lighting Reference](node-red-lighting.md) aligned so reviewers see the latest tab descriptions.
 
 ### Lighting: Evening Lights at Sunset (`automations.yaml:3`)
 - **ID** `evening_lights_at_sunset`

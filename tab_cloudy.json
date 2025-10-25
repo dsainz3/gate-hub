@@ -1,0 +1,1142 @@
+[
+  {
+    "id": "11a823e296424e8e",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Build clearing failure log",
+    "func": "const nameLower = (msg.light_name || '').toLowerCase();\nmsg.log_message = `Failed to turn off ${nameLower} lights as skies cleared (${msg.coverage_percent}% coverage).`;\nmsg.notification_message = `${msg.light_name} lights did not turn off after skies cleared (${msg.coverage_percent}% coverage).`;\nmsg.log_entity = \"automation.exterior_lights_cloudy_daytime\";\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3440,
+    "y": 620,
+    "wires": [
+      [
+        "047a9fb8683d92fa",
+        "91ea685b010e77d9"
+      ]
+    ]
+  },
+  {
+    "id": "5f09aedcf5d8eb44",
+    "type": "delay",
+    "z": "df0c3d394881af2d",
+    "name": "Delay before dismiss check (cloudy)",
+    "pauseType": "delay",
+    "timeout": "7",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 1460,
+    "y": 540,
+    "wires": [
+      [
+        "ccfdd996464906d8"
+      ]
+    ]
+  },
+  {
+    "id": "b45ba272a40d81e4",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Clearing validation result",
+    "func": "const state = (msg.light_state || '').toLowerCase();\nmsg.validation_success = state === 'off';\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3040,
+    "y": 580,
+    "wires": [
+      [
+        "8f5c0734c32f31ca"
+      ]
+    ]
+  },
+  {
+    "id": "91ea685b010e77d9",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Notify clearing failure",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "persistent_notification.create",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"title\":\"Cloudy Daytime Exterior validation failed\",\"message\":\"{{notification_message}}\",\"notification_id\":\"cloudy_daytime_exterior_validation\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "persistent_notification",
+    "service": "create",
+    "x": 3680,
+    "y": 660,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "cd26dbbbcbced890",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Build clearing success log",
+    "func": "const name = (msg.light_name || '').toLowerCase();\nmsg.log_message = `Turned off ${name} lights as skies cleared (${msg.coverage_percent}% coverage).`;\nmsg.log_entity = \"automation.exterior_lights_cloudy_daytime\";\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3440,
+    "y": 540,
+    "wires": [
+      [
+        "25151af0b5baa61a"
+      ]
+    ]
+  },
+  {
+    "id": "d84bc62b57f564c5",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Logbook cloudy failure",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"{{log_entity}}\",\"name\":\"Cloudy Daytime Exterior\",\"message\":\"{{log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 3640,
+    "y": 440,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "cf9987f1000820ae",
+    "type": "switch",
+    "z": "df0c3d394881af2d",
+    "name": "Turn off?",
+    "property": "needs_off",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 2260,
+    "y": 600,
+    "wires": [
+      [
+        "a51f5a6c236d4537"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "5aac48f59336d924",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Cloud coverage state",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "sensor.openweathermap_cloud_coverage",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "cloud_raw",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "cloud_entity",
+    "override_data": "msg",
+    "x": 400,
+    "y": 540,
+    "wires": [
+      [
+        "4763a61c2dd35328"
+      ]
+    ]
+  },
+  {
+    "id": "cf260a9227d1a947",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Build cloudy success log",
+    "func": "const name = (msg.light_name || '').toLowerCase();\nmsg.log_message = `Brought ${name} lights to cloudy daytime level (${msg.coverage_percent}% coverage).`;\nmsg.log_entity = \"automation.exterior_lights_cloudy_daytime\";\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3420,
+    "y": 380,
+    "wires": [
+      [
+        "f414c29bf1edfa87"
+      ]
+    ]
+  },
+  {
+    "id": "bfa940d9a05080eb",
+    "type": "delay",
+    "z": "df0c3d394881af2d",
+    "name": "Wait for off",
+    "pauseType": "delay",
+    "timeout": "2",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 2640,
+    "y": 580,
+    "wires": [
+      [
+        "88b00345bfbdcccf"
+      ]
+    ]
+  },
+  {
+    "id": "0b8dcf83280311fa",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Current light state",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "{{light_entity}}",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "light_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      },
+      {
+        "property": "light_brightness",
+        "propertyType": "msg",
+        "value": "data.attributes.brightness",
+        "valueType": "jsonata"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "light_entity_state",
+    "override_data": "msg",
+    "x": 1840,
+    "y": 440,
+    "wires": [
+      [
+        "f59d0c705aa67dc3"
+      ]
+    ]
+  },
+  {
+    "id": "4055f67ad27f29dc",
+    "type": "delay",
+    "z": "df0c3d394881af2d",
+    "name": "Wait for brightness",
+    "pauseType": "delay",
+    "timeout": "2",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 2660,
+    "y": 420,
+    "wires": [
+      [
+        "80e9fafc2834968b"
+      ]
+    ]
+  },
+  {
+    "id": "f71924e5db70dcb7",
+    "type": "delay",
+    "z": "df0c3d394881af2d",
+    "name": "Delay before dismiss check (clearing)",
+    "pauseType": "delay",
+    "timeout": "7",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "1",
+    "randomUnits": "seconds",
+    "drop": false,
+    "outputs": 1,
+    "x": 1460,
+    "y": 700,
+    "wires": [
+      [
+        "70d97049ecbc2160"
+      ]
+    ]
+  },
+  {
+    "id": "8f5c0734c32f31ca",
+    "type": "switch",
+    "z": "df0c3d394881af2d",
+    "name": "Off success?",
+    "property": "validation_success",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 3220,
+    "y": 580,
+    "wires": [
+      [
+        "cd26dbbbcbced890"
+      ],
+      [
+        "11a823e296424e8e"
+      ]
+    ]
+  },
+  {
+    "id": "b7b0b289285511cd",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Lighting hold active?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "binary_sensor.huskers_lighting_hold",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "hold_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "hold_entity",
+    "override_data": "msg",
+    "x": 840,
+    "y": 540,
+    "wires": [
+      [
+        "6fca05f9596bbab0"
+      ]
+    ]
+  },
+  {
+    "id": "6f20b1ad572b2086",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Bring light to cloudy level",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "light.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{light_entity}}"
+    ],
+    "labelId": [],
+    "data": "{\"brightness_pct\": {{light_target_pct}}, \"transition\": 2}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "light",
+    "service": "turn_on",
+    "x": 2480,
+    "y": 420,
+    "wires": [
+      [
+        "4055f67ad27f29dc"
+      ]
+    ]
+  },
+  {
+    "id": "3eadaa86b1977b18",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Set light context",
+    "func": "const candidate = (msg.payload && typeof msg.payload === 'object') ? msg.payload : msg.tracked_lights;\nconst light = (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) ? candidate : msg.light;\nif (!light || !light.entity_id) {\n    node.status({ fill: 'red', shape: 'ring', text: 'missing light context' });\n    return null;\n}\nconst targetPct = light.target_pct ?? msg.cloud.targetPct;\nconst tolerance = light.tolerance ?? msg.cloud.tolerance;\nconst target = Math.round(255 * targetPct / 100);\nconst low = Math.max(target - tolerance, 1);\nconst high = Math.min(target + tolerance, 255);\nmsg.light = light;\nmsg.light_entity = light.entity_id;\nmsg.light_name = light.name || light.entity_id;\nmsg.light_target_pct = targetPct;\nmsg.light_tolerance = tolerance;\nmsg.light_target = target;\nmsg.light_low = low;\nmsg.light_high = high;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1640,
+    "y": 440,
+    "wires": [
+      [
+        "0b8dcf83280311fa"
+      ]
+    ]
+  },
+  {
+    "id": "cf95e679c43a28f3",
+    "type": "split",
+    "z": "df0c3d394881af2d",
+    "name": "Each tracked light (cloudy)",
+    "splt": "\\n",
+    "spltType": "str",
+    "arraySplt": "1",
+    "arraySpltType": "len",
+    "stream": false,
+    "addname": "",
+    "property": "tracked_lights",
+    "x": 1440,
+    "y": 480,
+    "wires": [
+      [
+        "3eadaa86b1977b18"
+      ]
+    ]
+  },
+  {
+    "id": "70d97049ecbc2160",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Dismiss notification when cleared",
+    "func": "const ha = global.get('homeassistant');\nif (!ha || !ha.homeAssistant || !ha.homeAssistant.states) {\n    return null;\n}\nconst states = ha.homeAssistant.states;\nconst lights = Array.isArray(msg.tracked_lights) ? msg.tracked_lights : [];\nif (!lights.length) {\n    return null;\n}\nconst allOff = lights.every(light => {\n    const entity = states[light.entity_id];\n    return entity && (entity.state || '').toLowerCase() === 'off';\n});\nif (!allOff) {\n    return null;\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1700,
+    "y": 700,
+    "wires": [
+      [
+        "9a4c1229f61cdbb6"
+      ]
+    ]
+  },
+  {
+    "id": "17389496f227a610",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Notify cloudy failure",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "persistent_notification.create",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"title\":\"Cloudy Daytime Exterior validation failed\",\"message\":\"{{notification_message}}\",\"notification_id\":\"cloudy_daytime_exterior_validation\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "persistent_notification",
+    "service": "create",
+    "x": 3660,
+    "y": 500,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "25151af0b5baa61a",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Logbook clearing success",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"{{log_entity}}\",\"name\":\"Cloudy Daytime Exterior\",\"message\":\"{{log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 3660,
+    "y": 540,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "6fca05f9596bbab0",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Compute cloud logic",
+    "func": "const unavailable = ['unknown', 'unavailable', 'none', null, '', 'None'];\nconst raw = msg.cloud_raw;\nconst available = unavailable.indexOf(raw) === -1;\nif (!available) {\n    node.status({ fill: 'grey', shape: 'ring', text: 'coverage unavailable' });\n    return null;\n}\nconst coverage = Number(raw);\nif (Number.isNaN(coverage)) {\n    node.status({ fill: 'grey', shape: 'ring', text: 'coverage invalid' });\n    return null;\n}\nif (msg.sun_state !== 'above_horizon') {\n    node.status({ fill: 'grey', shape: 'ring', text: 'sun below horizon' });\n    return null;\n}\nif ((msg.hold_state || '').toLowerCase() === 'on') {\n    node.status({ fill: 'yellow', shape: 'ring', text: 'lighting hold active' });\n    return null;\n}\nconst defaultTargetPct = 30;\nconst defaultTolerance = 26;\nconst defaultTarget = Math.round(255 * defaultTargetPct / 100);\nconst defaultLow = Math.max(defaultTarget - defaultTolerance, 1);\nconst defaultHigh = Math.min(defaultTarget + defaultTolerance, 255);\nconst shouldBeOn = coverage >= 60;\nmsg.cloud = {\n    raw,\n    available,\n    coverage,\n    targetPct: defaultTargetPct,\n    target: defaultTarget,\n    tolerance: defaultTolerance,\n    low: defaultLow,\n    high: defaultHigh,\n    shouldBeOn\n};\nmsg.should_be_on = shouldBeOn;\nmsg.coverage_percent = Math.round(coverage);\nmsg.tracked_lights = [\n    { name: 'Front porch', entity_id: 'light.front_porch_lights', target_pct: 30, tolerance: defaultTolerance },\n    { name: 'Garage', entity_id: 'light.garage_lights', target_pct: 30, tolerance: defaultTolerance },\n    { name: 'Permanent LEDs', entity_id: 'light.permanent_outdoor_lights', target_pct: 50, tolerance: defaultTolerance },\n    { name: 'Mainfloor', entity_id: 'light.mainfloor_lights', target_pct: 65, tolerance: defaultTolerance }\n];\nmsg.validation_timeout_ms = 15000;\nnode.status({\n    fill: shouldBeOn ? 'blue' : 'green',\n    shape: 'dot',\n    text: shouldBeOn ? `cloudy ${msg.coverage_percent}%` : `clearing ${msg.coverage_percent}%`\n});\nreturn msg;",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1040,
+    "y": 540,
+    "wires": [
+      [
+        "6bc1c48be64c1448"
+      ]
+    ]
+  },
+  {
+    "id": "5637e0f4b9ff0d57",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Needs to turn off?",
+    "func": "const state = (msg.light_state || '').toLowerCase();\nmsg.needs_off = state !== 'off';\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2060,
+    "y": 600,
+    "wires": [
+      [
+        "cf9987f1000820ae"
+      ]
+    ]
+  },
+  {
+    "id": "9a4c1229f61cdbb6",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Dismiss cloudy notification",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "persistent_notification.dismiss",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"notification_id\":\"cloudy_daytime_exterior_validation\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "persistent_notification",
+    "service": "dismiss",
+    "x": 2020,
+    "y": 660,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "4763a61c2dd35328",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Sun above horizon?",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "sun.sun",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "sun_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "sun_entity",
+    "override_data": "msg",
+    "x": 620,
+    "y": 540,
+    "wires": [
+      [
+        "b7b0b289285511cd"
+      ]
+    ]
+  },
+  {
+    "id": "8c316ab2da39b6f5",
+    "type": "server-state-changed",
+    "z": "df0c3d394881af2d",
+    "name": "Cloud coverage change",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "exposeAsEntityConfig": "",
+    "entities": {
+      "entity": [
+        "sensor.openweathermap_cloud_coverage"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "ifState": "",
+    "ifStateType": "str",
+    "ifStateOperator": "is",
+    "outputOnlyOnStateChange": true,
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [],
+    "x": 160,
+    "y": 520,
+    "wires": [
+      [
+        "5aac48f59336d924"
+      ]
+    ]
+  },
+  {
+    "id": "94336d1c019a1cdf",
+    "type": "switch",
+    "z": "df0c3d394881af2d",
+    "name": "Success?",
+    "property": "validation_success",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 3220,
+    "y": 420,
+    "wires": [
+      [
+        "cf260a9227d1a947"
+      ],
+      [
+        "a4b1adc86424be19"
+      ]
+    ]
+  },
+  {
+    "id": "52d159c6469ea721",
+    "type": "inject",
+    "z": "df0c3d394881af2d",
+    "name": "Periodic check",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "*/5 * * * *",
+    "once": true,
+    "onceDelay": 10,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 160,
+    "y": 620,
+    "wires": [
+      [
+        "5aac48f59336d924"
+      ]
+    ]
+  },
+  {
+    "id": "80e9fafc2834968b",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Validate cloudy brightness",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "{{light_entity}}",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "light_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      },
+      {
+        "property": "light_brightness",
+        "propertyType": "msg",
+        "value": "data.attributes.brightness",
+        "valueType": "jsonata"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "light_entity_state",
+    "override_data": "msg",
+    "x": 2860,
+    "y": 420,
+    "wires": [
+      [
+        "8d9c2a8c8683354b"
+      ]
+    ]
+  },
+  {
+    "id": "ccfdd996464906d8",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Dismiss notification when cloudy satisfied",
+    "func": "const ha = global.get('homeassistant');\nif (!ha || !ha.homeAssistant || !ha.homeAssistant.states) {\n    return null;\n}\nconst states = ha.homeAssistant.states;\nconst lights = Array.isArray(msg.tracked_lights) ? msg.tracked_lights : [];\nif (!lights.length) {\n    return null;\n}\nconst defaultTargetPct = msg.cloud?.targetPct ?? 30;\nconst defaultTolerance = msg.cloud?.tolerance ?? 26;\nconst allGood = lights.every(light => {\n    const entity = states[light.entity_id];\n    if (!entity) {\n        return false;\n    }\n    if ((entity.state || '').toLowerCase() !== 'on') {\n        return false;\n    }\n    const targetPct = light.target_pct ?? defaultTargetPct;\n    const tolerance = light.tolerance ?? defaultTolerance;\n    const target = Math.round(255 * targetPct / 100);\n    const low = Math.max(target - tolerance, 1);\n    const high = Math.min(target + tolerance, 255);\n    const brightness = Number(entity.attributes?.brightness ?? 0);\n    return !Number.isNaN(brightness) && brightness >= low && brightness <= high;\n});\nif (!allGood) {\n    return null;\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1700,
+    "y": 540,
+    "wires": [
+      [
+        "9a4c1229f61cdbb6"
+      ]
+    ]
+  },
+  {
+    "id": "f414c29bf1edfa87",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Logbook cloudy success",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"{{log_entity}}\",\"name\":\"Cloudy Daytime Exterior\",\"message\":\"{{log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 3640,
+    "y": 380,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "8d9c2a8c8683354b",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Cloudy validation result",
+    "func": "const brightness = Number(msg.light_brightness ?? 0);\nconst state = (msg.light_state || '').toLowerCase();\nconst low = msg.light_low;\nconst high = msg.light_high;\nmsg.validation_success = state === 'on' && brightness >= low && brightness <= high;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3040,
+    "y": 420,
+    "wires": [
+      [
+        "94336d1c019a1cdf"
+      ]
+    ]
+  },
+  {
+    "id": "a5eb619b209dfee7",
+    "type": "switch",
+    "z": "df0c3d394881af2d",
+    "name": "Adjust?",
+    "property": "needs_adjustment",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 2260,
+    "y": 440,
+    "wires": [
+      [
+        "6f20b1ad572b2086"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "a51f5a6c236d4537",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Turn light off",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "light.turn_off",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "{{light_entity}}"
+    ],
+    "labelId": [],
+    "data": "{\"transition\": 2}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "light",
+    "service": "turn_off",
+    "x": 2460,
+    "y": 580,
+    "wires": [
+      [
+        "bfa940d9a05080eb"
+      ]
+    ]
+  },
+  {
+    "id": "fad211476a7c48ac",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Set light context (clearing)",
+    "func": "const candidate = (msg.payload && typeof msg.payload === 'object') ? msg.payload : msg.tracked_lights;\nconst light = (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) ? candidate : msg.light;\nif (!light || !light.entity_id) {\n    node.status({ fill: 'red', shape: 'ring', text: 'missing light context' });\n    return null;\n}\nconst targetPct = light.target_pct ?? msg.cloud.targetPct;\nconst tolerance = light.tolerance ?? msg.cloud.tolerance;\nconst target = Math.round(255 * targetPct / 100);\nconst low = Math.max(target - tolerance, 1);\nconst high = Math.min(target + tolerance, 255);\nmsg.light = light;\nmsg.light_entity = light.entity_id;\nmsg.light_name = light.name || light.entity_id;\nmsg.light_target_pct = targetPct;\nmsg.light_tolerance = tolerance;\nmsg.light_target = target;\nmsg.light_low = low;\nmsg.light_high = high;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 1640,
+    "y": 600,
+    "wires": [
+      [
+        "54e51d9eb783823f"
+      ]
+    ]
+  },
+  {
+    "id": "54e51d9eb783823f",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Current light state (clearing)",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "{{light_entity}}",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "light_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "light_entity_state",
+    "override_data": "msg",
+    "x": 1840,
+    "y": 600,
+    "wires": [
+      [
+        "5637e0f4b9ff0d57"
+      ]
+    ]
+  },
+  {
+    "id": "770622dddb501bae",
+    "type": "split",
+    "z": "df0c3d394881af2d",
+    "name": "Each tracked light (clearing)",
+    "splt": "\\n",
+    "spltType": "str",
+    "arraySplt": "1",
+    "arraySpltType": "len",
+    "stream": false,
+    "addname": "",
+    "property": "tracked_lights",
+    "x": 1440,
+    "y": 640,
+    "wires": [
+      [
+        "fad211476a7c48ac"
+      ]
+    ]
+  },
+  {
+    "id": "88b00345bfbdcccf",
+    "type": "api-current-state",
+    "z": "df0c3d394881af2d",
+    "name": "Validate cleared light",
+    "server": "11e9f35b.61816d",
+    "version": 3,
+    "outputs": 1,
+    "halt_if": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "entity_id": "{{light_entity}}",
+    "state_type": "str",
+    "blockInputOverrides": false,
+    "outputProperties": [
+      {
+        "property": "light_state",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "entityState"
+      }
+    ],
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "override_topic": false,
+    "state_location": "payload",
+    "override_payload": "msg",
+    "entity_location": "light_entity_state",
+    "override_data": "msg",
+    "x": 2840,
+    "y": 580,
+    "wires": [
+      [
+        "b45ba272a40d81e4"
+      ]
+    ]
+  },
+  {
+    "id": "047a9fb8683d92fa",
+    "type": "api-call-service",
+    "z": "df0c3d394881af2d",
+    "name": "Logbook clearing failure",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "logbook.log",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [],
+    "labelId": [],
+    "data": "{\"entity_id\":\"{{log_entity}}\",\"name\":\"Cloudy Daytime Exterior\",\"message\":\"{{log_message}}\"}",
+    "dataType": "json",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "blockInputOverrides": false,
+    "domain": "logbook",
+    "service": "log",
+    "x": 3660,
+    "y": 600,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "f59d0c705aa67dc3",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Needs cloudy adjustment?",
+    "func": "const brightness = Number(msg.light_brightness ?? 0);\nconst state = (msg.light_state || '').toLowerCase();\nconst low = msg.light_low;\nconst high = msg.light_high;\nconst needs = state !== 'on' || brightness === 0 || brightness < low || brightness > high;\nmsg.needs_adjustment = needs;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 2060,
+    "y": 440,
+    "wires": [
+      [
+        "a5eb619b209dfee7"
+      ]
+    ]
+  },
+  {
+    "id": "6bc1c48be64c1448",
+    "type": "switch",
+    "z": "df0c3d394881af2d",
+    "name": "Should lights be on?",
+    "property": "should_be_on",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "true"
+      },
+      {
+        "t": "false"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 2,
+    "x": 1240,
+    "y": 540,
+    "wires": [
+      [
+        "cf95e679c43a28f3",
+        "5f09aedcf5d8eb44"
+      ],
+      [
+        "770622dddb501bae",
+        "f71924e5db70dcb7"
+      ]
+    ]
+  },
+  {
+    "id": "a4b1adc86424be19",
+    "type": "function",
+    "z": "df0c3d394881af2d",
+    "name": "Build cloudy failure log",
+    "func": "const nameLower = (msg.light_name || '').toLowerCase();\nmsg.log_message = `Failed to bring ${nameLower} lights to cloudy daytime level (${msg.coverage_percent}% coverage).`;\nmsg.notification_message = `${msg.light_name} lights did not reach the expected cloudy brightness (${msg.coverage_percent}% coverage).`;\nmsg.log_entity = \"automation.exterior_lights_cloudy_daytime\";\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 3420,
+    "y": 460,
+    "wires": [
+      [
+        "d84bc62b57f564c5",
+        "17389496f227a610"
+      ]
+    ]
+  }
+]
