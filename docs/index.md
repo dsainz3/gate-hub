@@ -17,6 +17,7 @@ Latest highlights:
 - Agenda Planner package + kiosk view enable event/task entry from HA tablets.
 - Support · Test Resources dashboard adds a Plex · Theater lab with direct Fire TV controls and the HA Media Browser.
 - Admin-only Automations dashboard now inventories every automation, last-triggered timestamp, and scene button, with a companion Scenes view for one-tap presets.
+- Lighting, safety, and PLighting routines now run through Node-RED; see the new [Node-RED Lighting Reference](reference/node-red-lighting.md) for tab-level wiring notes.
 
 
 - **Tutorials** – step-by-step project onboarding (coming soon; contribute via the docs style guide).
@@ -44,6 +45,7 @@ Use the sections below or the navigation in `mkdocs.yml` (once rendered) to brow
 
 ## Reference
 - [Automation Catalog](reference/automations.md)
+- [Node-RED Lighting Reference](reference/node-red-lighting.md)
 - [Holiday Mode Reference](reference/holidays.md)
 - [Basement Theater Media Package](reference/theater-media.md)
 - [Infrastructure Overview](reference/infrastructure.md)
