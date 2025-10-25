@@ -1,0 +1,179 @@
+[
+  {
+    "id": "sim_set_plus10",
+    "type": "inject",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "Simulate: sunset in +10 min (outside window \u2192 no change)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "x": 370,
+    "y": 180,
+    "wires": [
+      [
+        "sim_fn_set_override_plus10"
+      ]
+    ]
+  },
+  {
+    "id": "sim_fn_set_override_plus10",
+    "type": "function",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "global override = now + 10m",
+    "func": "const iso = new Date(Date.now() + 10*60000).toISOString();\nglobal.set('tlighting_test.sun_next_setting_override', iso);\nnode.status({fill:'blue',shape:'dot',text:'override \u2192 +10m'});\nreturn null;",
+    "outputs": 0,
+    "x": 720,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "sim_set_plus4",
+    "type": "inject",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "Simulate: sunset in +4 min (pre-window \u2192 prePct)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "x": 340,
+    "y": 220,
+    "wires": [
+      [
+        "sim_fn_set_override_plus4"
+      ]
+    ]
+  },
+  {
+    "id": "sim_fn_set_override_plus4",
+    "type": "function",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "global override = now + 4m",
+    "func": "const iso = new Date(Date.now() + 4*60000).toISOString();\nglobal.set('tlighting_test.sun_next_setting_override', iso);\nnode.status({fill:'green',shape:'dot',text:'override \u2192 +4m (pre)'});\nreturn null;",
+    "outputs": 0,
+    "x": 700,
+    "y": 220,
+    "wires": []
+  },
+  {
+    "id": "sim_set_now",
+    "type": "inject",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "Simulate: at sunset (\u2192 sunsetPct)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "x": 300,
+    "y": 260,
+    "wires": [
+      [
+        "sim_fn_set_override_now"
+      ]
+    ]
+  },
+  {
+    "id": "sim_fn_set_override_now",
+    "type": "function",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "global override = now",
+    "func": "const iso = new Date().toISOString();\nglobal.set('tlighting_test.sun_next_setting_override', iso);\nnode.status({fill:'yellow',shape:'dot',text:'override \u2192 now (sunset)'});\nreturn null;",
+    "outputs": 0,
+    "x": 650,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "sim_set_minus5",
+    "type": "inject",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "Simulate: 5 min after sunset (\u2192 sunsetPct)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "x": 330,
+    "y": 300,
+    "wires": [
+      [
+        "sim_fn_set_override_minus5"
+      ]
+    ]
+  },
+  {
+    "id": "sim_fn_set_override_minus5",
+    "type": "function",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "global override = now - 5m",
+    "func": "const iso = new Date(Date.now() - 5*60000).toISOString();\nglobal.set('tlighting_test.sun_next_setting_override', iso);\nnode.status({fill:'red',shape:'dot',text:'override \u2192 -5m (after)'});\nreturn null;",
+    "outputs": 0,
+    "x": 700,
+    "y": 300,
+    "wires": []
+  },
+  {
+    "id": "sim_clear_override",
+    "type": "inject",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "Clear override (use real sun.sun)",
+    "props": [],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0,
+    "topic": "",
+    "x": 300,
+    "y": 360,
+    "wires": [
+      [
+        "sim_fn_clear_override"
+      ]
+    ]
+  },
+  {
+    "id": "sim_fn_clear_override",
+    "type": "function",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "unset global override",
+    "func": "global.set('tlighting_test.sun_next_setting_override', null);\nnode.status({fill:'grey',shape:'ring',text:'override cleared'});\nreturn null;",
+    "outputs": 0,
+    "x": 620,
+    "y": 360,
+    "wires": []
+  },
+  {
+    "id": "af1f8b4e3f0aSIM1",
+    "type": "subflow:sub_tlighting_sun_brightness_test",
+    "z": "b6a2a23f1dc4SIM",
+    "name": "TLighting Sun Brightness (Test)",
+    "env": [
+      {
+        "name": "PRESHOW_MIN_BEFORE_SUNSET",
+        "value": "5"
+      },
+      {
+        "name": "PRESHOW_BRIGHTNESS_PCT",
+        "value": "10"
+      },
+      {
+        "name": "SUNSET_BRIGHTNESS_PCT",
+        "value": "30"
+      },
+      {
+        "name": "APPLY_TRANSITION_SEC",
+        "value": "2"
+      }
+    ],
+    "x": 270,
+    "y": 80,
+    "wires": []
+  }
+]

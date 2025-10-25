@@ -237,6 +237,22 @@ views:
               target:
                 entity_id: input_button.lighting_halloween_stop
           - type: button
+            name: Test Halloween Loop
+            icon: mdi:halloween
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.test_lighting_halloween_cycle
+          - type: button
+            name: Stop Test Halloween Loop
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.test_lighting_halloween_stop
+          - type: button
             name: Trigger Interior Sunrise Off
             icon: mdi:white-balance-sunny
             tap_action:
@@ -831,3 +847,195 @@ views:
               service: scene.turn_on
               target:
                 entity_id: scene.safety_burner_plugs_off
+
+  - title: Test — Lighting Buttons
+    path: autos-test-lighting
+    icon: mdi:lightbulb-group-outline
+    badges: []
+    cards:
+      - type: markdown
+        content: >
+          # 🧪 Test Lighting
+
+          Start/stop monthly palettes for the *test* setup, plus quick Halloween
+          controls. Below are direct light tiles for manual checks.
+
+      - type: grid
+        square: false
+        columns: 2
+        cards:
+          - type: button
+            name: Test Halloween Loop
+            icon: mdi:halloween
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.lighting_halloween_cycle
+          - type: button
+            name: Stop Halloween Loop
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.lighting_halloween_stop
+
+      - type: markdown
+        content: "## ▶️ Start — Test Monthly Palettes"
+      - type: grid
+        square: false
+        columns: 6
+        cards:
+          - type: button
+            name: Start · January
+            icon: mdi:snowflake
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_january}}
+          - type: button
+            name: Start · February
+            icon: mdi:heart
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_february}}
+          - type: button
+            name: Start · March
+            icon: mdi:leaf
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_march}}
+          - type: button
+            name: Start · April
+            icon: mdi:flower-tulip
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_april}}
+          - type: button
+            name: Start · May
+            icon: mdi:flower
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_may}}
+          - type: button
+            name: Start · June
+            icon: mdi:weather-sunny
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_june}}
+          - type: button
+            name: Start · July
+            icon: mdi:flag-variant
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_july}}
+          - type: button
+            name: Start · August
+            icon: mdi:weather-sunny-alert
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_august}}
+          - type: button
+            name: Start · September
+            icon: mdi:fruit-grapes-outline
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_september}}
+          - type: button
+            name: Start · October
+            icon: mdi:halloween
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_october}}
+          - type: button
+            name: Start · November
+            icon: mdi:food-turkey
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_november}}
+          - type: button
+            name: Start · December
+            icon: mdi:string-lights
+            tap_action: {action: call-service, service: input_button.press, target: {entity_id: input_button.test_lighting_start_december}}
+
+      - type: markdown
+        content: "## ⏹ Stop — Test Monthly Palettes"
+      - type: grid
+        square: false
+        columns: 6
+        cards:
+          - type: button
+            name: Stop · Test
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.test_lighting_stop
+
+      - type: markdown
+        content: "## 💡 Test Light Entities"
+      - type: grid
+        square: false
+        columns: 4
+        cards:
+          - type: light
+            entity: light.light_theater_left
+            name: Theater Left
+          - type: light
+            entity: light.light_theater_right
+            name: Theater Right
+          - type: light
+            entity: light.sunroom_light
+            name: Sunroom
+          - type: light
+            entity: light.light_office
+            name: Office
+      - type: markdown
+        content: "## ☀️ Sun Simulations — Test Triggers"
+      - type: grid
+        square: false
+        columns: 3
+        cards:
+          - type: button
+            name: Sunset −5m → start 10%
+            icon: mdi:weather-sunset
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_sunset_minus5
+          - type: button
+            name: Sunset Now → to 30%
+            icon: mdi:weather-sunset-down
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_sunset_now
+          - type: button
+            name: Sunrise +15m (off)
+            icon: mdi:white-balance-sunny
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_sunrise_plus15
+          - type: button
+            name: Sunrise Now (off)
+            icon: mdi:weather-sunset-up
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_sunrise_now
+          - type: button
+            name: Cloudy Day Exterior
+            icon: mdi:weather-cloudy-alert
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_cloudy_day
+          - type: button
+            name: Stop Sun Sim
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.sun_sim_stop
+          - type: button
+            name: Start · Scarlet & Cream
+            icon: mdi:football
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.test_husker_game_mode
+          - type: button
+            name: Stop · Scarlet & Cream
+            icon: mdi:stop-circle-outline
+            tap_action:
+              action: call-service
+              service: input_button.press
+              target:
+                entity_id: input_button.test_stop_husker_mode

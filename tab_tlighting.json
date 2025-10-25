@@ -1,0 +1,1156 @@
+[
+  {
+    "id": "ec5b0c1a2f16ce04",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Init: monthly palette, settings",
+    "func": "const month = new Date().getMonth();\nconst palettes = {\n  0:  [[180,220,255],[120,180,255],[90,140,200],[255,255,255]],\n  1:  [[220,20,60],[255,105,180],[255,182,193],[255,240,245]],\n  2:  [[34,139,34],[50,205,50],[218,165,32],[173,255,47]],\n  3:  [[255,182,193],[221,160,221],[176,224,230],[152,251,152]],\n  4:  [[60,179,113],[255,192,203],[255,215,0],[135,206,235]],\n  5:  [[255,0,0],[255,140,0],[255,215,0],[0,0,255]],\n  6:  [[178,34,34],[255,255,255],[30,144,255],[240,230,140]],\n  7:  [[255,140,0],[255,69,0],[255,215,0],[0,128,128]],\n  8:  [[218,165,32],[205,133,63],[244,164,96],[255,228,181]],\n  9:  [[255,110,10],[128,0,128],[34,139,34],[255,165,0]],\n  10: [[210,105,30],[205,92,92],[255,140,0],[222,184,135]],\n  11: [[220,20,60],[0,128,0],[255,255,240],[176,224,230]]\n};\nflow.set('palette', palettes[month] || [[255,140,0],[0,100,0],[75,0,130],[139,0,0]]);\nflow.set('transition_secs', 30);\nflow.set('brightness_pct', 35);\nflow.set('min_wait', 5);\nflow.set('max_wait', 25);\nflow.set('stop_flag', false);\nreturn msg;",
+    "outputs": 1,
+    "timeout": "",
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 820,
+    "y": 80,
+    "wires": [
+      [
+        "3740ae27cd3b56a6",
+        "13629db795af7724",
+        "9580d2a2a3b711fc",
+        "8b7a34814267f778"
+      ]
+    ]
+  },
+  {
+    "id": "3740ae27cd3b56a6",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Left: next random color",
+    "func": "const colors = flow.get('palette') || [[255,140,0],[0,100,0],[75,0,130],[139,0,0]];\nconst pick = colors[Math.floor(Math.random()*colors.length)];\nconst transition = (msg && msg.immediate) ? 1 : (flow.get('transition_secs') || 30);\nconst brightness_pct = flow.get('brightness_pct') || 35;\nmsg.payload = { rgb_color: pick, brightness_pct, transition };\nreturn msg;",
+    "outputs": 1,
+    "x": 220,
+    "y": 160,
+    "wires": [
+      [
+        "a380b6fec5c4f7cc"
+      ]
+    ]
+  },
+  {
+    "id": "a380b6fec5c4f7cc",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "Left light \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_theater_left"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 480,
+    "y": 160,
+    "wires": [
+      [
+        "0fc9b5575ab9254f"
+      ]
+    ]
+  },
+  {
+    "id": "0fc9b5575ab9254f",
+    "type": "delay",
+    "z": "7e180ead4ba54b28",
+    "name": "Left: random wait (5\u201325s)",
+    "pauseType": "random",
+    "timeout": "1",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "20",
+    "randomLast": "25",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 750,
+    "y": 160,
+    "wires": [
+      [
+        "20b78999c296aab6"
+      ]
+    ]
+  },
+  {
+    "id": "20b78999c296aab6",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "x": 1010,
+    "y": 160,
+    "wires": [
+      [
+        "298dbb1eb80e103c",
+        "115e92f1a9ea218a"
+      ],
+      [
+        "3740ae27cd3b56a6"
+      ]
+    ]
+  },
+  {
+    "id": "13629db795af7724",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Sunroom: next random color",
+    "func": "const colors = flow.get('palette') || [[255,140,0],[0,100,0],[75,0,130],[139,0,0]];\nconst pick = colors[Math.floor(Math.random()*colors.length)];\nconst transition = (msg && msg.immediate) ? 1 : (flow.get('transition_secs') || 30);\nconst brightness_pct = flow.get('brightness_pct') || 35;\nmsg.payload = { rgb_color: pick, brightness_pct, transition };\nreturn msg;",
+    "outputs": 1,
+    "x": 250,
+    "y": 220,
+    "wires": [
+      [
+        "5f7c0df8594931b0"
+      ]
+    ]
+  },
+  {
+    "id": "5f7c0df8594931b0",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "Sunroom \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.sunroom_light_2"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 500,
+    "y": 220,
+    "wires": [
+      [
+        "f84bdfcf91e71411"
+      ]
+    ]
+  },
+  {
+    "id": "f84bdfcf91e71411",
+    "type": "delay",
+    "z": "7e180ead4ba54b28",
+    "name": "Sunroom: random wait (5\u201325s)",
+    "pauseType": "random",
+    "timeout": "1",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "20",
+    "randomLast": "25",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 790,
+    "y": 220,
+    "wires": [
+      [
+        "cb6d9758dd9fd417"
+      ]
+    ]
+  },
+  {
+    "id": "cb6d9758dd9fd417",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "x": 1050,
+    "y": 220,
+    "wires": [
+      [
+        "298dbb1eb80e103c",
+        "115e92f1a9ea218a"
+      ],
+      [
+        "13629db795af7724"
+      ]
+    ]
+  },
+  {
+    "id": "9580d2a2a3b711fc",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Right: next random color",
+    "func": "const colors = flow.get('palette') || [[255,140,0],[0,100,0],[75,0,130],[139,0,0]];\nconst pick = colors[Math.floor(Math.random()*colors.length)];\nconst transition = (msg && msg.immediate) ? 1 : (flow.get('transition_secs') || 30);\nconst brightness_pct = flow.get('brightness_pct') || 35;\nmsg.payload = { rgb_color: pick, brightness_pct, transition };\nreturn msg;",
+    "outputs": 1,
+    "x": 240,
+    "y": 280,
+    "wires": [
+      [
+        "ce1534dbd8f3b19f"
+      ]
+    ]
+  },
+  {
+    "id": "ce1534dbd8f3b19f",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "Right light \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_theater_right"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 500,
+    "y": 280,
+    "wires": [
+      [
+        "1b7cb174bfbd04b5"
+      ]
+    ]
+  },
+  {
+    "id": "1b7cb174bfbd04b5",
+    "type": "delay",
+    "z": "7e180ead4ba54b28",
+    "name": "Right: random wait (5\u201325s)",
+    "pauseType": "random",
+    "timeout": "1",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "20",
+    "randomLast": "25",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 780,
+    "y": 280,
+    "wires": [
+      [
+        "ab3b538285c2b549"
+      ]
+    ]
+  },
+  {
+    "id": "ab3b538285c2b549",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "x": 1040,
+    "y": 280,
+    "wires": [
+      [
+        "298dbb1eb80e103c",
+        "115e92f1a9ea218a"
+      ],
+      [
+        "9580d2a2a3b711fc"
+      ]
+    ]
+  },
+  {
+    "id": "8b7a34814267f778",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Office: next random color",
+    "func": "const colors = flow.get('palette') || [[255,140,0],[0,100,0],[75,0,130],[139,0,0]];\nconst pick = colors[Math.floor(Math.random()*colors.length)];\nconst transition = (msg && msg.immediate) ? 1 : (flow.get('transition_secs') || 30);\nconst brightness_pct = flow.get('brightness_pct') || 35;\nmsg.payload = { rgb_color: pick, brightness_pct, transition };\nreturn msg;",
+    "outputs": 1,
+    "x": 250,
+    "y": 340,
+    "wires": [
+      [
+        "5a7aab23b7b3b431"
+      ]
+    ]
+  },
+  {
+    "id": "5a7aab23b7b3b431",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "Office light \u2192 apply",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "light.turn_on",
+    "entityId": [
+      "light.light_office"
+    ],
+    "data": "payload",
+    "dataType": "jsonata",
+    "x": 510,
+    "y": 340,
+    "wires": [
+      [
+        "0a6bb2c7d0f1ed0c"
+      ]
+    ]
+  },
+  {
+    "id": "0a6bb2c7d0f1ed0c",
+    "type": "delay",
+    "z": "7e180ead4ba54b28",
+    "name": "Office: random wait (5\u201325s)",
+    "pauseType": "random",
+    "timeout": "20",
+    "timeoutUnits": "seconds",
+    "rate": "0",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "20",
+    "randomLast": "25",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 780,
+    "y": 340,
+    "wires": [
+      [
+        "70d532dcc964fb90"
+      ]
+    ]
+  },
+  {
+    "id": "70d532dcc964fb90",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Stop requested?",
+    "func": "if (flow.get('stop_flag')) { return [msg, null]; }\nreturn [null, msg];",
+    "outputs": 2,
+    "x": 1060,
+    "y": 340,
+    "wires": [
+      [
+        "298dbb1eb80e103c",
+        "115e92f1a9ea218a"
+      ],
+      [
+        "8b7a34814267f778"
+      ]
+    ]
+  },
+  {
+    "id": "298dbb1eb80e103c",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Build green payload",
+    "func": "msg.payload = { rgb_color: [0,255,0], brightness_pct: 100, transition: 1 };\nreturn msg;",
+    "outputs": 1,
+    "x": 1270,
+    "y": 160,
+    "wires": [
+      [
+        "58e9c74191f0bf20"
+      ]
+    ]
+  },
+  {
+    "id": "58e9c74191f0bf20",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "All lights \u2192 green 100%",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "debugenabled": false,
+    "action": "light.turn_on",
+    "floorId": [],
+    "areaId": [],
+    "deviceId": [],
+    "entityId": [
+      "light.light_theater_left",
+      "light.sunroom_light_2",
+      "light.light_theater_right",
+      "light.light_office"
+    ],
+    "labelId": [],
+    "data": "payload",
+    "dataType": "jsonata",
+    "mergeContext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "blockInputOverrides": false,
+    "domain": "light",
+    "service": "turn_on",
+    "x": 1520,
+    "y": 160,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "115e92f1a9ea218a",
+    "type": "api-call-service",
+    "z": "7e180ead4ba54b28",
+    "name": "Log: show stopped",
+    "server": "11e9f35b.61816d",
+    "version": 7,
+    "action": "logbook.log",
+    "data": "{\"name\":\"Test Lighting Seasonal Show\",\"message\":\"Random independent fade loop stopped\",\"entity_id\":\"input_button.test_lighting_stop\"}",
+    "dataType": "json",
+    "domain": "logbook",
+    "service": "log",
+    "x": 1290,
+    "y": 220,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "95109352e9faa76a",
+    "type": "inject",
+    "z": "7e180ead4ba54b28",
+    "name": "00:01 daily \u2192 refresh palette",
+    "props": [],
+    "repeat": "",
+    "crontab": "01 00 * * *",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 280,
+    "y": 20,
+    "wires": [
+      [
+        "ec5b0c1a2f16ce04"
+      ]
+    ]
+  },
+  {
+    "id": "1d3713ec868dad4c",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "Palette: set by monthIdx (test) + kick",
+    "func": "const idx = (typeof msg.monthIdx === 'number' && msg.monthIdx >= 0 && msg.monthIdx <= 11) ? msg.monthIdx : new Date().getMonth();\nconst palettes = {0:[[180,220,255],[120,180,255],[90,140,200],[255,255,255]],1:[[220,20,60],[255,105,180],[255,182,193],[255,240,245]],2:[[34,139,34],[50,205,50],[218,165,32],[173,255,47]],3:[[255,182,193],[221,160,221],[176,224,230],[152,251,152]],4:[[60,179,113],[255,192,203],[255,215,0],[135,206,235]],5:[[255,0,0],[255,140,0],[255,215,0],[0,0,255]],6:[[178,34,34],[255,255,255],[30,144,255],[240,230,140]],7:[[255,140,0],[255,69,0],[255,215,0],[0,128,128]],8:[[218,165,32],[205,133,63],[244,164,96],[255,228,181]],9:[[255,110,10],[128,0,128],[34,139,34],[255,165,0]],10:[[210,105,30],[205,92,92],[255,140,0],[222,184,135]],11:[[220,20,60],[0,128,0],[255,255,240],[176,224,230]]};\nflow.set('palette', palettes[idx]);\nflow.set('stop_flag', false);\nmsg.immediate = true;\nreturn msg;",
+    "outputs": 1,
+    "x": 910,
+    "y": 540,
+    "wires": [
+      [
+        "8b7a34814267f778",
+        "9580d2a2a3b711fc",
+        "13629db795af7724",
+        "3740ae27cd3b56a6"
+      ]
+    ]
+  },
+  {
+    "id": "53e56db242aae655",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 January (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_january"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 250,
+    "y": 520,
+    "wires": [
+      [
+        "8fd2c35fb8c2f421"
+      ]
+    ]
+  },
+  {
+    "id": "8fd2c35fb8c2f421",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=0",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "0",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 540,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "1c2e3df10946cb6e",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 February (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_february"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 260,
+    "y": 580,
+    "wires": [
+      [
+        "f21285cacb7fa499"
+      ]
+    ]
+  },
+  {
+    "id": "f21285cacb7fa499",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=1",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "1",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 580,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "a1b195277fe5c83e",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 March (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_march"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 250,
+    "y": 640,
+    "wires": [
+      [
+        "710c26bccc1bf773"
+      ]
+    ]
+  },
+  {
+    "id": "710c26bccc1bf773",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=2",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "2",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 620,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "154b2c961fa943f3",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 April (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_april"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 240,
+    "y": 700,
+    "wires": [
+      [
+        "ae06b9aa73014a39"
+      ]
+    ]
+  },
+  {
+    "id": "ae06b9aa73014a39",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=3",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "3",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 660,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "84a73b6843626633",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 May (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_may"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 240,
+    "y": 760,
+    "wires": [
+      [
+        "b48a24f1a6a74794"
+      ]
+    ]
+  },
+  {
+    "id": "b48a24f1a6a74794",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=4",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "4",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 700,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "8b964f970a341e09",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 June (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_june"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 240,
+    "y": 820,
+    "wires": [
+      [
+        "1611a0113e9ae595"
+      ]
+    ]
+  },
+  {
+    "id": "1611a0113e9ae595",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=5",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "5",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 740,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "4dae4e6086c2a098",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 July (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_july"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 240,
+    "y": 880,
+    "wires": [
+      [
+        "d7c17a6af7aac2f0"
+      ]
+    ]
+  },
+  {
+    "id": "d7c17a6af7aac2f0",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=6",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "6",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 780,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "7f829fbd75f765ae",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 August (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_august"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 250,
+    "y": 940,
+    "wires": [
+      [
+        "481391856378998a"
+      ]
+    ]
+  },
+  {
+    "id": "481391856378998a",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=7",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "7",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 820,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "3b3f4454dffdcf13",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 September (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_september"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 260,
+    "y": 1000,
+    "wires": [
+      [
+        "e2efe0363fbb25f6"
+      ]
+    ]
+  },
+  {
+    "id": "e2efe0363fbb25f6",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=8",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "8",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 860,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "682091221a2db6be",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 October (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_october"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 250,
+    "y": 1060,
+    "wires": [
+      [
+        "1272312d8f7c69ca"
+      ]
+    ]
+  },
+  {
+    "id": "1272312d8f7c69ca",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=9",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "9",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 900,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "71bbbafeba5904af",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 November (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_november"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 240,
+    "y": 1120,
+    "wires": [
+      [
+        "fd39af5e76ed8fce"
+      ]
+    ]
+  },
+  {
+    "id": "fd39af5e76ed8fce",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=10",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "10",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 940,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "48108825ef30ebd5",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Start \u00b7 December (test)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_start_december"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 260,
+    "y": 1160,
+    "wires": [
+      [
+        "d1ea7a97b59263c8"
+      ]
+    ]
+  },
+  {
+    "id": "d1ea7a97b59263c8",
+    "type": "change",
+    "z": "7e180ead4ba54b28",
+    "name": "monthIdx=11",
+    "rules": [
+      {
+        "t": "set",
+        "p": "monthIdx",
+        "pt": "msg",
+        "to": "11",
+        "tot": "num"
+      }
+    ],
+    "x": 620,
+    "y": 980,
+    "wires": [
+      [
+        "1d3713ec868dad4c"
+      ]
+    ]
+  },
+  {
+    "id": "16a139c3b028a514",
+    "type": "server-state-changed",
+    "z": "7e180ead4ba54b28",
+    "name": "Stop (single button)",
+    "server": "11e9f35b.61816d",
+    "version": 6,
+    "outputs": 1,
+    "entities": {
+      "entity": [
+        "input_button.test_lighting_stop"
+      ],
+      "substring": [],
+      "regex": []
+    },
+    "outputInitially": false,
+    "stateType": "str",
+    "for": "0",
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "x": 1180,
+    "y": 520,
+    "wires": [
+      [
+        "9a5d0dd1996e1def"
+      ]
+    ]
+  },
+  {
+    "id": "9a5d0dd1996e1def",
+    "type": "function",
+    "z": "7e180ead4ba54b28",
+    "name": "flow.stop_flag = true",
+    "func": "flow.set('stop_flag', true);\nreturn msg;",
+    "outputs": 1,
+    "x": 1420,
+    "y": 520,
+    "wires": [
+      [
+        "298dbb1eb80e103c"
+      ]
+    ]
+  }
+]
